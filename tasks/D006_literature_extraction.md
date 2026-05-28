@@ -65,6 +65,7 @@ One extraction card per full-text paper selected for extraction.
 ## Checks to Run
 
 - `checks/check_literature_registry.py`
+- `checks/check_literature_functions.py`
 - `checks/check_extraction_cards.py`
 - `checks/check_citation_audit.py`
 - `checks/check_agent_run_report.py`

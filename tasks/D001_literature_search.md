@@ -28,6 +28,7 @@ Find real candidate academic literature and register search results without writ
 - `project_manifest.yml`
 - `discovery/idea_memo.md`
 - `discovery/literature/AGENTS.md`
+- `discovery/literature/function_taxonomy.md`
 - `discovery/literature/search_protocol.md`
 - `discovery/literature/search_log.md`
 
@@ -69,6 +70,7 @@ Updated search log and paper registry with discovered candidate papers, source l
 
 - `checks/check_discovery_completeness.py`
 - `checks/check_literature_registry.py`
+- `checks/check_literature_functions.py`
 - `checks/check_agent_run_report.py`
 
 ## Done When

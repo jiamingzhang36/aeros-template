@@ -18,8 +18,14 @@ REQUIRED_COLUMNS = [
     "source",
     "doi",
     "url",
+    "primary_function",
+    "secondary_functions",
+    "reading_depth",
     "status",
     "full_text_available",
+    "opened_source",
+    "opened_date",
+    "evidence_basis",
     "screening_decision",
     "extraction_card",
     "used_in_synthesis",
@@ -37,6 +43,16 @@ ALLOWED_STATUSES = {
     "full_text_unavailable",
 }
 YES_NO = {"yes", "no"}
+ALLOWED_FUNCTIONS = {
+    "idea-inspiring",
+    "gap-verification",
+    "method-identification",
+    "data-measurement",
+    "background-institutional",
+    "theory-mechanism",
+}
+ALLOWED_READING_DEPTHS = {"skim", "abstract", "targeted", "full_text", "not_read"}
+ALLOWED_EVIDENCE = {"none", "title", "abstract", "full_text", "extraction_card"}
 
 
 def main() -> int:
@@ -69,6 +85,22 @@ def main() -> int:
         if status and status not in ALLOWED_STATUSES:
             failures.append(f"{paper_id}: invalid status {status!r}")
 
+        primary_function = row.get("primary_function", "").strip()
+        if primary_function not in ALLOWED_FUNCTIONS:
+            failures.append(f"{paper_id}: invalid primary_function {primary_function!r}")
+
+        for function in [item.strip() for item in row.get("secondary_functions", "").split(";") if item.strip()]:
+            if function not in ALLOWED_FUNCTIONS:
+                failures.append(f"{paper_id}: invalid secondary function {function!r}")
+
+        reading_depth = row.get("reading_depth", "").strip()
+        if reading_depth and reading_depth not in ALLOWED_READING_DEPTHS:
+            failures.append(f"{paper_id}: invalid reading_depth {reading_depth!r}")
+
+        evidence_basis = row.get("evidence_basis", "").strip()
+        if evidence_basis and evidence_basis not in ALLOWED_EVIDENCE:
+            failures.append(f"{paper_id}: invalid evidence_basis {evidence_basis!r}")
+
         for column in ["full_text_available", "extraction_card", "used_in_synthesis"]:
             value = row.get(column, "").strip()
             if value and value not in YES_NO:
@@ -81,6 +113,10 @@ def main() -> int:
             failures.append(f"{paper_id}: extraction card expected at {card_path}")
         if used and status in {"abstract_only", "discovered", "title_abstract_screened", "full_text_unavailable"}:
             failures.append(f"{paper_id}: cannot use status {status!r} in synthesis")
+        if primary_function == "gap-verification" and status in {"included", "extracted"} and not has_card:
+            failures.append(f"{paper_id}: gap-verification included/extracted papers require extraction_card=yes")
+        if has_card and evidence_basis != "extraction_card":
+            failures.append(f"{paper_id}: extraction_card=yes requires evidence_basis=extraction_card")
 
     if failures:
         print("FAIL: literature registry problems detected:")

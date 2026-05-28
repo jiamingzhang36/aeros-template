@@ -12,6 +12,21 @@ Choose one:
 - abstract_only
 - unavailable
 
+## Literature Function
+
+Choose primary function:
+
+- idea-inspiring
+- gap-verification
+- method-identification
+- data-measurement
+- background-institutional
+- theory-mechanism
+
+Secondary functions:
+
+TBD
+
 ## Research Question
 
 TBD
@@ -73,3 +88,9 @@ TBD
 | Page / section | Supporting passage | Interpretation |
 |---|---|---|
 | TBD | TBD | TBD |
+
+## Opened Source
+
+URL / DOI / PDF path:
+
+Opened date:

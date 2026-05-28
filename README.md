@@ -112,6 +112,17 @@ search -> registry -> citation audit -> full-text status -> extraction cards -> 
 
 Only papers with extraction cards may support substantive synthesis claims. Abstract-only papers may be mentioned only as abstract-based leads.
 
+Classify literature by function:
+
+- `idea-inspiring`: inspiration only, not gap evidence
+- `gap-verification`: closest literature for proving the gap
+- `method-identification`: design recipes and assumptions
+- `data-measurement`: data construction, validation, and measurement error
+- `background-institutional`: policy, institutional, legal, market, or historical context
+- `theory-mechanism`: mechanisms and interpretation
+
+Gap claims require extracted `gap-verification` papers.
+
 ## Harness Principle
 
 Do not let the worker agent be the only judge of its own output. A substantial task should have a task contract, a run report, mechanical checks, critic review when risk is high, and a human decision when protected definitions or claim boundaries are affected.

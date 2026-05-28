@@ -16,6 +16,18 @@ You are working inside the source-grounded literature review harness.
 8. Every claim about method, data, or finding must include `paper_id`.
 9. If full text cannot be obtained, mark `full_text_unavailable`.
 10. If evidence is ambiguous, write ambiguous, not likely.
+11. Every paper must have a `primary_function`.
+12. `gap-verification` papers require full text and an extraction card before they can support gap claims.
+13. `idea-inspiring` papers cannot be used as closest-literature evidence unless reclassified and extracted.
+
+## Literature Functions
+
+- `idea-inspiring`
+- `gap-verification`
+- `method-identification`
+- `data-measurement`
+- `background-institutional`
+- `theory-mechanism`
 
 ## Status Flow
 

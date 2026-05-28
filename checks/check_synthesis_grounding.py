@@ -11,6 +11,7 @@ from pathlib import Path
 
 REGISTRY = Path("discovery/literature/paper_registry.csv")
 SYNTHESIS_DIR = Path("discovery/literature/synthesis")
+INDEX_ONLY_FILES = {Path("discovery/literature/synthesis/function_matrix.csv")}
 PAPER_ID_RE = re.compile(r"\bP\d{3,}\b")
 
 
@@ -28,6 +29,8 @@ def main() -> int:
 
     failures: list[str] = []
     for path in sorted(SYNTHESIS_DIR.glob("*")):
+        if path in INDEX_ONLY_FILES:
+            continue
         if path.suffix not in {".md", ".csv"}:
             continue
         text = path.read_text(encoding="utf-8")

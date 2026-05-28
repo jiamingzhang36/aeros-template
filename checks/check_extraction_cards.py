@@ -13,6 +13,7 @@ CARDS_DIR = Path("discovery/literature/extraction_cards")
 REQUIRED_HEADINGS = [
     "## Full Citation",
     "## Full Text Status",
+    "## Literature Function",
     "## Research Question",
     "## Data",
     "## Treatment / Exposure / Shock",

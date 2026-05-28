@@ -64,6 +64,7 @@ Updated registry and citation audit with verified citation metadata and full-tex
 ## Checks to Run
 
 - `checks/check_literature_registry.py`
+- `checks/check_literature_functions.py`
 - `checks/check_citation_audit.py`
 - `checks/check_agent_run_report.py`
 
