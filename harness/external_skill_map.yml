@@ -1,0 +1,232 @@
+version: "0.1"
+
+principle: "External economics skills can accelerate work, but AEROS controls evidence status, file permissions, protected definitions, claim boundaries, critic review, and human gates."
+
+sources:
+  awesome_econ_ai_stuff:
+    name: "Awesome Econ AI Stuff"
+    url: "https://github.com/meleantonio/awesome-econ-ai-stuff"
+    role: "Stage-organized catalog of economics AI skills."
+  econ_writing_skill:
+    name: "Econ Writing Skill"
+    url: "https://github.com/hanlulong/econ-writing-skill"
+    role: "Economics writing, rewriting, review, and paper audit skill."
+  awesome_ai_for_economists:
+    name: "Awesome AI for Economists"
+    url: "https://github.com/hanlulong/awesome-ai-for-economists"
+    role: "Tool and infrastructure index for economists."
+
+skill_stage_taxonomy:
+  external_stages:
+    - ideation
+    - literature
+    - theory
+    - data
+    - analysis
+    - writing
+    - communication
+    - engineering
+  aeros_stages:
+    - discovery_ideation
+    - literature_discovery
+    - literature_extraction
+    - data_scouting
+    - design_formation
+    - execution_analysis
+    - writing_revision
+    - communication
+    - engineering_maintenance
+
+skills:
+  research_ideation:
+    name: "research-ideation"
+    source: "awesome_econ_ai_stuff"
+    external_stage: "ideation"
+    aeros_stage: "discovery_ideation"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "discovery/idea_bank.csv"
+      - "discovery/idea_memo.md"
+      - "discovery/01_literature_scope.md"
+    forbidden_outputs:
+      - "final go/no-go decision"
+      - "formal gap claim"
+      - "final causal design"
+    aeros_constraints:
+      - "All generated ideas must be marked speculative, under_verification, supported, parked, dropped, or promoted_to_design."
+      - "No idea can enter design_options.md without literature, data, or method evidence."
+    human_gate_required: false
+
+  lit_review_assistant:
+    name: "lit-review-assistant"
+    source: "awesome_econ_ai_stuff"
+    external_stage: "literature"
+    aeros_stage: "literature_discovery"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "discovery/literature/search_log.csv"
+      - "discovery/literature/paper_registry.csv"
+      - "discovery/literature/exclusion_log.csv"
+    forbidden_outputs:
+      - "final literature synthesis without extraction cards"
+      - "gap claim based on search snippets"
+      - "paper summary based on title only"
+    aeros_constraints:
+      - "Search results must flow through paper_registry.csv."
+      - "Full synthesis requires extraction cards."
+      - "Abstract-only papers must be labeled abstract_only."
+    human_gate_required: false
+
+  econ_writing_skill:
+    name: "econ-write"
+    source: "econ_writing_skill"
+    external_stage: "writing"
+    aeros_stage: "writing_revision"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "paper/draft.md"
+      - "paper/draft.tex"
+      - "audits/writing_audit_report.md"
+      - "audits/referee_panel_report.md"
+    forbidden_outputs:
+      - "stronger causal claim than claim_registry.md"
+      - "forecast language without forecast validation"
+      - "policy conclusion beyond language_constraints.md"
+    aeros_constraints:
+      - "Writing must preserve registered claim type and evidence status."
+      - "Unsupported claims must be removed, weakened, or marked for human decision."
+      - "For introduction and conclusion drafts, check against claim_registry.md and language_constraints.md."
+    human_gate_required: true
+
+  r_econometrics:
+    name: "r-econometrics"
+    source: "awesome_econ_ai_stuff"
+    external_stage: "analysis"
+    aeros_stage: "execution_analysis"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "code/04_analysis/"
+      - "code/05_robustness/"
+      - "outputs/tables/"
+      - "outputs/figures/"
+      - "outputs/logs/"
+    forbidden_outputs:
+      - "changes to data/raw/"
+      - "unapproved changes to protected definitions"
+      - "preferred specification chosen by significance"
+    aeros_constraints:
+      - "Must respect docs/protected_definitions.yml."
+      - "Must run relevant checks after execution."
+      - "Robustness outputs cannot overwrite main outputs unless task explicitly permits."
+    human_gate_required: true
+
+  python_panel_data:
+    name: "python-panel-data"
+    source: "awesome_econ_ai_stuff"
+    external_stage: "analysis"
+    aeros_stage: "execution_analysis"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "code/04_analysis/"
+      - "outputs/tables/"
+      - "outputs/figures/"
+      - "outputs/logs/"
+    forbidden_outputs:
+      - "changes to data/raw/"
+      - "unapproved sample restriction changes"
+      - "unregistered outcome changes"
+    aeros_constraints:
+      - "Must follow data_contract.yml and protected_definitions.yml."
+      - "Must document model, fixed effects, clustering, and sample in logs."
+    human_gate_required: true
+
+  stata_regression:
+    name: "stata-regression"
+    source: "awesome_econ_ai_stuff"
+    external_stage: "analysis"
+    aeros_stage: "execution_analysis"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "code/04_analysis/"
+      - "outputs/tables/"
+      - "outputs/logs/"
+    forbidden_outputs:
+      - "manual edits to raw Stata data"
+      - "unlogged model changes"
+      - "unapproved clustering changes"
+    aeros_constraints:
+      - "Must save do-file logs or command logs."
+      - "Must report stored model specifications when possible."
+    human_gate_required: true
+
+  latex_tables:
+    name: "latex-tables"
+    source: "awesome_econ_ai_stuff"
+    external_stage: "writing"
+    aeros_stage: "communication"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "outputs/tables/"
+      - "paper/tables/"
+    forbidden_outputs:
+      - "table values not generated from outputs"
+      - "unexplained changes to N, units, standard errors, or notes"
+    aeros_constraints:
+      - "Tables must be traceable to outputs and logs."
+      - "Table notes must state sample, fixed effects, controls, and clustering when relevant."
+    human_gate_required: false
+
+  econ_visualization:
+    name: "econ-visualization"
+    source: "awesome_econ_ai_stuff"
+    external_stage: "communication"
+    aeros_stage: "communication"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "outputs/figures/"
+      - "audits/visualization_audit_report.md"
+    forbidden_outputs:
+      - "figures with changed units not documented"
+      - "visual claims stronger than evidence"
+    aeros_constraints:
+      - "Figures must preserve units, sample, and uncertainty."
+      - "Captions must not imply causal interpretation unless claim_registry.md permits it."
+    human_gate_required: false
+
+  api_data_fetcher:
+    name: "api-data-fetcher"
+    source: "awesome_econ_ai_stuff"
+    external_stage: "data"
+    aeros_stage: "data_scouting"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "discovery/data_inventory.csv"
+      - "docs/data_sources.md"
+      - "data/intermediate/"
+    forbidden_outputs:
+      - "raw data overwrite"
+      - "undocumented data source"
+      - "feasibility claim without access path"
+    aeros_constraints:
+      - "Every source must record owner, URL or access path, unit, coverage, variables, restrictions, and limitations."
+      - "Fetched data must be logged and must not overwrite raw source files."
+    human_gate_required: false
+
+  spec_driven_development:
+    name: "sdd"
+    source: "awesome_econ_ai_stuff"
+    external_stage: "engineering"
+    aeros_stage: "engineering_maintenance"
+    use_status: "allowed_with_constraints"
+    allowed_outputs:
+      - "tasks/"
+      - "harness/"
+      - "checks/"
+    forbidden_outputs:
+      - "weakened permission policy"
+      - "deleted checks"
+      - "task spec that conflicts with AGENTS.md"
+    aeros_constraints:
+      - "Engineering improvements cannot weaken evidence, permissions, critic, or human-gate requirements."
+      - "New tasks must preserve allowed, forbidden, checks, done-when, and human-gate fields."
+    human_gate_required: true

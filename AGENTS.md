@@ -16,11 +16,12 @@ Before any task, read:
 2. `project_manifest.yml`
 3. `harness/permissions.yml`
 4. `harness/protocols/worker_protocol.md`
-5. `discovery/idea_memo.md`
-6. `docs/method_card.md`
-7. `docs/protected_definitions.yml`
-8. `evidence/claim_registry.md`
-9. `decisions/decision_log.md`
+5. `harness/skill_invocation_rules.md`
+6. `discovery/idea_memo.md`
+7. `docs/method_card.md`
+8. `docs/protected_definitions.yml`
+9. `evidence/claim_registry.md`
+10. `decisions/decision_log.md`
 
 If a task file names additional required files, read those after the required reading order.
 
@@ -115,6 +116,15 @@ If the project is still in discovery:
 - Treat `harness/protocols/critic_protocol.md` as the read-only review protocol.
 - Treat `harness/protocols/human_gate.md` as the approval policy for research judgment changes.
 - If a task affects protected definitions, claim strength, preferred specifications, or publication-facing outputs, mark `critic_required: true` and `human_gate_required: true`.
+
+## Skill Layer Rules
+
+- External economics skills may be used only under AEROS task, evidence, permission, and claim rules.
+- Treat `harness/skill_registry.md` as the skill taxonomy.
+- Treat `harness/skill_invocation_rules.md` as the rulebook for using external skills.
+- Treat `harness/external_skill_map.yml` as the default map from external skill stages to AEROS stages.
+- A skill may propose, search, draft, code, or visualize; it may not override extraction-card rules, data feasibility rules, protected definitions, claim registry boundaries, critic review, or human gates.
+- If a skill's instruction conflicts with AEROS, follow AEROS and record the conflict in the run report.
 
 ## Claim Rules
 

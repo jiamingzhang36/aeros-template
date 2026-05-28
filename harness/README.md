@@ -14,6 +14,7 @@ It defines how an agent receives a task, what it may read or change, what it mus
 6. Worker run report: `agent_runs/TEMPLATE_agent_run_report.md`
 7. Critic protocol: `harness/protocols/critic_protocol.md`
 8. Human decision gate: `harness/protocols/human_gate.md`
+9. Skill layer: `harness/skill_registry.md`, `harness/skill_invocation_rules.md`, and `harness/external_skill_map.yml`
 
 ## Default Run Flow
 
@@ -30,6 +31,8 @@ issue or task file
 ## Harness Principle
 
 The worker agent should never be the only judge of its own work.
+
+External economics skills should never be the source of final research authority. A skill may help search, draft, code, or visualize, but AEROS controls evidence status, permissions, protected definitions, checks, critic review, and human gates.
 
 Every meaningful run should leave:
 

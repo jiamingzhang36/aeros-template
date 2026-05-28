@@ -60,6 +60,9 @@ layers:
       - "harness/protocols/human_gate.md"
       - "harness/protocols/full_run_checklist.md"
       - "harness/agent_roles.yml"
+      - "harness/skill_registry.md"
+      - "harness/skill_invocation_rules.md"
+      - "harness/external_skill_map.yml"
   stage_agents:
     required_files:
       - "AGENTS.md"
@@ -87,6 +90,7 @@ checks:
   discovery_completeness: "checks/check_discovery_completeness.py"
   idea_bank: "checks/check_idea_bank.py"
   stage_agents: "checks/check_stage_agents.py"
+  skill_layer: "checks/check_skill_layer.py"
   feasibility_matrix: "checks/check_feasibility_matrix.py"
   literature_registry: "checks/check_literature_registry.py"
   literature_functions: "checks/check_literature_functions.py"

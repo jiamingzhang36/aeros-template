@@ -44,7 +44,7 @@ Start in `discovery/` unless the project already has a clear question, feasible 
 
 8. Agent Roles / Skills
 
-   `harness/agent_roles.yml` separates worker, critic, and human-gate responsibilities.
+   `harness/agent_roles.yml` separates worker, critic, and human-gate responsibilities. `harness/skill_registry.md`, `harness/skill_invocation_rules.md`, and `harness/external_skill_map.yml` map external economics skills into AEROS without letting them override evidence rules.
 
 9. Critic Review
 
@@ -73,6 +73,18 @@ harness/             permissions, worker protocol, critic protocol, hooks, and h
 execution/           execution-stage agent rules
 examples/            generic empirical project archetypes
 ```
+
+## Skill Layer
+
+Economics-specific agent skills are emerging for ideation, literature review, data cleaning, econometrics, LaTeX writing, visualization, and communication. AEROS treats them as optional modules.
+
+Use the skill layer when a task would benefit from a specialized skill, but keep AEROS in charge:
+
+- `harness/skill_registry.md` explains the local stage taxonomy.
+- `harness/skill_invocation_rules.md` defines how a task may invoke an external skill.
+- `harness/external_skill_map.yml` maps examples such as research ideation, literature review assistant, R/Python/Stata econometrics, LaTeX tables, visualization, API data fetching, and economics writing.
+
+External skills can accelerate work. They cannot invent citations, skip extraction cards, change protected definitions, choose preferred specifications by significance, or strengthen claims beyond the evidence registry.
 
 ## First Use
 
