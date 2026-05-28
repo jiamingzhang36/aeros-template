@@ -27,7 +27,7 @@ Draft a provisional research design sketch and decide whether the project is rea
 - `AGENTS.md`
 - `project_manifest.yml`
 - `discovery/idea_memo.md`
-- `discovery/literature_map.md`
+- `discovery/literature/synthesis/literature_map.md`
 - `discovery/data_inventory.csv`
 - `discovery/feasibility_matrix.md`
 - `discovery/feasibility_memo.md`

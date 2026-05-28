@@ -57,7 +57,7 @@ Start in `discovery/` unless the project already has a clear question, feasible 
 ## Directory Map
 
 ```text
-discovery/      idea, literature scope, data feasibility, gap, and design options
+discovery/           idea, source-grounded literature review, data feasibility, gap, and design options
 docs/                method card, data contract, protected definitions, robustness, language limits
 data/                raw, intermediate, parquet, clean, and snapshot data
 code/                setup, ingest, clean, construct, analysis, robustness, tables, and master scripts
@@ -76,14 +76,15 @@ examples/            generic empirical project archetypes
 ## First Use
 
 1. Start with `discovery/idea_memo.md`.
-2. Build `discovery/literature_map.md`.
-3. Fill `discovery/data_inventory.csv`.
-4. Record searches in `discovery/search_log.md`.
-5. Score `discovery/feasibility_matrix.md`.
-6. Draft `discovery/design_sketch.md`.
-7. Decide with `discovery/PROMOTE_TO_HARNESS.md`.
-8. Only after promotion, fill `docs/method_card.md`, `docs/protected_definitions.yml`, and `evidence/claim_registry.md`.
-9. Run execution tasks from `tasks/`.
+2. Search literature using `discovery/literature/search_protocol.md`.
+3. Register papers in `discovery/literature/paper_registry.csv`.
+4. Verify citations in `discovery/literature/citation_audit.md`.
+5. Create extraction cards before writing synthesis.
+6. Fill `discovery/data_inventory.csv`.
+7. Score `discovery/feasibility_matrix.md`.
+8. Draft `discovery/design_sketch.md`.
+9. Decide with `discovery/PROMOTE_TO_HARNESS.md`.
+10. Only after promotion, fill `docs/method_card.md`, `docs/protected_definitions.yml`, and `evidence/claim_registry.md`.
 
 ## Core Principle
 
@@ -100,6 +101,16 @@ The full execution harness is not the first step. Early-stage projects should fi
 - Is the minimum viable version feasible?
 
 Use the discovery harness to decide whether to pursue, revise, pause, or drop the idea before investing in protected definitions, pipeline checks, and claim management.
+
+## Source-Grounded Literature Review
+
+Do not ask an agent to write a literature review from memory. Use:
+
+```text
+search -> registry -> citation audit -> full-text status -> extraction cards -> synthesis
+```
+
+Only papers with extraction cards may support substantive synthesis claims. Abstract-only papers may be mentioned only as abstract-based leads.
 
 ## Harness Principle
 

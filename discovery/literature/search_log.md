@@ -10,5 +10,5 @@ Use this file to prevent repeated searching and to make discovery work resumable
 
 - Record searches even when they fail.
 - Record source, query, and date.
-- Move useful papers into `discovery/paper_registry.csv`.
+- Move useful papers into `discovery/literature/paper_registry.csv`.
 - Move candidate datasets into `discovery/data_inventory.csv`.

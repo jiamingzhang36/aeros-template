@@ -1,4 +1,4 @@
-# D001 Literature Map
+# D001 Literature Search
 
 ## Task ID
 
@@ -6,7 +6,7 @@ D001
 
 ## Task Name
 
-Literature Map
+Literature Search
 
 ## Harness Mode
 
@@ -20,28 +20,29 @@ Recommended work mode: discovery_report_only
 
 ## Objective
 
-Map the closest literature by research question, data, method, identification, findings, and remaining gaps.
+Find real candidate academic literature and register search results without writing synthesis.
 
 ## Required Reading
 
 - `AGENTS.md`
 - `project_manifest.yml`
 - `discovery/idea_memo.md`
-- `discovery/search_log.md`
+- `discovery/literature/AGENTS.md`
+- `discovery/literature/search_protocol.md`
+- `discovery/literature/search_log.md`
 
 ## Files to Inspect
 
 - `discovery/idea_memo.md`
-- `discovery/search_log.md`
-- `discovery/paper_registry.csv`
-- `discovery/closest_literature_matrix.csv`
+- `discovery/literature/search_protocol.md`
+- `discovery/literature/search_log.md`
+- `discovery/literature/paper_registry.csv`
 
 ## Files Allowed to Modify
 
-- `discovery/literature_map.md`
-- `discovery/paper_registry.csv`
-- `discovery/closest_literature_matrix.csv`
-- `discovery/search_log.md`
+- `discovery/literature/paper_registry.csv`
+- `discovery/literature/search_log.md`
+- `discovery/literature/search_log.csv`
 - `audits/discovery_audit_report.md`
 - `agent_runs/`
 
@@ -54,22 +55,24 @@ Map the closest literature by research question, data, method, identification, f
 
 ## Constraints
 
-- Do not claim a literature gap until closest papers are inspected.
+- Do not summarize papers.
+- Do not claim a literature gap.
+- Do not infer methods, data, or findings from titles or snippets.
 - Do not create final research claims.
 - Do not write analysis code.
 
 ## Expected Output
 
-A literature map that distinguishes research strands, closest papers, data used, methods, findings, and plausible gaps.
+Updated search log and paper registry with discovered candidate papers, source links, DOI or URL when available, and initial relevance notes.
 
 ## Checks to Run
 
 - `checks/check_discovery_completeness.py`
+- `checks/check_literature_registry.py`
 - `checks/check_agent_run_report.py`
 
 ## Done When
 
-- Literature map exists.
 - Paper registry has candidate entries or search failures are documented.
 - Search log is updated.
 - Run report is complete.

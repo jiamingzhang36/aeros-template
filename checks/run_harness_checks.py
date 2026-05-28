@@ -11,6 +11,10 @@ from pathlib import Path
 CHECKS = [
     "check_discovery_completeness.py",
     "check_feasibility_matrix.py",
+    "check_literature_registry.py",
+    "check_extraction_cards.py",
+    "check_synthesis_grounding.py",
+    "check_citation_audit.py",
     "check_no_raw_data_changes.py",
     "check_data_contract.py",
     "check_protected_definitions.py",

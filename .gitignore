@@ -25,5 +25,9 @@ outputs/logs/*.log
 outputs/model_outputs/*
 !outputs/model_outputs/.gitkeep
 
+# Literature PDFs may have copyright or license limits; keep paths/URLs in the registry.
+discovery/literature/pdfs/*
+!discovery/literature/pdfs/.gitkeep
+
 # Local check artifacts.
 .aeros/

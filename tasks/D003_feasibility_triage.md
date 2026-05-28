@@ -27,14 +27,14 @@ Assess whether the idea should be pursued, revised, paused, or dropped based on 
 - `AGENTS.md`
 - `project_manifest.yml`
 - `discovery/idea_memo.md`
-- `discovery/literature_map.md`
+- `discovery/literature/synthesis/literature_map.md`
 - `discovery/data_inventory.csv`
 - `discovery/feasibility_matrix.md`
 
 ## Files to Inspect
 
 - `discovery/idea_memo.md`
-- `discovery/literature_map.md`
+- `discovery/literature/synthesis/literature_map.md`
 - `discovery/data_inventory.csv`
 - `discovery/feasibility_matrix.md`
 - `discovery/feasibility_memo.md`

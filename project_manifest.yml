@@ -31,7 +31,9 @@ layers:
   research_judgment:
     required_files:
       - "discovery/idea_memo.md"
-      - "discovery/literature_map.md"
+      - "discovery/literature/synthesis/literature_map.md"
+      - "discovery/literature/paper_registry.csv"
+      - "discovery/literature/citation_audit.md"
       - "discovery/data_inventory.csv"
       - "discovery/feasibility_matrix.md"
       - "discovery/feasibility_memo.md"
@@ -76,6 +78,10 @@ default_task_policy:
 checks:
   discovery_completeness: "checks/check_discovery_completeness.py"
   feasibility_matrix: "checks/check_feasibility_matrix.py"
+  literature_registry: "checks/check_literature_registry.py"
+  extraction_cards: "checks/check_extraction_cards.py"
+  synthesis_grounding: "checks/check_synthesis_grounding.py"
+  citation_audit: "checks/check_citation_audit.py"
   no_raw_data_changes: "checks/check_no_raw_data_changes.py"
   data_contract: "checks/check_data_contract.py"
   protected_definitions: "checks/check_protected_definitions.py"

@@ -10,10 +10,13 @@ from pathlib import Path
 
 REQUIRED_FILES = [
     Path("discovery/idea_memo.md"),
-    Path("discovery/literature_map.md"),
-    Path("discovery/paper_registry.csv"),
+    Path("discovery/literature/synthesis/literature_map.md"),
+    Path("discovery/literature/paper_registry.csv"),
+    Path("discovery/literature/citation_audit.md"),
+    Path("discovery/literature/extraction_cards/TEMPLATE_extraction_card.md"),
     Path("discovery/data_inventory.csv"),
-    Path("discovery/search_log.md"),
+    Path("discovery/literature/search_log.md"),
+    Path("discovery/literature/search_log.csv"),
     Path("discovery/feasibility_matrix.md"),
     Path("discovery/feasibility_memo.md"),
     Path("discovery/design_sketch.md"),
@@ -22,8 +25,8 @@ REQUIRED_FILES = [
 
 REQUIRED_HEADINGS = {
     Path("discovery/idea_memo.md"): ["## Working Title", "## One-Sentence Research Question"],
-    Path("discovery/literature_map.md"): ["## Research Strands", "## Gap Status"],
-    Path("discovery/search_log.md"): ["## Search Rules"],
+    Path("discovery/literature/synthesis/literature_map.md"): ["## Research Strands", "## Gap Status"],
+    Path("discovery/literature/search_log.md"): ["## Search Rules"],
     Path("discovery/feasibility_matrix.md"): ["## Overall Decision", "## Minimum Viable Version"],
     Path("discovery/feasibility_memo.md"): ["## Decision"],
     Path("discovery/design_sketch.md"): ["## Project Type", "## Candidate Data"],
@@ -31,7 +34,16 @@ REQUIRED_HEADINGS = {
 }
 
 REQUIRED_CSV_COLUMNS = {
-    Path("discovery/paper_registry.csv"): ["paper_id", "title", "function", "notes"],
+    Path("discovery/literature/paper_registry.csv"): [
+        "paper_id",
+        "title",
+        "status",
+        "full_text_available",
+        "screening_decision",
+        "extraction_card",
+        "used_in_synthesis",
+        "notes",
+    ],
     Path("discovery/data_inventory.csv"): ["data_id", "dataset_name", "access_status", "unit", "feasibility_status"],
 }
 

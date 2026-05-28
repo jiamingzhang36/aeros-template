@@ -27,19 +27,19 @@ Identify candidate data sources and evaluate accessibility, unit, coverage, vari
 - `AGENTS.md`
 - `project_manifest.yml`
 - `discovery/idea_memo.md`
-- `discovery/literature_map.md`
+- `discovery/literature/synthesis/literature_map.md`
 
 ## Files to Inspect
 
 - `discovery/idea_memo.md`
-- `discovery/literature_map.md`
+- `discovery/literature/synthesis/literature_map.md`
 - `discovery/data_inventory.csv`
-- `discovery/search_log.md`
+- `discovery/literature/search_log.md`
 
 ## Files Allowed to Modify
 
 - `discovery/data_inventory.csv`
-- `discovery/search_log.md`
+- `discovery/literature/search_log.md`
 - `audits/data_audit_report.md`
 - `agent_runs/`
 

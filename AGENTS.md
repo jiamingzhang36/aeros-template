@@ -71,6 +71,15 @@ If the project is still in discovery:
 - Focus on literature mapping, data scouting, feasibility triage, and design sketches.
 - Use `discovery/PROMOTE_TO_HARNESS.md` before activating full execution.
 
+## Literature Review Rules
+
+- Do not summarize papers from memory.
+- Do not infer data, method, identification, or findings from title alone.
+- Do not cite papers that are missing from `discovery/literature/paper_registry.csv`.
+- Do not use abstract-only papers as full evidence.
+- Create extraction cards before synthesis.
+- Every substantive literature synthesis claim must cite a `paper_id` with an extraction card.
+
 ## Execution Rules
 
 - Work from task files in `tasks/`.
