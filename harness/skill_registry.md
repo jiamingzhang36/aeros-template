@@ -72,6 +72,29 @@ Each skill should be classified as:
 - `review_only`: may produce suggestions or audits, but not modify files.
 - `not_recommended`: conflicts with AEROS evidence, privacy, or human-gate rules.
 
+## Skill Tiers
+
+AEROS keeps the operational skill set small.
+
+- `core`: default shortlist for common empirical research work. Keep this at 10 or fewer skills.
+- `optional`: task-specific tools used only when the task clearly needs them.
+- `reference`: external inspiration or heavy workflows; do not invoke by default.
+
+Only `core` skills may have `default_use: true`.
+
+The default shortlist is:
+
+1. `research-ideation`
+2. `lit-review-assistant`
+3. `academic-research-suite`
+4. `data-inventory`
+5. `causal-id-review`
+6. `did-checklist`
+7. `data-quality-checker`
+8. `replication-check`
+9. `code-review-econ`
+10. `econ-write`
+
 ## Minimum Metadata
 
 Any skill listed in `harness/external_skill_map.yml` should record:
@@ -81,21 +104,12 @@ Any skill listed in `harness/external_skill_map.yml` should record:
 - `external_stage`
 - `aeros_stage`
 - `use_status`
+- `tier`
+- `default_use`
 - `allowed_outputs`
 - `forbidden_outputs`
 - `aeros_constraints`
 - `human_gate_required`
-
-Useful skills to consider first include:
-
-- discovery: `research-ideation`, `academic-research-suite`, `lead-research-assistant`
-- literature: `lit-review-assistant`, `bib-manager`, `zotero`, citation-check workflows
-- data: `data-inventory`, `data-codebook`, `data-quality-checker`, `data-merge-audit`, `describe-data`
-- design: `causal-id-review`, `did-checklist`, `diagnostics-panel`
-- analysis: `r-econometrics`, `python-panel-data`, `stata-regression`, `robustness-suite`, `placebo-test`
-- replication: `replication-check`, `project-rigor-check`, `code-review-econ`, `referee2`
-- writing: `econ-write`, `paper-draft`, `results-narrator`, `latex-compile-qa`, `pre-submission-audit`, `response-letter`, `journal-adapt`
-- communication: `econ-plots`, `regression-table`, `summary-stats-table`, `econ-visualization`
 
 ## Rule
 

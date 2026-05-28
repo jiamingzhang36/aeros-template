@@ -19,6 +19,8 @@ The task file and AEROS rules define the allowed files, outputs, and checks.
 
 Choose the smallest useful skill for the task.
 
+Default to `tier: core` skills.
+
 Prefer:
 
 - discovery skills before execution skills when the research question is still unsettled,
@@ -28,6 +30,10 @@ Prefer:
 - writing skills only after claim boundaries are clear.
 
 Do not invoke a full paper-writing or full research pipeline skill when the task only asks for one stage.
+
+Use `tier: optional` skills only when the task clearly requires that specialized operation.
+
+Use `tier: reference` skills only as inspiration or review framing unless the human explicitly asks to run that workflow.
 
 ## Discovery Skills
 

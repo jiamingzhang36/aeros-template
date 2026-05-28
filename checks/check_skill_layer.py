@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Check that the AEROS skill layer scaffold is present."""
+"""Check that the AEROS skill layer scaffold is present and tiered."""
 
 from __future__ import annotations
 
 import sys
 from pathlib import Path
+
+try:
+    import yaml
+except ImportError:  # pragma: no cover
+    yaml = None
 
 
 REQUIRED_FILES = {
@@ -12,6 +17,7 @@ REQUIRED_FILES = {
         "## Skill Layer Principle",
         "## Borrowed Organization",
         "## Practical Skill Menu",
+        "## Skill Tiers",
         "## Skill Use Status",
     ],
     Path("harness/skill_invocation_rules.md"): [
@@ -21,9 +27,9 @@ REQUIRED_FILES = {
         "## Skill Conflict Rule",
     ],
     Path("harness/practical_skill_menu.md"): [
-        "## Discovery and Scoping",
-        "## Data and Measurement",
-        "## Writing and Communication",
+        "## Core Skills",
+        "## Optional Skills",
+        "## Reference Skills",
     ],
     Path("harness/external_skill_map.yml"): [
         "awesome_econ_ai_stuff:",
@@ -38,6 +44,9 @@ REQUIRED_FILES = {
         "pre_submission_audit:",
     ],
 }
+SKILL_MAP = Path("harness/external_skill_map.yml")
+ALLOWED_TIERS = {"core", "optional", "reference"}
+MAX_CORE_SKILLS = 10
 
 
 def main() -> int:
@@ -51,6 +60,26 @@ def main() -> int:
         missing = [item for item in required_text if item not in text]
         if missing:
             failures.append(f"{path}: missing required content {missing}")
+
+    if yaml is None:
+        failures.append("PyYAML is required to validate harness/external_skill_map.yml")
+    elif SKILL_MAP.exists():
+        data = yaml.safe_load(SKILL_MAP.read_text(encoding="utf-8"))
+        skills = data.get("skills", {})
+        core_count = 0
+        for key, skill in skills.items():
+            tier = skill.get("tier")
+            if tier not in ALLOWED_TIERS:
+                failures.append(f"{key}: invalid or missing tier {tier!r}")
+            default_use = skill.get("default_use")
+            if not isinstance(default_use, bool):
+                failures.append(f"{key}: default_use must be true/false")
+            if tier == "core":
+                core_count += 1
+            if default_use and tier != "core":
+                failures.append(f"{key}: only core skills may have default_use=true")
+        if core_count > MAX_CORE_SKILLS:
+            failures.append(f"too many core skills: {core_count} > {MAX_CORE_SKILLS}")
 
     if failures:
         print("FAIL: skill layer problems detected:")

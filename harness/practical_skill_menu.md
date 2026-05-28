@@ -2,69 +2,60 @@
 
 Use this menu when choosing a skill for a concrete AEROS task.
 
-This is not a list of required dependencies. It is a routing guide for optional local or external skills that can make the harness more useful.
+AEROS keeps the active skill set deliberately small. Start with Core. Use Optional only for clear task-specific needs. Treat Reference as inspiration or review framing.
 
-## Discovery and Scoping
+## Core Skills
 
-| Task | Useful skill type | AEROS output | Constraint |
+These are the default shortlist. They cover the common research lifecycle without overwhelming the agent.
+
+| Skill | Best used for | AEROS stage | Main constraint |
 | --- | --- | --- | --- |
-| Turn a broad topic into researchable questions | research ideation, academic research suite, lead research assistant | `discovery/idea_bank.csv`, `discovery/idea_memo.md` | Ideas stay speculative until verified |
-| Narrow a vague topic | Socratic research question / deep research skill | `discovery/idea_memo.md`, `discovery/design_options.md` | Do not write a proposal before data and literature checks |
-| Build a literature search plan | literature review assistant, bib manager, Zotero | `discovery/01_literature_scope.md`, `discovery/literature/search_log.csv` | Search is not synthesis |
-| Verify sources and citations | citation check, bib manager, Zotero | `discovery/literature/citation_audit.md` | No invented citations |
+| `research-ideation` | Turn a broad phenomenon into candidate questions | discovery ideation | Ideas stay speculative until verified |
+| `lit-review-assistant` | Structure search and register candidate papers | literature discovery | Search is not synthesis |
+| `academic-research-suite` | Source-grounded research, extraction, and narrowing | literature discovery | Do not run full paper pipeline before promotion |
+| `data-inventory` | Identify and document real data sources | data scouting | Feasibility requires access path and limitations |
+| `causal-id-review` | Review whether a causal design is plausible | design formation | Review only; human approves design |
+| `did-checklist` | Check DiD/event-study assumptions and risks | design formation | Do not approve design automatically |
+| `data-quality-checker` | Audit missingness, duplicates, ranges, and units | execution analysis | Never modify `data/raw/` |
+| `replication-check` | Check reproducibility and package readiness | engineering maintenance | Failures block submission-facing claims |
+| `code-review-econ` | Review empirical code for research risks | engineering maintenance | Review only; no silent fixes |
+| `econ-write` | Draft or revise economics prose | writing revision | Must follow claim registry and language constraints |
 
-## Literature and Evidence
+## Optional Skills
 
-| Task | Useful skill type | AEROS output | Constraint |
-| --- | --- | --- | --- |
-| Create extraction cards | academic researcher, literature extraction skill, PDF skill | `discovery/literature/extraction_cards/` | Requires opened full text |
-| Build closest-literature matrix | literature synthesis skill | `discovery/literature/synthesis/closest_literature_matrix.csv` | Gap claims require extracted gap-verification papers |
-| Critique novelty | academic research agent, devil's advocate, referee skill | `audits/discovery_critic_report.md` | Critique cannot replace human go/no-go |
-| Track citation integrity | citation audit / bibliography skill | `citation_audit.md`, `paper/references.bib` | Abstract-only is not full evidence |
+Use these only when a task clearly needs the specialized operation.
 
-## Data and Measurement
+| Need | Optional skills |
+| --- | --- |
+| Bibliography and library work | `bib-manager`, `zotero` |
+| Data documentation | `data-codebook`, `describe-data` |
+| Data linkage risks | `data-merge-audit` |
+| Panel diagnostics | `diagnostics-panel` |
+| Robustness and falsification | `robustness-suite`, `placebo-test` |
+| Regression outputs | `regression-table`, `summary-stats-table`, `latex-tables` |
+| Figures and visualization | `econ-plots`, `econ-visualization` |
+| Manuscript build / LaTeX | `latex-compile-qa` |
+| Results prose | `results-narrator` |
+| Later-stage submission work | `pre-submission-audit`, `response-letter`, `journal-adapt` |
+| Policy background | `policy-timeline` |
+| Repository hygiene | `project-rigor-check` |
+| Specific analysis stack | `r-econometrics`, `python-panel-data`, `stata-regression` |
 
-| Task | Useful skill type | AEROS output | Constraint |
-| --- | --- | --- | --- |
-| List possible datasets | data inventory, API data fetcher, lead research assistant | `discovery/data_inventory.csv` | Must include owner, access path, unit, coverage, and limits |
-| Generate data dictionary | data-codebook skill | `docs/data_dictionary.md` | Must match actual data after execution begins |
-| Audit data quality | data quality checker, describe-data | `audits/data_audit_report.md` | Never modify `data/raw/` |
-| Audit merges | data merge audit | `audits/data_audit_report.md`, `outputs/logs/` | Merge keys and match rates must be logged |
-| Build measurement protocol | data / measurement literature skill | `docs/data_contract.yml`, `docs/data_sources.md` | Measurement claims need validation evidence |
+## Reference Skills
 
-## Design and Identification
+These are useful patterns, but they should not be default operational choices.
 
-| Task | Useful skill type | AEROS output | Constraint |
-| --- | --- | --- | --- |
-| Review causal identification | causal ID review, DID checklist | `audits/design_audit_report.md`, `docs/method_card.md` | Design remains provisional until human approval |
-| Design placebo tests | placebo-test skill | `docs/robustness_checklist.md` | Placebos cannot redefine the main model |
-| Diagnose panel setup | diagnostics panel | `audits/design_audit_report.md`, `outputs/logs/` | Must respect protected sample and outcome definitions |
-| Plan robustness checks | robustness suite | `docs/robustness_checklist.md`, `audits/robustness_audit_report.md` | Agent cannot choose preferred spec by significance |
-
-## Execution and Replication
-
-| Task | Useful skill type | AEROS output | Constraint |
-| --- | --- | --- | --- |
-| Run R/Python/Stata analysis | econometrics skill, Stata MCP, panel data skill | `code/`, `outputs/`, `outputs/logs/` | Must respect protected definitions |
-| Review empirical code | code-review-econ, academic code review | `audits/code_review_report.md` | Review should prioritize reproducibility and empirical design risks |
-| Check reproducibility | replication-check, referee2, project rigor check | `audits/replication_package_report.md` | Failure should block submission-facing claims |
-| Clean technical debt | refactor pipeline, code simplifier | `code/`, `checks/` | Must not change empirical estimands or outputs silently |
-
-## Writing and Communication
-
-| Task | Useful skill type | AEROS output | Constraint |
-| --- | --- | --- | --- |
-| Draft economics prose | econ-write, paper-draft, academic writing skill | `paper/draft.md`, `paper/draft.tex` | Must follow claim registry and language constraints |
-| Write results section | results narrator, econ-write | `paper/draft.md`, `audits/writing_audit_report.md` | Use economic significance, not only statistical significance |
-| Make tables | regression-table, summary-stats-table, latex-tables | `outputs/tables/`, `paper/` | Table values must trace to outputs |
-| Make figures | econ-plots, econ-visualization | `outputs/figures/` | Captions must preserve units and claim type |
-| Compile manuscript | latex-compile-qa, paper writer | `paper/`, `outputs/logs/` | Compilation success is not claim validation |
-| Pre-submission audit | pre-submission-audit, paper review, referee panel | `audits/referee_panel_report.md` | Reviewer simulation is advisory |
-| Response letter | response-letter skill | `paper/response_letter.md` | Human decides concessions and claim changes |
+| Skill | Use as |
+| --- | --- |
+| `sdd` | Engineering workflow inspiration |
+| `paper-review` | Review framework inspiration |
+| `referee2` | Reproducibility audit inspiration |
+| `academic-research-agent` | Human-gated research workflow reference |
+| `paper-writer-skill` | Stage-gated writing pipeline reference |
 
 ## Rule of Thumb
 
-Use specialized skills for speed and domain convention.
+Use specialized skills for speed and convention.
 
 Use AEROS for admissibility.
 
