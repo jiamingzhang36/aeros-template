@@ -12,12 +12,12 @@ run:
 scope:
   allowed_paths: []
   forbidden_paths:
-    - "2_execution/data/raw/**"
+    - "data/raw/**"
   protected_paths:
-    - "1_design/protected_definitions.yml"
-    - "1_design/method_card.md"
-    - "1_design/data_contract.yml"
-    - "3_evidence/claim_registry.md"
+    - "docs/protected_definitions.yml"
+    - "docs/method_card.md"
+    - "docs/data_contract.yml"
+    - "evidence/claim_registry.md"
 
 checks:
   required: []

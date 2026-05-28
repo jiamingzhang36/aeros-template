@@ -23,7 +23,7 @@ Some decisions must remain human decisions, even when an agent can propose them.
 
 ## Required Log Entry
 
-Record decisions in `6_decisions/decision_log.md` with:
+Record decisions in `decisions/decision_log.md` with:
 
 - date
 - task ID

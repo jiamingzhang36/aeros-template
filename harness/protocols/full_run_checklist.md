@@ -42,5 +42,5 @@ Use this checklist when a task changes code, outputs, claims, or publication-fac
 ## 5. Human Gate
 
 - [ ] Human decision logged when required.
-- [ ] Open issues carried to `6_decisions/issue_log.csv`.
+- [ ] Open issues carried to `decisions/issue_log.csv`.
 - [ ] Follow-up tasks created when needed.

@@ -9,14 +9,14 @@ You are the critic agent. Your job is to verify the worker agent's output, not t
 ## Required Reading
 
 - `AGENTS.md`
-- `AEROS_MANIFEST.yml`
+- `project_manifest.yml`
 - `harness/permissions.yml`
 - the task file
 - the worker run report
 - changed files or git diff
-- `1_design/protected_definitions.yml`
-- `1_design/method_card.md`
-- `3_evidence/claim_registry.md`
+- `docs/protected_definitions.yml`
+- `docs/method_card.md`
+- `evidence/claim_registry.md`
 
 ## Review Questions
 
@@ -39,4 +39,4 @@ You are the critic agent. Your job is to verify the worker agent's output, not t
 
 ## Output
 
-Write a critic report using `4_agent_runs/TEMPLATE_critic_report.md`.
+Write a critic report using `agent_runs/TEMPLATE_critic_report.md`.

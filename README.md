@@ -1,6 +1,6 @@
-# AEROS: Applied Empirical Research Operating System
+# AEROS: Applied Empirical Research Harness
 
-AEROS is a lightweight AI-assisted workflow for empirical research projects.
+AEROS is a medium-weight AI-assisted research harness for empirical economics, applied micro, management, policy, and adjacent empirical research projects.
 
 It separates early-stage discovery from execution-stage reproducibility.
 
@@ -12,45 +12,74 @@ AEROS is a thin wrapper around existing reproducible research practices, agent i
 
 ## Workflow Layers
 
-1. Research Judgment Layer
+1. Project Constitution
 
-   Human-led decisions about the idea, literature gap, identification, claim boundaries, and go / pause / revise / drop choices.
+   `AGENTS.md`, `project_manifest.yml`, and `harness/permissions.yml` define the project contract.
 
-2. Agent Execution Layer
+2. Research Design Memory
 
-   AI-assisted work on literature classification, data scouting, code execution, result checking, claim auditing, and report generation.
+   `docs/method_card.md`, `docs/language_constraints.md`, and `docs/robustness_checklist.md` preserve the research design.
 
-3. Mechanical Verification Layer
+3. Data Contract
 
-   Deterministic checks that protect raw data, protected definitions, paper numbers, and claim-evidence links.
+   `docs/data_contract.yml`, `docs/data_dictionary.md`, and `docs/data_sources.md` define data structure and provenance.
 
-4. Harness Layer
+4. Protected Definitions
 
-   Task contracts, permission policies, worker / critic protocols, run traces, and human approval gates that constrain agent work.
+   `docs/protected_definitions.yml` protects sample, exposure, outcome, model, and claim boundaries.
+
+5. Task Specification
+
+   `tasks/` turns open-ended requests into scoped issue-style work.
+
+6. Execution Pipeline
+
+   `code/`, `data/`, `outputs/`, `paper/`, and `Makefile` provide the reproducible project surface.
+
+7. Verification Checks
+
+   `checks/` runs deterministic checks for data, protected definitions, outputs, paper links, claims, and replication structure.
+
+8. Agent Roles / Skills
+
+   `harness/agent_roles.yml` separates worker, critic, and human-gate responsibilities.
+
+9. Critic Review
+
+   `agent_runs/` and `harness/protocols/critic_protocol.md` keep worker output from reviewing itself.
+
+10. Human Decision Log
+
+   `decisions/` records accept, revise, reject, and defer decisions.
 
 ## Directory Map
 
 ```text
-0_discovery/      idea, literature scope, data feasibility, gap, and design options
-1_design/         method card, data contract, protected definitions, robustness, language limits
-2_execution/      code, data, outputs, task files, and validation checks
-3_evidence/       claim registry, evidence ledger, and result index
-4_agent_runs/     agent run reports and critic reports
-5_audits/         discovery, data, design, result, and claim audit reports
-6_decisions/      human decision, issue, and revision logs
-harness/          permissions, worker protocol, critic protocol, hooks, and human gates
-examples/         generic empirical project archetypes
+docs/discovery/      idea, literature scope, data feasibility, gap, and design options
+docs/                method card, data contract, protected definitions, robustness, language limits
+data/                raw, intermediate, parquet, clean, and snapshot data
+code/                setup, ingest, clean, construct, analysis, robustness, tables, and master scripts
+outputs/             tables, figures, logs, and model outputs
+paper/               manuscript, appendix, references, and paper build files
+evidence/            claim registry, evidence ledger, and result index
+tasks/               issue-style task contracts and gate tasks
+checks/              deterministic harness checks
+agent_runs/          worker run reports, critic reports, commands, and diffs
+audits/              discovery, data, design, result, claim, and referee audit reports
+decisions/           human decision, issue, and revision logs
+harness/             permissions, worker protocol, critic protocol, hooks, and human gates
+examples/            generic empirical project archetypes
 ```
 
 ## First Use
 
-1. Fill `0_discovery/00_idea_note.md`.
-2. Fill `1_design/method_card.md`.
-3. Fill `1_design/protected_definitions.yml`.
-4. Fill `3_evidence/claim_registry.md`.
-5. Record the first human decision in `6_decisions/decision_log.md`.
-6. Run one task from `2_execution/tasks/`.
-7. Save an agent report in `4_agent_runs/`.
+1. Fill `docs/discovery/00_idea_note.md`.
+2. Fill `docs/method_card.md`.
+3. Fill `docs/protected_definitions.yml`.
+4. Fill `evidence/claim_registry.md`.
+5. Record the first human decision in `decisions/decision_log.md`.
+6. Run one task from `tasks/`.
+7. Save an agent report in `agent_runs/`.
 8. For high-risk tasks, run the critic protocol in `harness/protocols/critic_protocol.md`.
 
 ## Core Principle

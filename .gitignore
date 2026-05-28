@@ -7,15 +7,23 @@ venv/
 .env.*
 
 # Large or sensitive data should not be committed by default.
-2_execution/data/raw/*
-!2_execution/data/raw/.gitkeep
-2_execution/data/intermediate/*
-!2_execution/data/intermediate/.gitkeep
-2_execution/data/clean/*
-!2_execution/data/clean/.gitkeep
+data/raw/*
+!data/raw/.gitkeep
+data/intermediate/*
+!data/intermediate/.gitkeep
+data/parquet/*
+!data/parquet/.gitkeep
+data/clean/*
+!data/clean/.gitkeep
+data/snapshots/*
+!data/snapshots/.gitkeep
 
 # Generated outputs can be committed selectively when needed.
-2_execution/outputs/logs/*.log
+outputs/logs/*.log
+
+# Large model artifacts are usually regenerated or archived separately.
+outputs/model_outputs/*
+!outputs/model_outputs/.gitkeep
 
 # Local check artifacts.
 .aeros/

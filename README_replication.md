@@ -27,14 +27,14 @@ Estimated runtime:
 ## Reproduction Steps
 
 1. Confirm access to required data.
-2. Review `1_design/protected_definitions.yml`.
+2. Review `docs/protected_definitions.yml`.
 3. Run the project master script or project-specific workflow.
-4. Verify outputs using checks in `2_execution/checks/`.
-5. Compare manuscript numbers against `3_evidence/result_index.csv`.
+4. Verify outputs using checks in `checks/`.
+5. Compare manuscript numbers against `evidence/result_index.csv`.
 
 ## Master Script
 
-TBD
+`code/99_make_all.py` is the default placeholder. Replace or wrap it with the project-specific master workflow.
 
 ## Expected Outputs
 

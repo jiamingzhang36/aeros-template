@@ -1,16 +1,16 @@
 # Example pre-write policy.
 
 block:
-  - "2_execution/data/raw/**"
+  - "data/raw/**"
 
 ask:
-  - "1_design/protected_definitions.yml"
-  - "1_design/method_card.md"
-  - "1_design/data_contract.yml"
-  - "3_evidence/claim_registry.md"
+  - "docs/protected_definitions.yml"
+  - "docs/method_card.md"
+  - "docs/data_contract.yml"
+  - "evidence/claim_registry.md"
 
 allow:
-  - "2_execution/code/**"
-  - "2_execution/outputs/logs/**"
-  - "4_agent_runs/**"
-  - "5_audits/**"
+  - "code/**"
+  - "outputs/logs/**"
+  - "agent_runs/**"
+  - "audits/**"

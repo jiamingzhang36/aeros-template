@@ -1,0 +1,2 @@
+# Add project-specific Python requirements here.
+# Keep this file minimal in the template.

@@ -13,7 +13,7 @@ Recommended hook points:
 
 Recommended blocking rules:
 
-- block writes to `2_execution/data/raw/**`
+- block writes to `data/raw/**`
 - ask before writing protected definitions
 - block destructive git commands
 - require a run report after task completion

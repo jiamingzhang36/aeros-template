@@ -6,12 +6,12 @@ It defines how an agent receives a task, what it may read or change, what it mus
 
 ## Harness Components
 
-1. Project constitution: `AGENTS.md` and `AEROS_MANIFEST.yml`
-2. Task contract: `2_execution/tasks/TEMPLATE_task.md`
-3. Protected definitions: `1_design/protected_definitions.yml`
+1. Project constitution: `AGENTS.md` and `project_manifest.yml`
+2. Task contract: `tasks/TEMPLATE_task.md`
+3. Protected definitions: `docs/protected_definitions.yml`
 4. Permission policy: `harness/permissions.yml`
-5. Verification checks: `2_execution/checks/`
-6. Worker run report: `4_agent_runs/TEMPLATE_agent_run_report.md`
+5. Verification checks: `checks/`
+6. Worker run report: `agent_runs/TEMPLATE_agent_run_report.md`
 7. Critic protocol: `harness/protocols/critic_protocol.md`
 8. Human decision gate: `harness/protocols/human_gate.md`
 

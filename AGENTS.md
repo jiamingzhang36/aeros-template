@@ -13,20 +13,20 @@ You are not the final research decision maker.
 Before any task, read:
 
 1. `README.md`
-2. `AEROS_MANIFEST.yml`
+2. `project_manifest.yml`
 3. `harness/permissions.yml`
 4. `harness/protocols/worker_protocol.md`
-5. `0_discovery/00_idea_note.md`
-6. `1_design/method_card.md`
-7. `1_design/protected_definitions.yml`
-8. `3_evidence/claim_registry.md`
-9. `6_decisions/decision_log.md`
+5. `docs/discovery/00_idea_note.md`
+6. `docs/method_card.md`
+7. `docs/protected_definitions.yml`
+8. `evidence/claim_registry.md`
+9. `decisions/decision_log.md`
 
 If a task file names additional required files, read those after the required reading order.
 
 ## Hard Rules
 
-- Do not modify `2_execution/data/raw/`.
+- Do not modify `data/raw/`.
 - Do not bypass `harness/permissions.yml`.
 - Do not silently change treatment, exposure, or key-variable definitions.
 - Do not silently change sample restrictions.
@@ -62,7 +62,7 @@ Every feasibility memo must end with one of:
 
 ## Execution Rules
 
-- Work from task files in `2_execution/tasks/`.
+- Work from task files in `tasks/`.
 - Only modify files allowed by the task.
 - Write an agent run report after every task.
 - List all files read, files modified, commands run, and checks passed or failed.
@@ -82,7 +82,7 @@ Every feasibility memo must end with one of:
 ## Claim Rules
 
 - Every claim must have a claim ID.
-- Every claim must be linked to evidence in `3_evidence/evidence_ledger.csv` or a cited source.
+- Every claim must be linked to evidence in `evidence/evidence_ledger.csv` or a cited source.
 - Separate descriptive, associational, causal, mechanism, external-validity, policy-translation, and forecast claims.
 - If a claim relies on a robustness check, name the exact robustness check.
 - If a claim is not currently supportable, mark it as draft, ambiguous, or unsupported.

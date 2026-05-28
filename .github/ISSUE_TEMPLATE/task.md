@@ -19,10 +19,10 @@ TBD
 ## Required Reading
 
 - [ ] `AGENTS.md`
-- [ ] `AEROS_MANIFEST.yml`
+- [ ] `project_manifest.yml`
 - [ ] `harness/permissions.yml`
-- [ ] `1_design/protected_definitions.yml`
-- [ ] `3_evidence/claim_registry.md`
+- [ ] `docs/protected_definitions.yml`
+- [ ] `evidence/claim_registry.md`
 
 ## Files to Inspect
 
@@ -34,7 +34,7 @@ TBD
 
 ## Files Forbidden to Modify
 
-- [ ] Do not modify `2_execution/data/raw/`
+- [ ] Do not modify `data/raw/`
 - [ ] Do not change protected definitions without human approval
 - [ ] Do not strengthen claims without evidence
 
