@@ -1,12 +1,16 @@
-# D005 Literature Verification and Extraction
+# D004 Literature Verification and Extraction
 
 ## Task ID
 
-D005
+D004
 
 ## Task Name
 
 Literature Verification and Extraction
+
+## Renumbering Note
+
+Formerly D005, with the former D006 Literature Extraction responsibilities merged in.
 
 ## Harness Mode
 

@@ -117,6 +117,15 @@ The full execution harness is not the first step. Early-stage projects should fi
 
 Use the discovery harness to decide whether to pursue, revise, pause, or drop the idea before investing in protected definitions, pipeline checks, and claim management.
 
+Current discovery task order:
+
+- `D001` Literature Search
+- `D002` Data Scouting and Feasibility Probe, including former feasibility triage
+- `D003` Design Sketch
+- `D004` Literature Verification and Extraction, including former extraction
+- `D005` Literature Synthesis
+- `D006` Discovery Critic
+
 ## Exploration Policy
 
 Flexible in discovery, strict in verification, conservative in claims.

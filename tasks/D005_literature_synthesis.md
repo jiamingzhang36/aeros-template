@@ -1,12 +1,16 @@
-# D007 Literature Synthesis
+# D005 Literature Synthesis
 
 ## Task ID
 
-D007
+D005
 
 ## Task Name
 
 Literature Synthesis
+
+## Renumbering Note
+
+Formerly D007 before discovery task consolidation.
 
 ## Harness Mode
 

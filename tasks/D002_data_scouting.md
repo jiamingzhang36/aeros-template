@@ -8,6 +8,10 @@ D002
 
 Data Scouting and Feasibility Probe
 
+## Renumbering Note
+
+This task includes the former D003 Feasibility Triage responsibilities.
+
 ## Harness Mode
 
 Worker required: yes

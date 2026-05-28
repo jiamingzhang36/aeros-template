@@ -1,12 +1,16 @@
-# D008 Discovery Critic
+# D006 Discovery Critic
 
 ## Task ID
 
-D008
+D006
 
 ## Task Name
 
 Discovery Critic
+
+## Renumbering Note
+
+Formerly D008 before discovery task consolidation.
 
 ## Harness Mode
 

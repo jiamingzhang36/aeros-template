@@ -1,12 +1,16 @@
-# D004 Design Sketch
+# D003 Design Sketch
 
 ## Task ID
 
-D004
+D003
 
 ## Task Name
 
 Research Design Sketch
+
+## Renumbering Note
+
+Formerly D004 before discovery task consolidation.
 
 ## Harness Mode
 
