@@ -129,7 +129,7 @@ Data-source existence is not the same as data feasibility. Early scouting should
 
 Data feasibility also requires a skill-assisted probe pass. Agents should use or explicitly consider relevant data skills, record what was tried, and document blocked probes. A quick manual scan is not enough to support a final pursue, pause, or drop recommendation.
 
-If a project begins from a source memo, preserve the memo's concrete priorities. Key data sources, mechanisms, and design steps should be mapped in `discovery/source_memo_trace.csv`; high-priority data leads must be probed, blocked, or explicitly deferred before feasibility language is strengthened.
+If a project begins from a source memo, preserve the memo's concrete priorities. Map key data sources into `discovery/data_inventory.csv` and key mechanisms or design steps into `discovery/idea_bank.csv` using `source_memo_ref` and `source_priority`; high-priority data leads must be probed, blocked, or explicitly deferred before feasibility language is strengthened.
 
 ## Source-Grounded Literature Review
 

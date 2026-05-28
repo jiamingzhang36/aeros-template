@@ -10,7 +10,6 @@ from pathlib import Path
 
 REQUIRED_FILES = [
     Path("discovery/idea_memo.md"),
-    Path("discovery/source_memo_trace.csv"),
     Path("discovery/01_literature_scope.md"),
     Path("discovery/exploration_policy.md"),
     Path("discovery/idea_bank.csv"),
@@ -45,16 +44,16 @@ REQUIRED_HEADINGS = {
 }
 
 REQUIRED_CSV_COLUMNS = {
-    Path("discovery/idea_bank.csv"): ["idea_id", "idea", "status", "evidence_needed", "next_action", "human_decision"],
-    Path("discovery/source_memo_trace.csv"): [
-        "trace_id",
-        "source_memo",
-        "item_type",
-        "priority",
-        "target_file",
-        "target_id",
+    Path("discovery/idea_bank.csv"): [
+        "idea_id",
+        "idea",
+        "source",
+        "source_memo_ref",
+        "source_priority",
         "status",
-        "next_probe",
+        "evidence_needed",
+        "next_action",
+        "human_decision",
     ],
     Path("discovery/literature/paper_registry.csv"): [
         "paper_id",
@@ -71,6 +70,8 @@ REQUIRED_CSV_COLUMNS = {
         "dataset_name",
         "access_status",
         "unit",
+        "source_memo_ref",
+        "source_priority",
         "access_evidence",
         "engineering_status",
         "skills_considered",

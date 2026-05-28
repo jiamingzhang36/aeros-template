@@ -12,7 +12,6 @@ CHECKS = [
     "check_stage_agents.py",
     "check_skill_layer.py",
     "check_discovery_completeness.py",
-    "check_source_memo_trace.py",
     "check_idea_bank.py",
     "check_feasibility_matrix.py",
     "check_literature_registry.py",

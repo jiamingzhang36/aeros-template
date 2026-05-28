@@ -27,7 +27,6 @@ Assess whether the idea should be pursued, revised, paused, or dropped based on 
 - `AGENTS.md`
 - `project_manifest.yml`
 - `discovery/idea_memo.md`
-- `discovery/source_memo_trace.csv`
 - `discovery/literature/synthesis/literature_map.md`
 - `discovery/data_inventory.csv`
 - `discovery/feasibility_matrix.md`
@@ -35,7 +34,6 @@ Assess whether the idea should be pursued, revised, paused, or dropped based on 
 ## Files to Inspect
 
 - `discovery/idea_memo.md`
-- `discovery/source_memo_trace.csv`
 - `discovery/literature/synthesis/literature_map.md`
 - `discovery/data_inventory.csv`
 - `discovery/feasibility_matrix.md`
@@ -72,7 +70,6 @@ A feasibility matrix and memo with a provisional pursue, revise, pause, drop, or
 ## Checks to Run
 
 - `checks/check_discovery_completeness.py`
-- `checks/check_source_memo_trace.py`
 - `checks/check_feasibility_matrix.py`
 - `checks/check_agent_run_report.py`
 

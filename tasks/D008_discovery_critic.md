@@ -27,7 +27,6 @@ Review whether exploratory ideas, literature claims, data feasibility claims, an
 - `AGENTS.md`
 - `discovery/AGENTS.md`
 - `discovery/exploration_policy.md`
-- `discovery/source_memo_trace.csv`
 - `discovery/idea_bank.csv`
 - `discovery/literature/paper_registry.csv`
 - `discovery/literature/citation_audit.md`
@@ -73,7 +72,6 @@ A discovery critic report classifying major ideas or design options as promote, 
 ## Checks to Run
 
 - `checks/check_idea_bank.py`
-- `checks/check_source_memo_trace.py`
 - `checks/check_literature_registry.py`
 - `checks/check_gap_grounding.py`
 - `checks/check_feasibility_matrix.py`

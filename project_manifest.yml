@@ -31,7 +31,6 @@ layers:
   research_judgment:
     required_files:
       - "discovery/idea_memo.md"
-      - "discovery/source_memo_trace.csv"
       - "discovery/01_literature_scope.md"
       - "discovery/idea_bank.csv"
       - "discovery/exploration_policy.md"
@@ -91,7 +90,6 @@ default_task_policy:
 
 checks:
   discovery_completeness: "checks/check_discovery_completeness.py"
-  source_memo_trace: "checks/check_source_memo_trace.py"
   idea_bank: "checks/check_idea_bank.py"
   stage_agents: "checks/check_stage_agents.py"
   skill_layer: "checks/check_skill_layer.py"

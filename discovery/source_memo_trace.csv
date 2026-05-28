@@ -1,2 +1,0 @@
-trace_id,source_memo,item_type,item_text,priority,target_file,target_id,status,next_probe,notes
-SM001,TBD,data_source,TBD,high,discovery/data_inventory.csv,D001,pending,"Probe access path, schema, variables, and coverage before feasibility triage.",TBD

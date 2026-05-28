@@ -18,7 +18,7 @@ State the main empirical relationship or mechanism in plain language.
 
 ## Source Memo Preservation
 
-If the project starts from a user memo, preserve its priority signals. Do not compress concrete data sources, mechanisms, or proposed design steps into vague prose only. Map them into `discovery/source_memo_trace.csv` and then to `discovery/data_inventory.csv`, `discovery/idea_bank.csv`, `tasks/`, or an explicit defer/drop status.
+If the project starts from a user memo, preserve its priority signals. Do not compress concrete data sources, mechanisms, or proposed design steps into vague prose only. Map data-source leads into `discovery/data_inventory.csv` and mechanism/design leads into `discovery/idea_bank.csv`, using `source_memo_ref` and `source_priority`.
 
 ## Unit of Analysis
 
