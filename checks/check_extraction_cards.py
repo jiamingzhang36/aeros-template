@@ -14,6 +14,8 @@ REQUIRED_HEADINGS = [
     "## Full Citation",
     "## Full Text Status",
     "## Literature Function",
+    "## Inclusion Decision",
+    "## Content Summary",
     "## Research Question",
     "## Data",
     "## Treatment / Exposure / Shock",
@@ -25,11 +27,48 @@ REQUIRED_HEADINGS = [
     "## What The Paper Does Not Claim",
     "## Direct Evidence Notes",
 ]
+SUMMARY_HEADINGS = [
+    "## Full Citation",
+    "## Inclusion Decision",
+    "## Content Summary",
+    "## Research Question",
+    "## Main Findings",
+    "## Relevance To This Project",
+    "## Direct Evidence Notes",
+    "## Opened Source",
+]
+PLACEHOLDERS = {"", "tbd", "todo", "not stated", "unknown", "n/a", "na"}
 
 
 def missing_headings(path: Path) -> list[str]:
     text = path.read_text(encoding="utf-8")
     return [heading for heading in REQUIRED_HEADINGS if heading not in text]
+
+
+def section_text(text: str, heading: str) -> str:
+    start = text.find(heading)
+    if start == -1:
+        return ""
+    start += len(heading)
+    next_heading = text.find("\n## ", start)
+    if next_heading == -1:
+        next_heading = len(text)
+    return text[start:next_heading].strip()
+
+
+def has_substantive_content(value: str) -> bool:
+    lines = [line.strip(" |-:\t") for line in value.splitlines()]
+    words = [line for line in lines if line and line.lower() not in PLACEHOLDERS]
+    return bool(words)
+
+
+def missing_summary_content(path: Path) -> list[str]:
+    text = path.read_text(encoding="utf-8")
+    return [
+        heading
+        for heading in SUMMARY_HEADINGS
+        if not has_substantive_content(section_text(text, heading))
+    ]
 
 
 def main() -> int:
@@ -57,6 +96,10 @@ def main() -> int:
                 missing = missing_headings(card)
                 if missing:
                     failures.append(f"{card}: missing headings {missing}")
+                if row.get("status", "").strip() in {"extracted", "included"}:
+                    missing_content = missing_summary_content(card)
+                    if missing_content:
+                        failures.append(f"{card}: missing substantive summary content under {missing_content}")
 
     if failures:
         print("FAIL: extraction card problems detected:")

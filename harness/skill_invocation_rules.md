@@ -69,6 +69,8 @@ Rules:
 - Search outputs alone cannot support literature synthesis.
 - Abstract-only papers can only support abstract-based notes.
 - Full paper summaries require opened full text.
+- DOI is optional, but if it exists it must be recorded.
+- Papers promoted beyond search/screening require a stable source locator: DOI, official URL, working-paper page, database record, or private local PDF path.
 - Gap claims require extracted `gap-verification` papers.
 - Synthesis must cite `paper_id` values that have extraction cards.
 

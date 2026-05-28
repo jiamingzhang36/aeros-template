@@ -19,6 +19,10 @@ You are working inside the source-grounded literature review harness.
 11. Every paper must have a `primary_function`.
 12. `gap-verification` papers require full text and an extraction card before they can support gap claims.
 13. `idea-inspiring` papers cannot be used as closest-literature evidence unless reclassified and extracted.
+14. DOI is optional, but if a DOI exists it must be recorded.
+15. Before a paper can be treated as full-text obtained, extracted, included, or used in synthesis, it must have at least one stable source locator in `paper_registry.csv`: DOI, official/publisher URL, working-paper page, database record, or private local PDF path.
+16. Mark `screening_decision=include` only after the source has an extraction card with a content summary, inclusion reason, direct evidence notes, and opened source.
+17. Use `maybe` for unverified candidates, `exclude` for checked non-evidence, and `defer` for plausible but out-of-scope or lower-priority sources.
 
 ## Literature Functions
 

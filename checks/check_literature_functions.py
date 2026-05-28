@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 import sys
 from pathlib import Path
@@ -26,7 +27,18 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--require-complete-matrix",
+        action="store_true",
+        help="Require every registry paper_id to appear in the synthesis function matrix.",
+    )
+    return parser.parse_args()
+
+
 def main() -> int:
+    args = parse_args()
     failures: list[str] = []
     if not REGISTRY.exists():
         print(f"FAIL: missing {REGISTRY}")
@@ -42,7 +54,7 @@ def main() -> int:
         primary = row.get("primary_function", "").strip()
         if primary not in ALLOWED_FUNCTIONS:
             failures.append(f"{paper_id}: invalid registry primary_function {primary!r}")
-        if paper_id not in matrix:
+        if args.require_complete_matrix and paper_id not in matrix:
             failures.append(f"{paper_id}: missing from function_matrix.csv")
 
     for paper_id, row in matrix.items():
@@ -67,7 +79,10 @@ def main() -> int:
         print("\n".join(failures))
         return 1
 
-    print("PASS: literature function classifications are consistent")
+    if args.require_complete_matrix:
+        print("PASS: literature function classifications and complete function matrix are consistent")
+    else:
+        print("PASS: literature function classifications and existing function matrix rows are consistent")
     return 0
 
 

@@ -55,6 +55,8 @@ Synthesize the literature using only extraction cards and audited citations.
 
 - Use only papers with extraction cards.
 - Every substantive claim must cite `paper_id`.
+- Every cited paper must have citation audit coverage and a stable source locator; DOI is preferred when available but not required.
+- Every cited paper must have an extraction-card content summary and inclusion decision.
 - Do not cite abstract-only papers as full evidence.
 - Gap claims require extracted `gap-verification` papers.
 - Do not use `idea-inspiring` papers as gap evidence.
@@ -68,7 +70,7 @@ Source-grounded literature map, method matrix, data matrix, findings matrix, gap
 ## Checks to Run
 
 - `checks/check_literature_registry.py`
-- `checks/check_literature_functions.py`
+- `checks/check_literature_functions.py --require-complete-matrix`
 - `checks/check_extraction_cards.py`
 - `checks/check_synthesis_grounding.py`
 - `checks/check_citation_audit.py`

@@ -57,10 +57,12 @@ Create structured extraction cards from full-text papers.
 - If a detail is not stated, write `not stated`.
 - Include page, section, table, or figure references when possible.
 - Do not infer identification strategy unless explicitly described.
+- For every extracted or included paper, write a concise content summary in the extraction card covering the question, setting, data, method, main result, and project relevance.
+- Mark `screening_decision=include` only when the extraction card explains why the paper belongs in the evidence base.
 
 ## Expected Output
 
-One extraction card per full-text paper selected for extraction.
+One extraction card per full-text paper selected for extraction, including content summary and inclusion decision.
 
 ## Checks to Run
 

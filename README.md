@@ -134,6 +134,10 @@ search -> registry -> citation audit -> full-text status -> extraction cards -> 
 
 Only papers with extraction cards may support substantive synthesis claims. Abstract-only papers may be mentioned only as abstract-based leads.
 
+DOI is optional and should be recorded whenever it exists. A paper does not need a DOI to become evidence, but before it is treated as full-text obtained, extracted, included, or used in synthesis, the registry must contain at least one stable source locator: DOI, official or publisher URL, working-paper page, database record, or private local PDF path.
+
+Use `screening_decision=include` only for opened, verified, full-text sources with an extraction card that summarizes content, records an inclusion reason, and points to direct evidence notes. Use `maybe` for candidates still being verified, `exclude` for checked sources that should not support claims, and `defer` for plausible but lower-priority or out-of-scope sources.
+
 Classify literature by function:
 
 - `idea-inspiring`: inspiration only, not gap evidence

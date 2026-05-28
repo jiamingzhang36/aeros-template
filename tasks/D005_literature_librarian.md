@@ -20,7 +20,7 @@ Recommended work mode: discovery_report_only
 
 ## Objective
 
-Verify candidate citations, find DOI / official pages / working paper pages / PDF links, and update full-text status.
+Verify candidate citations, find DOI when available, record stable source locators, and update full-text status.
 
 ## Required Reading
 
@@ -54,6 +54,8 @@ Verify candidate citations, find DOI / official pages / working paper pages / PD
 
 - Do not summarize papers.
 - Do not fabricate DOI, URL, or citation metadata.
+- DOI is not required for sources that legitimately lack one, but DOI must be recorded when it exists.
+- Every full-text-obtained, extracted, included, or synthesis-eligible paper must have at least one stable locator: DOI, official/publisher URL, working-paper page, database record, or private local PDF path.
 - Do not commit copyrighted PDFs; record official URLs or local private paths instead.
 - If full text is unavailable, mark `full_text_unavailable` or `abstract_only`.
 
@@ -71,6 +73,8 @@ Updated registry and citation audit with verified citation metadata and full-tex
 ## Done When
 
 - Citation audit is updated.
+- DOI status is explicit: verified DOI, no DOI found, or not yet verified.
+- Stable source locator is recorded for every paper promoted beyond search/screening.
 - Full-text availability is explicit.
 - Registry statuses are updated.
 - Run report is complete.
