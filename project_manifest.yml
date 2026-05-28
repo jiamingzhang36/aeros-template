@@ -45,6 +45,7 @@ layers:
       - "docs/method_card.md"
       - "evidence/claim_registry.md"
       - "decisions/decision_log.md"
+      - "decisions/revision_log.md"
   agent_execution:
     required_dirs:
       - "tasks"

@@ -68,7 +68,7 @@ tasks/               issue-style task contracts and gate tasks
 checks/              deterministic harness checks
 agent_runs/          worker run reports, critic reports, commands, and diffs
 audits/              discovery, data, design, result, claim, and referee audit reports
-decisions/           human decision, issue, and revision logs
+decisions/           human decision, issue, and dated revision logs
 harness/             permissions, worker protocol, critic protocol, hooks, and human gates
 execution/           execution-stage agent rules
 examples/            generic empirical project archetypes
