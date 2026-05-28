@@ -81,6 +81,7 @@ Economics-specific agent skills are emerging for ideation, literature review, da
 Use the skill layer when a task would benefit from a specialized skill, but keep AEROS in charge:
 
 - `harness/skill_registry.md` explains the local stage taxonomy.
+- `harness/practical_skill_menu.md` gives a task-to-skill routing guide for common research work.
 - `harness/skill_invocation_rules.md` defines how a task may invoke an external skill.
 - `harness/external_skill_map.yml` maps examples such as research ideation, literature review assistant, R/Python/Stata econometrics, LaTeX tables, visualization, API data fetching, and economics writing.
 

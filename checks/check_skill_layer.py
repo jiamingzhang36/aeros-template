@@ -11,19 +11,31 @@ REQUIRED_FILES = {
     Path("harness/skill_registry.md"): [
         "## Skill Layer Principle",
         "## Borrowed Organization",
+        "## Practical Skill Menu",
         "## Skill Use Status",
     ],
     Path("harness/skill_invocation_rules.md"): [
         "## Invocation Order",
+        "## Skill Selection Rule",
         "## Literature Skills",
         "## Skill Conflict Rule",
+    ],
+    Path("harness/practical_skill_menu.md"): [
+        "## Discovery and Scoping",
+        "## Data and Measurement",
+        "## Writing and Communication",
     ],
     Path("harness/external_skill_map.yml"): [
         "awesome_econ_ai_stuff:",
         "econ_writing_skill:",
+        "local_codex_skills:",
+        "academic_research_suite:",
         "research_ideation:",
         "lit_review_assistant:",
         "econ_writing_skill:",
+        "causal_id_review:",
+        "replication_check:",
+        "pre_submission_audit:",
     ],
 }
 

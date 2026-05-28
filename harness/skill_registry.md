@@ -47,6 +47,22 @@ AEROS uses these local stages for skill mapping:
 - `communication`
 - `engineering_maintenance`
 
+## Practical Skill Menu
+
+Use `harness/practical_skill_menu.md` as the human-readable routing guide.
+
+It maps common tasks to useful skill types:
+
+- research question refinement
+- literature search and citation verification
+- full-text extraction and novelty critique
+- data inventory, codebook, quality checks, and merge audit
+- causal identification, DID, panel diagnostics, placebo, and robustness
+- replication checks and economics code review
+- paper drafting, results narration, tables, figures, LaTeX QA, pre-submission audit, and response letters
+
+The menu is advisory. `harness/external_skill_map.yml` is the machine-readable map.
+
 ## Skill Use Status
 
 Each skill should be classified as:
@@ -69,6 +85,17 @@ Any skill listed in `harness/external_skill_map.yml` should record:
 - `forbidden_outputs`
 - `aeros_constraints`
 - `human_gate_required`
+
+Useful skills to consider first include:
+
+- discovery: `research-ideation`, `academic-research-suite`, `lead-research-assistant`
+- literature: `lit-review-assistant`, `bib-manager`, `zotero`, citation-check workflows
+- data: `data-inventory`, `data-codebook`, `data-quality-checker`, `data-merge-audit`, `describe-data`
+- design: `causal-id-review`, `did-checklist`, `diagnostics-panel`
+- analysis: `r-econometrics`, `python-panel-data`, `stata-regression`, `robustness-suite`, `placebo-test`
+- replication: `replication-check`, `project-rigor-check`, `code-review-econ`, `referee2`
+- writing: `econ-write`, `paper-draft`, `results-narrator`, `latex-compile-qa`, `pre-submission-audit`, `response-letter`, `journal-adapt`
+- communication: `econ-plots`, `regression-table`, `summary-stats-table`, `econ-visualization`
 
 ## Rule
 

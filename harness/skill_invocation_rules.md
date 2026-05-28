@@ -10,9 +10,24 @@ Before invoking or following an external skill, the agent must read:
 2. the active stage `AGENTS.md`
 3. the active task file in `tasks/`
 4. `harness/skill_registry.md`
-5. `harness/external_skill_map.yml`
+5. `harness/practical_skill_menu.md`
+6. `harness/external_skill_map.yml`
 
 The task file and AEROS rules define the allowed files, outputs, and checks.
+
+## Skill Selection Rule
+
+Choose the smallest useful skill for the task.
+
+Prefer:
+
+- discovery skills before execution skills when the research question is still unsettled,
+- read-only review skills before editing skills when the risk is high,
+- source verification skills before writing skills when citations or literature claims are involved,
+- diagnostics and audit skills before robustness or model-changing skills,
+- writing skills only after claim boundaries are clear.
+
+Do not invoke a full paper-writing or full research pipeline skill when the task only asks for one stage.
 
 ## Discovery Skills
 
@@ -84,6 +99,17 @@ Rules:
 - Policy, causal, external-validity, and forecast language must follow `docs/language_constraints.md`.
 - Unsupported claims must be marked as unsupported or converted to placeholders.
 - Writing polish cannot hide uncertainty, sample limits, or identification limits.
+
+## Review and Replication Skills
+
+Review, code-audit, reproducibility, and pre-submission skills are useful late-stage checks.
+
+Rules:
+
+- Treat review outputs as findings, not automatic decisions.
+- Do not let a review skill directly rewrite protected definitions, preferred specifications, or claim language.
+- Convert review findings into `decisions/issue_log.csv` or an audit report.
+- Human approval is required before accepting or rejecting major reviewer-style recommendations.
 
 ## Skill Conflict Rule
 

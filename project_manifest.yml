@@ -63,6 +63,7 @@ layers:
       - "harness/agent_roles.yml"
       - "harness/skill_registry.md"
       - "harness/skill_invocation_rules.md"
+      - "harness/practical_skill_menu.md"
       - "harness/external_skill_map.yml"
   stage_agents:
     required_files:
