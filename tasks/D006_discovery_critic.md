@@ -66,7 +66,7 @@ Review whether exploratory ideas, literature claims, data feasibility claims, an
 - Check whether speculative ideas are clearly labeled.
 - Check whether gap claims rely on extracted gap-verification papers.
 - Check whether data feasibility claims rely on real data sources.
-- Check whether high-priority source-memo data leads were actually probed, not merely registered.
+- Check whether high-priority intake leads were actually mapped and, for data leads, probed rather than merely registered.
 - Check whether causal design claims document plausible identifying variation.
 
 ## Expected Output
@@ -86,7 +86,7 @@ A discovery critic report classifying major ideas or design options as promote, 
 - Discovery critic report exists.
 - Speculative claims are flagged.
 - Promotion blockers are listed.
-- Registered-but-unprobed source-memo leads are listed.
+- Registered-but-unprobed high-priority intake leads are listed.
 - Human decisions needed are listed.
 
 ## Human Approval Required For

@@ -16,9 +16,9 @@ What real-world, policy, market, institutional, or theoretical problem makes thi
 
 State the main empirical relationship or mechanism in plain language.
 
-## Source Memo Preservation
+## Intake Trace
 
-If the project starts from a user memo, preserve its priority signals. Do not compress concrete data sources, mechanisms, or proposed design steps into vague prose only. Map data-source leads into `discovery/data_inventory.csv` and mechanism/design leads into `discovery/idea_bank.csv`, using `source_memo_ref` and `source_priority`.
+Before discovery synthesis or feasibility triage, create or update an intake trace that maps every nontrivial lead from initial materials to a registry, inventory, task, idea bank entry, or explicit deferral reason. Data-source leads belong in `discovery/data_inventory.csv`; mechanism and design leads belong in `discovery/idea_bank.csv`. Use `intake_ref` and `intake_priority` to preserve provenance and priority.
 
 ## Unit of Analysis
 

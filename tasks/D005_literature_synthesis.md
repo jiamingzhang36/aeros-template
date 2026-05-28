@@ -58,6 +58,7 @@ Synthesize the literature using only extraction cards and audited citations.
 ## Constraints
 
 - Use only papers with extraction cards.
+- Before synthesis, confirm nontrivial intake literature, mechanism, design, and data leads are mapped to a registry, inventory, task, idea bank entry, or explicit deferral reason.
 - Every substantive claim must cite `paper_id`.
 - Every cited paper must have citation audit coverage and a stable source locator; DOI is preferred when available but not required.
 - Every cited paper must have an extraction-card content summary and inclusion decision.

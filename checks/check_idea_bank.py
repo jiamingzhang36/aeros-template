@@ -13,8 +13,8 @@ REQUIRED_COLUMNS = [
     "idea_id",
     "idea",
     "source",
-    "source_memo_ref",
-    "source_priority",
+    "intake_ref",
+    "intake_priority",
     "status",
     "evidence_needed",
     "next_action",
@@ -38,7 +38,7 @@ ALLOWED_HUMAN_DECISIONS = {
     "drop",
     "defer",
 }
-ALLOWED_SOURCE_PRIORITIES = {"high", "medium", "low", ""}
+ALLOWED_INTAKE_PRIORITIES = {"high", "medium", "low", ""}
 
 
 def main() -> int:
@@ -70,9 +70,9 @@ def main() -> int:
         if status not in ALLOWED_STATUSES:
             failures.append(f"{idea_id}: invalid status {status!r}")
 
-        source_priority = row.get("source_priority", "").strip()
-        if source_priority not in ALLOWED_SOURCE_PRIORITIES:
-            failures.append(f"{idea_id}: invalid source_priority {source_priority!r}")
+        intake_priority = row.get("intake_priority", "").strip()
+        if intake_priority not in ALLOWED_INTAKE_PRIORITIES:
+            failures.append(f"{idea_id}: invalid intake_priority {intake_priority!r}")
 
         human_decision = row.get("human_decision", "").strip()
         if human_decision not in ALLOWED_HUMAN_DECISIONS:

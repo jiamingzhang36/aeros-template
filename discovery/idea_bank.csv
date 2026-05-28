@@ -1,2 +1,2 @@
-idea_id,idea,source,source_memo_ref,source_priority,status,evidence_needed,next_action,human_decision,notes
+idea_id,idea,source,intake_ref,intake_priority,status,evidence_needed,next_action,human_decision,notes
 I001,TBD,user_or_agent,,medium,speculative,TBD,TBD,pending,TBD
