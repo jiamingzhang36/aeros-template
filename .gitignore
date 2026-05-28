@@ -31,3 +31,4 @@ discovery/literature/pdfs/*
 
 # Local check artifacts.
 .aeros/
+outputs/logs/rigor_check_latest.*

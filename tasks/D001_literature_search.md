@@ -27,6 +27,7 @@ Find real candidate academic literature and register search results without writ
 - `AGENTS.md`
 - `project_manifest.yml`
 - `discovery/idea_memo.md`
+- `discovery/01_literature_scope.md`
 - `discovery/literature/AGENTS.md`
 - `discovery/literature/function_taxonomy.md`
 - `discovery/literature/search_protocol.md`
@@ -35,6 +36,7 @@ Find real candidate academic literature and register search results without writ
 ## Files to Inspect
 
 - `discovery/idea_memo.md`
+- `discovery/01_literature_scope.md`
 - `discovery/literature/search_protocol.md`
 - `discovery/literature/search_log.md`
 - `discovery/literature/paper_registry.csv`

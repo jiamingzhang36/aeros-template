@@ -31,6 +31,7 @@ layers:
   research_judgment:
     required_files:
       - "discovery/idea_memo.md"
+      - "discovery/01_literature_scope.md"
       - "discovery/idea_bank.csv"
       - "discovery/exploration_policy.md"
       - "discovery/literature/synthesis/literature_map.md"

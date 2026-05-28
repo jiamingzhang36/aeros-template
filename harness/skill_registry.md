@@ -28,7 +28,7 @@ The external econ-skills ecosystem suggests a useful stage taxonomy:
 | Literature | `discovery/literature/` | literature review assistant | Must use registry, full-text status, extraction cards, and citation audit |
 | Theory / mechanism | `discovery/mechanism_map.md` and `docs/method_card.md` | economic model / mechanism skill | Must distinguish theory, mechanism, and empirical evidence |
 | Data | `discovery/data_inventory.csv` and `docs/data_contract.yml` | data cleaning / API fetcher | Must document access path, unit, coverage, and limitations |
-| Analysis | `execution/code/`, `code/`, and `checks/` | R, Python, or Stata econometrics skill | Must respect protected definitions and task contracts |
+| Analysis | `code/`, `outputs/`, and `checks/` | R, Python, or Stata econometrics skill | Must respect protected definitions and task contracts |
 | Writing | `paper/`, `docs/language_constraints.md`, `evidence/claim_registry.md` | economics writing skill | Must not strengthen claims beyond registered evidence |
 | Communication | `outputs/`, `paper/`, presentations | visualization / Beamer / policy writing skill | Must preserve units, uncertainty, and evidence boundaries |
 | Engineering | `harness/`, `tasks/`, `checks/` | spec-driven or maintenance skill | Must not weaken AEROS permissions or checks |

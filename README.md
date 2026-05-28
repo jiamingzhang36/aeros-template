@@ -89,7 +89,7 @@ External skills can accelerate work. They cannot invent citations, skip extracti
 ## First Use
 
 1. Start with `discovery/idea_memo.md`.
-2. Search literature using `discovery/literature/search_protocol.md`.
+2. Define literature boundaries in `discovery/01_literature_scope.md` and search rules in `discovery/literature/search_protocol.md`.
 3. Register papers in `discovery/literature/paper_registry.csv`.
 4. Verify citations in `discovery/literature/citation_audit.md`.
 5. Create extraction cards before writing synthesis.

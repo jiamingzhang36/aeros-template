@@ -10,6 +10,7 @@ from pathlib import Path
 
 REQUIRED_FILES = [
     Path("discovery/idea_memo.md"),
+    Path("discovery/01_literature_scope.md"),
     Path("discovery/exploration_policy.md"),
     Path("discovery/idea_bank.csv"),
     Path("discovery/literature/synthesis/literature_map.md"),
@@ -27,6 +28,7 @@ REQUIRED_FILES = [
 
 REQUIRED_HEADINGS = {
     Path("discovery/idea_memo.md"): ["## Working Title", "## One-Sentence Research Question"],
+    Path("discovery/01_literature_scope.md"): ["## Literature Functions to Search", "## Closest-Literature Standard"],
     Path("discovery/literature/synthesis/literature_map.md"): ["## Research Strands", "## Gap Status"],
     Path("discovery/literature/search_log.md"): ["## Search Rules"],
     Path("discovery/feasibility_matrix.md"): ["## Overall Decision", "## Minimum Viable Version"],
