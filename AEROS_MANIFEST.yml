@@ -30,11 +30,19 @@ layers:
   mechanical_verification:
     required_dirs:
       - "2_execution/checks"
+  harness:
+    required_files:
+      - "harness/permissions.yml"
+      - "harness/protocols/worker_protocol.md"
+      - "harness/protocols/critic_protocol.md"
+      - "harness/protocols/human_gate.md"
+      - "harness/protocols/full_run_checklist.md"
 
 protected_files:
   - "1_design/protected_definitions.yml"
   - "1_design/data_contract.yml"
   - "3_evidence/claim_registry.md"
+  - "harness/permissions.yml"
 
 never_modify_without_human_approval:
   - "2_execution/data/raw/"
@@ -51,3 +59,6 @@ checks:
   protected_definitions: "2_execution/checks/check_protected_definitions.py"
   claim_registry: "2_execution/checks/check_claim_registry.py"
   paper_numbers: "2_execution/checks/check_paper_numbers.py"
+  task_contract: "2_execution/checks/check_task_contract.py"
+  agent_run_report: "2_execution/checks/check_agent_run_report.py"
+  pipeline_runs: "2_execution/checks/check_pipeline_runs.py"

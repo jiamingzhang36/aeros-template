@@ -14,17 +14,20 @@ Before any task, read:
 
 1. `README.md`
 2. `AEROS_MANIFEST.yml`
-3. `0_discovery/00_idea_note.md`
-4. `1_design/method_card.md`
-5. `1_design/protected_definitions.yml`
-6. `3_evidence/claim_registry.md`
-7. `6_decisions/decision_log.md`
+3. `harness/permissions.yml`
+4. `harness/protocols/worker_protocol.md`
+5. `0_discovery/00_idea_note.md`
+6. `1_design/method_card.md`
+7. `1_design/protected_definitions.yml`
+8. `3_evidence/claim_registry.md`
+9. `6_decisions/decision_log.md`
 
 If a task file names additional required files, read those after the required reading order.
 
 ## Hard Rules
 
 - Do not modify `2_execution/data/raw/`.
+- Do not bypass `harness/permissions.yml`.
 - Do not silently change treatment, exposure, or key-variable definitions.
 - Do not silently change sample restrictions.
 - Do not silently change outcome definitions.
@@ -65,6 +68,16 @@ Every feasibility memo must end with one of:
 - List all files read, files modified, commands run, and checks passed or failed.
 - Human approval is required before changing protected definitions.
 - If protected definitions appear inconsistent with the task request, stop and write the conflict in the run report.
+- High-risk tasks require a critic report before they are treated as complete.
+
+## Harness Rules
+
+- Prefer a branch or isolated worktree for substantial tasks.
+- Treat `harness/permissions.yml` as the permission policy.
+- Treat `harness/protocols/worker_protocol.md` as the worker run protocol.
+- Treat `harness/protocols/critic_protocol.md` as the read-only review protocol.
+- Treat `harness/protocols/human_gate.md` as the approval policy for research judgment changes.
+- If a task affects protected definitions, claim strength, preferred specifications, or publication-facing outputs, mark `critic_required: true` and `human_gate_required: true`.
 
 ## Claim Rules
 

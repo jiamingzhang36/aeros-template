@@ -24,6 +24,10 @@ AEROS is a thin wrapper around existing reproducible research practices, agent i
 
    Deterministic checks that protect raw data, protected definitions, paper numbers, and claim-evidence links.
 
+4. Harness Layer
+
+   Task contracts, permission policies, worker / critic protocols, run traces, and human approval gates that constrain agent work.
+
 ## Directory Map
 
 ```text
@@ -34,7 +38,8 @@ AEROS is a thin wrapper around existing reproducible research practices, agent i
 4_agent_runs/     agent run reports and critic reports
 5_audits/         discovery, data, design, result, and claim audit reports
 6_decisions/      human decision, issue, and revision logs
-examples/         starter examples for adapting the template to real projects
+harness/          permissions, worker protocol, critic protocol, hooks, and human gates
+examples/         generic empirical project archetypes
 ```
 
 ## First Use
@@ -46,7 +51,12 @@ examples/         starter examples for adapting the template to real projects
 5. Record the first human decision in `6_decisions/decision_log.md`.
 6. Run one task from `2_execution/tasks/`.
 7. Save an agent report in `4_agent_runs/`.
+8. For high-risk tasks, run the critic protocol in `harness/protocols/critic_protocol.md`.
 
 ## Core Principle
 
 Agents may help execute and audit. Humans decide whether a research claim is valid.
+
+## Harness Principle
+
+Do not let the worker agent be the only judge of its own output. A substantial task should have a task contract, a run report, mechanical checks, critic review when risk is high, and a human decision when protected definitions or claim boundaries are affected.

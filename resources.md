@@ -11,8 +11,9 @@ This file is a curated pointer list for tools and standards that AEROS can borro
 ## AI and Agent Workflows
 
 - AGENTS.md: project instructions for coding agents.
-- Agent harness patterns: guardrails, validation loops, and run reports.
+- Agent harness patterns: instructions, permissions, routing, validation checks, logs, critic review, and run reports.
 - GitHub Agentic Workflows: read-only defaults, sandboxing, allow lists, and human approval gates.
+- Coding-agent issue workflows: issue-based task specs, isolated branches or worktrees, checks, diffs, and review.
 
 ## Research Assistant and Tool Indexes
 

@@ -11,6 +11,7 @@ PROTECTED_PATHS = [
     "1_design/protected_definitions.yml",
     "1_design/data_contract.yml",
     "3_evidence/claim_registry.md",
+    "harness/permissions.yml",
 ]
 
 
