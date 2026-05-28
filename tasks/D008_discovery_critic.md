@@ -27,6 +27,7 @@ Review whether exploratory ideas, literature claims, data feasibility claims, an
 - `AGENTS.md`
 - `discovery/AGENTS.md`
 - `discovery/exploration_policy.md`
+- `discovery/source_memo_trace.csv`
 - `discovery/idea_bank.csv`
 - `discovery/literature/paper_registry.csv`
 - `discovery/literature/citation_audit.md`
@@ -62,6 +63,7 @@ Review whether exploratory ideas, literature claims, data feasibility claims, an
 - Check whether speculative ideas are clearly labeled.
 - Check whether gap claims rely on extracted gap-verification papers.
 - Check whether data feasibility claims rely on real data sources.
+- Check whether high-priority source-memo data leads were actually probed, not merely registered.
 - Check whether causal design claims document plausible identifying variation.
 
 ## Expected Output
@@ -71,6 +73,7 @@ A discovery critic report classifying major ideas or design options as promote, 
 ## Checks to Run
 
 - `checks/check_idea_bank.py`
+- `checks/check_source_memo_trace.py`
 - `checks/check_literature_registry.py`
 - `checks/check_gap_grounding.py`
 - `checks/check_feasibility_matrix.py`
@@ -81,6 +84,7 @@ A discovery critic report classifying major ideas or design options as promote, 
 - Discovery critic report exists.
 - Speculative claims are flagged.
 - Promotion blockers are listed.
+- Registered-but-unprobed source-memo leads are listed.
 - Human decisions needed are listed.
 
 ## Human Approval Required For

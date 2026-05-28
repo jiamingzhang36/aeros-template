@@ -16,6 +16,10 @@ What real-world, policy, market, institutional, or theoretical problem makes thi
 
 State the main empirical relationship or mechanism in plain language.
 
+## Source Memo Preservation
+
+If the project starts from a user memo, preserve its priority signals. Do not compress concrete data sources, mechanisms, or proposed design steps into vague prose only. Map them into `discovery/source_memo_trace.csv` and then to `discovery/data_inventory.csv`, `discovery/idea_bank.csv`, `tasks/`, or an explicit defer/drop status.
+
 ## Unit of Analysis
 
 TBD
