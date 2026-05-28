@@ -16,7 +16,7 @@ Before any task, read:
 2. `project_manifest.yml`
 3. `harness/permissions.yml`
 4. `harness/protocols/worker_protocol.md`
-5. `docs/discovery/00_idea_note.md`
+5. `discovery/idea_memo.md`
 6. `docs/method_card.md`
 7. `docs/protected_definitions.yml`
 8. `evidence/claim_registry.md`
@@ -59,6 +59,17 @@ Every feasibility memo must end with one of:
 - revise
 - pause
 - drop
+
+## Discovery-Stage Rules
+
+If the project is still in discovery:
+
+- Do not build the full execution harness unless the task explicitly asks for promotion.
+- Do not write analysis code unless explicitly requested.
+- Do not treat provisional treatment, exposure, sample, outcome, or model ideas as protected final definitions.
+- Do not create final causal or policy claims.
+- Focus on literature mapping, data scouting, feasibility triage, and design sketches.
+- Use `discovery/PROMOTE_TO_HARNESS.md` before activating full execution.
 
 ## Execution Rules
 

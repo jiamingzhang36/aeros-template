@@ -12,6 +12,8 @@ AEROS is a thin wrapper around existing reproducible research practices, agent i
 
 ## Workflow Layers
 
+Start in `discovery/` unless the project already has a clear question, feasible data source, unit of analysis, candidate outcome, and empirical design.
+
 1. Project Constitution
 
    `AGENTS.md`, `project_manifest.yml`, and `harness/permissions.yml` define the project contract.
@@ -55,7 +57,7 @@ AEROS is a thin wrapper around existing reproducible research practices, agent i
 ## Directory Map
 
 ```text
-docs/discovery/      idea, literature scope, data feasibility, gap, and design options
+discovery/      idea, literature scope, data feasibility, gap, and design options
 docs/                method card, data contract, protected definitions, robustness, language limits
 data/                raw, intermediate, parquet, clean, and snapshot data
 code/                setup, ingest, clean, construct, analysis, robustness, tables, and master scripts
@@ -73,18 +75,31 @@ examples/            generic empirical project archetypes
 
 ## First Use
 
-1. Fill `docs/discovery/00_idea_note.md`.
-2. Fill `docs/method_card.md`.
-3. Fill `docs/protected_definitions.yml`.
-4. Fill `evidence/claim_registry.md`.
-5. Record the first human decision in `decisions/decision_log.md`.
-6. Run one task from `tasks/`.
-7. Save an agent report in `agent_runs/`.
-8. For high-risk tasks, run the critic protocol in `harness/protocols/critic_protocol.md`.
+1. Start with `discovery/idea_memo.md`.
+2. Build `discovery/literature_map.md`.
+3. Fill `discovery/data_inventory.csv`.
+4. Record searches in `discovery/search_log.md`.
+5. Score `discovery/feasibility_matrix.md`.
+6. Draft `discovery/design_sketch.md`.
+7. Decide with `discovery/PROMOTE_TO_HARNESS.md`.
+8. Only after promotion, fill `docs/method_card.md`, `docs/protected_definitions.yml`, and `evidence/claim_registry.md`.
+9. Run execution tasks from `tasks/`.
 
 ## Core Principle
 
 Agents may help execute and audit. Humans decide whether a research claim is valid.
+
+## Discovery Before Execution
+
+The full execution harness is not the first step. Early-stage projects should first answer:
+
+- Is there a real literature gap?
+- Is at least one usable data source available?
+- Can the project measure key variables credibly?
+- Is there credible variation or a clear non-causal contribution?
+- Is the minimum viable version feasible?
+
+Use the discovery harness to decide whether to pursue, revise, pause, or drop the idea before investing in protected definitions, pipeline checks, and claim management.
 
 ## Harness Principle
 

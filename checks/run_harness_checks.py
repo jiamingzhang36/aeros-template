@@ -9,6 +9,8 @@ from pathlib import Path
 
 
 CHECKS = [
+    "check_discovery_completeness.py",
+    "check_feasibility_matrix.py",
     "check_no_raw_data_changes.py",
     "check_data_contract.py",
     "check_protected_definitions.py",

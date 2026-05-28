@@ -14,7 +14,7 @@ Human gate required: yes, if recommendation changes project status
 
 ## Files to Inspect
 
-- `docs/discovery/`
+- `discovery/`
 - `docs/method_card.md`
 - `evidence/claim_registry.md`
 - `decisions/decision_log.md`

@@ -1,4 +1,4 @@
-# Idea Note
+# Idea Memo
 
 ## Working Title
 
@@ -50,3 +50,7 @@ Status: draft
 Decision date: TBD
 
 Decision maker: TBD
+
+## Discovery Rule
+
+This memo is not a commitment to build the full execution harness. Use it to decide whether literature, data, and design feasibility justify promotion.

@@ -14,15 +14,15 @@ Human gate required: yes, if recommending pursue, pause, or drop
 
 ## Files to Inspect
 
-- `docs/discovery/04_data_inventory.csv`
-- `docs/discovery/09_feasibility_memo.md`
+- `discovery/data_inventory.csv`
+- `discovery/feasibility_memo.md`
 - `docs/data_contract.yml`
 - `docs/protected_definitions.yml`
 
 ## Files Allowed to Modify
 
-- `docs/discovery/04_data_inventory.csv`
-- `docs/discovery/09_feasibility_memo.md`
+- `discovery/data_inventory.csv`
+- `discovery/feasibility_memo.md`
 - `audits/data_audit_report.md`
 - `agent_runs/`
 
