@@ -1,4 +1,4 @@
-# D005 Literature Librarian
+# D005 Literature Verification and Extraction
 
 ## Task ID
 
@@ -6,7 +6,7 @@ D005
 
 ## Task Name
 
-Literature Librarian
+Literature Verification and Extraction
 
 ## Harness Mode
 
@@ -20,7 +20,7 @@ Recommended work mode: discovery_report_only
 
 ## Objective
 
-Verify candidate citations, find DOI when available, record stable source locators, and update full-text status.
+Verify candidate citations, record stable source locators, update full-text status, and create extraction cards for selected full-text papers.
 
 ## Required Reading
 
@@ -28,18 +28,21 @@ Verify candidate citations, find DOI when available, record stable source locato
 - `project_manifest.yml`
 - `discovery/literature/AGENTS.md`
 - `discovery/literature/paper_registry.csv`
+- `discovery/literature/extraction_cards/TEMPLATE_extraction_card.md`
 
 ## Files to Inspect
 
 - `discovery/literature/paper_registry.csv`
 - `discovery/literature/search_log.csv`
 - `discovery/literature/citation_audit.md`
+- full-text paper files or official full-text URLs
 
 ## Files Allowed to Modify
 
 - `discovery/literature/paper_registry.csv`
 - `discovery/literature/citation_audit.md`
 - `discovery/literature/search_log.csv`
+- `discovery/literature/extraction_cards/`
 - `agent_runs/`
 
 ## Files Forbidden to Modify
@@ -58,15 +61,23 @@ Verify candidate citations, find DOI when available, record stable source locato
 - Every full-text-obtained, extracted, included, or synthesis-eligible paper must have at least one stable locator: DOI, official/publisher URL, working-paper page, database record, or private local PDF path.
 - Do not commit copyrighted PDFs; record official URLs or local private paths instead.
 - If full text is unavailable, mark `full_text_unavailable` or `abstract_only`.
+- Extract only from papers with full text obtained.
+- Do not use model memory or search snippets.
+- If a detail is not stated, write `not stated`.
+- Include page, section, table, or figure references when possible.
+- Do not infer identification strategy unless explicitly described.
+- For every extracted or included paper, write a concise content summary covering the question, setting, data, method, main result, and project relevance.
+- Mark `screening_decision=include` only when the extraction card explains why the paper belongs in the evidence base.
 
 ## Expected Output
 
-Updated registry and citation audit with verified citation metadata and full-text status.
+Updated registry and citation audit, plus extraction cards for selected full-text papers.
 
 ## Checks to Run
 
 - `checks/check_literature_registry.py`
 - `checks/check_literature_functions.py`
+- `checks/check_extraction_cards.py`
 - `checks/check_citation_audit.py`
 - `checks/check_agent_run_report.py`
 
@@ -76,6 +87,7 @@ Updated registry and citation audit with verified citation metadata and full-tex
 - DOI status is explicit: verified DOI, no DOI found, or not yet verified.
 - Stable source locator is recorded for every paper promoted beyond search/screening.
 - Full-text availability is explicit.
+- Extraction cards exist for extracted papers.
 - Registry statuses are updated.
 - Run report is complete.
 
@@ -84,3 +96,4 @@ Updated registry and citation audit with verified citation metadata and full-tex
 - Paid access
 - Restricted access
 - Uploading or sharing PDFs
+- Treating abstract-only papers as sufficient evidence
