@@ -35,6 +35,8 @@ Human gate required: yes, if recommending pursue, pause, or drop
 - Do not download restricted or confidential data into the repository.
 - Do not modify `data/raw/`.
 - Do not mark data as feasible without source evidence.
+- Do not mark data as execution-ready until access, schema, key variables, coverage, linkage keys, and minimum viable construction have been probed or explicitly scoped out.
+- Separate linked descriptive pilot feasibility from national causal design feasibility.
 
 ## Expected Output
 
@@ -43,9 +45,11 @@ A data audit report with:
 - available sources
 - unavailable or restricted sources
 - key variables
+- evidence maturity and data-engineering status
 - measurement gaps
+- unresolved linkage, coverage, access, and construction probes
 - minimum viable empirical test
-- decision: pursue, revise, pause, or drop
+- decision: pursue, revise, pause, drop, or TBD
 
 ## Checks to Run
 

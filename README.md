@@ -112,6 +112,7 @@ The full execution harness is not the first step. Early-stage projects should fi
 - Is at least one usable data source available?
 - Can the project measure key variables credibly?
 - Is there credible variation or a clear non-causal contribution?
+- How mature is the data-engineering path: located source, verified access path, inspected schema, verified variables, tested linkage, diagnosed coverage, or execution-ready?
 - Is the minimum viable version feasible?
 
 Use the discovery harness to decide whether to pursue, revise, pause, or drop the idea before investing in protected definitions, pipeline checks, and claim management.
@@ -123,6 +124,8 @@ Flexible in discovery, strict in verification, conservative in claims.
 Agents may brainstorm new angles, adjacent literatures, possible data sources, mechanisms, and designs. Those ideas must be labeled and tracked in `discovery/idea_bank.csv` until evidence promotes them.
 
 Exploration is not evidence. Verification comes from real literature, extraction cards, real data sources, matrices, critic review, and human decisions.
+
+Data-source existence is not the same as data feasibility. Early scouting should record provisional evidence grades and next probes. A project can be appropriate for a linked descriptive pilot while still being far from a national causal design; the feasibility memo must state that boundary instead of collapsing it into a final verdict.
 
 ## Source-Grounded Literature Review
 

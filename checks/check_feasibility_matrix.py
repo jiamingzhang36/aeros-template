@@ -13,6 +13,7 @@ REQUIRED_DIMENSIONS = [
     "Importance",
     "Literature gap",
     "Data availability",
+    "Data engineering maturity",
     "Measurement quality",
     "Identification",
     "Execution cost",

@@ -60,7 +60,7 @@ Separate literature by function:
 
 Do not claim a gap unless closest literature has been reviewed.
 
-Do not propose a causal design unless the data contain plausible identifying variation.
+Do not propose a causal design unless the data contain plausible identifying variation and the data engineering path has been probed.
 
 Every feasibility memo must end with one of:
 
@@ -68,6 +68,9 @@ Every feasibility memo must end with one of:
 - revise
 - pause
 - drop
+- TBD
+
+Feasibility conclusions are provisional until data access, coverage, variables, linkage keys, and minimum viable construction have been tested or explicitly ruled out.
 
 ## Discovery-Stage Rules
 

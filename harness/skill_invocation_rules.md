@@ -49,7 +49,7 @@ Discovery skills must not:
 
 - claim a gap without extracted closest literature,
 - claim feasibility without a real data source in `discovery/data_inventory.csv`,
-- propose a causal design without documented identifying variation,
+- propose a causal design without documented identifying variation and a probed data engineering path,
 - move speculative ideas into formal memos without verification.
 
 Exploratory outputs must be recorded in `discovery/idea_bank.csv` unless they are immediately rejected.
@@ -83,6 +83,7 @@ Rules:
 - Never modify `data/raw/`.
 - Record real source, owner, access path, unit, coverage, variables, restrictions, and limitations.
 - Do not treat "possible data" as "available data".
+- Early data scouting should produce provisional evidence grades and next probes, not final feasibility conclusions.
 - Do not create analysis-ready claims from unvalidated data.
 
 ## Econometrics and Analysis Skills

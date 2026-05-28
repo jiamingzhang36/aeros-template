@@ -5,13 +5,16 @@ Use this gate before activating the full execution harness.
 ## Promotion Criteria
 
 - [ ] Main literature gap is clear enough to justify continued work.
-- [ ] At least one feasible data source is identified.
+- [ ] At least one feasible data source is identified with access evidence.
+- [ ] Data engineering maturity is high enough for the proposed project type.
 - [ ] Unit of analysis is approximately clear.
 - [ ] Candidate outcome can be constructed or measured.
 - [ ] Candidate treatment, exposure, shock, variation, or non-causal contribution is clear.
 - [ ] Project type is classified as causal, descriptive, measurement, prediction, policy translation, mechanism, or replication.
 - [ ] Minimum viable version is written.
 - [ ] Major data, measurement, design, and execution risks are listed.
+
+For a causal design, do not promote unless access, schema, key variables, linkage keys, coverage, and identifying variation have been probed or the remaining uncertainty is explicitly accepted by the human owner.
 
 ## Decision
 

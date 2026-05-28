@@ -32,7 +32,7 @@ REQUIRED_HEADINGS = {
     Path("discovery/literature/synthesis/literature_map.md"): ["## Research Strands", "## Gap Status"],
     Path("discovery/literature/search_log.md"): ["## Search Rules"],
     Path("discovery/feasibility_matrix.md"): ["## Overall Decision", "## Minimum Viable Version"],
-    Path("discovery/feasibility_memo.md"): ["## Decision"],
+    Path("discovery/feasibility_memo.md"): ["## Data Engineering Burden", "## Claim Boundary", "## Required Next Probes", "## Decision"],
     Path("discovery/design_sketch.md"): ["## Project Type", "## Candidate Data"],
     Path("discovery/PROMOTE_TO_HARNESS.md"): ["## Promotion Criteria", "## Decision"],
 }
@@ -49,7 +49,16 @@ REQUIRED_CSV_COLUMNS = {
         "used_in_synthesis",
         "notes",
     ],
-    Path("discovery/data_inventory.csv"): ["data_id", "dataset_name", "access_status", "unit", "feasibility_status"],
+    Path("discovery/data_inventory.csv"): [
+        "data_id",
+        "dataset_name",
+        "access_status",
+        "unit",
+        "access_evidence",
+        "engineering_status",
+        "next_probe",
+        "feasibility_status",
+    ],
 }
 
 

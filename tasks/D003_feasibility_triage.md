@@ -55,12 +55,15 @@ Assess whether the idea should be pursued, revised, paused, or dropped based on 
 ## Constraints
 
 - Be strict and candid.
-- Do not promote the project unless data and design feasibility are plausible.
+- Do not promote the project unless data and design feasibility are plausible after documented data-engineering probes.
+- Do not treat source existence, a website, or a database name as sufficient evidence of feasibility.
+- State the evidence grade for data feasibility and identify what additional data engineering could change the decision.
 - Separate causal feasibility from descriptive or measurement feasibility.
+- If data engineering is unresolved, use `TBD` or `revise` rather than a final pursue/pause/drop conclusion.
 
 ## Expected Output
 
-A feasibility matrix and memo with a clear pursue, revise, pause, or drop recommendation.
+A feasibility matrix and memo with a provisional pursue, revise, pause, drop, or TBD recommendation and explicit data-engineering next probes.
 
 ## Checks to Run
 
@@ -70,11 +73,13 @@ A feasibility matrix and memo with a clear pursue, revise, pause, or drop recomm
 
 ## Done When
 
-- Six feasibility dimensions are scored or marked TBD.
+- Feasibility dimensions are scored or marked TBD.
 - Minimum viable version is stated.
 - Decision is pursue, revise, pause, drop, or TBD.
+- Decision confidence and remaining data-engineering work are stated.
 - Run report is complete.
 
 ## Human Approval Required For
 
 - Treating the feasibility decision as final
+- Promoting a causal design before linkage, coverage, and identifying variation have been probed

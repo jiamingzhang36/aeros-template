@@ -31,9 +31,10 @@ Do not treat inspiration papers as closest literature unless they are reclassifi
 - If only the abstract is available, mark `abstract_only`.
 - Every gap claim must cite at least one `gap-verification` extraction card.
 - Every data feasibility claim must cite a real data source.
-- Do not propose a causal design unless data contain plausible identifying variation.
+- Do not propose a causal design unless data contain plausible identifying variation and the data engineering path has been probed.
 - Always distinguish feasible now, feasible with paid/protected data, and interesting but currently infeasible.
-- Final recommendation must be `pursue`, `revise`, `pause`, or `drop`.
+- Treat early data-source findings as provisional. Record what has been verified, what has only been located, what data engineering remains, and what next probe would change the judgment.
+- Final recommendation must be `pursue`, `revise`, `pause`, `drop`, or `TBD`.
 
 ## Stage Rule
 
