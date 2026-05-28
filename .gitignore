@@ -1,0 +1,21 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+
+# Large or sensitive data should not be committed by default.
+2_execution/data/raw/*
+!2_execution/data/raw/.gitkeep
+2_execution/data/intermediate/*
+!2_execution/data/intermediate/.gitkeep
+2_execution/data/clean/*
+!2_execution/data/clean/.gitkeep
+
+# Generated outputs can be committed selectively when needed.
+2_execution/outputs/logs/*.log
+
+# Local check artifacts.
+.aeros/

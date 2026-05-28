@@ -1,0 +1,37 @@
+data_contract:
+  version: "0.1"
+  status: "draft"
+
+raw_data:
+  write_access: false
+  directory: "2_execution/data/raw"
+  expected_sources: []
+  sensitive_data: "unknown"
+  notes: ""
+
+derived_data:
+  intermediate_directory: "2_execution/data/intermediate"
+  clean_directory: "2_execution/data/clean"
+  rebuild_rule: "Derived data should be reproducible from raw data and code."
+
+units:
+  observation_unit: ""
+  time_unit: ""
+  geography_unit: ""
+
+required_variables:
+  treatment: []
+  outcomes: []
+  controls: []
+  identifiers: []
+  time_variables: []
+
+provenance:
+  source_log_required: true
+  code_to_data_lineage_required: true
+  manual_edits_allowed: false
+
+privacy:
+  contains_personal_data: "unknown"
+  contains_confidential_data: "unknown"
+  sharing_restrictions: ""
