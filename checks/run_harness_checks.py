@@ -11,6 +11,7 @@ from pathlib import Path
 CHECKS = [
     "check_stage_agents.py",
     "check_discovery_completeness.py",
+    "check_idea_bank.py",
     "check_feasibility_matrix.py",
     "check_literature_registry.py",
     "check_literature_functions.py",

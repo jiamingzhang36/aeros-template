@@ -31,6 +31,8 @@ layers:
   research_judgment:
     required_files:
       - "discovery/idea_memo.md"
+      - "discovery/idea_bank.csv"
+      - "discovery/exploration_policy.md"
       - "discovery/literature/synthesis/literature_map.md"
       - "discovery/literature/paper_registry.csv"
       - "discovery/literature/citation_audit.md"
@@ -83,6 +85,7 @@ default_task_policy:
 
 checks:
   discovery_completeness: "checks/check_discovery_completeness.py"
+  idea_bank: "checks/check_idea_bank.py"
   stage_agents: "checks/check_stage_agents.py"
   feasibility_matrix: "checks/check_feasibility_matrix.py"
   literature_registry: "checks/check_literature_registry.py"

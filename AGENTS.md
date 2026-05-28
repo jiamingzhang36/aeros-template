@@ -40,6 +40,14 @@ If a task file names additional required files, read those after the required re
 
 ## Discovery Rules
 
+Exploration is allowed, but unverified exploration cannot become a formal conclusion.
+
+Core principle:
+
+```text
+Flexible in discovery, strict in verification, conservative in claims.
+```
+
 Separate literature by function:
 
 - idea-inspiring
@@ -70,6 +78,14 @@ If the project is still in discovery:
 - Do not create final causal or policy claims.
 - Focus on literature mapping, data scouting, feasibility triage, and design sketches.
 - Use `discovery/PROMOTE_TO_HARNESS.md` before activating full execution.
+
+## Exploration Policy
+
+- Agents may propose speculative ideas, adjacent literatures, alternative data sources, possible mechanisms, and possible designs.
+- Exploratory outputs must be labeled as speculative, possible, under verification, or verified.
+- Use `discovery/idea_bank.csv` for exploratory ideas that are not yet part of the main design.
+- Do not use exploratory ideas as formal evidence until they pass verification.
+- Do not move speculative content into feasibility, design, method, or claim files without evidence.
 
 ## Literature Review Rules
 

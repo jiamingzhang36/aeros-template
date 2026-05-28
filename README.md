@@ -103,6 +103,14 @@ The full execution harness is not the first step. Early-stage projects should fi
 
 Use the discovery harness to decide whether to pursue, revise, pause, or drop the idea before investing in protected definitions, pipeline checks, and claim management.
 
+## Exploration Policy
+
+Flexible in discovery, strict in verification, conservative in claims.
+
+Agents may brainstorm new angles, adjacent literatures, possible data sources, mechanisms, and designs. Those ideas must be labeled and tracked in `discovery/idea_bank.csv` until evidence promotes them.
+
+Exploration is not evidence. Verification comes from real literature, extraction cards, real data sources, matrices, critic review, and human decisions.
+
 ## Source-Grounded Literature Review
 
 Do not ask an agent to write a literature review from memory. Use:
