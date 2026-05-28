@@ -10,6 +10,7 @@ from pathlib import Path
 TASK_DIR = Path("tasks")
 REQUIRED_HEADINGS = [
     "## Objective",
+    "## Mainline Alignment Gate",
     "## Harness Mode",
     "## Files to Inspect",
     "## Files Allowed to Modify",

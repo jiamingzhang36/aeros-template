@@ -83,6 +83,16 @@ If the project is still in discovery:
 - Focus on literature mapping, data scouting, feasibility triage, and design sketches.
 - Use `discovery/PROMOTE_TO_HARNESS.md` before activating full execution.
 
+## Mainline Alignment Gate
+
+Every task contract must include a Mainline Alignment Gate section before execution:
+
+- Project north star.
+- Which mechanism or hypothesis this task serves.
+- Task class: feasibility probe, measurement pilot, or evidence synthesis.
+- What this task must not become (e.g., detailed micro-implementation).
+- Explicit stop rule and side leads parking rule.
+
 ## Exploration Policy
 
 - Agents may propose speculative ideas, adjacent literatures, alternative data sources, possible mechanisms, and possible designs.
@@ -90,6 +100,7 @@ If the project is still in discovery:
 - Use `discovery/idea_bank.csv` for exploratory ideas that are not yet part of the main design.
 - Do not use exploratory ideas as formal evidence until they pass verification.
 - Do not move speculative content into feasibility, design, method, or claim files without evidence.
+- If uncertainty remains unresolved (ambiguous lead mapping, mechanism choice, or alternative path choices), pause and ask the owner before proceeding.
 
 ## Literature Review Rules
 
@@ -110,6 +121,7 @@ If the project is still in discovery:
 - Human approval is required before changing protected definitions.
 - If protected definitions appear inconsistent with the task request, stop and write the conflict in the run report.
 - High-risk tasks require a critic report before they are treated as complete.
+- Record explicitly any unresolved uncertainty and the owner questions raised in the run report before closing the task.
 
 ## Harness Rules
 

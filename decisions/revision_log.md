@@ -6,6 +6,8 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 | Date/time | Revision ID | Commit | Change type | Files changed | Reason | Checks | Notes |
 |---|---|---|---|---|---|---|---|
+| 2026-05-28 20:57 +0800 | REV011 | this commit | task governance | `tasks/*.md`, `AGENTS.md`, `README.md`, `harness/protocols/human_gate.md`, `harness/protocols/full_run_checklist.md` | Require explicit human escalation on unresolved uncertainty | not run (requested change only) | Prevents blind continuation when task direction is ambiguous. |
+| 2026-05-28 20:42 +0800 | REV010 | this commit | task governance | `tasks/*.md`, `checks/check_task_contract.py`, `AGENTS.md`, `README.md`, `harness/protocols/full_run_checklist.md` | Add Mainline Alignment Gate to every task contract as anti-drift control | not run (requested change only) | Prevents partial task execution from replacing project mainline and hardens stop-rule discipline. |
 | 2026-05-28 18:39 +0800 | REV009 | this commit | terminology | `data_inventory.csv`, `idea_bank.csv`, task docs | Generalize source memo tracing to intake tracing | `checks/run_harness_checks.py` pass | Use `intake_ref` and `intake_priority` for any initial material, not only memos. |
 | 2026-05-28 18:31 +0800 | REV008 | 39ab92c | task structure | `tasks/D*.md`, `README.md` | Renumber discovery tasks sequentially after consolidation | `checks/run_harness_checks.py` pass | Current discovery sequence is D001-D006. |
 | 2026-05-28 18:26 +0800 | REV007 | 39aff96 | task structure | `tasks/D002*`, `tasks/D005*`, removed former D003/D006 | Merge overlapping discovery tasks | `checks/run_harness_checks.py` pass | Data scouting absorbed feasibility triage; literature verification absorbed extraction. |

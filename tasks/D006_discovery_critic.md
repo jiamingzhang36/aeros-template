@@ -26,7 +26,15 @@ Recommended work mode: read_only_or_report_only
 
 Review whether exploratory ideas, literature claims, data feasibility claims, and design options are properly labeled and grounded.
 
-## Required Reading
+## Mainline Alignment Gate
+
+- Project north star:
+- Active mechanism / hypothesis:
+- This task serves (feasibility / measurement / causal evidence / linkage probe / other):
+- This task must not become:
+- Stop rule:
+- Side leads to park:
+- Human escalation points: when uncertainty remains and requires owner confirmation.
 
 - `AGENTS.md`
 - `discovery/AGENTS.md`

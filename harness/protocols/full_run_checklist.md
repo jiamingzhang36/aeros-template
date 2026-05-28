@@ -6,6 +6,7 @@ Use this checklist when a task changes code, outputs, claims, or publication-fac
 
 - [ ] Task ID exists.
 - [ ] Goal is specific.
+- [ ] Mainline alignment gate is filled before execution.
 - [ ] Files to inspect are listed.
 - [ ] Files allowed to modify are listed.
 - [ ] Files forbidden to modify are listed.
@@ -42,5 +43,6 @@ Use this checklist when a task changes code, outputs, claims, or publication-fac
 ## 5. Human Gate
 
 - [ ] Human decision logged when required.
+- [ ] Unresolved uncertainty points are listed and explicitly deferred to owner input.
 - [ ] Open issues carried to `decisions/issue_log.csv`.
 - [ ] Follow-up tasks created when needed.

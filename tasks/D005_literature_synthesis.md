@@ -26,7 +26,15 @@ Recommended work mode: discovery_report_only
 
 Synthesize the literature using only extraction cards and audited citations.
 
-## Required Reading
+## Mainline Alignment Gate
+
+- Project north star:
+- Active mechanism / hypothesis:
+- This task serves (feasibility / measurement / causal evidence / linkage probe / other):
+- This task must not become:
+- Stop rule:
+- Side leads to park:
+- Human escalation points: when uncertainty remains and requires owner confirmation.
 
 - `AGENTS.md`
 - `project_manifest.yml`

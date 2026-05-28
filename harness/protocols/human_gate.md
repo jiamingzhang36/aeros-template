@@ -12,6 +12,8 @@ Some decisions must remain human decisions, even when an agent can propose them.
 - Strengthen claim type, especially descriptive to causal or historical to forecast.
 - Drop observations, geographies, time periods, or sources for substantive reasons.
 - Publish, push, release, or share outputs outside the private project.
+- Resolve open ambiguities in mechanism-to-task mapping, lead mapping, or evidence sufficiency before accepting completion.
+- Ask explicitly when there are multiple reasonable interpretation paths and branch preference is unclear.
 
 ## Decision Values
 

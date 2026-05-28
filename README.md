@@ -126,6 +126,14 @@ Current discovery task order:
 - `D005` Literature Synthesis
 - `D006` Discovery Critic
 
+Every task must complete a Mainline Alignment Gate:
+
+- Project north star and active mechanism/hypothesis
+- Task role (feasibility / measurement / evidence)
+- What the task must not become
+- Explicit stop rule and side-lead parking rule
+- Any uncertainty that changes task direction must be flagged and sent to human before proceeding
+
 ## Exploration Policy
 
 Flexible in discovery, strict in verification, conservative in claims.

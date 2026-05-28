@@ -22,7 +22,15 @@ Recommended work mode: read_only_or_report_only
 
 Simulate methods, domain, policy, and skeptical-editor objections after the core design, results, and claim audits exist.
 
-## Required Reading
+## Mainline Alignment Gate
+
+- Project north star:
+- Active mechanism / hypothesis:
+- This task serves (feasibility / measurement / causal evidence / linkage probe / other):
+- This task must not become:
+- Stop rule:
+- Side leads to park:
+- Human escalation points: when uncertainty remains and requires owner confirmation.
 
 - `AGENTS.md`
 - `project_manifest.yml`

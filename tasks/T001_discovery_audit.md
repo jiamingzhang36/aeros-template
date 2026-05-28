@@ -4,6 +4,16 @@
 
 Review the discovery layer and identify whether the idea, literature scope, data inventory, gap memo, and feasibility memo are internally consistent.
 
+## Mainline Alignment Gate
+
+- Project north star:
+- Active mechanism / hypothesis:
+- This task serves (feasibility / measurement / causal evidence / linkage probe / other):
+- This task must not become:
+- Stop rule:
+- Side leads to park:
+- Human escalation points: when uncertainty remains and requires owner confirmation.
+
 ## Harness Mode
 
 Worker required: yes

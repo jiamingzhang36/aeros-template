@@ -12,7 +12,15 @@ Critic required: yes
 
 Human gate required: yes, if publication-facing text or claims change
 
-## Required Reading
+## Mainline Alignment Gate
+
+- Project north star:
+- Active mechanism / hypothesis:
+- This task serves (feasibility / measurement / causal evidence / linkage probe / other):
+- This task must not become:
+- Stop rule:
+- Side leads to park:
+- Human escalation points: when uncertainty remains and requires owner confirmation.
 
 - `AGENTS.md`
 - `docs/protected_definitions.yml`

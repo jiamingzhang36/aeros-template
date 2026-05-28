@@ -4,6 +4,16 @@
 
 Audit whether the proposed empirical design can support the intended claim type.
 
+## Mainline Alignment Gate
+
+- Project north star:
+- Active mechanism / hypothesis:
+- This task serves (feasibility / measurement / causal evidence / linkage probe / other):
+- This task must not become:
+- Stop rule:
+- Side leads to park:
+- Human escalation points: when uncertainty remains and requires owner confirmation.
+
 ## Harness Mode
 
 Worker required: yes
