@@ -60,3 +60,5 @@ Use specialized skills for speed and convention.
 Use AEROS for admissibility.
 
 If a skill makes the project sound better by weakening evidence standards, do not use that output as-is.
+
+For data feasibility, do not skip the skill pass. Use or explicitly consider `data-inventory` first, then add `data-quality-checker`, `data-codebook`, `describe-data`, or `data-merge-audit` when sample data, schema, or linkage keys are available. If the skill cannot run, record the blocker and the next probe instead of making a final feasibility call.

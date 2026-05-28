@@ -56,12 +56,14 @@ Identify candidate data sources and evaluate accessibility, unit, coverage, vari
 - Do not treat availability as confirmed unless evidence is recorded.
 - Do not conclude that a project is feasible or infeasible from source existence alone.
 - Label each source by evidence maturity: located, access_path_verified, sample_obtained, schema_inspected, variables_verified, linkage_tested, coverage_diagnosed, or blocked.
+- Consider relevant data skills before making a feasibility judgment, such as `data-inventory`, `data-quality-checker`, `data-codebook`, `describe-data`, and `data-merge-audit`; record which were used or why they were not applicable.
+- If a useful skill cannot be run because data are unavailable, restricted, or not yet sampled, record that as a blocked probe rather than as a final conclusion.
 - Record the next concrete probe needed to upgrade the feasibility judgment.
 - Do not write data pipeline code.
 
 ## Expected Output
 
-A data inventory with candidate sources, units, coverage, variables, access barriers, measurement limits, evidence maturity, next probes, and likely research use.
+A data inventory with candidate sources, units, coverage, variables, access barriers, measurement limits, evidence maturity, skills considered/used, next probes, and likely research use.
 
 ## Checks to Run
 
@@ -75,6 +77,7 @@ A data inventory with candidate sources, units, coverage, variables, access barr
 - Search log records data-source searches.
 - Main access barriers are listed.
 - Engineering status and next probe are recorded for each candidate source.
+- Skill use or skill non-use rationale is recorded for each candidate source.
 - Run report is complete.
 
 ## Human Approval Required For

@@ -127,6 +127,8 @@ Exploration is not evidence. Verification comes from real literature, extraction
 
 Data-source existence is not the same as data feasibility. Early scouting should record provisional evidence grades and next probes. A project can be appropriate for a linked descriptive pilot while still being far from a national causal design; the feasibility memo must state that boundary instead of collapsing it into a final verdict.
 
+Data feasibility also requires a skill-assisted probe pass. Agents should use or explicitly consider relevant data skills, record what was tried, and document blocked probes. A quick manual scan is not enough to support a final pursue, pause, or drop recommendation.
+
 ## Source-Grounded Literature Review
 
 Do not ask an agent to write a literature review from memory. Use:

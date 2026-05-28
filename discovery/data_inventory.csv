@@ -1,2 +1,2 @@
-data_id,dataset_name,owner_or_source,access_status,unit,geography,period,key_variables,link_or_path,restrictions,access_evidence,engineering_status,next_probe,feasibility_status,notes
-D001,,,,,,,,,,,,,,
+data_id,dataset_name,owner_or_source,access_status,unit,geography,period,key_variables,link_or_path,restrictions,access_evidence,engineering_status,skills_considered,skills_used,skill_probe_status,next_probe,feasibility_status,notes
+D001,,,,,,,,,,,,,,,,,

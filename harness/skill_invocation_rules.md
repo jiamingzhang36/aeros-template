@@ -84,6 +84,7 @@ Rules:
 - Record real source, owner, access path, unit, coverage, variables, restrictions, and limitations.
 - Do not treat "possible data" as "available data".
 - Early data scouting should produce provisional evidence grades and next probes, not final feasibility conclusions.
+- Before a feasibility recommendation, consider relevant data skills and record use, non-use rationale, or blocked probes in `discovery/data_inventory.csv` and the feasibility memo.
 - Do not create analysis-ready claims from unvalidated data.
 
 ## Econometrics and Analysis Skills

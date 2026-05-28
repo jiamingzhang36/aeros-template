@@ -34,6 +34,24 @@ What remains unverified:
 
 TBD
 
+## Skill-Assisted Data Probes
+
+Relevant skills considered:
+
+TBD
+
+Skills used:
+
+TBD
+
+Skills not used and why:
+
+TBD
+
+Blocked skill probes:
+
+TBD
+
 ## Identification Feasibility
 
 TBD

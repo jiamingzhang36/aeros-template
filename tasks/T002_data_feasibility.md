@@ -37,6 +37,7 @@ Human gate required: yes, if recommending pursue, pause, or drop
 - Do not mark data as feasible without source evidence.
 - Do not mark data as execution-ready until access, schema, key variables, coverage, linkage keys, and minimum viable construction have been probed or explicitly scoped out.
 - Separate linked descriptive pilot feasibility from national causal design feasibility.
+- Use or explicitly consider relevant data skills before recommending pursue, pause, or drop. If a skill is blocked, record the blocking condition and the next probe needed.
 
 ## Expected Output
 
@@ -46,6 +47,7 @@ A data audit report with:
 - unavailable or restricted sources
 - key variables
 - evidence maturity and data-engineering status
+- skills considered, skills used, and blocked skill probes
 - measurement gaps
 - unresolved linkage, coverage, access, and construction probes
 - minimum viable empirical test
