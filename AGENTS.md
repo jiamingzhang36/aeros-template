@@ -83,6 +83,7 @@ If the project is still in discovery:
 ## Execution Rules
 
 - Work from task files in `tasks/`.
+- For execution-stage tasks, also read `execution/AGENTS.md`.
 - Only modify files allowed by the task.
 - Write an agent run report after every task.
 - List all files read, files modified, commands run, and checks passed or failed.

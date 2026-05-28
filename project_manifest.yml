@@ -58,6 +58,12 @@ layers:
       - "harness/protocols/human_gate.md"
       - "harness/protocols/full_run_checklist.md"
       - "harness/agent_roles.yml"
+  stage_agents:
+    required_files:
+      - "AGENTS.md"
+      - "discovery/AGENTS.md"
+      - "discovery/literature/AGENTS.md"
+      - "execution/AGENTS.md"
 
 protected_files:
   - "docs/protected_definitions.yml"
@@ -77,6 +83,7 @@ default_task_policy:
 
 checks:
   discovery_completeness: "checks/check_discovery_completeness.py"
+  stage_agents: "checks/check_stage_agents.py"
   feasibility_matrix: "checks/check_feasibility_matrix.py"
   literature_registry: "checks/check_literature_registry.py"
   literature_functions: "checks/check_literature_functions.py"

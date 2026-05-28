@@ -70,6 +70,7 @@ agent_runs/          worker run reports, critic reports, commands, and diffs
 audits/              discovery, data, design, result, claim, and referee audit reports
 decisions/           human decision, issue, and revision logs
 harness/             permissions, worker protocol, critic protocol, hooks, and human gates
+execution/           execution-stage agent rules
 examples/            generic empirical project archetypes
 ```
 
