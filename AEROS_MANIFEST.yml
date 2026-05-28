@@ -6,7 +6,7 @@ project:
   private_by_default: true
 
 research:
-  field: ""
+  field_or_domain: ""
   topic: ""
   one_sentence_question: ""
   current_stage: "discovery"

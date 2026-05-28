@@ -2,7 +2,7 @@
 
 ## Objective
 
-Evaluate whether candidate data sources can support the proposed unit, sample, treatment, outcomes, and design.
+Evaluate whether candidate data sources can support the proposed unit, sample, treatment / exposure / key variables, outcomes, and design.
 
 ## Allowed Files / Directories
 

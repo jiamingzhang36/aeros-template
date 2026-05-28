@@ -20,7 +20,7 @@ units:
   geography_unit: ""
 
 required_variables:
-  treatment: []
+  treatment_or_exposure: []
   outcomes: []
   controls: []
   identifiers: []

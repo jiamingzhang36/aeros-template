@@ -13,7 +13,7 @@ TBD
 ## Causal Pathway
 
 ```text
-Shock / treatment -> behavioral or institutional response -> measured outcome
+Shock / exposure / key variable -> behavioral, institutional, or measurement response -> measured outcome
 ```
 
 ## Alternative Mechanisms

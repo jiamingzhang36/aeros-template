@@ -3,7 +3,7 @@ protected_definitions:
   status: "draft"
   change_policy: "Human approval required before modifying any protected definition."
 
-treatment:
+key_exposure:
   name: ""
   definition: ""
   source: ""

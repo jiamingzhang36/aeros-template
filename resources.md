@@ -2,10 +2,10 @@
 
 This file is a curated pointer list for tools and standards that AEROS can borrow from without trying to replace.
 
-## Reproducible Economics
+## Reproducible Empirical Research
 
-- OpenSourceEconomics econ project templates: reproducible project structure and automated research pipelines.
-- World Bank DIME standards: research transparency, master scripts, code review, and reproducibility checks.
+- Reproducible project templates: project structure, automated pipelines, and output rebuilds.
+- Research transparency standards: master scripts, code review, data provenance, and reproducibility checks.
 - Social Science Data Editors replication README template: replication package documentation standard.
 
 ## AI and Agent Workflows
@@ -14,10 +14,10 @@ This file is a curated pointer list for tools and standards that AEROS can borro
 - Agent harness patterns: guardrails, validation loops, and run reports.
 - GitHub Agentic Workflows: read-only defaults, sandboxing, allow lists, and human approval gates.
 
-## Economics RA and Tool Indexes
+## Research Assistant and Tool Indexes
 
-- Guide2EconRA: economics RA and reproducibility learning resources.
-- awesome-ai-for-economists: AI tools, MCP resources, Stata integrations, literature tools, and policy analysis resources.
+- Research assistant guides: coding, data work, reproducibility, causal inference, and documentation practices.
+- AI-for-research tool indexes: literature tools, coding tools, data extraction, analysis, and reporting resources.
 
 ## AEROS Rule
 

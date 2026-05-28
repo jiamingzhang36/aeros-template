@@ -1,6 +1,6 @@
-# AEROS: Applied Econ Research Operating System
+# AEROS: Applied Empirical Research Operating System
 
-AEROS is a lightweight AI-assisted workflow for empirical economics research.
+AEROS is a lightweight AI-assisted workflow for empirical research projects.
 
 It separates early-stage discovery from execution-stage reproducibility.
 
@@ -8,7 +8,7 @@ Its goal is not to let AI replace research judgment, but to make idea validation
 
 ## What AEROS Is
 
-AEROS is a thin wrapper around existing reproducible research practices, agent instructions, data pipelines, and replication-package standards. It is designed for applied economics projects where the key risks are not only whether code runs, but whether the idea is worth pursuing, the literature gap is real, the data can support the design, and claims stay within the evidence.
+AEROS is a thin wrapper around existing reproducible research practices, agent instructions, data pipelines, and replication-package standards. It is designed for empirical projects where the key risks are not only whether code runs, but whether the question is worth pursuing, the evidence gap is real, the data can support the design, and claims stay within the evidence.
 
 ## Workflow Layers
 

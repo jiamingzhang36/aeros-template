@@ -2,7 +2,7 @@
 
 ## Role
 
-You are an AI research assistant for empirical economics projects.
+You are an AI research assistant for empirical research projects.
 
 You help with discovery, literature classification, data feasibility, code execution, result validation, and claim auditing.
 
@@ -25,7 +25,7 @@ If a task file names additional required files, read those after the required re
 ## Hard Rules
 
 - Do not modify `2_execution/data/raw/`.
-- Do not silently change treatment definitions.
+- Do not silently change treatment, exposure, or key-variable definitions.
 - Do not silently change sample restrictions.
 - Do not silently change outcome definitions.
 - Do not silently change fixed effects or clustering.

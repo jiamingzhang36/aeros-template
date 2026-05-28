@@ -24,7 +24,7 @@ TBD
 
 TBD
 
-## Candidate Treatment, Shock, or Exposure
+## Candidate Treatment, Exposure, Shock, or Key Variable
 
 TBD
 

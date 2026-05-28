@@ -15,7 +15,7 @@ Choose the strongest currently supportable type:
 - policy-translation
 - forecast
 
-## Treatment / Shock / Exposure
+## Treatment / Exposure / Shock / Key Variable
 
 TBD
 
