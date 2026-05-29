@@ -1,3 +1,8 @@
+---
+schema_version: 1
+required_sections:
+  - ## Search Rules
+---
 # Search Log
 
 Use this file to prevent repeated searching and to make discovery work resumable.

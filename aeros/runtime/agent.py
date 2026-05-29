@@ -8,12 +8,25 @@ so permission enforcement happens at the agent layer, not on trust.
 
 from __future__ import annotations
 
+import os
 import shutil
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 from .contract import Contract
+
+
+def _agent_env() -> dict[str, str]:
+    """Environment for the spawned agent.
+
+    Claude Code refuses to launch nested inside another Claude Code session.
+    When the AEROS runtime is itself invoked from within a Claude Code session,
+    the spawned `claude -p` worker must not inherit CLAUDECODE, or it is blocked.
+    """
+    env = dict(os.environ)
+    env.pop("CLAUDECODE", None)
+    return env
 
 
 @dataclass
@@ -70,6 +83,7 @@ def run_agent(prompt: str, project_root: Path, timeout: int = 1800) -> AgentResu
         proc = subprocess.run(
             [binary, "-p", prompt, "--output-format", "text"],
             cwd=str(project_root), text=True, capture_output=True, timeout=timeout,
+            env=_agent_env(),
         )
     except subprocess.TimeoutExpired:
         return AgentResult(False, "", f"agent timed out after {timeout}s")
