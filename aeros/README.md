@@ -1,10 +1,21 @@
 # AEROS Runtime (Phase 1)
 
-A thin orchestrator over the AEROS harness. It does **not** contain research
-intelligence — that lives in the agent (`claude -p`). The runtime only does:
+AEROS is a **tool** (`aeros`) that runs empirical-research task contracts
+through an agent under mechanical checks and permission hooks. The surrounding
+directory tree (`discovery/`, `docs/`, `evidence/`, `checks/`, ...) is the
+**scaffold** the tool operates on — not something you maintain by hand.
+
+The runtime contains no research intelligence — that lives in the agent
+(`claude -p`). It only does:
 
 ```
 load task contract -> run agent -> run checks -> retry or escalate -> update state
+```
+
+## Install
+
+```bash
+python3 -m pip install -e .   # provides the `aeros` command
 ```
 
 ## Pieces
@@ -20,12 +31,24 @@ load task contract -> run agent -> run checks -> retry or escalate -> update sta
 | `aeros/hooks/block_raw_write.py` | PreToolUse hook: hard-blocks writes to `data/raw/` |
 | `.claude/settings.json` | wires the hook into Claude Code |
 
+## Commands
+
+```bash
+aeros list-tasks                 # list .yml task contracts in the project
+aeros status                     # gate, per-task status, agent-call budget
+aeros check   <contract.yml>     # run a contract's checks, no agent call
+aeros run     <contract.yml>     # the full loop: agent -> checks -> retry/escalate
+aeros run     <contract.yml> --dry-run   # print prompt + planned checks only
+```
+
+(Before install, `python3 -m aeros.cli <command>` is identical.)
+
 ## Try it
 
 Dry run (no agent call — prints the exact prompt and planned checks):
 
 ```bash
-python3 -m aeros.cli run tasks/discovery/D001_literature_search.yml --dry-run
+aeros run tasks/discovery/D001_literature_search.yml --dry-run
 ```
 
 Live run (requires an authenticated `claude` CLI on PATH):
@@ -33,7 +56,7 @@ Live run (requires an authenticated `claude` CLI on PATH):
 ```bash
 # 1. Fill discovery/01_literature_scope.md with a real topic first.
 # 2. Then:
-python3 -m aeros.cli run tasks/discovery/D001_literature_search.yml
+aeros run tasks/discovery/D001_literature_search.yml
 ```
 
 The kernel will: build a prompt from the contract + scope, call the agent,

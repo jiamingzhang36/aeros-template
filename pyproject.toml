@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aeros-runtime"
+version = "0.0.1"
+description = "A thin orchestrator that runs empirical-research task contracts through an agent under mechanical checks and permission hooks."
+readme = "aeros/README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+aeros = "aeros.cli:main"
+
+[tool.setuptools]
+# The runtime package; the surrounding directories are the project scaffold,
+# not part of the installable distribution.
+packages = ["aeros", "aeros.runtime", "aeros.hooks"]
