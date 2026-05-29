@@ -1,0 +1,92 @@
+task_id: D001b_framework_search
+stage: discovery
+goal: >
+  Search for literature WITHIN the human-reasoned framing deck and register each
+  paper in discovery/literature/paper_registry.csv, stratified by function. This
+  is the "apply" step after the framing "plan": you do NOT invent the framing
+  here — you fill the registry inside the frameworks the deck already approved.
+
+  For each framework card in discovery/literature/framing_deck.yml whose
+  decision is NOT 'drop', do three things:
+
+    1. REGISTER ITS ANCHORS. Every seminal anchor named on the card becomes a
+       registry row. Carry its DOI and exact title; resolve the DOI from the
+       anchor's openalex_id via the OpenAlex API if needed. The row's
+       primary_function = the card's function bucket.
+
+    2. FIND APPLIED / BRIDGE PAPERS within that framework: works that apply the
+       framework to regulation, food, agriculture, or novel/regulated industries
+       (e.g. for "policy diffusion as identification threat", papers applying
+       diffusion/event-history to regulatory adoption; for "regulatory capture",
+       applied capture studies in food or novel industries). Use OpenAlex —
+       search the framework's terms AND/OR the citation neighborhood of the
+       anchors (works that cite, or are cited by, the anchor).
+
+    3. Add TOPIC-SUBSTANTIVE papers for the gap-verification,
+       background-institutional, and data-measurement buckets: cultivated-meat-
+       specific works (regulation, firm outcomes, investment, measurement).
+
+  Each registered paper's primary_function is the bucket of the framework strand
+  that surfaced it, so classification follows from the search, not a guess.
+
+inputs:
+  - discovery/literature/framing_deck.yml
+  - discovery/01_literature_scope.md
+  - discovery/literature/paper_registry.csv
+  - project_manifest.yml
+
+allowed_outputs:
+  - discovery/literature/paper_registry.csv
+  - discovery/literature/search_log.csv
+  - discovery/literature/citation_audit.md
+
+forbidden_actions:
+  - "Do not write anywhere under data/raw/ (enforced by a hook)."
+  - "Do not re-do the framing or change the deck; search only within non-dropped cards."
+  - "Do not summarize findings or write synthesis."
+  - "Do not set status beyond 'discovered' or 'title_abstract_screened'."
+  - "Do not set extraction_card=yes, used_in_synthesis=yes, or full_text_available=yes."
+  - "Do not invent citations. Every row needs a real, OpenAlex- or DOI-resolvable locator."
+  - "Every non-dropped deck anchor MUST appear as a registry row (it is the recall floor)."
+
+output_contract:
+  registry_path: discovery/literature/paper_registry.csv
+  registry_columns:
+    - paper_id
+    - citation_key
+    - title
+    - authors
+    - year
+    - source
+    - doi
+    - url
+    - pdf_url
+    - primary_function    # = the function bucket of the framework that surfaced the paper
+    - secondary_functions
+    - reading_depth
+    - status
+    - full_text_available
+    - opened_source
+    - opened_date
+    - evidence_basis
+    - screening_decision
+    - extraction_card
+    - used_in_synthesis
+    - notes
+
+checks:
+  - check_literature_registry.py
+  - check_citation_audit.py
+  - check_literature_functions.py
+  - check_anchors_in_registry.py
+
+retry_policy:
+  max_retries: 2
+
+escalate_if:
+  - "any non-dropped deck anchor is missing from the registry after max_retries"
+  - "checks still fail after max_retries"
+
+budget:
+  max_agent_calls: 3
+  max_dollars: 4.0
