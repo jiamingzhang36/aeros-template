@@ -1,220 +1,220 @@
-idea: "Do government regulatory actions toward cultivated meat — approvals, bans, labeling
+idea: Do government regulatory actions toward cultivated meat — approvals, bans, labeling
   rules, and public funding — causally affect firm investment, market entry, and R&D
-  activity across jurisdictions?"
-
+  activity across jurisdictions?
 cards:
-  - id: F01
-    function: theory-mechanism
-    framework: "Regulatory capture / political economy of regulation"
-    rationale: "State-level bans on cultivated meat may reflect successful lobbying by
-      incumbent conventional meat producers who use regulatory mechanisms to exclude new
-      entrants; Stigler's capture theory predicts that organized industry groups (cattle
-      ranchers, pork producers) will invest in regulatory capture proportional to the rents
-      at stake, making US state bans a predicted outcome of this mechanism rather than a
-      genuine food-safety response."
-    role: mechanism-tested
-    caveat: "If state bans primarily reflect genuine consumer or food-safety concerns rather
-      than industry lobbying — for example if bans passed in jurisdictions with negligible
-      conventional meat production — the capture mechanism is refuted, and cross-state
-      variation in regulatory stringency must be explained through alternative institutional
-      channels rather than as incumbent-protection strategy."
-    decision: proposed
-    anchors:
-      - author: "Stigler"
-        year: 1971
-        title: "The Theory of Economic Regulation"
-        openalex_id: "W4293229472"
-        kind: theory
-
-  - id: F02
-    function: theory-mechanism
-    framework: "Organizational legitimacy theory"
-    rationale: "Regulatory approval — Singapore's 2020 first market authorization, US FDA/USDA
-      pre-market consultation completions in 2023 — signals institutional legitimacy to venture
-      investors, corporate partners, and future customers, reducing perceived risk and lowering
-      the cost of capital for cultivated-meat firms; conversely, state-level bans actively
-      delegitimize the sector in affected jurisdictions and may spill over to suppress investment
-      even in permissive markets through reputational contagion."
-    role: mechanism-tested
-    caveat: "Legitimacy effects may operate globally rather than locally — a single regulatory
-      approval anywhere could signal worldwide institutional endorsement — in which case the
-      cross-jurisdiction variation in regulatory status understates the mechanism's true
-      magnitude and a purely spatial treatment design is misspecified relative to the mechanism
-      being tested."
-    decision: proposed
-    anchors:
-      - author: "Suchman"
-        year: 1995
-        title: "Managing Legitimacy: Strategic and Institutional Approaches"
-        openalex_id: "W4238779927"
-        kind: theory
-
-  - id: F03
-    function: theory-mechanism
-    framework: "Investment under uncertainty / real options"
-    rationale: "When regulatory status is uncertain — pending FDA pre-market review,
-      anticipated state bans, unclear labeling requirements — firms face irreversible
-      investment decisions (facility construction, workforce expansion, long-term supply
-      contracts) whose option value of delay rises with regulatory uncertainty, predicting
-      reduced irreversible capital expenditure and R&D commitments in jurisdictions or time
-      periods characterized by regulatory ambiguity rather than settled approval or settled
-      prohibition."
-    role: mechanism-tested
-    caveat: "Real options logic predicts delay under uncertainty, but competitive first-mover
-      dynamics in a new technology race may dominate the wait-and-see incentive; if firms
-      believe rivals will not delay, then the real-options prediction of reduced investment
-      under regulatory uncertainty may not hold in this sector, and a negative investment
-      response to uncertainty could instead reflect exit rather than deferral."
-    decision: proposed
-    anchors:
-      - author: "Dixit and Pindyck"
-        year: 1994
-        title: "Investment under Uncertainty"
-        openalex_id: "W4365787967"
-        kind: theory
-
-  - id: F04
-    function: method-identification
-    framework: "Staggered difference-in-differences with heterogeneous treatment effects"
-    rationale: "Cross-jurisdiction regulatory events — US state bans enacted from 2024
-      onward at different dates, national-level approvals in Singapore (2020), the US (2023),
-      and potentially the EU — create a natural staggered adoption structure that, combined
-      with firm-level panel data on investment and entry, enables difference-in-differences
-      estimation of the causal effect of each regulatory action on cultivated-meat industry
-      outcomes while absorbing time-invariant jurisdiction heterogeneity."
-    role: measurement-strategy
-    caveat: "US state bans were coordinated through national model-legislation networks
-      (ALEC-linked bills), making treatment timing correlated with jurisdiction-level political
-      characteristics — strength of cattlemen's associations, conventional beef output per
-      capita — that may independently predict investment outcomes, violating the parallel-trends
-      assumption required for DiD validity and demanding instrument-based or sensitivity
-      approaches to credibly identify causal effects."
-    decision: proposed
-    anchors:
-      - author: "Callaway and Sant'Anna"
-        year: 2021
-        title: "Difference-in-Differences with multiple time periods"
-        openalex_id: "W3113269512"
-        kind: method
-
-  - id: F05
-    function: method-identification
-    framework: "Synthetic control method for comparative case studies"
-    rationale: "With a small number of major cultivated-meat regulatory jurisdictions —
-      Singapore, the United States, the European Union, Israel — that each adopted distinct
-      regulatory regimes at different times, the synthetic control method can construct a
-      weighted combination of untreated donor jurisdictions as a counterfactual for each
-      treated jurisdiction, enabling inference about aggregate investment or firm-entry effects
-      without requiring the large balanced panel that DiD demands."
-    role: measurement-strategy
-    caveat: "The donor pool for constructing synthetic controls is extremely thin at the
-      national or state level — fewer than ten jurisdictions have both regulatory events of
-      interest and available outcome data — making it difficult to achieve adequate pre-treatment
-      fit and risking that the synthetic control collapses to interpolation among a small set
-      of structurally dissimilar economies, producing an unreliable counterfactual trajectory."
-    decision: proposed
-    anchors:
-      - author: "Abadie and Gardeazabal"
-        year: 2003
-        title: "The Economic Costs of Conflict: A Case Study of the Basque Country"
-        openalex_id: "W2171656257"
-        kind: method
-
-  - id: F06
-    function: method-identification
-    framework: "Policy diffusion as identification threat to treatment exogeneity"
-    rationale: "Regulatory policies spread across jurisdictions through diffusion mechanisms —
-      neighboring-state adoption, ideological alignment, industry coordination, model legislation
-      templates — meaning that which state adopts a cultivated-meat ban and when depends on
-      political, economic, and network characteristics rather than factors unrelated to the
-      outcome; this endogenous diffusion process means treatment assignment is non-random with
-      respect to jurisdiction-level determinants of investment, undermining simple DiD or
-      event-study designs that assume regulatory events are as-good-as-random conditional on
-      observables."
-    role: identification-threat
-    caveat: "If ban diffusion is primarily driven by a single national-template bill introduced
-      in successive legislative sessions rather than by local economic factors, the within-wave
-      variation in which states adopt first may be quasi-random conditional on legislative
-      calendar, partially restoring identification — but this requires explicit modeling of the
-      diffusion mechanism and falsification tests to validate the identifying assumption."
-    decision: proposed
-    anchors:
-      - author: "Meseguer and Gilardi"
-        year: 2009
-        title: "What is new in the study of policy diffusion?"
-        openalex_id: "W2085835083"
-        kind: method
-
-  - id: F07
-    function: gap-verification
-    framework: "EU novel food regulation and firm investment decisions (empirical)"
-    rationale: "Varacca et al. (2024) directly measure how EU novel food regulations affected
-      corporate investment behavior using 326 applications under the 1997 and 2018 regulations
-      and real-option theory, finding that regulatory centralization did not shorten authorization
-      timelines and that success rates were higher for non-EU private applicants with prior
-      experience — making this the closest published empirical rival because it uses the same
-      novel-food regulatory context, firm-investment outcome, and real-options theoretical
-      grounding as the proposed study."
-    role: motivation
-    caveat: "Varacca et al. focus on EU authorization success rates and timeline outcomes
-      rather than on investment quantity, firm entry rates, or cross-jurisdictional comparative
-      causal effects; the analytic scope is on approval-process mechanics for applicants who
-      already engaged the system, not on how upstream investment decisions and firm entry
-      respond to regulatory regime changes, leaving the proposed research question substantially
-      open despite this close overlap in institutional setting."
-    decision: proposed
-    anchors:
-      - author: "Varacca et al."
-        year: 2024
-        title: "The effect of the EU's novel food regulations on firm investment decisions"
-        openalex_id: "W4405821041"
-        kind: empirical
-
-  - id: F08
-    function: gap-verification
-    framework: "GE crop regulatory approval timing and opportunity costs (empirical)"
-    rationale: "Smart, Blum, and Wesseler (2016) empirically document that genetically
-      engineered crop approval timelines diverged substantially between the US and EU from
-      1988 to 2015, with EU timelines nearly doubling, creating measurable opportunity costs;
-      this study is the closest method-and-topic analog to the proposed research because both
-      contexts involve novel agricultural biotechnologies, food-safety regulatory agencies,
-      cross-jurisdiction regulatory divergence, and investment consequences for commercialization."
-    role: motivation
-    caveat: "GE crop approvals affect established agribusiness firms making farm-level adoption
-      decisions with long-established market structures, whereas cultivated meat regulation
-      targets pre-commercial startups making early-stage venture investment decisions in an
-      industry that barely existed before 2015; the economic magnitudes, firm types, market
-      structures, and nature of regulatory risk differ enough that GE-crop findings likely do
-      not transfer to the cultivated-meat setting without direct replication and extension."
-    decision: proposed
-    anchors:
-      - author: "Smart, Blum, and Wesseler"
-        year: 2016
-        title: "Trends in Approval Times for Genetically Engineered Crops in the United States and the European Union"
-        openalex_id: "W2417498326"
-        kind: empirical
-
-  - id: F09
-    function: background-institutional
-    framework: "Regulatory and economic context of agricultural biotechnology"
-    rationale: "The agricultural biotechnology sector provides the closest institutional
-      template for how government regulatory decisions shape the commercialization trajectory
-      of novel food technologies; Barrows, Sexton, and Zilberman (2014) synthesize evidence
-      on how biotech crop regulation, IP rights, and market concentration shaped innovation
-      incentives across jurisdictions, providing background context for situating cultivated
-      meat within the broader pattern of novel-protein agricultural-technology regulation and
-      for anticipating which regulatory features are most consequential for firm behavior."
-    role: motivation
-    caveat: "Agricultural biotechnology involves established agrochemical multinationals and
-      input markets with decades of institutional history, which differ substantially from the
-      startup-dominated cultivated-meat sector in firm scale, market structure, and political
-      economy; institutional analogies drawn from GE crop regulation to cultivated meat must
-      account for these structural differences to avoid overstating the predictive value of
-      prior regulatory economics findings for this nascent industry."
-    decision: proposed
-    anchors:
-      - author: "Barrows, Sexton, and Zilberman"
-        year: 2014
-        title: "Agricultural Biotechnology: The Promise and Prospects of Genetically Modified Crops"
-        openalex_id: "W2141902865"
-        kind: review
+- id: F01
+  function: theory-mechanism
+  framework: Regulatory capture / political economy of regulation
+  rationale: State-level bans on cultivated meat may reflect successful lobbying by
+    incumbent conventional meat producers who use regulatory mechanisms to exclude
+    new entrants; Stigler's capture theory predicts that organized industry groups
+    (cattle ranchers, pork producers) will invest in regulatory capture proportional
+    to the rents at stake, making US state bans a predicted outcome of this mechanism
+    rather than a genuine food-safety response.
+  role: mechanism-tested
+  caveat: If state bans primarily reflect genuine consumer or food-safety concerns
+    rather than industry lobbying — for example if bans passed in jurisdictions with
+    negligible conventional meat production — the capture mechanism is refuted, and
+    cross-state variation in regulatory stringency must be explained through alternative
+    institutional channels rather than as incumbent-protection strategy.
+  decision: proposed
+  anchors:
+  - author: Stigler
+    year: 1971
+    title: The Theory of Economic Regulation
+    openalex_id: W4293229472
+    kind: theory
+- id: F02
+  function: theory-mechanism
+  framework: Organizational legitimacy theory
+  rationale: Regulatory approval — Singapore's 2020 first market authorization, US
+    FDA/USDA pre-market consultation completions in 2023 — signals institutional legitimacy
+    to venture investors, corporate partners, and future customers, reducing perceived
+    risk and lowering the cost of capital for cultivated-meat firms; conversely, state-level
+    bans actively delegitimize the sector in affected jurisdictions and may spill
+    over to suppress investment even in permissive markets through reputational contagion.
+  role: mechanism-tested
+  caveat: Legitimacy effects may operate globally rather than locally — a single regulatory
+    approval anywhere could signal worldwide institutional endorsement — in which
+    case the cross-jurisdiction variation in regulatory status understates the mechanism's
+    true magnitude and a purely spatial treatment design is misspecified relative
+    to the mechanism being tested.
+  decision: proposed
+  anchors:
+  - author: Suchman
+    year: 1995
+    title: 'Managing Legitimacy: Strategic and Institutional Approaches'
+    openalex_id: W4238779927
+    kind: theory
+- id: F03
+  function: theory-mechanism
+  framework: Investment under uncertainty / real options
+  rationale: When regulatory status is uncertain — pending FDA pre-market review,
+    anticipated state bans, unclear labeling requirements — firms face irreversible
+    investment decisions (facility construction, workforce expansion, long-term supply
+    contracts) whose option value of delay rises with regulatory uncertainty, predicting
+    reduced irreversible capital expenditure and R&D commitments in jurisdictions
+    or time periods characterized by regulatory ambiguity rather than settled approval
+    or settled prohibition.
+  role: mechanism-tested
+  caveat: Real options logic predicts delay under uncertainty, but competitive first-mover
+    dynamics in a new technology race may dominate the wait-and-see incentive; if
+    firms believe rivals will not delay, then the real-options prediction of reduced
+    investment under regulatory uncertainty may not hold in this sector, and a negative
+    investment response to uncertainty could instead reflect exit rather than deferral.
+  decision: proposed
+  anchors:
+  - author: Dixit and Pindyck
+    year: 1994
+    title: Investment under Uncertainty
+    openalex_id: W4365787967
+    kind: theory
+- id: F04
+  function: method-identification
+  framework: Staggered difference-in-differences with heterogeneous treatment effects
+  rationale: Cross-jurisdiction regulatory events — US state bans enacted from 2024
+    onward at different dates, national-level approvals in Singapore (2020), the US
+    (2023), and potentially the EU — create a natural staggered adoption structure
+    that, combined with firm-level panel data on investment and entry, enables difference-in-differences
+    estimation of the causal effect of each regulatory action on cultivated-meat industry
+    outcomes while absorbing time-invariant jurisdiction heterogeneity.
+  role: measurement-strategy
+  caveat: US state bans were coordinated through national model-legislation networks
+    (ALEC-linked bills), making treatment timing correlated with jurisdiction-level
+    political characteristics — strength of cattlemen's associations, conventional
+    beef output per capita — that may independently predict investment outcomes, violating
+    the parallel-trends assumption required for DiD validity and demanding instrument-based
+    or sensitivity approaches to credibly identify causal effects.
+  decision: proposed
+  anchors:
+  - author: Callaway and Sant'Anna
+    year: 2021
+    title: Difference-in-Differences with multiple time periods
+    openalex_id: W3113269512
+    kind: method
+- id: F05
+  function: method-identification
+  framework: Synthetic control method for comparative case studies
+  rationale: With a small number of major cultivated-meat regulatory jurisdictions
+    — Singapore, the United States, the European Union, Israel — that each adopted
+    distinct regulatory regimes at different times, the synthetic control method can
+    construct a weighted combination of untreated donor jurisdictions as a counterfactual
+    for each treated jurisdiction, enabling inference about aggregate investment or
+    firm-entry effects without requiring the large balanced panel that DiD demands.
+  role: measurement-strategy
+  caveat: The donor pool for constructing synthetic controls is extremely thin at
+    the national or state level — fewer than ten jurisdictions have both regulatory
+    events of interest and available outcome data — making it difficult to achieve
+    adequate pre-treatment fit and risking that the synthetic control collapses to
+    interpolation among a small set of structurally dissimilar economies, producing
+    an unreliable counterfactual trajectory.
+  decision: proposed
+  anchors:
+  - author: Abadie and Gardeazabal
+    year: 2003
+    title: 'The Economic Costs of Conflict: A Case Study of the Basque Country'
+    openalex_id: W2171656257
+    kind: method
+- id: F06
+  function: method-identification
+  framework: Policy diffusion as identification threat to treatment exogeneity
+  rationale: Regulatory policies spread across jurisdictions through diffusion mechanisms
+    — neighboring-state adoption, ideological alignment, industry coordination, model
+    legislation templates — meaning that which state adopts a cultivated-meat ban
+    and when depends on political, economic, and network characteristics rather than
+    factors unrelated to the outcome; this endogenous diffusion process means treatment
+    assignment is non-random with respect to jurisdiction-level determinants of investment,
+    undermining simple DiD or event-study designs that assume regulatory events are
+    as-good-as-random conditional on observables.
+  role: identification-threat
+  caveat: If ban diffusion is primarily driven by a single national-template bill
+    introduced in successive legislative sessions rather than by local economic factors,
+    the within-wave variation in which states adopt first may be quasi-random conditional
+    on legislative calendar, partially restoring identification — but this requires
+    explicit modeling of the diffusion mechanism and falsification tests to validate
+    the identifying assumption.
+  decision: proposed
+  anchors:
+  - author: Meseguer and Gilardi
+    year: 2009
+    title: What is new in the study of policy diffusion?
+    openalex_id: W2085835083
+    kind: method
+- id: F07
+  function: gap-verification
+  framework: EU novel food regulation and firm investment decisions (empirical)
+  rationale: Varacca et al. (2024) directly measure how EU novel food regulations
+    affected corporate investment behavior using 326 applications under the 1997 and
+    2018 regulations and real-option theory, finding that regulatory centralization
+    did not shorten authorization timelines and that success rates were higher for
+    non-EU private applicants with prior experience — making this the closest published
+    empirical rival because it uses the same novel-food regulatory context, firm-investment
+    outcome, and real-options theoretical grounding as the proposed study.
+  role: motivation
+  caveat: Varacca et al. focus on EU authorization success rates and timeline outcomes
+    rather than on investment quantity, firm entry rates, or cross-jurisdictional
+    comparative causal effects; the analytic scope is on approval-process mechanics
+    for applicants who already engaged the system, not on how upstream investment
+    decisions and firm entry respond to regulatory regime changes, leaving the proposed
+    research question substantially open despite this close overlap in institutional
+    setting.
+  decision: proposed
+  anchors:
+  - author: Varacca et al.
+    year: 2024
+    title: The effect of the EU's novel food regulations on firm investment decisions
+    openalex_id: W4405821041
+    kind: empirical
+- id: F08
+  function: background-institutional
+  framework: GE crop regulatory approval timing and opportunity costs (empirical)
+  rationale: Smart, Blum, and Wesseler (2016) empirically document that genetically
+    engineered crop approval timelines diverged substantially between the US and EU
+    from 1988 to 2015, with EU timelines nearly doubling, creating measurable opportunity
+    costs; this study is the closest method-and-topic analog to the proposed research
+    because both contexts involve novel agricultural biotechnologies, food-safety
+    regulatory agencies, cross-jurisdiction regulatory divergence, and investment
+    consequences for commercialization.
+  role: motivation
+  caveat: 'GE crop approvals affect established agribusiness firms making farm-level
+    adoption decisions with long-established market structures, whereas cultivated
+    meat regulation targets pre-commercial startups making early-stage venture investment
+    decisions in an industry that barely existed before 2015; the economic magnitudes,
+    firm types, market structures, and nature of regulatory risk differ enough that
+    GE-crop findings likely do not transfer to the cultivated-meat setting without
+    direct replication and extension. [Reclassified gap->background by human gate:
+    GE-crop approval is an analogy, not a closest rival.]'
+  decision: proposed
+  anchors:
+  - author: Smart, Blum, and Wesseler
+    year: 2016
+    title: Trends in Approval Times for Genetically Engineered Crops in the United
+      States and the European Union
+    openalex_id: W2417498326
+    kind: empirical
+- id: F09
+  function: background-institutional
+  framework: Regulatory and economic context of agricultural biotechnology
+  rationale: The agricultural biotechnology sector provides the closest institutional
+    template for how government regulatory decisions shape the commercialization trajectory
+    of novel food technologies; Barrows, Sexton, and Zilberman (2014) synthesize evidence
+    on how biotech crop regulation, IP rights, and market concentration shaped innovation
+    incentives across jurisdictions, providing background context for situating cultivated
+    meat within the broader pattern of novel-protein agricultural-technology regulation
+    and for anticipating which regulatory features are most consequential for firm
+    behavior.
+  role: motivation
+  caveat: Agricultural biotechnology involves established agrochemical multinationals
+    and input markets with decades of institutional history, which differ substantially
+    from the startup-dominated cultivated-meat sector in firm scale, market structure,
+    and political economy; institutional analogies drawn from GE crop regulation to
+    cultivated meat must account for these structural differences to avoid overstating
+    the predictive value of prior regulatory economics findings for this nascent industry.
+  decision: proposed
+  anchors:
+  - author: Barrows, Sexton, and Zilberman
+    year: 2014
+    title: 'Agricultural Biotechnology: The Promise and Prospects of Genetically Modified
+      Crops'
+    openalex_id: W2141902865
+    kind: review

@@ -45,9 +45,12 @@ goal: >
     is related) and a `caveat` (the threat/limit it raises). A framework can be a
     threat to identification (e.g. policy diffusion -> endogenous treatment timing,
     Manski reflection problem), not only a method to borrow.
-  - gap-verification MUST name >= 2 EMPIRICAL closest rivals (anchor kind=empirical):
-    the papers most likely to make THIS study redundant. A review or perspective is
-    NOT a closest rival; do not use one to fill the gap bucket.
+  - gap-verification MUST name >= 1 EMPIRICAL closest rival (anchor kind=empirical):
+    the paper(s) most likely to make THIS study redundant. A review or perspective is
+    NOT a closest rival; do not use one to fill the gap bucket. Do NOT pad the gap
+    bucket with analogies to hit a count -- if the genuine closest-rival set is one
+    paper, name one. Analogies from adjacent regulated industries belong in
+    background-institutional, not gap-verification.
 
 inputs:
   - discovery/idea_memo.md

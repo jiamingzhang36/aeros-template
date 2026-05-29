@@ -37,8 +37,11 @@ ROLES = {
     "measurement-strategy", "robustness-comparison",
 }
 # A gap anchor must be empirical (a closest rival), not a review/perspective/theory.
+# Floor is >=1, not >=2: when the literature is genuinely thin (a wide gap), the
+# honest closest-rival set may be a single paper. Requiring 2 only pressures the
+# agent to pad the gap bucket with analogies that are not genuine closest rivals.
 NON_EMPIRICAL_KINDS = {"review", "perspective", "survey", "theory", "editorial", "commentary"}
-GAP_MIN_EMPIRICAL_ANCHORS = 2
+GAP_MIN_EMPIRICAL_ANCHORS = 1
 PLACEHOLDERS = {"", "tbd", "todo", "to be determined", "n/a", "na", "none"}
 
 REMEDIATION_HINT = (
@@ -47,8 +50,8 @@ REMEDIATION_HINT = (
     "measurement-strategy|robustness-comparison), and caveat; plus >=1 anchor with "
     "a real doi or openalex_id (verify via OpenAlex; do not fabricate). The deck "
     "must cover gap-verification, method-identification, and theory-mechanism. "
-    "gap-verification must name >=2 EMPIRICAL closest rivals (anchor kind=empirical, "
-    "not review/perspective/theory)."
+    "gap-verification must name >=1 EMPIRICAL closest rival (anchor kind=empirical, "
+    "not review/perspective/theory); do not pad with analogies."
 )
 
 
