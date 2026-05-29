@@ -112,24 +112,33 @@ def run_agent(prompt: str, project_root: Path, timeout: int = 1800) -> AgentResu
     except subprocess.TimeoutExpired:
         return AgentResult(False, "", f"agent timed out after {timeout}s")
 
-    if proc.returncode != 0:
-        return AgentResult(False, "", (proc.stderr or proc.stdout or "").strip())
-
-    # --output-format json emits a single result object with usage + cost.
+    # The CLI emits a result JSON even when it errors (is_error:true), and that
+    # JSON still carries total_cost_usd. Parse it FIRST so a failed-but-billed
+    # call (e.g. quota exhaustion, mid-run abort) is still accounted for -- a $0
+    # cost on a failed call is exactly the "burned overnight" blind spot.
     try:
         data = json.loads((proc.stdout or "").strip())
     except (json.JSONDecodeError, ValueError):
-        # Fell back to non-JSON (older CLI); still return the raw text.
+        data = None
+
+    if data is None:
+        # Non-JSON output (older CLI or hard crash): fall back to returncode.
+        if proc.returncode != 0:
+            return AgentResult(False, "", (proc.stderr or proc.stdout or "").strip())
         return AgentResult(True, (proc.stdout or "").strip(), "")
 
     usage = data.get("usage", {}) or {}
+    cost = float(data.get("total_cost_usd", 0.0) or 0.0)
+    in_tok = int(usage.get("input_tokens", 0) or 0)
+    out_tok = int(usage.get("output_tokens", 0) or 0)
+    failed = bool(data.get("is_error")) or proc.returncode != 0
     return AgentResult(
-        ok=True,
-        output=str(data.get("result", "")),
-        error="",
-        cost_usd=float(data.get("total_cost_usd", 0.0) or 0.0),
-        input_tokens=int(usage.get("input_tokens", 0) or 0),
-        output_tokens=int(usage.get("output_tokens", 0) or 0),
+        ok=not failed,
+        output="" if failed else str(data.get("result", "")),
+        error=str(data.get("result", "")).strip() if failed else "",
+        cost_usd=cost,
+        input_tokens=in_tok,
+        output_tokens=out_tok,
         num_turns=int(data.get("num_turns", 0) or 0),
         duration_ms=int(data.get("duration_ms", 0) or 0),
     )
