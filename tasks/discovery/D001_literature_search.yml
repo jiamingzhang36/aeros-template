@@ -13,6 +13,7 @@ inputs:
 allowed_outputs:
   - discovery/literature/paper_registry.csv
   - discovery/literature/search_log.csv
+  - discovery/literature/citation_audit.md
 
 forbidden_actions:
   - "Do not write anywhere under data/raw/ (enforced by a hook; it will be blocked)."
@@ -20,6 +21,23 @@ forbidden_actions:
   - "Do not set status beyond 'discovered' or 'title_abstract_screened'."
   - "Do not set extraction_card=yes, used_in_synthesis=yes, or full_text_available=yes."
   - "Do not invent citations. Every registered row must carry a real, resolvable DOI or URL."
+  - "Do not edit discovery/literature/synthesis/function_matrix.csv (function classification is a later task)."
+
+# Every paper whose screening_decision is 'maybe' or 'include', or whose status is
+# full_text_obtained or beyond, MUST also get a row in citation_audit.md keyed by its
+# paper_id (Pxxx). Keep the existing table header and Risk Labels / Rules sections.
+citation_audit:
+  path: discovery/literature/citation_audit.md
+  table_columns:
+    - Paper ID            # Pxxx, must match the registry
+    - Citation exists     # yes | unknown
+    - DOI status          # resolves | no-doi | unknown
+    - Stable source locator  # yes | no
+    - Full text obtained  # no (at discovery)
+    - Extraction card exists # no (at discovery)
+    - Used in synthesis   # no (at discovery)
+    - Risk                # discovered-only | abstract-only | citation-unverified | low
+    - Notes
 
 # The agent MUST produce paper_registry.csv with EXACTLY these columns, in order.
 # This list is the single source of truth shared with check_literature_registry.py.
@@ -50,6 +68,8 @@ output_contract:
 
 checks:
   - check_literature_registry.py
+  - check_citation_audit.py
+  - check_literature_functions.py
 
 retry_policy:
   max_retries: 2

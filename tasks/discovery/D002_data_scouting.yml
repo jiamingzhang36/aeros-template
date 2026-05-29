@@ -1,0 +1,61 @@
+task_id: D002_data_scouting
+stage: discovery
+goal: >
+  Scout candidate data sources that could support the project's research
+  question and register each as one row in discovery/data_inventory.csv. This
+  is a DISCOVERY task: locate sources and record their access path, engineering
+  status, and the next probe needed. Do not download data, do not claim a
+  source is feasible, and do not write any data files.
+
+inputs:
+  - discovery/01_literature_scope.md
+  - discovery/idea_memo.md
+  - project_manifest.yml
+
+allowed_outputs:
+  - discovery/data_inventory.csv
+
+forbidden_actions:
+  - "Do not write anywhere under data/raw/ (enforced by a hook; it will be blocked)."
+  - "Do not download or store any dataset; record locators and access paths only."
+  - "Do not set feasibility_status to 'pursue' for any source at scouting stage; use 'TBD'."
+  - "Do not claim a source is accessible without recording access_evidence; otherwise record a next_probe."
+  - "Data-source existence is not data feasibility. State the next probe, do not collapse it into a verdict."
+
+# Each candidate source is one row. Vocabulary is enforced by check_data_inventory.py.
+output_contract:
+  inventory_path: discovery/data_inventory.csv
+  required_columns:
+    - data_id              # D001, D002, ... unique
+    - dataset_name
+    - owner_or_source
+    - access_status        # located | public | restricted | paid | requested | granted | unavailable | unknown
+    - unit                 # unit of observation (firm, state-year, product, ...)
+    - intake_ref
+    - intake_priority
+    - geography
+    - period
+    - key_variables
+    - link_or_path         # resolvable URL or access path
+    - restrictions
+    - access_evidence      # what was actually checked, or blank if only a next_probe exists
+    - engineering_status   # not_started | located | access_verified | schema_inspected | variables_verified | linkage_tested | coverage_diagnosed | execution_ready
+    - skills_considered
+    - skills_used
+    - skill_probe_status   # not_started | attempted | blocked | done
+    - next_probe           # the concrete next step to verify this source
+    - feasibility_status   # TBD at scouting stage
+    - notes
+
+checks:
+  - check_data_inventory.py
+
+retry_policy:
+  max_retries: 2
+
+escalate_if:
+  - "fewer than 3 candidate data sources registered"
+  - "checks still fail after max_retries"
+
+budget:
+  max_agent_calls: 3

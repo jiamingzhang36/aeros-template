@@ -9,6 +9,7 @@ from . import state as state_mod
 from .agent import build_prompt, run_agent
 from .checks import format_feedback, run_checks
 from .contract import Contract, load_contract
+from .report import AttemptRecord, RunRecord, write_run_report
 
 
 def find_project_root(start: Path) -> Path:
@@ -61,6 +62,17 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
                    else contract.max_retries)
     inputs_text = _read_inputs(project_root, contract)
     feedback: str | None = None
+    attempts_log: list[AttemptRecord] = []
+
+    def _finish(status: str) -> None:
+        """Persist the run report on both pass and escalate."""
+        run = RunRecord(
+            contract=contract, final_status=status, attempts=attempts_log,
+            agent_calls_used=state_mod.task_entry(state, contract.task_id).get(
+                "agent_calls_used", 0),
+        )
+        report_path = write_run_report(project_root, run)
+        print(f"[kernel] run report -> {report_path.relative_to(project_root)}")
 
     for attempt in range(max_retries + 1):
         remaining = state_mod.budget_remaining(state, contract.task_id, contract.max_agent_calls)
@@ -90,24 +102,36 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
         result = run_agent(prompt, project_root)
         if not result.ok:
             print(f"[kernel] agent error: {result.error}")
+            attempts_log.append(AttemptRecord(
+                attempt=attempt + 1, agent_ok=False, agent_error=result.error,
+                checks=[], feedback="",
+            ))
             feedback = f"Agent invocation failed: {result.error}"
             continue
 
         passed, results = run_checks(project_root, contract.checks)
         for r in results:
-            status = "PASS" if r.passed else "FAIL"
-            print(f"[kernel]   check {r.name}: {status}")
+            print(f"[kernel]   check {r.name}: {'PASS' if r.passed else 'FAIL'}")
+
+        attempt_feedback = "" if passed else format_feedback(results)
+        attempts_log.append(AttemptRecord(
+            attempt=attempt + 1, agent_ok=True, agent_error="",
+            checks=[(r.name, r.passed, r.failures) for r in results],
+            feedback=attempt_feedback,
+        ))
 
         if passed:
             state_mod.set_status(state, contract.task_id, "passed")
             state_mod.save_state(project_root, state)
             print(f"[kernel] task {contract.task_id} PASSED.")
+            _finish("passed")
             return 0
 
-        feedback = format_feedback(results)
+        feedback = attempt_feedback
 
     path = _escalate(project_root, contract, feedback or "")
     state_mod.set_status(state, contract.task_id, "escalated")
     state_mod.save_state(project_root, state)
     print(f"[kernel] task {contract.task_id} ESCALATED -> {path}")
+    _finish("escalated")
     return 2
