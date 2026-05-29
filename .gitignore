@@ -6,6 +6,9 @@ venv/
 .env
 .env.*
 
+# AEROS runtime: per-run state, regenerated on each run.
+aeros_state.yml
+
 # Large or sensitive data should not be committed by default.
 data/raw/*
 !data/raw/.gitkeep

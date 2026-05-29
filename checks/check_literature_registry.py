@@ -3,9 +3,18 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
+import json
 import sys
 from pathlib import Path
+
+CHECK_NAME = "check_literature_registry"
+REMEDIATION_HINT = (
+    "Fix paper_registry.csv: keep the exact column order, use only allowed "
+    "vocabulary values, give every evidence-eligible row a DOI/URL/PDF locator, "
+    "and do not set extraction_card/full_text_available=yes at discovery stage."
+)
 
 
 REGISTRY = Path("discovery/literature/paper_registry.csv")
@@ -67,10 +76,33 @@ def has_source_locator(row: dict[str, str]) -> bool:
     )
 
 
-def main() -> int:
+def _emit(as_json: bool, status: str, failures: list[str], rows_checked: int) -> int:
+    """Print result in human or JSON form; return process exit code."""
+    if as_json:
+        print(json.dumps({
+            "check": CHECK_NAME,
+            "status": status,                       # "pass" | "fail"
+            "rows_checked": rows_checked,
+            "failures": failures,                   # each: "<id>: <problem>"
+            "hint": REMEDIATION_HINT if status == "fail" else "",
+        }, ensure_ascii=False))
+    else:
+        if status == "pass":
+            print(f"PASS: literature registry is valid ({rows_checked} row(s) checked)")
+        else:
+            print("FAIL: literature registry problems detected:")
+            print("\n".join(failures))
+    return 0 if status == "pass" else 1
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description="Validate the literature registry.")
+    parser.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    args = parser.parse_args(argv)
+    as_json = args.json
+
     if not REGISTRY.exists():
-        print(f"FAIL: missing {REGISTRY}")
-        return 1
+        return _emit(as_json, "fail", [f"missing {REGISTRY}"], 0)
 
     failures: list[str] = []
     with REGISTRY.open(newline="", encoding="utf-8") as handle:
@@ -78,9 +110,10 @@ def main() -> int:
         columns = set(reader.fieldnames or [])
         missing = [column for column in REQUIRED_COLUMNS if column not in columns]
         if missing:
-            print("FAIL: literature registry missing required columns:")
-            print("\n".join(missing))
-            return 1
+            return _emit(
+                as_json, "fail",
+                [f"missing required column: {column}" for column in missing], 0,
+            )
 
         rows = list(reader)
 
@@ -144,13 +177,8 @@ def main() -> int:
         if has_card and evidence_basis != "extraction_card":
             failures.append(f"{paper_id}: extraction_card=yes requires evidence_basis=extraction_card")
 
-    if failures:
-        print("FAIL: literature registry problems detected:")
-        print("\n".join(failures))
-        return 1
-
-    print(f"PASS: literature registry is valid ({len(rows)} row(s) checked)")
-    return 0
+    status = "fail" if failures else "pass"
+    return _emit(as_json, status, failures, len(rows))
 
 
 if __name__ == "__main__":
