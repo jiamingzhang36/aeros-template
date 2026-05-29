@@ -27,6 +27,26 @@ Use this file to verify that cited papers exist and that synthesis claims are gr
 | P021 | yes | web-confirmed | https://www.liebertpub.com/doi/10.1089/ind.2023.29303.mod | no | no | no | abstract-only | DOI 10.1089/ind.2023.29303.mod confirmed via Liebert; Industrial Biotechnology 19(2) 2023 |
 | P022 | yes | web-confirmed | https://link.springer.com/chapter/10.1007/978-3-319-77045-1_14 | no | no | no | abstract-only | DOI 10.1007/978-3-319-77045-1_14 confirmed via Springer; book chapter in Regulating Food Safety EU |
 | P023 | yes | no DOI | https://gfi.org/resource/alternative-proteins-state-of-global-policy/ | no | no | no | discovered-only | No DOI; stable PDF on gfi.org confirmed; 2023 global policy landscape report |
+| P024 | yes | openalex-confirmed | https://doi.org/10.2307/3003160 | no | no | no | abstract-only | OpenAlex W4293229472; deck anchor F01; Bell J Econ Mgmt Sci 2(1):3-21 |
+| P025 | yes | openalex-confirmed | https://doi.org/10.2307/258788 | no | no | no | abstract-only | OpenAlex W4238779927; deck anchor F02; AMR 20(3):571-610 |
+| P026 | yes | openalex-confirmed | https://doi.org/10.1515/9781400830176 | no | no | no | abstract-only | OpenAlex W4365787967; deck anchor F03; Princeton University Press book |
+| P027 | yes | openalex-confirmed | https://doi.org/10.1016/j.jeconom.2020.12.001 | no | no | no | abstract-only | OpenAlex W3113269512; deck anchor F04; J Econometrics 225(2):200-230 |
+| P028 | yes | openalex-confirmed | https://doi.org/10.1257/000282803321455188 | no | no | no | abstract-only | OpenAlex W2171656257; deck anchor F05; AER 93(1):113-132 |
+| P029 | yes | openalex-confirmed | https://doi.org/10.1080/09692290802409236 | no | no | no | abstract-only | OpenAlex W2085835083; deck anchor F06; Rev Int Pol Econ 16(3):527-543 |
+| P030 | yes | openalex-confirmed | https://doi.org/10.1111/1477-9552.12171 | no | no | no | abstract-only | OpenAlex W2417498326; deck anchor F08; J Agr Econ 68(1):182-198 |
+| P031 | yes | openalex-confirmed | https://doi.org/10.1257/jep.28.1.99 | no | no | no | abstract-only | OpenAlex W2141902865; deck anchor F09; JEP 28(1):99-122 |
+| P032 | yes | openalex-confirmed | https://doi.org/10.1017/cbo9781139565875 | no | no | no | abstract-only | OpenAlex W1579437294; bridge F01; Cambridge UP edited volume |
+| P033 | yes | doi-confirmed | https://doi.org/10.1086/467410 | no | no | no | discovered-only | Not in OpenAlex; JSTOR DOI confirmed; J Law Econ 19(2):211-240 |
+| P034 | yes | openalex-confirmed | https://www.nber.org/papers/w3307 | no | no | no | discovered-only | NBER WP OpenAlex W1842741107; JEL published version not separately indexed; bridge F03 |
+| P035 | yes | openalex-confirmed | https://doi.org/10.1016/j.jeconom.2021.03.014 | no | no | no | abstract-only | OpenAlex W2791859701; bridge F04; J Econometrics 225(2):254-277 |
+| P036 | yes | openalex-confirmed | https://doi.org/10.1093/restud/rdae007 | no | no | no | abstract-only | OpenAlex W3196836501; bridge F04; Rev Econ Stud 91(6):3253-3285 |
+| P037 | yes | doi-confirmed | https://doi.org/10.1198/jasa.2010.ap08746 | no | no | no | discovered-only | Not indexed in OpenAlex; DOI confirmed from literature; JASA 105(490):493-505; bridge F05 |
+| P038 | yes | openalex-confirmed | https://doi.org/10.1146/annurev-resource-100518-094140 | no | no | no | abstract-only | OpenAlex W2953223532; bridge F03; Annu Rev Resour Econ 11:85-110 |
+| P039 | yes | openalex-confirmed | https://doi.org/10.1371/journal.pone.0181353 | no | no | no | abstract-only | OpenAlex W2739671091; bridge F08; PLOS ONE 12(7):e0181353 |
+| P040 | yes | openalex-confirmed | https://doi.org/10.1038/s43016-020-0112-z | no | no | no | abstract-only | OpenAlex W3042426761; topic-substantive background-institutional; Nature Food 1:403-415 |
+| P041 | yes | openalex-confirmed | https://doi.org/10.1016/j.tibtech.2019.02.004 | no | no | no | abstract-only | OpenAlex W2925359939; bridge F08; Trends Biotechnol 37(7):665-667 |
+| P042 | yes | doi-confirmed | https://doi.org/10.1111/j.1540-5907.2008.00332.x | no | no | no | discovered-only | Not in OpenAlex; DOI confirmed; AJPS 52(4):840-869; bridge F06 |
+| P043 | yes | doi-confirmed | https://doi.org/10.2307/2095101 | no | no | no | discovered-only | Not in OpenAlex; JSTOR DOI confirmed; ASR 48(2):147-160; bridge F02 |
 
 ## Risk Labels
 
