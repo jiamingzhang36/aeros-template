@@ -64,28 +64,42 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
     feedback: str | None = None
     attempts_log: list[AttemptRecord] = []
 
+    # Per-run budget counters (enforced locally so a re-run is never blocked by
+    # a previous run's spend). State keeps cumulative totals for the audit trail.
+    run_calls = 0
+    run_cost = 0.0
+    run_in = 0
+    run_out = 0
+
     def _finish(status: str) -> None:
-        """Persist the run report on both pass and escalate."""
+        """Persist the run report and per-run summary on both pass and escalate."""
+        state_mod.record_run_summary(state, contract.task_id,
+                                     calls=run_calls, cost_usd=run_cost)
+        state_mod.save_state(project_root, state)
         run = RunRecord(
             contract=contract, final_status=status, attempts=attempts_log,
-            agent_calls_used=state_mod.task_entry(state, contract.task_id).get(
-                "agent_calls_used", 0),
+            run_calls=run_calls, run_cost_usd=run_cost,
+            run_input_tokens=run_in, run_output_tokens=run_out,
         )
         report_path = write_run_report(project_root, run)
-        print(f"[kernel] run report -> {report_path.relative_to(project_root)}")
+        print(f"[kernel] run report -> {report_path.relative_to(project_root)} "
+              f"(cost ${run_cost:.4f}, {run_calls} call(s))")
 
     for attempt in range(max_retries + 1):
-        remaining = state_mod.budget_remaining(state, contract.task_id, contract.max_agent_calls)
-        if remaining <= 0:
-            print(f"[kernel] budget exhausted ({contract.max_agent_calls} agent calls). Escalating.")
+        if run_calls >= contract.max_agent_calls:
+            print(f"[kernel] call budget exhausted ({contract.max_agent_calls} calls). Escalating.")
+            break
+        if run_cost >= contract.max_dollars:
+            print(f"[kernel] cost budget exhausted (${run_cost:.4f} >= "
+                  f"${contract.max_dollars:.2f}). Escalating.")
             break
 
-        prompt = build_prompt(contract, inputs_text, feedback)
+        prompt = build_prompt(contract, inputs_text, feedback, project_root)
 
         if dry_run:
             print("=" * 70)
             print(f"[DRY RUN] task={contract.task_id} attempt={attempt + 1} "
-                  f"budget_remaining={remaining}")
+                  f"budget: {contract.max_agent_calls} calls / ${contract.max_dollars:.2f}")
             print("=" * 70)
             print(prompt)
             print("=" * 70)
@@ -95,11 +109,21 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
             state_mod.save_state(project_root, state)
             return 0
 
-        print(f"[kernel] attempt {attempt + 1}/{max_retries + 1}: invoking agent...")
-        state_mod.record_agent_call(state, contract.task_id)
-        state_mod.save_state(project_root, state)  # persist BEFORE the call (crash-safe)
+        print(f"[kernel] attempt {attempt + 1}/{max_retries + 1}: invoking agent "
+              f"(spent ${run_cost:.4f}/{contract.max_dollars:.2f})...")
 
         result = run_agent(prompt, project_root)
+        # Account for spend regardless of outcome (a failed call can still cost).
+        run_calls += 1
+        run_cost += result.cost_usd
+        run_in += result.input_tokens
+        run_out += result.output_tokens
+        state_mod.record_agent_call(state, contract.task_id, result.cost_usd)
+        state_mod.save_state(project_root, state)  # crash-safe: persist spend immediately
+        if result.cost_usd:
+            print(f"[kernel]   call cost ${result.cost_usd:.4f} "
+                  f"({result.input_tokens} in / {result.output_tokens} out)")
+
         if not result.ok:
             print(f"[kernel] agent error: {result.error}")
             attempts_log.append(AttemptRecord(
@@ -122,7 +146,6 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
 
         if passed:
             state_mod.set_status(state, contract.task_id, "passed")
-            state_mod.save_state(project_root, state)
             print(f"[kernel] task {contract.task_id} PASSED.")
             _finish("passed")
             return 0
@@ -131,7 +154,6 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
 
     path = _escalate(project_root, contract, feedback or "")
     state_mod.set_status(state, contract.task_id, "escalated")
-    state_mod.save_state(project_root, state)
     print(f"[kernel] task {contract.task_id} ESCALATED -> {path}")
     _finish("escalated")
     return 2

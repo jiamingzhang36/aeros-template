@@ -29,7 +29,10 @@ class RunRecord:
     contract: Contract
     final_status: str            # "passed" | "escalated"
     attempts: list[AttemptRecord] = field(default_factory=list)
-    agent_calls_used: int = 0
+    run_calls: int = 0           # agent calls in THIS run (not cumulative)
+    run_cost_usd: float = 0.0
+    run_input_tokens: int = 0
+    run_output_tokens: int = 0
 
 
 def _checks_table(run: RunRecord) -> str:
@@ -100,7 +103,9 @@ def write_run_report(project_root: Path, run: RunRecord) -> Path:
 - Critic required: no
 - Human gate required: {"yes" if run.final_status == "escalated" else "no"}
 - Attempts: {len(run.attempts)}
-- Agent calls used: {run.agent_calls_used}
+- Agent calls (this run): {run.run_calls}
+- Cost (this run): ${run.run_cost_usd:.4f}
+- Tokens (this run): {run.run_input_tokens} in / {run.run_output_tokens} out
 
 ## Objective
 

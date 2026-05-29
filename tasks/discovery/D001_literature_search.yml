@@ -80,3 +80,4 @@ escalate_if:
 
 budget:
   max_agent_calls: 3
+  max_dollars: 2.0

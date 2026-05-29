@@ -53,8 +53,10 @@ def _cmd_status(args: argparse.Namespace) -> int:
     print("tasks:")
     for task_id, entry in tasks.items():
         print(f"  - {task_id:32s} status={entry.get('status','?'):10s} "
-              f"attempts={entry.get('attempts',0)} "
-              f"calls_used={entry.get('agent_calls_used',0)}")
+              f"last_run={entry.get('last_run_calls',0)} call(s)/"
+              f"${entry.get('last_run_cost_usd',0.0):.4f}  "
+              f"cumulative={entry.get('agent_calls_total',0)} call(s)/"
+              f"${entry.get('cost_usd_total',0.0):.4f}")
     return 0
 
 
