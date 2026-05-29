@@ -48,6 +48,7 @@ forbidden_actions:
   - "Do not set extraction_card=yes, used_in_synthesis=yes, or full_text_available=yes."
   - "Do not invent citations. Every row needs a real, OpenAlex- or DOI-resolvable locator."
   - "Every non-dropped deck anchor MUST appear as a registry row (it is the recall floor)."
+  - "evidence_basis must be one of: none | title | abstract | full_text | extraction_card. For deck anchors verified via OpenAlex metadata use 'title'; record 'anchor from framing_deck' provenance in the notes column, NOT in evidence_basis."
 
 output_contract:
   registry_path: discovery/literature/paper_registry.csv

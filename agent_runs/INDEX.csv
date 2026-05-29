@@ -1,7 +1,9 @@
 run_file,run_id,task_id,task_name,agent,date,mode,work_mode,completion_status,branch_commit,start_commit,end_commit,updated_at,requires_critic,requires_human_gate
-agent_runs/D001_literature_search_20260529_041722.md,D001_literature_search-20260529T041722Z,D001_literature_search,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,passed,,,,2026-05-29T08:34:16.264937+00:00,no,no
-agent_runs/D001a_framing_20260529_052054.md,D001a_framing-20260529T052054Z,D001a_framing,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,passed,,,,2026-05-29T08:34:16.264937+00:00,no,no
-agent_runs/D001a_framing_20260529_055549.md,D001a_framing-20260529T055549Z,D001a_framing,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,escalated,,,,2026-05-29T08:34:16.264937+00:00,no,yes
-agent_runs/D002_data_scouting_20260529_042447.md,D002_data_scouting-20260529T042447Z,D002_data_scouting,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,passed,,,,2026-05-29T08:34:16.264937+00:00,no,no
-agent_runs/D002_data_scouting_20260529_044207.md,D002_data_scouting-20260529T044207Z,D002_data_scouting,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,passed,,,,2026-05-29T08:34:16.264937+00:00,no,no
-agent_runs/EXAMPLE_agent_run_report_filled.md,EXAMPLE-001,D001,D001_literature_search.md,template_author,2026-05-28,discovery,,,,,,2026-05-29T08:34:16.264937+00:00,,
+agent_runs/D001_literature_search_20260529_041722.md,D001_literature_search-20260529T041722Z,D001_literature_search,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,passed,,,,2026-05-29T15:30:18.156131+00:00,no,no
+agent_runs/D001a_framing_20260529_052054.md,D001a_framing-20260529T052054Z,D001a_framing,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,passed,,,,2026-05-29T15:30:18.156131+00:00,no,no
+agent_runs/D001a_framing_20260529_055549.md,D001a_framing-20260529T055549Z,D001a_framing,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,escalated,,,,2026-05-29T15:30:18.156131+00:00,no,yes
+agent_runs/D001a_framing_20260529_085326.md,D001a_framing-20260529T085326Z,D001a_framing,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,passed,,,,2026-05-29T15:30:18.156131+00:00,no,no
+agent_runs/D001b_framework_search_20260529_152656.md,D001b_framework_search-20260529T152656Z,D001b_framework_search,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,escalated,,,,2026-05-29T15:30:18.156131+00:00,no,yes
+agent_runs/D002_data_scouting_20260529_042447.md,D002_data_scouting-20260529T042447Z,D002_data_scouting,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,passed,,,,2026-05-29T15:30:18.156131+00:00,no,no
+agent_runs/D002_data_scouting_20260529_044207.md,D002_data_scouting-20260529T044207Z,D002_data_scouting,,aeros-runtime (claude -p),2026-05-29,discovery,runtime,passed,,,,2026-05-29T15:30:18.156131+00:00,no,no
+agent_runs/EXAMPLE_agent_run_report_filled.md,EXAMPLE-001,D001,D001_literature_search.md,template_author,2026-05-28,discovery,,,,,,2026-05-29T15:30:18.156131+00:00,,
