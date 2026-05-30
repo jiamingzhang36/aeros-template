@@ -25,6 +25,7 @@ CHECKS = [
     "check_data_contract.py",
     "check_protected_definitions.py",
     "check_claim_registry.py",
+    "check_claim_ceiling.py",
     "check_claim_method_consistency.py",
     "check_paper_numbers.py",
     "check_output_reproducibility.py",
