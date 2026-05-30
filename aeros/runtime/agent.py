@@ -99,7 +99,7 @@ def build_prompt(contract: Contract, inputs_text: str, feedback: str | None,
     return "\n".join(parts)
 
 
-def run_agent(prompt: str, project_root: Path, timeout: int = 1800,
+def run_agent(prompt: str, project_root: Path, timeout: int = 480,
               max_budget_usd: float | None = None) -> AgentResult:
     binary = shutil.which("claude")
     if not binary:
