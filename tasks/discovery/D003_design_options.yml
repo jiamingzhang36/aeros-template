@@ -1,5 +1,6 @@
 task_id: D003_design_options
 stage: discovery
+gate: G3
 goal: >
   Produce a DECK of ranked candidate research designs in discovery/design_options.md,
   NOT a single committed design. Empirical design is data-contingent: hold several

@@ -14,7 +14,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from .runtime.adjudicate import adjudicate, write_selection
+from .runtime.adjudicate import adjudicate, feasibility, write_selection
 from .runtime.checks import run_checks
 from .runtime.contract import load_contract
 from .runtime.kernel import find_project_root, run_task
@@ -80,6 +80,19 @@ def _cmd_adjudicate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_feasibility(args: argparse.Namespace) -> int:
+    root = _project_root()
+    f = feasibility(root)
+    print("G1-G3 feasibility (data ready AND variables buildable AND a viable design survives):")
+    for g in ("G1", "G2", "G3"):
+        ok, reason = f[g]
+        print(f"  {'PASS' if ok else 'FAIL'}  {g}  {reason}")
+    verdict = "FEASIBLE" if f["feasible"] else "NOT FEASIBLE (as designed)"
+    print(f"verdict: {verdict}  | earned claim ceiling: {f['earned_claim'] or 'none'}"
+          f"{' (PROVISIONAL — stub data)' if f['diag_status'] != 'measured' else ''}")
+    return 0 if f["feasible"] else 1
+
+
 def _cmd_list_tasks(args: argparse.Namespace) -> int:
     root = _project_root()
     tasks_dir = root / "tasks"
@@ -121,6 +134,9 @@ def main(argv: list[str] | None = None) -> int:
 
     adj = sub.add_parser("adjudicate", help="adjudicate design options against data diagnostics (earn the claim)")
     adj.set_defaults(func=_cmd_adjudicate)
+
+    feas = sub.add_parser("feasibility", help="G1-G3 feasibility verdict (data + variables + viable design)")
+    feas.set_defaults(func=_cmd_feasibility)
 
     args = parser.parse_args(argv)
     return args.func(args)

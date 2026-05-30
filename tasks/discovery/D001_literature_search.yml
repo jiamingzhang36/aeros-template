@@ -1,5 +1,6 @@
 task_id: D001_literature_search
 stage: discovery
+gate: G0
 goal: >
   Find real academic literature relevant to the project idea and register each
   paper as one row in discovery/literature/paper_registry.csv. This is a

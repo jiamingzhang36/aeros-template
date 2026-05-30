@@ -1,5 +1,6 @@
 task_id: D001a_framing
 stage: discovery
+gate: G0
 goal: >
   REASONING step, not a search. Given the research idea, reason about which
   literature FRAMEWORKS this idea draws on, organized by function bucket, and

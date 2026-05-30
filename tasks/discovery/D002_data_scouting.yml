@@ -1,5 +1,6 @@
 task_id: D002_data_scouting
 stage: discovery
+gate: G1
 goal: >
   Scout candidate data sources that could support the project's research
   question and register each as one row in discovery/data_inventory.csv. This

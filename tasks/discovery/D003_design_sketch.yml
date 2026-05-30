@@ -1,5 +1,6 @@
 task_id: D003_design_sketch
 stage: discovery
+gate: G3
 goal: >
   Converge the framing deck, the data inventory, and the gap into ONE concrete
   candidate research design, written to discovery/design_sketch.md. This is a

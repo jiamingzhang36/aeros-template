@@ -15,6 +15,7 @@ REQUIRED_KEYS = ("task_id", "stage", "checks", "allowed_outputs")
 class Contract:
     task_id: str
     stage: str
+    gate: str
     goal: str
     inputs: list[str]
     allowed_outputs: list[str]
@@ -48,6 +49,7 @@ def load_contract(path: str | Path) -> Contract:
     return Contract(
         task_id=str(data["task_id"]),
         stage=str(data["stage"]),
+        gate=str(data.get("gate", "") or ""),
         goal=str(data.get("goal", "")).strip(),
         inputs=list(data.get("inputs", []) or []),
         allowed_outputs=list(data["allowed_outputs"]),
