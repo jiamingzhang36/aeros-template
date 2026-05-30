@@ -39,9 +39,9 @@ corrections:
     date: "2026-05-30"
     type: agent-lesson
     scope: [discovery, all]
-    symptom: "framing/design drifted to an aggressive causal staggered-DiD on firm investment when the real paper is descriptive and claim-careful"
-    root_cause: "thin input (one-line idea) + a default bias toward prestige causal designs, with no anchor to the actual claim posture, dependent variable, or unit"
-    lesson: "Do not default to causal/DiD. Match the project's stated claim_type, dependent variable, and unit; if these are not given, propose options across claim types (descriptive/measurement/causal) rather than committing to causal. Respect any explicit non-claims (e.g. 'does not estimate entry deterrence')."
+    symptom: "framing/design asserted an aggressive causal claim (causal staggered-DiD on firm investment) before any data could earn it"
+    root_cause: "treated claim strength as something to declare/default, biased toward prestige causal claims, instead of something earned by the surviving design + data"
+    lesson: "Claim strength is EARNED by the selected design and the data, never declared or defaulted. Default to the weakest claim the evidence can support (descriptive before associational before causal); ratchet a claim up only when a design's identifying assumptions AND the data credibly earn it; never claim beyond the evidence. You MAY propose ambitious designs (e.g. causal) as candidates to test against data, but the CLAIM follows what the data adjudicates, not the ambition. Carry each candidate's maximum-supportable claim, not a committed one."
     enforced_by: prompt-only
 
   - id: C004
