@@ -99,13 +99,20 @@ def build_prompt(contract: Contract, inputs_text: str, feedback: str | None,
     return "\n".join(parts)
 
 
-def run_agent(prompt: str, project_root: Path, timeout: int = 1800) -> AgentResult:
+def run_agent(prompt: str, project_root: Path, timeout: int = 1800,
+              max_budget_usd: float | None = None) -> AgentResult:
     binary = shutil.which("claude")
     if not binary:
         return AgentResult(False, "", "`claude` CLI not found on PATH.")
+    cmd = [binary, "-p", prompt, "--output-format", "json"]
+    if max_budget_usd is not None and max_budget_usd > 0:
+        # Hard per-call dollar cap (claude --max-budget-usd). This is what makes
+        # max_dollars an enforceable ceiling instead of a between-calls guardrail:
+        # a single runaway call can no longer overshoot the budget.
+        cmd += ["--max-budget-usd", f"{max_budget_usd:.2f}"]
     try:
         proc = subprocess.run(
-            [binary, "-p", prompt, "--output-format", "json"],
+            cmd,
             cwd=str(project_root), text=True, capture_output=True, timeout=timeout,
             env=_agent_env(),
         )

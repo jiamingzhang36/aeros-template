@@ -109,10 +109,13 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
             state_mod.save_state(project_root, state)
             return 0
 
+        # Hard-cap this call at the run's remaining budget so a single runaway
+        # call cannot overshoot max_dollars (claude --max-budget-usd).
+        call_cap = round(contract.max_dollars - run_cost, 2)
         print(f"[kernel] attempt {attempt + 1}/{max_retries + 1}: invoking agent "
-              f"(spent ${run_cost:.4f}/{contract.max_dollars:.2f})...")
+              f"(spent ${run_cost:.4f}/{contract.max_dollars:.2f}, call cap ${call_cap:.2f})...")
 
-        result = run_agent(prompt, project_root)
+        result = run_agent(prompt, project_root, max_budget_usd=call_cap)
         # Account for spend regardless of outcome (a failed call can still cost).
         run_calls += 1
         run_cost += result.cost_usd
