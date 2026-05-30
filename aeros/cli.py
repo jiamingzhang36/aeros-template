@@ -14,6 +14,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from .runtime.adjudicate import adjudicate, write_selection
 from .runtime.checks import run_checks
 from .runtime.contract import load_contract
 from .runtime.kernel import find_project_root, run_task
@@ -60,6 +61,25 @@ def _cmd_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_adjudicate(args: argparse.Namespace) -> int:
+    root = _project_root()
+    result = adjudicate(root)
+    path = write_selection(root, result)
+    sel = result["selected"]
+    print(f"diagnostics: {result['diag_status']}")
+    for e in sorted(result["evaluated"], key=lambda x: x["priority"]):
+        print(f"  {'✓' if e['viable'] else '✗'} P{e['priority']} {e['id']} "
+              f"({e['max_claim']}) — {e['reason']}")
+    print(f"selected: {sel['id'] if sel else 'none'}  | "
+          f"earned claim ceiling: {result['earned_claim'] or 'none'}")
+    if result["ratcheted_from"]:
+        print(f"ratcheted down from: {', '.join(result['ratcheted_from'])}")
+    if result["diag_status"] != "measured":
+        print("NOTE: diagnostics are STUB — no real claim earned until status: measured")
+    print(f"wrote {path.relative_to(root)}")
+    return 0
+
+
 def _cmd_list_tasks(args: argparse.Namespace) -> int:
     root = _project_root()
     tasks_dir = root / "tasks"
@@ -98,6 +118,9 @@ def main(argv: list[str] | None = None) -> int:
 
     lt = sub.add_parser("list-tasks", help="list .yml task contracts in the project")
     lt.set_defaults(func=_cmd_list_tasks)
+
+    adj = sub.add_parser("adjudicate", help="adjudicate design options against data diagnostics (earn the claim)")
+    adj.set_defaults(func=_cmd_adjudicate)
 
     args = parser.parse_args(argv)
     return args.func(args)

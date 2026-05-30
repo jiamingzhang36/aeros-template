@@ -1,0 +1,17 @@
+# Measured data diagnostics — the facts that adjudicate which design is viable.
+#
+# In a real project these values are produced by the data audit (G5) AFTER the
+# data is assembled. Here they are STUBBED to exercise the adjudication engine
+# in the test bed (status: stub). The stub encodes the geography reality that the
+# domain review surfaced: the banning states have ~no cultivated-meat firms, so a
+# within-state firm-investment causal DiD (O1) is not viable.
+
+status: stub        # stub | measured  (only 'measured' adjudication earns real claims)
+measured_on: ""
+
+diagnostics:
+  n_states_with_firm_presence: 4          # CA, NY, a few — concentrated
+  n_ban_states_with_firm_presence: 0      # banning states (AL/FL/TN/IA/ID) have ~no firms
+  n_states_with_ban_dates: 5
+  bill_text_extractable_states: 6         # LegiScan full text recoverable
+  donor_pool_size: 9                      # countries with pre-period investment series

@@ -1,42 +1,116 @@
 ---
 status: filled
 options:
-  - id: O1
-    name: "Staggered DiD on state ban timing"
-    project_type: causal
-    identification: "Staggered difference-in-differences exploiting within-state before-vs-after variation in ban enactment timing across US states (F04); Callaway–Sant'Anna 2021 group-time ATT estimator (P027) avoids negative-weighting from heterogeneous treatment effects; Goodman-Bacon 2021 decomposition (P035) as diagnostic; Borusyak-Jaravel-Spiess 2024 imputation estimator (P036) as robustness alternative"
-    viability_condition: ">=10 US states have non-zero cultivated-meat firm presence or recorded investment in any pre-ban year verified from D001 editions 2020-2024; >=5 states have confirmed ban passage dates in D007 (LegiScan); both conditions checkable once D001 and D007 are downloaded and merged"
-    threats_addressed: [F06]
-    priority: 1
-    is_fallback_floor: false
-    claim_boundary: "CAN claim: US state bans are associated with within-state declines in firm presence or investment relative to not-yet-treated and clean-control states, conditional on parallel pre-trends. CANNOT claim: national or global investment trends are caused by state bans; bans cause firm bankruptcy or exit; results generalise beyond cultivated meat or beyond 2020-2025; Singapore or EU regulatory actions are causally identified under this design."
-  - id: O2
-    name: "Bill-text cosine-similarity / model-legislation diffusion instrument"
-    project_type: mechanism
-    identification: "Text-reuse analysis of enacted state ban legislation (D007 LegiScan full-text) computing cosine similarity of each bill to the earliest enacted ban (Alabama SB23) or a known ALEC model template; high-similarity states classified as coordinated-diffusion adopters used as instrument or effect-modifier in 2SLS or subgroup DiD, directly addressing F06 endogenous-diffusion threat (P029 Meseguer-Gilardi; P042 Shipan-Volden)"
-    viability_condition: "D007 full-text is extractable for >=5 enacted ban states via LegiScan JSON or bulk export; Alabama SB23 text is recoverable as reference corpus; text preprocessing and cosine similarity computation feasible in Python; viability checkable once D007 is accessed and bill texts are retrieved"
-    threats_addressed: [F06]
-    priority: 2
-    is_fallback_floor: false
-    claim_boundary: "CAN claim: states adopting near-verbatim model-legislation text show a different investment response than states with independently drafted bans, consistent with a coordinated national campaign rather than local economic conditions driving ban adoption. CANNOT claim: text similarity is a fully clean instrument without additional evidence that ALEC membership is uncorrelated with investment confounders; cannot estimate an aggregate average treatment effect without the causal DiD scaffold from O1; cannot purge all endogeneity absent a formal exclusion-restriction argument."
-  - id: O3
-    name: "Synthetic control for national regulatory approval events"
-    project_type: causal
-    identification: "Synthetic control method (F05; Abadie-Gardeazabal 2003 P028; Abadie-Diamond-Hainmueller 2010 P037) using Singapore December 2020 first-ever cultivated-meat market approval and US FDA/USDA 2022-2023 pre-market consultation completions as treatment events; donor pool of non-approving countries constructed from GFI D001 and D002 annual investment series; placebo inference via leave-one-out and permutation tests"
-    viability_condition: ">=8 donor jurisdictions have non-zero cultivated-meat investment data for >=3 pre-treatment calendar years available in D001 and D002 (2016-2019 pre-Singapore); pre-treatment RMSPE fit <20 percent of treated unit mean investment level achievable; both conditions checkable once D001 and D002 jurisdiction-year investment table is constructed"
-    threats_addressed: [F06]
-    priority: 3
-    is_fallback_floor: false
-    claim_boundary: "CAN claim: Singapore 2020 approval or US 2022-2023 approvals are associated with a post-treatment investment trajectory diverging from the synthetic counterfactual, conditional on adequate pre-treatment fit. CANNOT claim: cross-state DiD results; mechanism-level heterogeneity; F06 endogeneity is fully resolved since national approval timing also reflects political economy; donor pool violations of SUTVA if approval signals spill over to donor countries."
-  - id: O_floor
-    name: "Descriptive cross-jurisdiction regulatory event-study"
-    project_type: descriptive
-    identification: "No causal identification; descriptive event-study plots of global and jurisdiction-level investment series (D001, D002) aligned to regulatory event dates (state bans, national approvals, labeling rules) with bootstrapped confidence intervals; characterises co-movement and documents the regulatory timeline without asserting causality"
-    viability_condition: "always viable (descriptive); requires only D001 annual investment series 2016-2024 and D002 regulatory event date table, both confirmed as public free downloads"
-    threats_addressed: []
-    priority: 9
-    is_fallback_floor: true
-    claim_boundary: "CAN claim: descriptive co-movement between regulatory events and investment trends across jurisdictions; provides a documented chronology of the regulatory environment and investment series as a factual contribution. CANNOT claim: any causal direction; cannot rule out confounding by the global macro investment cycle (40 percent sector-wide decline in 2024 per D001/P019); cannot distinguish regulatory effects from technology-readiness or macroeconomic drivers."
+- id: O1
+  name: Staggered DiD on state ban timing
+  project_type: causal
+  identification: Staggered difference-in-differences exploiting within-state before-vs-after
+    variation in ban enactment timing across US states (F04); Callaway–Sant'Anna 2021
+    group-time ATT estimator (P027) avoids negative-weighting from heterogeneous treatment
+    effects; Goodman-Bacon 2021 decomposition (P035) as diagnostic; Borusyak-Jaravel-Spiess
+    2024 imputation estimator (P036) as robustness alternative
+  viability_condition: '>=10 US states have non-zero cultivated-meat firm presence
+    or recorded investment in any pre-ban year verified from D001 editions 2020-2024;
+    >=5 states have confirmed ban passage dates in D007 (LegiScan); both conditions
+    checkable once D001 and D007 are downloaded and merged'
+  threats_addressed:
+  - F06
+  priority: 1
+  is_fallback_floor: false
+  claim_boundary: 'CAN claim: US state bans are associated with within-state declines
+    in firm presence or investment relative to not-yet-treated and clean-control states,
+    conditional on parallel pre-trends. CANNOT claim: national or global investment
+    trends are caused by state bans; bans cause firm bankruptcy or exit; results generalise
+    beyond cultivated meat or beyond 2020-2025; Singapore or EU regulatory actions
+    are causally identified under this design.'
+  viability_test:
+    metric: n_ban_states_with_firm_presence
+    op: '>='
+    threshold: 5
+  max_claim: causal
+- id: O2
+  name: Bill-text cosine-similarity / model-legislation diffusion instrument
+  project_type: mechanism
+  identification: Text-reuse analysis of enacted state ban legislation (D007 LegiScan
+    full-text) computing cosine similarity of each bill to the earliest enacted ban
+    (Alabama SB23) or a known ALEC model template; high-similarity states classified
+    as coordinated-diffusion adopters used as instrument or effect-modifier in 2SLS
+    or subgroup DiD, directly addressing F06 endogenous-diffusion threat (P029 Meseguer-Gilardi;
+    P042 Shipan-Volden)
+  viability_condition: D007 full-text is extractable for >=5 enacted ban states via
+    LegiScan JSON or bulk export; Alabama SB23 text is recoverable as reference corpus;
+    text preprocessing and cosine similarity computation feasible in Python; viability
+    checkable once D007 is accessed and bill texts are retrieved
+  threats_addressed:
+  - F06
+  priority: 2
+  is_fallback_floor: false
+  claim_boundary: 'CAN claim: states adopting near-verbatim model-legislation text
+    show a different investment response than states with independently drafted bans,
+    consistent with a coordinated national campaign rather than local economic conditions
+    driving ban adoption. CANNOT claim: text similarity is a fully clean instrument
+    without additional evidence that ALEC membership is uncorrelated with investment
+    confounders; cannot estimate an aggregate average treatment effect without the
+    causal DiD scaffold from O1; cannot purge all endogeneity absent a formal exclusion-restriction
+    argument.'
+  viability_test:
+    metric: bill_text_extractable_states
+    op: '>='
+    threshold: 5
+  max_claim: associational
+- id: O3
+  name: Synthetic control for national regulatory approval events
+  project_type: causal
+  identification: Synthetic control method (F05; Abadie-Gardeazabal 2003 P028; Abadie-Diamond-Hainmueller
+    2010 P037) using Singapore December 2020 first-ever cultivated-meat market approval
+    and US FDA/USDA 2022-2023 pre-market consultation completions as treatment events;
+    donor pool of non-approving countries constructed from GFI D001 and D002 annual
+    investment series; placebo inference via leave-one-out and permutation tests
+  viability_condition: '>=8 donor jurisdictions have non-zero cultivated-meat investment
+    data for >=3 pre-treatment calendar years available in D001 and D002 (2016-2019
+    pre-Singapore); pre-treatment RMSPE fit <20 percent of treated unit mean investment
+    level achievable; both conditions checkable once D001 and D002 jurisdiction-year
+    investment table is constructed'
+  threats_addressed:
+  - F06
+  priority: 3
+  is_fallback_floor: false
+  claim_boundary: 'CAN claim: Singapore 2020 approval or US 2022-2023 approvals are
+    associated with a post-treatment investment trajectory diverging from the synthetic
+    counterfactual, conditional on adequate pre-treatment fit. CANNOT claim: cross-state
+    DiD results; mechanism-level heterogeneity; F06 endogeneity is fully resolved
+    since national approval timing also reflects political economy; donor pool violations
+    of SUTVA if approval signals spill over to donor countries.'
+  viability_test:
+    metric: donor_pool_size
+    op: '>='
+    threshold: 8
+  max_claim: causal
+- id: O_floor
+  name: Descriptive cross-jurisdiction regulatory event-study
+  project_type: descriptive
+  identification: No causal identification; descriptive event-study plots of global
+    and jurisdiction-level investment series (D001, D002) aligned to regulatory event
+    dates (state bans, national approvals, labeling rules) with bootstrapped confidence
+    intervals; characterises co-movement and documents the regulatory timeline without
+    asserting causality
+  viability_condition: always viable (descriptive); requires only D001 annual investment
+    series 2016-2024 and D002 regulatory event date table, both confirmed as public
+    free downloads
+  threats_addressed: []
+  priority: 9
+  is_fallback_floor: true
+  claim_boundary: 'CAN claim: descriptive co-movement between regulatory events and
+    investment trends across jurisdictions; provides a documented chronology of the
+    regulatory environment and investment series as a factual contribution. CANNOT
+    claim: any causal direction; cannot rule out confounding by the global macro investment
+    cycle (40 percent sector-wide decline in 2024 per D001/P019); cannot distinguish
+    regulatory effects from technology-readiness or macroeconomic drivers.'
+  viability_test:
+    metric: always
+    op: always
+    threshold: 0
+  max_claim: descriptive
 ---
 
 # Design Options: Ranked Candidate Research Designs

@@ -21,6 +21,7 @@ CHECKS = [
     "check_literature_tools.py",
     "check_git_guardrails.py",
     "check_data_inventory.py",
+    "check_design_selection.py",
     "check_data_contract.py",
     "check_protected_definitions.py",
     "check_claim_registry.py",

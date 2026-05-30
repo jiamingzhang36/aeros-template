@@ -31,6 +31,8 @@ CHECK_NAME = "check_design_options"
 PROJECT_TYPES = {"causal", "descriptive", "measurement", "prediction",
                  "policy-translation", "mechanism", "replication"}
 CAUSAL_TYPES = {"causal", "mechanism"}
+CLAIM_STRENGTHS = {"descriptive", "measurement", "associational", "causal"}
+VIABILITY_OPS = {">=", "<=", ">", "<", "==", "always"}
 PLACEHOLDERS = {"", "tbd", "todo", "to be determined", "n/a", "na", "none"}
 
 REMEDIATION_HINT = (
@@ -123,6 +125,16 @@ def main(argv: list[str] | None = None) -> int:
             failures.append(f"{oid}: priority must be a positive integer, got {pr!r}")
         else:
             priorities.append(pr)
+
+        # structured, machine-adjudicable viability test + earned claim ceiling
+        mc = str(o.get("max_claim", "")).strip().lower()
+        if mc not in CLAIM_STRENGTHS:
+            failures.append(f"{oid}: max_claim must be one of {sorted(CLAIM_STRENGTHS)}, got {mc!r}")
+        vt = o.get("viability_test")
+        if not isinstance(vt, dict) or "metric" not in vt or "op" not in vt:
+            failures.append(f"{oid}: needs a viability_test with metric/op/threshold")
+        elif str(vt.get("op")) not in VIABILITY_OPS:
+            failures.append(f"{oid}: viability_test op must be one of {sorted(VIABILITY_OPS)}")
 
         is_floor = bool(o.get("is_fallback_floor", False))
         if is_floor:

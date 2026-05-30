@@ -21,6 +21,12 @@ goal: >
         identification: "the estimator/variation, citing framing method cards (e.g. F04)"
         viability_condition: "a CHECKABLE data diagnostic, e.g. >=10-15 states have non-zero
                               cultivated-meat firm presence in the pre-period (from D001)"
+        viability_test:            # the SAME condition in machine-adjudicable form
+          metric: n_ban_states_with_firm_presence   # a named diagnostic measured later
+          op: ">="                 # one of: >= <= > < == always
+          threshold: 5
+        max_claim: causal          # the STRONGEST claim this design could earn if viable:
+                                   #   descriptive | measurement | associational | causal
         threats_addressed: [F06]   # framing identification-threat card ids this design handles
         priority: 1                # unique integer; lower = tried first
         is_fallback_floor: false
