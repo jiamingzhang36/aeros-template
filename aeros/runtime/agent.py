@@ -15,7 +15,36 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+import yaml
+
 from .contract import Contract
+
+
+def _load_corrections(project_root: Path, contract: Contract) -> str:
+    """Return injectable past-correction lessons whose scope matches the contract.
+
+    This is the evolving-constraint mechanism: agent-lesson entries from the
+    correction ledger are fed into the prompt so the agent does not repeat a
+    mistake the harness already corrected.
+    """
+    ledger = project_root / "harness" / "correction_ledger.yml"
+    if not ledger.exists():
+        return ""
+    try:
+        data = yaml.safe_load(ledger.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError:
+        return ""
+    scopes = set(contract.correction_scopes)
+    lessons: list[str] = []
+    for c in data.get("corrections", []) or []:
+        if not isinstance(c, dict) or c.get("type") != "agent-lesson":
+            continue
+        if scopes.intersection(set(c.get("scope", []) or [])):
+            lessons.append(f"- [{c.get('id','?')}] {c.get('lesson','').strip()}")
+    if not lessons:
+        return ""
+    return ("## Past corrections — do not repeat these mistakes\n"
+            + "\n".join(lessons))
 
 
 def _agent_env() -> dict[str, str]:
@@ -64,6 +93,7 @@ def build_prompt(contract: Contract, inputs_text: str, feedback: str | None,
     outputs = "\n".join(f"- {p}" for p in contract.allowed_outputs)
     forbidden = "\n".join(f"- {a}" for a in contract.forbidden_actions)
     columns = _column_block(contract)
+    corrections = _load_corrections(project_root, contract) if project_root is not None else ""
     fb = ("\n## Your previous attempt FAILED these mechanical checks. Fix exactly these:\n"
           + feedback) if feedback else ""
 
@@ -75,6 +105,7 @@ def build_prompt(contract: Contract, inputs_text: str, feedback: str | None,
                 ("<<TASK_ID>>", contract.task_id), ("<<STAGE>>", contract.stage),
                 ("<<GOAL>>", goal), ("<<OUTPUTS>>", outputs),
                 ("<<FORBIDDEN>>", forbidden), ("<<COLUMNS>>", columns),
+                ("<<CORRECTIONS>>", corrections),
                 ("<<INPUTS>>", inputs_text), ("<<FEEDBACK>>", fb),
             ):
                 tpl = tpl.replace(token, value)
@@ -86,6 +117,10 @@ def build_prompt(contract: Contract, inputs_text: str, feedback: str | None,
         "", "## Goal", goal,
         "", "## You may write ONLY these files", outputs,
         "", "## Forbidden", forbidden,
+    ]
+    if corrections:
+        parts += ["", corrections]
+    parts += [
         columns,
         "## Inputs (read-only context)", inputs_text,
     ]

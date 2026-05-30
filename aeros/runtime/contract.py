@@ -26,6 +26,7 @@ class Contract:
     max_agent_calls: int
     max_dollars: float
     prompt_template_file: str
+    correction_scopes: list[str]
     raw: dict[str, Any] = field(default_factory=dict)
     path: Path | None = None
 
@@ -58,6 +59,8 @@ def load_contract(path: str | Path) -> Contract:
         max_agent_calls=int(budget.get("max_agent_calls", 3)),
         max_dollars=float(budget.get("max_dollars", 5.0)),
         prompt_template_file=str(data.get("prompt_template_file", "") or ""),
+        correction_scopes=list(data.get("correction_scopes", []) or [])
+        or ["all", str(data.get("stage", ""))],
         raw=data,
         path=path,
     )

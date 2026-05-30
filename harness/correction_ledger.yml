@@ -1,0 +1,81 @@
+# AEROS correction ledger — the harness's evolving institutional memory.
+#
+# Each error -> root cause -> lesson -> constraint is recorded here once, and
+# agent-lesson entries are injected into future agent prompts (by scope) so the
+# same mistake is not repeated. This turns the manual "纠错进化约束" loop into a
+# built-in mechanism: constraints accumulate and tighten over time, while the
+# model stays free to propose new candidates.
+#
+# Fields:
+#   id           unique C###
+#   date         when the correction was made
+#   type         agent-lesson (injected into prompts) | runtime-fix (recorded only)
+#   scope        tags matched against a contract's correction_scopes (e.g. discovery, all)
+#   symptom      what went wrong
+#   root_cause   why
+#   lesson       the injectable instruction (imperative, agent-facing)
+#   enforced_by  a check/contract that now enforces it, or 'prompt-only'
+
+corrections:
+  - id: C001
+    date: "2026-05-30"
+    type: agent-lesson
+    scope: [discovery, all]
+    symptom: "gap-verification bucket padded with analogy papers to hit a count floor"
+    root_cause: "a >=2 empirical-gap-rival floor pressured padding when the genuine closest-rival set was one paper"
+    lesson: "Do not pad gap-verification with analogies to hit a count. Name only genuine closest rivals (>=1 is fine when the gap is wide); put adjacent-industry analogies in background-institutional, not gap-verification."
+    enforced_by: check_framing_deck.py
+
+  - id: C002
+    date: "2026-05-30"
+    type: agent-lesson
+    scope: [discovery, all]
+    symptom: "agent invented evidence_basis='framing_deck', outside the controlled vocabulary"
+    root_cause: "the controlled vocabulary was not stated and the agent had no field for deck provenance"
+    lesson: "Use only the controlled vocabulary for each field (evidence_basis: none|title|abstract|full_text|extraction_card). Put provenance like 'anchor from framing_deck' in the notes column, never in a vocabulary field."
+    enforced_by: check_literature_registry.py
+
+  - id: C003
+    date: "2026-05-30"
+    type: agent-lesson
+    scope: [discovery, all]
+    symptom: "framing/design drifted to an aggressive causal staggered-DiD on firm investment when the real paper is descriptive and claim-careful"
+    root_cause: "thin input (one-line idea) + a default bias toward prestige causal designs, with no anchor to the actual claim posture, dependent variable, or unit"
+    lesson: "Do not default to causal/DiD. Match the project's stated claim_type, dependent variable, and unit; if these are not given, propose options across claim types (descriptive/measurement/causal) rather than committing to causal. Respect any explicit non-claims (e.g. 'does not estimate entry deterrence')."
+    enforced_by: prompt-only
+
+  - id: C004
+    date: "2026-05-30"
+    type: agent-lesson
+    scope: [discovery, all]
+    symptom: "produced a single committed design before any data was in hand"
+    root_cause: "empirical design is data-contingent but the step treated one design as final"
+    lesson: "Empirical design is data-contingent. Offer ranked candidate designs, each guarded by a checkable data-viability condition, plus an always-viable fallback floor; let the data adjudicate which is used. Do not commit to one design upfront."
+    enforced_by: check_design_options.py
+
+  - id: C005
+    date: "2026-05-30"
+    type: agent-lesson
+    scope: [discovery, all]
+    symptom: "seminal anchors named in framing were not all registered downstream"
+    root_cause: "no recall floor tying the framing deck to the registry"
+    lesson: "Every seminal anchor you name in framing MUST be registered downstream (carry its DOI/title). The anchors are the recall floor, not optional."
+    enforced_by: check_anchors_in_registry.py
+
+  - id: C006
+    date: "2026-05-30"
+    type: agent-lesson
+    scope: [discovery, all]
+    symptom: "risk of confidently naming papers that do not exist or are mis-attributed"
+    root_cause: "reasoning steps name canonical papers from memory, which can be wrong"
+    lesson: "Verify every named paper/anchor against the OpenAlex API and record a real locator (openalex_id or doi). If you cannot verify it, drop it rather than guess. Never fabricate a citation."
+    enforced_by: check_framing_deck.py
+
+  - id: C007
+    date: "2026-05-30"
+    type: runtime-fix
+    scope: [runtime]
+    symptom: "a single agent call ran ~22 min and could overshoot the dollar budget; killed child agents were respawned by the retry loop, leaving orphans"
+    root_cause: "no per-call cost cap; 30-min timeout; killing children not parents"
+    lesson: "Per-call hard cost cap via claude --max-budget-usd; 8-min agent timeout; kill the kernel parent before child agents."
+    enforced_by: aeros/runtime/agent.py
