@@ -1,5 +1,6 @@
 task_id: D003_design_options
 stage: discovery
+depends_on: [D001b_framework_search, D002_data_scouting]
 gate: G3
 goal: >
   Produce a DECK of ranked candidate research designs in discovery/design_options.md,

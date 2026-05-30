@@ -1,5 +1,6 @@
 task_id: D001b_framework_search
 stage: discovery
+depends_on: [D001a_framing]
 gate: G0
 goal: >
   Search for literature WITHIN the human-reasoned framing deck and register each

@@ -1,5 +1,6 @@
 task_id: D002_data_scouting
 stage: discovery
+depends_on: []
 gate: G1
 goal: >
   Scout candidate data sources that could support the project's research

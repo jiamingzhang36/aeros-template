@@ -1,5 +1,6 @@
 task_id: D001a_framing
 stage: discovery
+depends_on: []
 gate: G0
 goal: >
   REASONING step, not a search. Given the research idea, reason about which

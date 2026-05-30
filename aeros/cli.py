@@ -17,7 +17,7 @@ from pathlib import Path
 from .runtime.adjudicate import adjudicate, feasibility, write_selection
 from .runtime.checks import run_checks
 from .runtime.contract import load_contract
-from .runtime.kernel import find_project_root, run_task
+from .runtime.kernel import find_project_root, run_pipeline, run_task
 from .runtime.state import load_state
 
 
@@ -80,6 +80,17 @@ def _cmd_adjudicate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_pipeline(args: argparse.Namespace) -> int:
+    root = _project_root()
+    rc = run_pipeline(root, args.stage, dry_run=args.dry_run)
+    if rc != 0 or args.dry_run:
+        return rc
+    # after the stage runs, adjudicate designs and print the feasibility verdict
+    print("[pipeline] adjudicating designs against data diagnostics...")
+    write_selection(root, adjudicate(root))
+    return _cmd_feasibility(args)
+
+
 def _cmd_feasibility(args: argparse.Namespace) -> int:
     root = _project_root()
     f = feasibility(root)
@@ -137,6 +148,11 @@ def main(argv: list[str] | None = None) -> int:
 
     feas = sub.add_parser("feasibility", help="G1-G3 feasibility verdict (data + variables + viable design)")
     feas.set_defaults(func=_cmd_feasibility)
+
+    pipe = sub.add_parser("pipeline", help="run a stage's tasks in dependency order, then adjudicate + feasibility")
+    pipe.add_argument("--stage", default="discovery", help="stage to run (default: discovery)")
+    pipe.add_argument("--dry-run", action="store_true", help="show the ordered plan; do not run agents")
+    pipe.set_defaults(func=_cmd_pipeline)
 
     args = parser.parse_args(argv)
     return args.func(args)

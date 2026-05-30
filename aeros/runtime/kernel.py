@@ -23,6 +23,66 @@ def find_project_root(start: Path) -> Path:
     )
 
 
+def discover_contracts(project_root: Path, stage: str | None = None) -> dict:
+    """Load all task contracts (optionally filtered by stage), keyed by task_id."""
+    out: dict[str, tuple[Contract, Path]] = {}
+    for p in sorted((project_root / "tasks").rglob("*.yml")):
+        try:
+            c = load_contract(p)
+        except Exception:  # noqa: BLE001 - skip unparseable contracts
+            continue
+        if stage and c.stage != stage:
+            continue
+        out[c.task_id] = (c, p)
+    return out
+
+
+def topo_order(contracts: dict) -> list[str]:
+    """Dependency order (Kahn). Gates are checkpoints; execution follows depends_on,
+    which can differ from gate number (e.g. G2 variable construction depends on the
+    G3 design options that name the variables)."""
+    from collections import deque
+    deps = {tid: set(c.depends_on) & set(contracts) for tid, (c, _) in contracts.items()}
+    order: list[str] = []
+    ready = deque(sorted(t for t, d in deps.items() if not d))
+    queued = set(ready)
+    while ready:
+        t = ready.popleft()
+        order.append(t)
+        for other, d in deps.items():
+            if t in d:
+                d.discard(t)
+                if not d and other not in order and other not in queued:
+                    ready.append(other); queued.add(other)
+    for t in sorted(contracts):  # any cycle leftovers, deterministically appended
+        if t not in order:
+            order.append(t)
+    return order
+
+
+def run_pipeline(project_root: Path, stage: str = "discovery", *, dry_run: bool = False) -> int:
+    """Run a stage's contracts in dependency order, stopping at the first
+    escalation. Returns 0 if all passed (or dry-run), non-zero on stop."""
+    contracts = discover_contracts(project_root, stage)
+    if not contracts:
+        print(f"[pipeline] no contracts for stage {stage!r}")
+        return 1
+    order = topo_order(contracts)
+    print(f"[pipeline] {stage}: {len(order)} task(s) in dependency order")
+    for tid in order:
+        c, path = contracts[tid]
+        deps = ", ".join(c.depends_on) or "—"
+        print(f"  -> {tid} (gate {c.gate or '?'}, after: {deps})")
+        if dry_run:
+            continue
+        rc = run_task(path, dry_run=False)
+        if rc != 0:
+            print(f"[pipeline] stopped at {tid} (escalated). Fix/approve, then re-run.")
+            return rc
+    print("[pipeline] all tasks passed." if not dry_run else "[pipeline] (dry-run: no tasks executed)")
+    return 0
+
+
 def _read_inputs(project_root: Path, contract: Contract) -> str:
     blocks: list[str] = []
     for rel in contract.inputs:
