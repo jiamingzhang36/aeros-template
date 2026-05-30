@@ -26,6 +26,10 @@ Human gate required:
 
 TBD
 
+## Skills Used
+
+- TBD
+
 ## Files Read
 
 TBD

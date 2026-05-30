@@ -29,6 +29,7 @@ class Contract:
     prompt_template_file: str
     correction_scopes: list[str]
     depends_on: list[str]
+    timeout_seconds: int
     raw: dict[str, Any] = field(default_factory=dict)
     path: Path | None = None
 
@@ -65,6 +66,7 @@ def load_contract(path: str | Path) -> Contract:
         correction_scopes=list(data.get("correction_scopes", []) or [])
         or ["all", str(data.get("stage", ""))],
         depends_on=list(data.get("depends_on", []) or []),
+        timeout_seconds=int(budget.get("timeout_seconds", 480)),
         raw=data,
         path=path,
     )

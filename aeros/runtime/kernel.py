@@ -175,7 +175,9 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
         print(f"[kernel] attempt {attempt + 1}/{max_retries + 1}: invoking agent "
               f"(spent ${run_cost:.4f}/{contract.max_dollars:.2f}, call cap ${call_cap:.2f})...")
 
-        result = run_agent(prompt, project_root, max_budget_usd=call_cap)
+        result = run_agent(prompt, project_root,
+                           timeout=contract.timeout_seconds,
+                           max_budget_usd=call_cap)
         # Account for spend regardless of outcome (a failed call can still cost).
         run_calls += 1
         run_cost += result.cost_usd
