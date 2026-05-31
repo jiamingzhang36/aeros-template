@@ -486,53 +486,57 @@ def _check_requirement(req: dict) -> tuple[bool, str]:
     raise RuntimeError(f"unknown criterion type: {req_type}")
 
 
+def evaluate_through_gate(gate_label: str, project_root: str | Path = ".") -> tuple[bool, list[str]]:
+    """Evaluate manifest gate-exit criteria for every gate up to and including
+    gate_label. Returns (ok, failures). Reusable by both the check and the
+    human-gate approval flow so they share one criteria source of truth.
+    """
+    import os
+    prev = os.getcwd()
+    os.chdir(str(project_root))
+    try:
+        manifest = _load_manifest()
+        gate_ids = [item.split()[0] for item in _extract_gate_id_series(manifest)]
+        target_id = _parse_gate_id(gate_label.split()[0])
+        failures: list[str] = []
+        failures.extend(_validate_mainline_alignment(manifest))
+        failures.extend(_required_file_statuses(manifest))
+        criteria = _load_criteria(manifest)
+        for gate in gate_ids[: target_id + 1]:
+            for req in criteria.get(gate, []):
+                try:
+                    ok, message = _check_requirement(req)
+                except RuntimeError as exc:
+                    failures.append(f"{gate}: {exc}")
+                    continue
+                if not ok:
+                    failures.append(f"{gate}: {message}")
+        return (not failures, failures)
+    finally:
+        os.chdir(prev)
+
+
 def main() -> int:
     try:
         manifest = _load_manifest()
-        gate_entries = _extract_gate_id_series(manifest)
-        gate_ids: list[str] = []
-        for item in gate_entries:
-            gate_id = item.split()[0]
-            gate_ids.append(gate_id)
-            _parse_gate_id(gate_id)
-        current_gate = _load_current_gate(manifest)
+        # Source of truth for the current gate is the runtime state (aeros_state.yml);
+        # the manifest value is only a fallback for a fresh project.
         runtime_gate = _load_runtime_gate()
-        current_id = _parse_gate_id(current_gate.split()[0])
-    except RuntimeError as exc:
+        manifest_gate = _load_current_gate(manifest)
+        authoritative = runtime_gate or manifest_gate
+        _parse_gate_id(authoritative.split()[0])
+    except (RuntimeError, ValueError, IndexError) as exc:
         print(f"FAIL: gate configuration invalid ({exc})")
         return 1
 
-    failures: list[str] = []
-    failures.extend(_validate_mainline_alignment(manifest))
-    failures.extend(_required_file_statuses(manifest))
-    criteria = _load_criteria(manifest)
-
-    for gate in gate_ids[: current_id + 1]:
-        reqs = criteria.get(gate, [])
-        for req in reqs:
-            try:
-                ok, message = _check_requirement(req)
-            except RuntimeError as exc:
-                failures.append(f"{gate}: {exc}")
-                continue
-            if not ok:
-                failures.append(f"{gate}: {message}")
-
-    if failures:
+    ok, failures = evaluate_through_gate(authoritative)
+    if not ok:
         print("FAIL: gate exit criteria not satisfied:")
         print("\n".join(failures))
         return 1
 
-    if runtime_gate and runtime_gate.split()[0] != current_gate.split()[0]:
-        print(
-            "WARN: runtime current_gate differs from manifest gate_lifecycle.current_gate: "
-            f"{runtime_gate} != {current_gate}"
-        )
-
-    if current_gate:
-        print(f"PASS: gate_exit check passed at {current_gate}")
-    else:
-        print("PASS: gate_exit check passed")
+    src = "runtime state" if runtime_gate else "manifest"
+    print(f"PASS: gate_exit check passed at {authoritative} (source: {src})")
     return 0
 
 

@@ -1,5 +1,5 @@
-current_gate: G3
-gate_status: approved
+current_gate: G0
+gate_status: open
 candidate_gate: G3
 candidate_stage: discovery
 tasks:

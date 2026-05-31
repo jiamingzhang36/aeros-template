@@ -146,17 +146,43 @@ def _cmd_gate_history(args: argparse.Namespace) -> int:
 
 def _cmd_gate_approve(args: argparse.Namespace) -> int:
     root = _project_root()
+
+    # A human gate is a stamp ON TOP of satisfied criteria, not instead of them.
+    # Verify the gate's exit criteria before allowing approval.
+    sys.path.insert(0, str(root / "checks"))
+    try:
+        from check_gate_exit import evaluate_through_gate  # noqa: E402
+        ok, failures = evaluate_through_gate(args.gate, project_root=str(root))
+    except Exception as exc:  # noqa: BLE001
+        ok, failures = False, [f"could not evaluate gate criteria: {exc}"]
+
+    note = args.note or ""
+    if not ok:
+        if not args.force:
+            print(f"REFUSED: {args.gate} exit criteria are NOT satisfied:")
+            for f in failures:
+                print(f"  - {f}")
+            print("\nFix the criteria, or override with --force (the override is logged).")
+            return 2
+        note = f"[FORCED OVERRIDE despite {len(failures)} unmet criteria] " + note
+        print(f"WARNING: forcing approval of {args.gate} despite {len(failures)} unmet criteria:")
+        for f in failures:
+            print(f"  - {f}")
+
     state = load_state(root)
     decision = approve_gate(
         state,
         stage=args.stage,
         gate=args.gate,
         owner=args.owner or "",
-        note=args.note or "",
+        note=note,
     )
     save_state(root, state)
     log_path = _append_decision_log(root, decision)
-    print(f"approved {args.gate} for stage {args.stage}")
+    if ok:
+        print(f"approved {args.gate} for stage {args.stage} (criteria satisfied)")
+    else:
+        print(f"FORCE-approved {args.gate} for stage {args.stage} (criteria NOT satisfied — logged)")
     print(f"decision log: {log_path.relative_to(root)}")
     return 0
 
@@ -277,6 +303,8 @@ def main(argv: list[str] | None = None) -> int:
     gate_approve.add_argument("--stage", default="discovery", help="stage name")
     gate_approve.add_argument("--owner", default="", help="human owner / approver")
     gate_approve.add_argument("--note", default="", help="approval rationale")
+    gate_approve.add_argument("--force", action="store_true",
+                              help="approve even if gate exit criteria are unmet (override is logged)")
     gate_approve.set_defaults(func=_cmd_gate_approve)
 
     gate_block = gate_sub.add_parser("block", help="record a human gate block")
