@@ -1,3 +1,9 @@
+---
+schema_version: 1
+required_sections:
+  - ## Overall Decision
+  - ## Minimum Viable Version
+---
 # Feasibility Matrix
 
 Score each dimension from 0 to 5. Use 0 for not yet assessed.

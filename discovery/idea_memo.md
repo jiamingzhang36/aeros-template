@@ -1,3 +1,9 @@
+---
+schema_version: 1
+required_sections:
+  - ## Working Title
+  - ## One-Sentence Research Question
+---
 # Idea Memo
 
 ## Working Title
@@ -38,7 +44,7 @@ TBD
 
 ## Why This Might Be New
 
-List what appears underexplored, but do not claim a gap until `08_gap_memo.md` is complete.
+List what appears underexplored, but do not claim a gap until `discovery/gap_memo.md` is complete.
 
 ## Main Risks
 

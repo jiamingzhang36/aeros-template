@@ -1,3 +1,13 @@
+---
+schema_version: 1
+required_sections:
+  - ## Research Question
+  - ## Data Feasibility
+  - ## Skill-Assisted Data Probes
+  - ## Claim Boundary
+  - ## Required Next Probes
+  - ## Decision
+---
 # Feasibility Memo
 
 ## Research Question

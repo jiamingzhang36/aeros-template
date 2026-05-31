@@ -1,3 +1,9 @@
+---
+schema_version: 1
+required_sections:
+  - ## Research Strands
+  - ## Gap Status
+---
 # Literature Map
 
 Build a map, not a generic summary.

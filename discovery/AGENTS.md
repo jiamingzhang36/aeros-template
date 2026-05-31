@@ -4,6 +4,10 @@
 
 You are working in the discovery harness. Your job is to test whether an idea deserves a full execution harness.
 
+Shared universal rules are in [harness/common_rules.md](harness/common_rules.md).
+
+Discovery-specific requirements follow the same governance baseline in the root file and should be applied together.
+
 ## Exploration Policy
 
 Be creative in exploration and strict in verification.

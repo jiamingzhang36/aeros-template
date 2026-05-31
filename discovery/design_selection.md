@@ -7,7 +7,7 @@ ratcheted_from: ['O1']
 ---
 # Design Selection / Claim Adjudication
 
-Adjudicated: 2026-05-30T03:43:25+00:00
+Adjudicated: 2026-05-31T00:47:03+00:00
 
 > NOTE: diagnostics are STUBBED — this selection does not earn a real claim until data_diagnostics.yml status is 'measured'.
 

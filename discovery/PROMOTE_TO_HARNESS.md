@@ -1,3 +1,9 @@
+---
+schema_version: 1
+required_sections:
+  - ## Promotion Criteria
+  - ## Decision
+---
 # Promote to Execution Harness
 
 Use this gate before activating the full execution harness.
@@ -36,7 +42,7 @@ Create or update:
 - `docs/protected_definitions.yml`
 - `docs/robustness_checklist.md`
 - `evidence/claim_registry.md`
-- relevant `tasks/`
+- relevant `tasks/discovery/` (and `tasks/execution/` after promotion)
 - relevant `checks/`
 
 ## Human Rationale
