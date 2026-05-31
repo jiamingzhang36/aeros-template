@@ -186,6 +186,57 @@ variables:
       or as a robustness check against the state_ban primary treatment in O1 rather
       than a standalone causal treatment"
     constructible: yes
+
+  - name: state_gdp_food_manuf
+    role: control
+    definition: "annual real GDP (chained USD) attributed to food manufacturing (NAICS
+      311) in each US state, in millions of constant 2017 USD; used as a time-varying
+      control in O1 covariate-augmented DiD to absorb incumbent conventional food-industry
+      economic weight correlated with state ban adoption (F06); also used to test
+      whether pre-ban state GDP growth differs between ban and non-ban states as a
+      parallel-trends diagnostic"
+    source_data_id: D022
+    construction: "download BEA state GDP by industry bulk CSV from the BEA Regional
+      Data portal (D022); filter to NAICS 311 (food manufacturing) for all 50 states
+      and years 2016-2025; where NAICS 3116 (animal slaughter and processing) is
+      separately available as a sub-industry, extract it as a supplementary proxy
+      for conventional meat industry weight; merge state-year GDP series with the
+      LegiScan ban panel (D007) on state × year key; deflate to constant USD using
+      BEA implicit price deflators; log-transform for regression specifications"
+    validity_concern: "NAICS 311 food manufacturing is broader than conventional
+      meat processing and includes dairy, bakery, beverage, and other sub-industries
+      that are not relevant to the cultivated-meat regulatory motivation; the more
+      precise NAICS 3116 sub-industry may not be reported for all states in BEA's
+      state-level tables; state GDP is an imperfect proxy for conventional-meat-industry
+      lobbying power, which would be better measured by livestock value-added (USDA
+      NASS) or lobbying expenditure (D016); BEA API key required for programmatic
+      access but access itself is confirmed free"
+    constructible: yes
+
+  - name: regulatory_quality_index
+    role: control
+    definition: "World Bank Worldwide Governance Indicators (WGI) regulatory quality
+      subscale score for a given country in a given year, ranging from approximately
+      -2.5 (weakest) to +2.5 (strongest); used as a time-varying country-level control
+      in O3 synthetic control analysis to adjust donor weights for baseline differences
+      in regulatory environment quality unrelated to cultivated-meat policy"
+    source_data_id: D021
+    construction: "query World Bank WDI API (D021) for WGI regulatory quality indicator
+      (indicator code RQ.EST or WGI.RQ) for key jurisdictions: US, Singapore, EU
+      member states individually (Germany, France, Netherlands as major markets),
+      Israel, UK, Australia, and the broader donor-pool candidate set; extract annual
+      scores for 2013-2024; merge with country-year investment panel on country ×
+      year key; use as a predictor in the synthetic control donor-weight optimization
+      alongside pre-treatment investment growth rate"
+    validity_concern: "WGI regulatory quality changes slowly (annual revisions are
+      modest) and captures broad business-regulation quality rather than food-safety
+      regulatory capacity specifically; EU member states have individual WGI scores
+      but cultivated-meat regulation is set at the EU level, so Germany or France
+      scores introduce measurement error when used as EU proxies; WGI scores for
+      small economies (Singapore, Israel) are computed from fewer underlying surveys
+      and have wider confidence intervals; the WGI series is available through the
+      World Bank DataBank but coverage of 2024 may be one year lagged"
+    constructible: yes
 ---
 
 # Variable Construction: Cultivated Meat Policy Database
@@ -393,3 +444,59 @@ supplementary event marker for descriptive plots, a robustness check in O1 (do r
 change when the federal consultation year is controlled?), and a milestone timestamp for
 the O3 US synthetic control. Researchers should not treat it as a primary treatment
 variable in any causal specification.
+
+---
+
+## state_gdp_food_manuf
+
+**Design use:** Time-varying covariate in O1 (covariate-augmented DiD, Sant'Anna-Zhao
+doubly robust estimator) for controlling incumbent food-industry economic confounders
+correlated with state ban adoption (F06 threat).
+
+**Unit:** US state × calendar year, millions of chained 2017 USD.
+
+State-level food manufacturing GDP (NAICS 311) is the primary observable proxy for
+incumbent conventional food-industry economic weight in O1's F06 response strategy.
+Design O1 explicitly identifies "annual beef output" and "state GDP" as covariates
+needed for the doubly robust DiD estimator. BEA state GDP by industry (D022) provides
+the most systematic and complete source: bulk CSV downloads from the BEA Regional Data
+portal cover all 50 states for 1997-2025 at the industry level, and the portal is
+confirmed accessible with no subscription requirement (API key is free).
+
+Constructibility is `yes` because D022's access is confirmed, the data structure is
+documented, and the merge key (state × year) is straightforward. The main caveat is
+precision: NAICS 311 is broader than livestock slaughter (NAICS 3116), which would be
+a tighter proxy for the conventional beef and pork industry that F06 implicates. If
+BEA's state-level tables do not report NAICS 3116 separately, the researcher should
+supplement with USDA NASS livestock value-added data or use D016 (federal lobbying
+expenditures by NCBA/NCC/NPPC) as an alternative proxy that more directly captures
+incumbent-industry political mobilization.
+
+---
+
+## regulatory_quality_index
+
+**Design use:** Country-level predictor variable in O3 synthetic control donor-weight
+optimization; robustness control to rule out the alternative hypothesis that investment
+differences across jurisdictions reflect general regulatory environment quality rather
+than cultivated-meat-specific policy.
+
+**Unit:** Country × calendar year continuous score (approximately -2.5 to +2.5).
+
+The World Bank Worldwide Governance Indicators regulatory quality subscale (RQ.EST) is
+the most widely used cross-national regulatory environment measure in empirical regulatory
+economics. For O3, it serves two roles: as a matching predictor in the synthetic control
+donor-weight computation (so that Singapore's synthetic counterfactual draws on countries
+with similar regulatory capacity, not just similar investment trajectories) and as a
+robustness control in cross-jurisdiction regressions testing whether WGI regulatory
+quality mediates the investment effects estimated elsewhere.
+
+Constructibility is `yes` because the WDI API is publicly documented, requires no
+registration, and provides data for all key jurisdictions through at least 2023. The
+validity concern is the mismatch between WGI's broad regulatory quality concept and
+the narrow food-safety regulatory process relevant to cultivated meat specifically:
+a high WGI regulatory quality score reflects a general business-friendly regulatory
+environment, not specifically a fast or permissive novel-food approval pathway. Researchers
+should consider pairing this variable with D005 (EU Novel Food application processing
+duration) or D003/D006 (approval timeline days) for a domain-specific regulatory-process
+quality proxy when the O3 mechanism argument requires it.
