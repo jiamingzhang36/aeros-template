@@ -1,17 +1,1358 @@
-% AEROS manuscript placeholder.
-%
-% Projects may use Markdown, LaTeX, Quarto, Word, or another manuscript workflow.
-% Publication-facing claims should be checked against:
-% - docs/method_card.md
-% - docs/language_constraints.md
-% - evidence/claim_registry.md
-% - evidence/result_index.csv
+% Cultivated meat policy paper
+% Bibliography source of truth: tex/references.bib.
+% Compile with: pdflatex paper.tex && bibtex paper && pdflatex paper.tex && pdflatex paper.tex.
 
-\documentclass[11pt]{article}
+\documentclass[12pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{threeparttable}
+\usepackage{dcolumn}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage[section]{placeins}  % keep floats in their sections
+\usepackage{appendix}
+
+\onehalfspacing
+
+\newcolumntype{d}[1]{D{.}{.}{#1}}  % decimal-aligned columns
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\setlength{\emergencystretch}{2em}
+
+\title{Regulating Before Entry:\\
+The Political Economy of State Restrictions on Cultivated Meat}
+\author{
+Jiaming Zhang\thanks{Department of Agricultural, Food, and Resource Economics, Michigan State University. Email: \texttt{jiamingz@msu.edu}.}
+\and H. Holly Wang\thanks{Department of Agricultural, Food, and Resource Economics, Michigan State University. Email: \texttt{wanghong@msu.edu}.}
+\and David L. Ortega\thanks{Department of Agricultural, Food, and Resource Economics, Michigan State University. Email: \texttt{dlortega@msu.edu}.}
+\and Lin Lin\thanks{Department of Agribusiness and Markets, Lincoln University. Email: \texttt{linlin9@msu.edu}.}
+}
+\date{\today}
+
 \begin{document}
 
-\section*{Draft}
+\maketitle
 
-Replace this placeholder with the project manuscript.
+\begin{abstract}
+Why do U.S.\ states regulate an emerging food technology before broad market entry, realized displacement, or measurable consumer harms exist, and through which political and institutional channels do those restrictions arise? This paper studies that question using the Cultivated Meat Policy Database (CMPD), an original corpus of \textbf{140} state bill records from \textbf{38} U.S.\ states over 2019--2025, combined with a 2018 alternative-protein policy baseline and a \textbf{21,748}-row legislator-bill panel covering \textbf{7,270} state-legislator identities. Throughout the paper, cultivated meat is the product category--cell-cultured meat made from animal cells--not cultivated beef alone. We document a policy-before-market pattern: labeling restrictions, procurement limits, moratoria, and bans appear before cultivated meat has a meaningful U.S.\ commercial footprint. The empirical design is descriptive rather than structurally causal and follows three margins: state adoption and maximum stringency, bill-level severity and passage, and within-bill political supply by legislators. The strongest state-level pattern is policy-ideology sorting. The Caughey--Warshaw (CW) state policy ideology index is consistently associated with response and stringency--more conservative policy environments score lower on the CW index and show higher restriction--while measured beef/livestock-sector exposure proxies are economically plausible but statistically unstable across outcomes and specifications. The legislator-bill evidence is sharper as a political-supply margin: conditional on bill fixed effects, agriculture-committee membership, district cattle exposure, and Republican party affiliation predict sponsorship and cosponsorship of cultivated-meat restrictions. Biography-based agricultural identity is positive but imprecise in the bio-observed sample. Vote records, primary-challenge measures, age, lobbying, contributions, and text diffusion are used as source-limited mechanism and appendix evidence rather than as the main identification strategy. The paper contributes a validated 50-state policy corpus and a disciplined account of anticipatory food-technology regulation under federalism, while leaving direct estimates of firm entry, investment, prices, sales, quantities, and welfare effects to future work.
+\end{abstract}
+
+\noindent\textbf{Keywords:} cultivated meat; state policy; anticipatory regulation; food technology; political economy; policy before markets.
+
+\noindent\textbf{JEL codes:} Q18, Q13, L51, O33, D72.
+
+\bigskip
+\noindent\textbf{Data Availability Statement:} The CMPD data and replication scripts are maintained in the project repository. Public release will include bill-level policy labels, state-year outcomes, source and audit files, and code needed to reproduce the paper's tables and figures, subject to removal of local cache files and any credentials or application programming interface (API) keys.
+
+\noindent\textbf{Conflict of Interest Statement:} The authors report no conflicts of interest in this draft; final disclosures will be author-confirmed before submission.
+
+\noindent\textbf{Funding and Acknowledgments:} No external funding statement has been specified for this draft. Final acknowledgments will be confirmed by the authors before submission.
+
+\noindent\textbf{Ethics Statement:} The study uses public legislative, regulatory, and policy records and does not collect human-subject survey or experimental data.
+
+% ============================================================
+\section{Introduction}
+% ============================================================
+
+Cultivated meat has become commercially credible, but not yet commercially large.  In this paper, \emph{cultivated meat} refers to the broader category of meat, poultry, seafood, and related animal-cell products produced through cell culture, not to cultivated beef alone.  The global cultivated-meat industry attracted more than \$3 billion in private investment between 2016 and 2022 \citep{gfi2023state}; in the United States, federal commercialization milestones---Food and Drug Administration (FDA) pre-market consultations, U.S.\ Department of Agriculture/Food Safety and Inspection Service (USDA/FSIS) label and inspection steps, and early restaurant launches---made market entry visible over 2022--2025 (Table~\ref{tab:federal_milestones}).  Yet state legislatures began regulating before cultivated meat had broad consumer access: stable retail channels, routine in-state purchase opportunities, or observable state-level sales and substitution away from conventional meat.  This creates the central puzzle: \emph{why do states regulate, restrict, or ban a product category before broad consumer markets exist?}
+
+That puzzle is different from a standard policy-adoption question.  The issue is not simply which states adopt first or whether neighboring states imitate each other.  The more interesting economic question is why state governments legislate in anticipation of a market that is still small, uncertain, and only partially visible.  Put differently, cultivated-meat bills are not just a response to realized market losses; they are a form of pre-market regulation.  These bills matter because they can shape future market access before firms, consumers, and regulators observe mature market outcomes.  Some instruments look like conventional information policy, such as labeling and disclosure requirements.  Others restrict access to public procurement or private markets, including moratoria, manufacturing prohibitions, and sales bans.  The empirical task is to describe variation in state response and policy severity while being clear that the paper does not observe the entrant's counterfactual entry, investment, prices, quantities, or welfare effects.
+
+The organizing framework draws on the industrial organization and political-economy literatures on regulation, raising rivals' costs, and political influence \citep{stigler1971theory, peltzman1976toward, grossman1994protection}.  Incumbent livestock and meatpacking interests are plausible political stakeholders because cultivated meat could become a future competitor, and statutory restrictions can plausibly operate as potential market-access barriers.  But the pre-market setting changes the interpretation.  If policy arrives before broad consumer access and observable commercial displacement, then a simple realized-stake story is incomplete.  Ideology, cultural politics, prior anti-alt-protein policy infrastructure, and template-style statutory copying may matter alongside conventional producer exposure.
+
+We study these issues using the Cultivated Meat Policy Database (CMPD), an original dataset that combines a 2018 state-policy baseline with all qualifying cultivated-meat state bill records from 2019 to 2025.  The current estimation corpus contains \textbf{140} state bill records from \textbf{38} states, paired with bill timing, status, policy type, sponsor, committee, vote/process, testimony, lobbying, and federal-commercialization milestone records.  We also link the bill corpus to a seated-legislator opportunity panel with \textbf{21,748} legislator-bill rows and \textbf{7,270} state-legislator identities.  The empirical design organizes evidence in three linked margins: state adoption and maximum stringency, bill-level severity and passage, and within-bill political supply by legislators who sponsor or cosponsor restrictions.
+
+The current empirical patterns are best read as descriptive political economy.  State activity is temporally clustered, and the CW policy ideology index is more consistently associated with response than any single incumbent-sector exposure proxy in the state-level specifications (lower CW scores, i.e., more conservative policy environments, predict higher restriction).  Cattle inventory is treated as a beef/livestock-sector exposure proxy, not as a definition of the product category under study; companion exposure measures include livestock receipts, meatpacking employment, and animal-production establishments.  These measured incumbent-sector exposure proxies remain substantively important, but the state- and bill-level estimates are too unstable to claim that industry interests either dominate or do not matter.  The legislator-bill political-supply evidence adds a different margin: conditional on the same bill opportunity, agriculture-committee membership, district cattle exposure, and Republican party affiliation predict who supplies sponsorship and cosponsorship.  Regional peer timing proxies are weak substitutes for identifying diffusion because common national timing absorbs much of the apparent pattern.  The stronger mechanism evidence on possible text reuse comes from statutory text similarity: text alignment and GPT-4o-mini verification identify 2 cross-state pairs with cultivated-meat-specific shared language (NE--OK 292-char definitional template, high confidence; AZ--WV 302-char enforcement template, medium confidence), with public source-state direction documented for both pairs; the remaining shared substrings are Federal Food, Drug, and Cosmetic Act (FDCA) boilerplate or standard food-law language.
+
+The paper contributes to agricultural political economy, law and economics of regulation, and food-technology governance in three ways.  First, it documents anticipatory regulation before broad market formation: U.S. states regulate cultivated meat in advance of broad market entry.  Second, it introduces a validated 50-state, 140-bill dataset measuring timing, type, severity, process, and policy trajectory.  Third, it shows that these restrictions are politically supplied through legislators connected to agricultural constituencies and policy venues.  The contribution is not a clean causal estimate of entry deterrence.  Vote records, primary challenges, age, lobbying, contributions, and text alignment remain source-limited mechanism evidence or appendix checks.  The regulatory-risk index is likewise an ancillary monitoring output, not a claim about firm siting, capital allocation, or welfare.
+
+The paper proceeds as follows.  Section~\ref{sec:background} describes the institutional setting and federal commercialization milestones.  Section~\ref{sec:theory} develops the theoretical framework.  Section~\ref{sec:data} presents the CMPD and the policy-stage variables.  Section~\ref{sec:empirical} states the evidence hierarchy: the core estimands are state adoption/stringency, bill-level severity/passage, and legislator political supply; the state-year hazard models are retained as supporting timing diagnostics.  Section~\ref{sec:descriptive} documents the timeline and geography of pre-market regulation.  Section~\ref{sec:results} presents the main response/stringency, bill-level severity, and legislator political-supply evidence first, followed by cross-issue diagnostics, statutory text alignment, and supporting timing/mechanism diagnostics; two ancillary results (frozen-exposure timing diagnostic and regulatory-risk monitoring index) are deferred to Appendix~\ref{app:supp_timing} and Appendix~\ref{app:risk_index}.  Section~\ref{sec:discussion} discusses implications and limitations.
+
+% ============================================================
+\section{Institutional and Policy Background}
+\label{sec:background}
+% ============================================================
+
+Cultivated meat occupies an unusual regulatory space in the United States.  At the federal level, jurisdiction is shared between the Food and Drug Administration (FDA) and the U.S.\ Department of Agriculture's Food Safety and Inspection Service (USDA/FSIS): FDA oversees cell collection, cell banks, and production of the cell-cultured product up to harvest; USDA/FSIS takes jurisdiction over processing, packaging, and labeling of the final product.  This bifurcated framework was formalized in a joint agreement in March 2019 and became commercially salient in stages: FDA completed its first ``no further questions'' consultation for UPSIDE Foods in November 2022 and a second for GOOD Meat in March 2023; USDA/FSIS label and inspection steps followed in June 2023; and the first U.S.\ restaurant sales occurred in summer 2023.  Later FDA inventory and USDA/market-entry records show additional products moving through the pathway in 2025, including cultivated pork fat, salmon, and additional chicken products.  Table~\ref{tab:federal_milestones} summarizes the source-backed milestone timeline used in this paper.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Federal Commercialization Milestones for U.S. Cultivated Meat}
+\label{tab:federal_milestones}
+\small
+\begin{tabularx}{\textwidth}{p{0.15\textwidth}p{0.32\textwidth}Y}
+\toprule
+Date & Milestone & Why it matters for this paper \\
+\midrule
+Mar.\ 2019 & FDA--USDA/FSIS formal agreement & Establishes the federal division of oversight before the main state-policy wave: FDA pre-harvest consultation; USDA/FSIS post-harvest inspection and labeling for meat and poultry. \\
+\addlinespace
+Sep.\ 2021 & USDA/FSIS labeling advance notice of proposed rulemaking (ANPR) & Shows that federal label terminology was already contested before full commercial clearance, providing context for state truth-in-labeling bills. \\
+\addlinespace
+Nov.\ 2022 & FDA first ``no further questions'' response for UPSIDE Foods & First federal safety-consultation milestone for cultivated meat in the United States; makes commercialization more credible while not itself authorizing market entry. \\
+\addlinespace
+Mar.--Jun.\ 2023 & GOOD Meat FDA response; USDA/FSIS label approvals and grants of inspection for UPSIDE Foods and GOOD Meat & Converts the federal pathway from safety consultation into practical market clearance for cultivated chicken. \\
+\addlinespace
+Jul.--Aug.\ 2023 & First U.S.\ restaurant sales/availability by UPSIDE Foods and GOOD Meat & Makes market entry visible to consumers, legislators, and incumbent producer groups. \\
+\addlinespace
+Oct.\ 2024 & FSIS Notice 38-24 on sampling cell-cultured meat and poultry & Documents post-clearance implementation of inspection and testing responsibilities, reinforcing that the federal pathway is operational. \\
+\addlinespace
+Mar.--Nov.\ 2025 & FDA/USDA and market-entry expansion: Mission Barns, Wildtype, Believer Meats & Shows the pathway extending beyond the initial two chicken firms to pork fat, salmon, and additional chicken products; useful as continuing salience rather than the first shock. \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Complete 19-row source table with event dates, agency roles, source status, and URLs is stored in \texttt{cultivated\_meat\_project/data/manual/federal\_commercialization\_milestones.csv}.  Official anchors include the FDA--USDA formal agreement, FDA's cultured-animal-cell-food inventory and constituent updates, USDA/FSIS labeling rulemaking, FSIS Directive~7800.1, and FSIS Notice~38-24.  Company releases and trade/news sources are used only where no concise public official table was located for label approvals or market-launch events.  These milestones are used as commercialization-salience benchmarks, not as a clean national natural experiment.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The federal framework, however, establishes a floor rather than a ceiling.  Public-comment evidence from USDA/FSIS labeling consultations documents how stakeholders invoke competing terms for cell-cultivated meat \citep{failla2023usda}, and peer-reviewed nomenclature inventories catalog the vocabulary choices at stake in definitional debates \citep{malerich2022nomenclature}.  States retain substantial authority over product labeling and nomenclature, commerce, and livestock-industry regulations.  Beginning in 2018, state legislatures emerged as a primary arena for debates over restricting cultivated meat, with three main instruments: (1)~\emph{labeling and definition bills} mandating disclosures or restricting use of terms such as ``meat,'' ``beef,'' or ``poultry'' on cultivated-meat products; (2)~\emph{outright sales bans and moratoria}, prohibiting or suspending the sale of cultivated meat pending further regulatory review; and (3)~\emph{procurement restrictions}, barring state institutions from purchasing cultivated meat with public funds.  In the CMPD, by the end of 2025, 38 of 50 states had introduced at least one cultivated-meat-related bill.
+
+Interstate policy diffusion---the spread of regulatory innovations across state borders via learning, competition, and emulation---is a standard lens for organizing state adoption patterns \citep{walker1969diffusion,berry1992tax,shipan2008mechanisms,volden2008formal,mooney2001regional}.  In short panels with strong national salience shocks, geographic correlation in timing need not identify peer-to-peer learning; Appendix~\ref{app:peer_diagnostics} documents that a regional peer proxy for escalation is absorbed once common national timing is controlled.  Cross-sectional variation in cattle-industry exposure, political ideology, and technology-sector capacity remains the primary descriptive focus of the empirical analysis below (Sections~\ref{sec:empirical}--\ref{sec:results}).
+
+% ============================================================
+\section{Theoretical Framework: Anticipatory Political Economy}
+\label{sec:theory}
+% ============================================================
+
+\subsection{Setup}
+
+The geographic and temporal patterns documented in Section~\ref{sec:descriptive} are consistent with an anticipatory political-economy logic.  The mapping to industrial organization is conceptually useful but empirically incomplete and should be read as an organizing lens rather than an identified structural model: statutory restrictions are observed, but firm entry, investment, prices, quantities, and welfare responses are not.  Three conceptual ingredients matter:
+
+\begin{itemize}
+    \item \textbf{Incumbent stake}: the conventional livestock and meatpacking sector, organized politically through state Farm Bureaus, cattlemen's associations, and national commodity groups.
+    \item \textbf{Commercialization salience}: federal consultations, inspection steps, and early product launches that make a still-small entrant more politically visible.
+    \item \textbf{Policy instrument}: the state restriction instrument---a labeling rule, procurement restriction, moratorium, or ban---that can plausibly shape future market access but is not itself evidence of realized entry deterrence.
+\end{itemize}
+
+Dixit's (1980) entry-deterrence model shows that an incumbent may invest pre-emptively in capacity or commitment devices---not necessarily because these reduce production costs, but because they can lower entrant profits relative to entry costs.  The analogous logic here is institutional rather than physical: organized incumbents may support regulatory commitments that would make future market access more costly or uncertain.  The ``raising rivals' costs'' intuition \citep{salop1983raising, milgrom1982predation} therefore motivates a descriptive prediction: political demand for restrictions should be larger where incumbent livestock stakes are larger, although this paper does not observe the entrant's counterfactual entry payoff.
+
+The Stigler--Peltzman--Becker tradition provides the political-economy micro-foundation for why producer interests, consumer arguments, ideology, and political costs can be associated with regulatory outcomes \citep{stigler1971theory, peltzman1976toward, becker1983theory}.  Cultivated meat is a useful setting for this framework: the entrant is recent and visible, the incumbent industry is geographically concentrated and politically organized, and no preemptive federal standard prevents state action.  State legislatures therefore became an important venue for anticipatory regulation, even when entrant responses are not directly observed.
+
+\subsection{Stylized Political-Economy Bookkeeping}
+
+Let $R_{s,t}=1$ indicate that state $s$ adopts or advances a restrictive cultivated-meat policy in period $t$.  Instead of treating the legislature as maximizing an estimable welfare function, the paper uses a reduced-form political-payoff index:
+
+\begin{equation}
+\Delta \Omega_{s,t}
+=
+\theta_s M_{s,t} Z_t
++ \lambda_s C_{s,t}
+- \kappa_s T_{s,t}
+- \chi_s L_{s,t}
++ \varepsilon_{s,t}.
+\label{eq:political_payoff}
+\end{equation}
+
+Here $M_{s,t}$ is the perceived incumbent stake in conventional meat and livestock; $Z_t$ is national commercialization salience; $C_{s,t}$ captures ideological and cultural alignment with restriction; $T_{s,t}$ captures innovation-oriented or legal opportunity costs of restriction; and $L_{s,t}$ summarizes countervailing lobbying, administrative, or process frictions.  Equation~\eqref{eq:political_payoff} is not a welfare decomposition.  It is a bookkeeping device for translating political-economy theory into observable state-policy predictions.
+
+Restriction is more likely when the index crosses a threshold:
+\begin{equation}
+\theta_s M_{s,t} Z_t + \lambda_s C_{s,t}
+\;\geq\;
+\kappa_s T_{s,t} + \chi_s L_{s,t} - \varepsilon_{s,t}.
+\label{eq:restriction_condition}
+\end{equation}
+
+Equations~\eqref{eq:political_payoff}--\eqref{eq:restriction_condition} justify the empirical focus on state response, maximum stringency, bill-level severity, and timing around federal commercialization milestones.  They do not imply that the paper estimates incumbent surplus, consumer welfare, firm entry deterrence, or lobbying effectiveness.
+
+\subsection{Testable Predictions}
+
+The sign implications of~\eqref{eq:restriction_condition} map to the covariates in the empirical analysis.  Table~\ref{tab:predictions} summarizes the five main predictions and the empirical counterparts used in Paper~1.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Stylized Predictions and Empirical Counterparts}
+\label{tab:predictions}
+\small
+\begin{tabular}{p{0.33\textwidth}p{0.29\textwidth}p{0.25\textwidth}}
+\toprule
+Prediction & Interpretation & Empirical proxy \\
+\midrule
+\textbf{P1.} States with larger incumbent livestock sectors are more likely to respond or choose more restrictive instruments.
+  & Higher perceived incumbent stake $M_{s,t}$
+  & \texttt{log\_cattle\_inventory} $(+)$; robustness: livestock receipts, meatpacking employment, animal-production establishments \\
+\addlinespace
+\textbf{P2.} States with lower CW policy ideology scores (more conservative policy environments) are more likely to respond or choose more restrictive instruments.
+  & Political/cultural alignment $C_{s,t}$
+  & \texttt{cw\_policy\_ideology} $(-)$, higher $=$ more liberal \\
+\addlinespace
+\textbf{P3.} States with greater innovation capacity are less likely to restrict or escalate.
+  & Higher political or opportunity cost $T_{s,t}$
+  & \texttt{rnd\_emp\_share} $(-)$ \\
+\addlinespace
+\textbf{P4 (appendix benchmark).} Regional peer timing proxy for Stage~2 escalation (diagnostic only).
+  & \emph{Not} interpreted as identified peer diffusion: the proxy is absorbed by a national year trend (Appendix~\ref{app:peer_diagnostics})
+  & \texttt{peer\_escalation} (Stage~2; appendix) \\
+\addlinespace
+\textbf{P5.} Federal commercialization milestones increase the salience of restriction, especially in high-exposure states with lower CW policy ideology scores.
+  & National salience $Z_t$ makes latent political conflict more visible
+  & Pre-milestone exposure $\times\, \mathbf{1}(t \geq 2023)$ \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Predictions are derived from the stylized political-payoff bookkeeping in equations~\eqref{eq:political_payoff}--\eqref{eq:restriction_condition}.  The preferred Paper~1 outcomes are state response, maximum stringency, bill-level severity, and policy-before-market timing.  The existing state-year hazards evaluate related timing diagnostics only; they are not the paper's main estimand.  P4 is retained only as an appendix diagnostic for Stage~2 peer timing (Appendix~\ref{app:peer_diagnostics}) and is \emph{not} treated as a headline causal mechanism.  P5 is probed descriptively in the frozen-exposure timing design (Appendix~\ref{app:supp_timing}).
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The main empirical mapping follows from the threshold in equation~\eqref{eq:restriction_condition}.  Low-cost instruments such as agenda entry, study bills, and labeling mandates require less political support than procurement limits, moratoria, or sales bans.  The preferred empirical ladder therefore measures (i) whether the state responds at all, (ii) the maximum stringency reached by 2025, and (iii) the severity of individual bills.  The two-stage state-year design remains useful for documenting timing---first agenda entry and first escalation---but it is a supporting diagnostic rather than the structure of the paper.
+
+% ============================================================
+\section{Data: Cultivated Meat Policy Database (CMPD)}
+\label{sec:data}
+% ============================================================
+
+\subsection{Construction}
+
+Bill metadata and full texts are assembled from state portals, LegiScan, and OpenStates; structured policy indicators are extracted with GPT-class models and passed through automated validation scripts \citep{grimmer2013text,lazer2009computational}.  The paper's public 2018--2025 window includes a source-backed 2018 prior alternative-protein labeling baseline used to describe the state-policy environment and to supply lagged baseline covariates.  The active cultivated-meat bill corpus begins in 2019 and runs through 2025.  The reproducible large-language-model (LLM) cleaning stage yields \textbf{161} JSON documents paired with full bill texts.  \texttt{03\_build\_panel.py} then retains state-level filings with a bill-level \texttt{activity\_year} in 2019--2025, where \texttt{activity\_year} is based on legislative activity rather than raw/proposed effective-date metadata.  This drops \textbf{20} federal (\texttt{US\_*}) records and one strict out-of-scope state record (\texttt{ME\_LD1257}, genetic-engineering labeling rather than cultivated meat), producing \textbf{140} rows in the active bill-level analysis file \texttt{doc\_level.csv} spanning \textbf{38} state codes.  Downstream outcome construction then assigns each bill a \texttt{canonical\_year} in \texttt{bill\_final.csv}: the first substantive policy-action year from \texttt{policy\_actions.csv}, with prior-year prefiles assigned to the formal session year.  Raw/proposed \texttt{effective\_year} metadata is retained as an extraction audit field but does not determine inclusion or event timing in the bill-activity corpus.  The full timing audit now checks the 140 Paper~1 bill records and reports 140 verified cases and 0 problem cases; metadata disagreements are retained in machine-readable audit fields and resolved against external state or legislative-status sources rather than treated as outcome-year failures.  The external verification did not change any stored \texttt{canonical\_year}, so the downstream state-year panels, risk sets, and empirical estimates are unchanged by the audit-display cleanup except for the strict ME exclusion.  The remaining twelve states have no qualifying bill row in this file but remain in the fifty-state outcome panel (implicit zero bill activity until first introduction).  A stratified gold set (140 bill records, two-annotator blind-coding design) matches the active \texttt{doc\_level.csv} row count; annotation packages are available in \texttt{data/gold\_set/} and validation logic in \texttt{02\_validate\_outputs.py}.  All 140 rows now use gold-corrected labels: 20 are \texttt{author\_manual} rows and 120 are finalized through the project phase-13 (P13) blind-human verification queue.  For all 120 P13 rows, Annotator~A independently coded policy type, labeling, ban, and effective-year fields directly from bill text (no codex labels were present in the annotation workbook); Annotator~B independently resolved the 11 A-versus-codex disagreements.  The finalized labels therefore reflect independent human adjudication for all 140 active-corpus rows.  Residual label uncertainty---arising from Annotator~A's per-field error rate rather than from unchecked LLM labels---is quantified in the measurement-error sensitivity analysis (Section~\ref{sec:robustness}).
+
+\subsection{Status and Timing}
+
+Legislative status data---bill introduction dates, hearing dates, floor votes, and enactment dates---are retrieved from the OpenStates and LegiScan APIs, which provide structured metadata for legislation across all 50 states.  Each bill is assigned a \emph{canonical legislative year} based first on action-history evidence: the first substantive policy action in \texttt{policy\_actions.csv}.  If the first action is a prior-calendar-year prefile or draft setup for the next legislative session, the bill is assigned to the formal session year.  Introduced date, session year, \texttt{activity\_year}, and raw/proposed \texttt{effective\_year} metadata are fallbacks, in that order.  This distinction matters for prefiled bills, biennial sessions, delayed-effective-date statutes, and occasional extraction-layer effective-year errors: source-specific dates remain in \texttt{policy\_actions.csv} and \texttt{analysis\_ready\_with\_status.csv} for process audits, but legal-effect metadata do not move a bill's legislative event into a later panel year.  Manual fallbacks are applied for key bills with missing or ambiguous API data.
+
+\subsection{Broad Consumer Access}
+
+The ``before broad consumer access'' claim is defined at the national market-maturity level rather than separately for each state.  A year is inside the pre-broad-access window if cultivated meat lacks stable retail channels, lacks routine in-state purchase opportunities for ordinary consumers, and lacks observable state-level sales or substitution evidence showing displacement of conventional meat.  Limited restaurant launches, tasting-menu availability, firm-specific launches, or isolated retail pilots can make commercialization salient without converting the product category into a broad consumer market.  The timing claim is therefore not that every state independently lacked any possible product exposure; it is that U.S.\ state policy activity occurred before cultivated meat became routinely purchasable at scale or measurably substituted for conventional meat in state markets.
+
+\subsection{From Documents to Policy Stages, Severity, and Timing Diagnostics}
+
+The bill-level file (\texttt{doc\_level.csv}, 140 active rows) supports three levels of analysis.  First, it generates a \emph{policy-before-market timeline}: annual bill introductions, first state responses, first bans or moratoria, and federal commercialization milestones.  Second, it defines a 50-state cross-section of \emph{response and maximum stringency}: no activity, study or task-force activity, labeling or definitional restriction, procurement restriction, moratorium, or sales/manufacturing ban.  Third, it defines bill-level severity and status measures for the 140-record corpus, separating study bills, information/labeling instruments, procurement restrictions, moratoria, bans, and enactment status.
+
+For continuity with the earlier draft, the bill file is also aggregated to a state-year timing panel using two first-event definitions.  \emph{Agenda entry} is defined as the first year in which any cultivated-meat-related bill is introduced in state $s$ (regardless of instrument type or legislative outcome).  \emph{Escalation} is defined as the first year in which a state sees a ban or moratorium bill, whether or not that bill is enacted.  Both outcomes follow a first-event-exit design: once a state experiences an agenda entry (or escalation), it exits the corresponding timing risk set and is not observed at risk in subsequent years.  These risk sets are retained to describe annual timing, not to substitute for the paper's preferred response/stringency and bill-severity outcomes.
+
+The resulting state-year outcomes panel (\texttt{state\_year\_outcomes.csv}) spans 50 states and 7 years (2019--2025).  After applying the first-event-exit rule for agenda entry, the Stage~1 risk set contains 236 state-year observations with 38 agenda-entry events.  The Stage~2 risk set---states with agenda entry but not yet a ban/moratorium bill---contains 133 observations with 22 escalation events.  The state covariate file (\texttt{state\_covariates.csv}) merges data from six sources: U.S.\ Department of Agriculture National Agricultural Statistics Service (USDA NASS; cattle and livestock inventories), Bureau of Labor Statistics Quarterly Census of Employment and Wages (BLS QCEW; employment by industry), Census American Community Survey (ACS; demographics), Bureau of Economic Analysis (BEA; per-capita income), Caughey--Warshaw (state policy ideology), and FollowTheMoney (campaign finance).  Table~\ref{tab:sumstats} reports summary statistics for the Stage~1 timing risk-set sample.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Summary Statistics: Legacy Stage 1 Timing Risk-Set Sample ($N = 236$)}
+\label{tab:sumstats}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+Variable & $N$ & Mean & SD & Min & Max \\
+\midrule
+Agenda entry (0/1)            & 236 & 0.161 & 0.368 & 0.000 & 1.000 \\
+Log cattle inventory          & 236 & 10.858 & 1.889 & 6.215 & 14.366 \\
+Caughey--Warshaw ideology     & 236 & 1.577 & 0.772 & 0.135 & 3.352 \\
+R\&D employment share (\%)   & 236 & 0.564 & 0.668 & 0.037 & 3.762 \\
+Republican governor (0/1)     & 236 & 0.525 & 0.500 & 0.000 & 1.000 \\
+Livestock receipts share      & 236 & 0.487 & 0.189 & 0.090 & 0.828 \\
+Meatpacking emp.\ share       & 236 & 0.005 & 0.007 & 0.000 & 0.029 \\
+Peer agenda entry (region)    & 236 & 0.075 & 0.123 & 0.000 & 0.327 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Stage-1 risk-set state-year observations (2019--2025, prior to first agenda entry for each state).  Caughey--Warshaw (CW) policy ideology: latent policy ideology; higher values = more liberal.  Livestock receipts share: state livestock cash receipts as a fraction of total agricultural output.  Meatpacking employment share: BLS QCEW North American Industry Classification System (NAICS) 3116 employment as a share of total state employment.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% ============================================================
+\section{Empirical Strategy and Evidence Hierarchy}
+\label{sec:empirical}
+% ============================================================
+
+\subsection{Three Empirical Margins}
+
+The main empirical object is not a causal treatment effect of cultivated-meat regulation on firms.  Firm entry, investment, prices, quantities, and welfare are not observed.  The empirical strategy is therefore descriptive mapping plus correlational models of state response, bill severity, and political supply, not causal estimates of firm entry or welfare.  The preferred Paper~1 estimands are descriptive and comparative:
+
+\begin{enumerate}
+    \item \textbf{State adoption and maximum stringency.}  Which states responded by 2025, and what was the strictest instrument reached: no activity, study/task force, labeling or definitional restriction, procurement restriction, moratorium, or ban?
+    \item \textbf{Bill-level severity and passage.}  Conditional on bill introduction, which bills propose information tools versus market-access restrictions, and which become enacted law or advance through the process?
+    \item \textbf{Legislator political supply.}  Within the opportunity set created by each bill, which legislators supply sponsorship or cosponsorship of cultivated-meat restrictions?
+    \item \textbf{Bounded mechanism triangulation.}  Do vote/process, testimony, lobbying, contributions, and text-similarity evidence line up with the political-economy interpretation without claiming a complete voting, lobbying-effectiveness, or diffusion design?
+\end{enumerate}
+
+The current state-year hazard models are therefore treated as supporting timing diagnostics.  They are useful for showing when agenda entry and escalation cluster, and for checking whether observed timing patterns survive basic controls, but they should not be read as the paper's main source of independent identifying variation.
+
+\subsection{State Response and Maximum Stringency}
+
+The preferred state-level outcome is a 50-state cross-section measured by 2025.  Let $S_s$ denote state $s$'s maximum cultivated-meat policy stage:
+\[
+S_s \in \{0,1,2,3,4,5\},
+\]
+where 0 indicates no activity; 1 indicates a study, task force, or nonbinding resolution; 2 indicates labeling or definitional restrictions; 3 indicates procurement restrictions; 4 indicates a moratorium; and 5 indicates a sales, manufacturing, or distribution ban.  This outcome directly matches the pre-market-regulation question: it asks not only whether a state moved, but how far it moved along the policy ladder before broad consumer access existed.  The analysis compares $S_s$ and binary variants such as any response, any severe restriction, and any ban/moratorium with pre-period livestock-sector exposure proxies, conservative policy environment, prior anti-alt-protein policy infrastructure, rural/agricultural structure, and innovation capacity.
+
+For the severe-bill cross-section, the estimand is especially simple: a 50-state linear probability model for whether state $s$ introduced at least one severe bill by 2025, where severe means a ban or moratorium rather than a labeling-only bill:
+\begin{equation}
+\begin{aligned}
+\mathrm{Severe}_s
+= {} & \alpha
++ \beta_1 \mathrm{Conservatism}_s
++ \beta_2 \mathrm{Cattle}_s
++ \beta_3 \mathrm{Meatpacking}_s \\
+&+ \beta_4 \mathrm{RepublicanGovernor}_s
++ \beta_5 \mathrm{PriorPlantBasedLabeling}_s
++ \varepsilon_s .
+\end{aligned}
+\label{eq:severe_lpm}
+\end{equation}
+The main text reports the same relationship using the Caughey--Warshaw (CW) policy ideology index (project variable \texttt{cw\_policy\_ideology}); higher values are more liberal, lower values are more conservative.  A negative coefficient on the CW scale therefore indicates that more conservative states (i.e., lower CW scores) are more likely to restrict.
+
+This cross-sectional design is intentionally modest.  With 50 states, inference will be limited; the value is transparency about the actual information content rather than treating repeated state-years as many independent shocks.  Standardized coefficients, confidence intervals, and specification sensitivity are more important than significance stars.  In particular, an imprecise livestock-exposure coefficient should not be written as evidence that industry interests are absent unless the confidence interval rules out economically meaningful effects.
+
+\subsection{Bill-Level Severity}
+
+The second preferred outcome is bill-level severity in the 140-record active CMPD corpus.  Each bill record is classified into policy instruments such as study/task force, labeling or definitional restriction, procurement restriction, moratorium, ban, penalties, and enactment status.  The main 0/1/2 severity ladder is deliberately narrower than the full policy-type taxonomy: severity 0 means no direct labeling or sales/manufacturing ban in the main market-access ladder; severity 1 means labeling, disclosure, or naming restriction without a ban; severity 2 means a sales/manufacturing ban or moratorium, with or without labeling.  Procurement-only, funding-only, scope-exclusion, and study rows remain visible in the policy-type file and are not described as ``no regulation.''  Table~\ref{tab:severity_boundary} lists the severity-0 boundary rows that are policy-relevant but outside the main labeling-versus-ban ladder.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Boundary Rows in the Bill-Level Severity Ladder}
+\label{tab:severity_boundary}
+\small
+\begin{tabular}{llllp{0.40\textwidth}}
+\toprule
+Bill & State & Year & Policy type & Treatment in main severity ladder \\
+\midrule
+IA\_HF377 & IA & 2023 & Procurement restriction & Severity 0 because it does not impose a labeling rule, sales ban, manufacturing ban, or moratorium; retained as a separate procurement tool in the policy taxonomy. \\
+TN\_SB0148 & TN & 2025 & Procurement restriction & Same treatment as IA\_HF377: policy-relevant procurement restriction, but outside the main labeling-versus-ban severity ladder. \\
+SD\_HB1118 & SD & 2025 & Funding restriction & Severity 0 in the main ladder; treated separately as a public-funding restriction rather than as labeling or market-access prohibition. \\
+MT\_SB386 & MT & 2025 & Scope exclusion & Severity 0 in the main ladder; treated separately as a definitional/scope exclusion rather than as a labeling mandate or ban. \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} The table prevents a common misreading of severity 0.  These rows are not ``no regulation'' bills.  They are boundary instruments that do not enter the main 0/1/2 labeling-versus-ban severity ladder but remain available in \texttt{policy\_types\_norm}, \texttt{max\_intensity}, and component-outcome audits.  Source: \texttt{bill\_level\_severity.csv} and \texttt{bill\_level\_severity\_audit.md}.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The full policy-type taxonomy also contains several hybrid or nonrestrictive instruments that are easy to lose in a three-level severity outcome.  Table~\ref{tab:hybrid_tools} summarizes these categories.  The most important conceptual distinction is between \emph{supportive or exploratory} bills and \emph{restrictive} bills.  The Massachusetts protein-innovation commission bills, for example, study cultivated meat as part of a broader alternative-protein economic-development agenda; they are relevant to the pre-market governance puzzle, but they do not fit an incumbent-protection or market-access restriction interpretation.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Hybrid and Nonstandard Cultivated-Meat Policy Instruments}
+\label{tab:hybrid_tools}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.95}
+\begin{tabularx}{\textwidth}{p{0.23\textwidth}p{0.14\textwidth}p{0.30\textwidth}Y}
+\toprule
+Policy instrument & Count & Bills & Interpretation \\
+\midrule
+Supportive study / commission & 3 & IL\_HB3710; MA\_H402; MA\_S229 & Study or commission bills, including Massachusetts protein-innovation bills that frame cultivated, plant-based, and fermented proteins as economic-development opportunities. \\
+\addlinespace
+Nonbinding federal-labeling resolution & 2 & KY\_HR105; ND\_HCR3024 & Resolutions urging federal labeling or risk-assessment action; no binding state market restriction. \\
+\addlinespace
+Procurement-only / funding / scope boundary & 4 & IA\_HF377; TN\_SB0148; SD\_HB1118; MT\_SB386 & Policy-relevant boundary instruments outside the main labeling-versus-ban ladder; see Table~\ref{tab:severity_boundary}. \\
+\addlinespace
+Labeling plus procurement restriction & 9 & IA\_SF2391; MS\_HB913; MS\_HB1305; NC\_H135; OH\_HB661; OH\_HB10; OR\_HB2691; WI\_AB554; WI\_SB560 & Labeling/misbranding plus school, public-institution, or public-purchase restrictions; severity 1 because retail sale is not broadly banned. \\
+\addlinespace
+Labeling plus permit & 2 & TN\_HB0804; TN\_SB0931 & Labeling restriction plus annual manufacturer permit; regulatory but not a broad private-market ban. \\
+\addlinespace
+Ban plus labeling & 4 & MT\_HB401; MT\_LC1338; TX\_HB1431; TX\_SB261 & Sales/manufacturing restriction with labeling language; severity 2 because the ban/moratorium component dominates. \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Counts are from the P13 gold-corrected 140-record active corpus.  Plain labeling-only bills ($N=82$) and plain ban-only bills ($N=34$) are omitted from this table because the purpose is to show the nonstandard categories that require careful description.  The classifications are descriptive and do not imply causal interpretation.  \texttt{ME\_LD1257} is excluded from the active corpus after strict review found it concerns genetic-engineering labeling rather than cultivated meat or cell-cultured meat.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Bill-level severity exploits the corpus more directly than a first-event state-year design: multiple bills within a state can differ in instrument choice, passage status, and proximity to market-access restrictions.  The main bill-level analysis should therefore ask whether severe instruments are more common in states with conservative policy environments, high livestock exposure, prior anti-alt-protein policy infrastructure, or agriculture-facing sponsors/referrals.
+
+Bill-level estimates will be descriptive because bills are not independent policy shocks.  Companion bills, prefiles, repeated sessions, and state legislative institutions can generate clustered observations within states.  The manuscript therefore treats bill-level severity as a structured description of instrument choice, not as a causal model of bill passage.
+
+\subsection{Legislator Political Supply}
+\label{sec:political_supply_design}
+
+The third empirical margin asks who supplies cultivated-meat restrictions once a bill opportunity exists.  The unit is a legislator-bill row: every seated legislator in the relevant chamber and session is observed as eligible to sponsor or cosponsor a bill.  The preferred specification is a bill-fixed-effect linear probability model:
+\begin{equation}
+\begin{aligned}
+Sponsor_{lbst}
+= {} & \alpha_b
++ \beta_1 AgCommittee_{lst}
++ \beta_2 CattleExposure_{lst}
++ \beta_3 Republican_{lst} \\
+&+ \beta_4 Female_l
++ \beta_5 ElectoralMargin_{lst}
++ \beta_6 BioAg_l
++ X_{lst}\Gamma
++ \varepsilon_{lbst},
+\end{aligned}
+\label{eq:political_supply}
+\end{equation}
+where $l$ indexes legislators, $b$ bills, $s$ states, and $t$ sessions.  The bill fixed effect $\alpha_b$ compares legislators facing the same legislative opportunity, absorbing bill severity, state-year salience, and chamber-level institutional context.  The main outcomes are primary sponsorship and any sponsorship/cosponsorship.  The full-panel columns omit age and primary-challenge controls because their current coverage is not sufficiently complete for main-text inference; biography-based agricultural identity is included only in bio-observed columns.  Standard errors are clustered by state-session.  These specifications estimate political supply of sponsorship, not voter preferences, floor-vote behavior, or causal effects of legislator identity.
+
+\subsection{Cross-Issue Falsification: Multi-Issue Triple-Difference}
+\label{sec:multi_issue}
+
+A central concern with state cross-section evidence on cultivated-meat regulation is that any pattern attributed to ``morality politics'' or ``cultural cluster'' may simply reflect a generic tendency for conservative agricultural states to regulate everything more aggressively.  We therefore report a formal falsification / negative-control check covering three core policy domains over 2019--2025: cultivated-meat restriction, plant-based meat labeling restriction, and raw milk prohibition.  The cross-issue falsification asks whether ideology predicts cultivated-meat restrictions similarly to plant-based labeling, but with opposite polarity for raw milk.  The design is intentionally narrow: its purpose is to discipline the ``conservatives restrict everything'' alternative explanation by including raw milk---a contested food product whose deregulation is a documented libertarian and conservative-permissive cause in U.S. state politics---rather than to identify a generic ``food-technology politics'' parameter across an exhaustive issue universe.  Issue selection therefore prioritizes the sign of the falsification contrast, not coverage breadth, and the panel remains a supporting check rather than the paper's main causal design.  The plant-based-labeling arm uses a source-backed issue-universe file with 14 main-panel positive states by 2025.  Florida's row is conditional on other states' labeling laws, so we report a sensitivity that removes this conditional row from the plant-based-labeling arm.  Raw-milk legality is coded at four levels (retail-legal, farm-legal, herdshare-only, prohibited), with a source-backed 50-state seed and six within-panel transition/correction rows (Montana 2021, Georgia 2023, Iowa 2023, North Dakota 2023, Delaware 2024, and West Virginia 2024).  The harmonized core panel has $50 \times 7 \times 3 = 1050$ state-issue-year observations.
+
+We also screen candidate expansions to avoid post-hoc issue selection.  A sparse fourth issue, plant-based dairy labeling, can be source-backed from the same state-law file (North Carolina 2018 and Florida 2025 conditional dairy/milk labeling provisions) and is written to an expanded source-screen panel, but it is too sparse and conditional-law-heavy to enter the main regression.  Genetically modified organism (GMO)/bioengineered-food labeling is excluded because the National Bioengineered Food Disclosure Standard preempts non-identical state disclosure requirements and leaves little state-level 2019--2025 variation.  Hemp/cannabidiol (CBD) foods are a plausible future fifth issue because state policy is a genuine patchwork, but they require a new 50-state-year official coding of CBD/hemp-in-food permissiveness or restriction before they can be used in this paper's panel.
+
+For compact notation in the triple-difference equation, CM denotes cultivated meat and RM denotes raw milk.  The triple-difference specification, with plant-based labeling as the omitted reference category, is
+\begin{align}
+y_{i,j,t} = \alpha &+ \beta_1 \mathrm{industry}_{j,t-1} + \beta_2 \mathrm{ideology}_{j,t-1} \nonumber \\
+& + \gamma_{\mathrm{CM}}(\mathrm{industry} \times \mathbf{1}[\mathrm{CM}]_i) + \gamma_{\mathrm{RM}}(\mathrm{industry} \times \mathbf{1}[\mathrm{RM}]_i) \nonumber \\
+& + \delta_{\mathrm{CM}}(\mathrm{ideology} \times \mathbf{1}[\mathrm{CM}]_i) + \delta_{\mathrm{RM}}(\mathrm{ideology} \times \mathbf{1}[\mathrm{RM}]_i) \nonumber \\
+& + \mu_s + \tau_t + \nu_i + \varepsilon_{i,j,t},
+\label{eq:triple_diff}
+\end{align}
+where $i$ indexes issue, $j$ indexes state, $t$ indexes year, $y_{i,j,t}$ indicates that state $j$ has enacted a restrictive regime on issue $i$ by year $t$, and $\mu_s, \tau_t, \nu_i$ are state, year, and issue fixed effects.  Standard errors are clustered at the state level.  The falsification test is the sign and magnitude of $\delta_{\mathrm{RM}}$: if conservative-state ideology drives all three issues in the same restrictive direction, $\delta_{\mathrm{RM}}$ should be small.  If instead conservative policy environments predict \emph{restriction} on alt-protein issues but \emph{permissiveness} on raw milk, $\delta_{\mathrm{RM}}$ should be positive; the strongest version would reverse the sign of the implied raw-milk ideology coefficient $\beta_2 + \delta_{\mathrm{RM}}$, while the weaker but still informative version attenuates the raw-milk coefficient toward zero relative to the alt-protein arms.
+
+The interaction $\gamma_{\mathrm{CM}}$ is a separate falsification of the standard interest-group story: if industry economic exposure operates uniformly across alt-protein issues, $\gamma_{\mathrm{CM}}$ should be near zero; if the cultivated-meat case is mechanically different because incumbent industry has not yet faced realized market displacement, $\gamma_{\mathrm{CM}}$ should be negative (industry coefficient on cultivated meat is smaller than on plant-based labeling).
+
+\subsection{Mechanism: Statutory Text Alignment via Local Sequence Alignment}
+\label{sec:alignment}
+
+A standard concern with statistical peer-effect estimation is the Manski reflection problem: coincident timing across states is observationally equivalent under common-shock and peer-learning interpretations.  In the cultivated-meat case the federal regulatory milestones generate exactly such a common shock, making peer-timing logits uninformative even before $G$=38 small-cluster concerns.  We therefore replace statistical inference about peer effects with direct textual evidence of possible statutory-text reuse.
+
+For each pair of bills in the corpus, we first compute term frequency--inverse document frequency (TF-IDF) char $n$-gram cosine similarity to generate candidate pairs, then apply Smith--Waterman local sequence alignment \citep{smith1981identification} and exact-match extraction (\texttt{difflib.SequenceMatcher}) to identify the longest contiguous verbatim substring between any two bills.  The methodology is the published state-of-art for legislative-text lineage detection \citep{hertel2014whoseinterests,linder2020textaspolicy} and is preferred over cosine similarity alone because it produces verifiable shared-substring quotations rather than abstract similarity scores.  All cross-state pairs with shared substrings of at least 40 contiguous characters are then submitted to a GPT-4o-mini verification step: the model classifies each shared substring by provision type, whether it is cultivated-meat-specific (versus federal boilerplate or standard food-law language), and diffusion confidence (high/medium/low), with an explicit anti-overclaim prompt instructing conservative scoring.  Only pairs classified as cultivated-meat-specific with at least medium confidence are treated as verified statutory alignment consistent with possible template reuse.
+
+\subsection{Supporting Timing Diagnostics: Two-Stage State-Year Hazards}
+
+For continuity with the earlier draft and to document timing, we retain a two-stage discrete-time hazard framework \citep{berry1990state,angrist2009mostly}.  The first stage is a state-year logit for new bill introduction: whether lagged ideology and cattle exposure predict the first year in which a state places cultivated meat on its legislative agenda.  The second stage models annual escalation---whether a state that has already placed cultivated meat on its legislative agenda sees a ban or moratorium bill.  These estimates are diagnostics for timing and calendar clustering; they are not the core identification strategy.
+
+Formally, each stage is estimated as a discrete-time logistic hazard model.  In the first stage, state $s$ enters the risk set in the first year of the panel and exits upon its first agenda entry.  In the second stage, the risk set consists of states that have experienced agenda entry but have not yet escalated:
+\begin{align}
+    \text{Stage 1:} \quad \Pr(A_{s,t} = 1 \mid A_{s,t-1} = 0) &= \Lambda\!\left(\mathbf{x}_{s,t-1}'\boldsymbol{\beta}_1 + f(d_{s,t})\right) \label{eq:stage1} \\[6pt]
+    \text{Stage 2:} \quad \Pr(E_{s,t} = 1 \mid A_{s,\tau} = 1, E_{s,t-1} = 0) &= \Lambda\!\left(\mathbf{w}_{s,t-1}'\boldsymbol{\beta}_2\right) \label{eq:stage2}
+\end{align}
+where $\Lambda(\cdot)$ is the logistic CDF, $A_{s,t}$ indicates agenda entry, $E_{s,t}$ indicates escalation, $\mathbf{x}_{s,t-1}$ and $\mathbf{w}_{s,t-1}$ are vectors of lagged covariates, and $f(d_{s,t}) = \gamma_1 d + \gamma_2 d^2 + \gamma_3 d^3$ is a cubic polynomial in duration capturing the baseline hazard \citep{carter2010temporal,box2001duration}.  Standard errors are clustered at the state level throughout; with $G=50$ clusters in Stage~1 and $G=38$ in Stage~2, bootstrap-based refinements are used as finite-sample checks \citep{cameron2008bootstrap,mackinnon2018wild}.
+
+\paragraph{Legislative-calendar risk set.}  The risk set is annual, not monthly or daily.  A state-year is treated as at risk for first agenda entry if the state has not previously introduced a cultivated-meat bill in the panel; the outcome records whether any qualifying legislative activity occurs in that calendar/session year.  This choice matches the paper's question about annual state-level agenda entry and escalation, but it does not estimate within-session speed.  To reduce calendar misclassification, prior-year prefiles and draft/setup actions are assigned to the formal session year when action-history evidence indicates that they belong to the next legislative session (Section~\ref{sec:data}).  The remaining differences in session timing, session length, and biennial legislative schedules are therefore part of the annual policy-opportunity environment rather than separately identified treatment variation.  Accordingly, all timing results should be interpreted as annual first-event hazards; a state-month design would require explicit in-session indicators, session-length controls, and biennial-session calendars that are beyond the current paper.
+
+\subsection{Component Timing Model}
+
+Because labeling requirements and outright bans may be driven by different political forces, the current draft also estimates a pooled component timing model that stacks the risk sets for both policy instruments:
+\begin{equation}
+    \Pr(Y_{s,c,t} = 1 \mid Y_{s,c,t-1} = 0) = \Lambda\!\left(\alpha_c + \mathbf{x}_{s,t-1}'\boldsymbol{\beta}_3 + f(d_{s,t})\right)
+    \label{eq:component}
+\end{equation}
+where $c \in \{\text{labeling}, \text{ban}\}$ indexes the policy component, $\alpha_c$ is a component fixed effect, and $Y_{s,c,t}$ indicates first adoption of component $c$ by state $s$ in year $t$.  This specification increases the event count available for exploratory comparison (from 38 agenda-entry events to 65 component events).  Because the stacked component observations are not independent new state histories, this design is treated as a timing/severity diagnostic rather than as independent replication.
+
+\subsection{Covariates}
+\label{sec:covariates}
+
+The parsimonious Stage~1 specification includes two substantive covariates, all lagged one year to mitigate simultaneity:
+
+\begin{itemize}
+    \item \textbf{Incumbent-sector exposure.}  Log cattle inventory (\texttt{log\_cattle\_inventory}) captures beef/livestock-sector exposure, not the product scope of cultivated meat.  It is one proxy for conventional animal-agriculture stakes; robustness checks compare it with livestock receipts, meatpacking employment, and animal-production establishment shares.
+    \item \textbf{Political orientation.}  Caughey--Warshaw state policy ideology \citep{caughey2016dynamics} (\texttt{cw\_policy\_ideology}), a latent measure of state policy liberalism derived from over 100 policy outputs.  In the project data, higher values indicate a more liberal policy environment; the raw source median is multiplied by $-1$ to maintain this project convention.  Therefore, negative coefficients mean that more liberal states have lower hazards, equivalently that more conservative states have higher hazards.  The CW series is directly observed through 2024; only the 2025 forecasting rows (8\% of the Stage~1 risk set) rely on carried-forward values.  Ideology therefore enters the likelihood primarily through cross-sectional (between-state) differences in this short panel.
+\end{itemize}
+
+An extended specification adds research-and-development (R\&D) employment share (\texttt{rnd\_emp\_share}), reflecting the state's orientation toward technology-intensive sectors.  This variable is moderately collinear with policy ideology ($r = 0.39$) and its inclusion attenuates the ideology coefficient without improving model fit (Akaike information criterion (AIC) unchanged); it is therefore reported as a robustness check rather than a core control (see Section~\ref{sec:robustness}).  In the component hazard model, which pools labeling and ban risk sets for greater statistical power, R\&D employment share is retained as it achieves significance ($p < 0.001$ under Firth estimation).
+
+Stage~2 escalation hazards are defined on the post-agenda-entry risk set (equation~\eqref{eq:stage2}).  Any regional peer timing proxies used for benchmarking are reported only in Appendix~\ref{app:peer_diagnostics} and are not interpreted as identified interstate diffusion in the main text.
+
+\subsection{Baseline Timing Wave and Time Trend Decomposition}
+
+The cubic duration polynomial captures the aggregate adoption wave dynamics.  To assess the relative contribution of the time trend versus substantive covariates, we report a cluster-robust linear-probability decomposition: the time polynomial alone achieves pseudo-$R^2 = 0.2006$, while the full model achieves $0.2241$.  The covariates add 0.0235 pseudo-$R^2$ points, a 11.7\% improvement over the time-only fit, and are jointly significant beyond the time trend in a cluster-robust $F$ test ($F = 4.101$, $p = 0.0226$).  In the hazard-model framework, the baseline hazard is a nuisance parameter analogous to the non-parametric baseline in a Cox model; the substantive covariates capture proportional shifts in risk conditional on the aggregate national adoption trajectory.
+
+\subsection{Regulatory-Risk Score}
+
+The estimated probabilities from both stages are combined into a composite monitoring index of state policy attention and escalation:
+\begin{equation}
+    \text{Risk}_{s,t} =
+    \begin{cases}
+    \hat{\Pr}(A_{s,t}=1), & \text{if state } s \text{ is in the Stage 1 risk set at } t,\\
+    \hat{\Pr}(E_{s,t}=1\mid A_{s,\tau}=1), & \text{if state } s \text{ is in the Stage 2 risk set at } t,\\
+    0, & \text{otherwise.}
+    \end{cases}
+    \label{eq:risk}
+\end{equation}
+This stage-aware score aligns with the sequential hazard structure: before agenda entry it summarizes fitted agenda-entry hazard; after agenda entry it summarizes fitted escalation hazard.  For continuity, we also report a ``product'' score $\hat{\Pr}(A_{s,t}=1)\times\hat{\Pr}(E_{s,t}=1\mid A_{s,t}=1)$ as an auxiliary diagnostic, but it requires extrapolating the escalation model beyond its estimation support (states that have never entered the agenda), and is therefore interpreted cautiously.
+
+% ============================================================
+\section{Descriptive Patterns}
+\label{sec:descriptive}
+% ============================================================
+
+Figure~\ref{fig:premarket_timeline} establishes the central descriptive fact of the paper: state legislative activity on cultivated meat precedes broad consumer access.  Bars show the 140 state bill records introduced 2019--2025, stacked by stringency (study/research, labeling-only, ban/moratorium).  Dashed vertical lines mark four federal milestones: the 2019-03 USDA--FDA joint oversight framework; the 2022-11 FDA ``no further questions'' response to UPSIDE Foods; the 2023-06 USDA--FSIS grants of inspection to UPSIDE and GOOD Meat; and the 2023-07 first U.S. consumer sale of cultivated chicken at Bar Crenn (San Francisco).  The shaded green band covers the entire panel: cultivated meat lacked stable retail channels, routine in-state purchase opportunities, and observable state-level sales or substitution evidence through 2025.  Two distinct waves of bills are visible: a 2019 wave of approximately 25 bills (overwhelmingly labeling-only, blue) that precedes any FDA action on the product, and a 2024--2025 surge ($\sim$80 bills, red-dominated) that follows federal market clearance but still occurs before broad consumer access.  The 2019 wave is therefore strongly anticipatory; the 2024--2025 wave is anticipatory in the broad-access sense but coincides with limited restaurant launches and firm-specific pilots.  The paper's substantive interpretation distinguishes these two sub-claims.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_policy_before_market_timeline.png}
+    \caption{Policy precedes broad consumer access: U.S. cultivated meat policy activity, 2019--2025}
+    \label{fig:premarket_timeline}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} Stacked bars show the 140 state bill records in the CMPD corpus by year and stringency.  Dashed vertical lines mark four federal milestones (USDA--FDA framework 2019-03; FDA UPSIDE no-further-questions response 2022-11; USDA grants of inspection 2023-06; first U.S. consumer sale at Bar Crenn 2023-07).  The shaded band marks the pre-broad-access window: no stable retail channel, routine in-state consumer purchase opportunity, or observable state-level sales/substitution evidence is available through end of 2025.
+    \end{flushleft}
+\end{figure}
+
+Figure~\ref{fig:time_series} plots the annual count of states with first agenda entry and first escalation from 2019 to 2025.  Legislative activity was minimal through 2021, then accelerated sharply following the late-2022/2023 federal commercialization milestones summarized in Table~\ref{tab:federal_milestones}.  The peak entry year was 2023 (15 new states), coinciding with USDA/FSIS grants of inspection and the first commercial cultivated-chicken sales.  Activity moderated in 2024--2025 as the pool of never-entered states shrank.  Escalation---adoption of outright bans or moratoria---followed a similar but more compressed trajectory, with the largest wave occurring in 2023--2024.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_time_series_adoption.png}
+    \caption{Annual Policy Adoption: Agenda Entry and Escalation, 2019--2025}
+    \label{fig:time_series}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} Annual counts of states experiencing their first agenda entry (any cultivated-meat bill) or first severe-bill event (ban or moratorium bill, regardless of enactment).  Total entries: 38 states; total escalations: 22 states.  The dashed vertical line marks November 2022, the first FDA ``no further questions'' response for cultivated chicken; additional federal and market-entry milestones followed through June--August 2023 (Table~\ref{tab:federal_milestones}).
+    \end{flushleft}
+\end{figure}
+
+Figure~\ref{fig:heatmap} presents a state-by-year heatmap of agenda-entry status.  The geographic pattern is striking: early adopters are disproportionately concentrated in the South and Mountain West---regions with large cattle and meatpacking industries and conservative policy environments.  California, New York, and other liberal coastal states were either non-adopters or late adopters, consistent with the higher political cost of restricting a technology-aligned industry in innovation-oriented states.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_agenda_entry_heatmap.png}
+    \caption{Heatmap: Agenda Entry by State and Year, 2019--2025}
+    \label{fig:heatmap}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} White cells indicate states still at risk (no agenda entry).  Shaded cells indicate states that have entered the legislative agenda; darker shading indicates earlier entry.  States are sorted top-to-bottom by year of first entry.
+    \end{flushleft}
+\end{figure}
+
+Labeling and definitional bills account for the plurality of legislative activity (35 of 65 component events), reflecting incumbents' preference for low-cost instruments that impose disclosure burdens on entrants without generating the litigation risk of outright bans.  Ban and moratorium bills are more common in later years (2023--2025), consistent with escalation following an initial agenda-entry wave.
+
+Figure~\ref{fig:state_stages} maps the cumulative policy trajectory of all 50 states as of 2025: states at Stage~0 (no activity), Stage~1 (agenda entry but no ban/moratorium bill), and Stage~2 (ban/moratorium bill).  The 12 non-adopter states include California, Maine, Oregon, and several Northeast states---states with liberal policy environments and strong technology sectors---while severe-bill states are concentrated in the South, Plains, and Mountain West, producing the geographic clustering that motivates the political-economy analysis.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_state_stages.png}
+    \caption{Cumulative State Policy Trajectories as of 2025}
+    \label{fig:state_stages}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} Stage~0: no cultivated-meat-related legislative activity through 2025 (12 states).  Stage~1: at least one bill introduced but no ban or moratorium bill (16 states).  Stage~2: at least one ban or moratorium bill, regardless of enactment (22 states).
+    \end{flushleft}
+\end{figure}
+
+% ============================================================
+\section{Empirical Results}
+\label{sec:results}
+% ============================================================
+
+The descriptive patterns in Section~\ref{sec:descriptive} establish the policy-before-market timing and geography.  This section now follows the Paper~1 evidence hierarchy.  We first report the 50-state response/stringency cross-section, then the bill-level severity results, and then the legislator-bill political-supply models.  The cross-issue panel and statutory text alignment are supporting diagnostics, while state-year hazards and component timing models are retained only as timing checks.
+
+\subsection{State Response and Maximum Stringency}
+\label{sec:results_state_response}
+
+Table~\ref{tab:state_cross_section} reports the preferred 50-state cross-section.  The outcome columns ask whether a state responded at all by 2025, whether it introduced any severe bill, whether it enacted a restrictive policy, and the maximum stringency reached.  This is the most transparent state-level summary of the pre-market regulation question: it uses one observation per state rather than treating repeated state-years as independent shocks.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{State Response and Maximum Stringency by 2025}
+\label{tab:state_cross_section}
+\footnotesize
+\input{../cultivated_meat_project/data/final_csv/state_policy_cross_section_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Ordinary least squares (OLS) / linear probability model (LPM) coefficients with HC1 heteroskedasticity-robust standard errors.  Continuous covariates are standardized.  Policy ideology is Caughey--Warshaw (CW), with higher values more liberal.  Response equals one if a state introduced at least one CMPD bill record by 2025.  Severe bill equals one if the active corpus includes a ban or moratorium bill by 2025; labeling-only bills are non-severe for this outcome.  Enacted restrictive policy uses the first enacted restrictive-year indicator.  Maximum stringency is the state's highest policy stage by 2025.  This table is descriptive, not causal; $N=50$ is the real state-level information content.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Two patterns are robust enough to guide the rest of the paper.  First, the CW policy ideology index is consistently associated with state response and stringency: the coefficient on \texttt{cw\_policy\_ideology} is negative across all four outcomes, meaning more liberal states are less likely to respond or reach high-stringency instruments.  Second, measured incumbent-sector exposure is mixed.  Cattle inventory predicts any response in the cross-section and is positive for maximum stringency, but it is weaker for ban/moratorium bills and enacted restrictions; meatpacking exposure is not a stable positive predictor.  The correct interpretation is therefore not ``industry has no role.''  It is that policy-ideology sorting is more stable than any single measured-exposure proxy in the current 50-state data.
+
+The strict prior anti-alt-protein policy variable does not support the earlier policy-infrastructure extension claim.  Once the source-backed 6-state definition is used, the coefficient is negative and imprecise for response, severe bill, enacted restrictive policy, and maximum stringency.  The no-false-positive coding rule therefore weakens the prior-policy story; we treat it as a falsified or currently unsupported channel rather than a main result.
+
+\subsection{Bill-Level Severity and the Industry-Exposure Equivalence}
+\label{sec:results_billlevel}
+
+The 140-record severity ladder is regressed on the same predictor battery via three specifications: binary logit for is-ban, binary logit for passed-chamber, and ordered logit on the 0/1/2 severity ladder.  The 0/1/2 ladder should be read with the boundary rule in Table~\ref{tab:severity_boundary}: severity 0 does not mean no regulatory content; it means the bill does not impose a direct labeling requirement, sales/manufacturing ban, or moratorium in the main ladder.  All three specifications use state-clustered standard errors.  None of the predictors achieves conventional statistical significance at this sample size.  An LPM on the severity ladder serves as a small-sample robustness check (P38) and confirms the ordered-logit result is not a small-sample artifact: signs and significance pattern agree across all five predictors.
+
+Importantly, the bill-level industry-exposure estimates are reported with multiple equivalence thresholds rather than written as ``industry exposure is null.''  At a $\pm 5$pp marginal-effect threshold (logit-scale $\pm 0.20$), the 95\% confidence intervals on log cattle inventory ($[-0.47, +0.30]$) and meatpacking employment share ($[-1.20, +0.20]$) do not exclude meaningful industry effects.  At a $\pm 20$pp threshold (logit-scale $\pm 0.80$), the cattle-inventory interval excludes large effects, but the meatpacking interval does not.  The defensible written claim is therefore asymmetric: \emph{cattle-inventory effects are bounded below large ($\geq \pm 20$pp) marginal effects on ban probability per one-standard-deviation predictor change, while meatpacking exposure remains too imprecise for a large-effect equivalence claim; modest effects cannot be ruled out with the current sample}.  This follows the equivalence-test framework of \citet{lakens2017equivalence} and \citet{hartman2018equivalence}, with null-result writing standards from \citet{rainey2014arguing}.
+
+The state-level cross-section does not support the earlier policy-infrastructure extension claim once the strict 6-state prior-policy variable is used.  In the 50-state OLS/LPM cross-section, the strict prior-policy coefficient is negative and imprecise for any response by 2025 ($-0.220$, $p=0.185$), any severe bill ($-0.129$, $p=0.553$), enacted restrictive policy ($-0.317$, $p=0.092$), and maximum stringency ($-0.489$, $p=0.406$).  The defensible interpretation is therefore the reverse of the starter result: policy-infrastructure extension is not supported under the current no-false-positive coding rule, while policy-ideology sorting is more stable across extensive and stringency outcomes.
+
+\subsection{Legislator Political Supply}
+\label{sec:results_political_supply}
+
+Table~\ref{tab:political_supply} reports bill-fixed-effect LPMs on the legislator-bill panel.  General-election-margin coverage limits the full-panel specifications to 21,394 rows; the bio-observed columns use 18,394 rows.  Because the models include bill fixed effects, coefficients compare legislators facing the same bill opportunity rather than comparing different bills or states.
+
+The sponsorship patterns are consistent with the paper's political-supply interpretation.  Agriculture-committee membership predicts an additional 0.8 percentage points in primary sponsorship and 2.4 percentage points in any sponsorship or cosponsorship.  District cattle exposure predicts 0.3 percentage points higher primary sponsorship and 0.7 percentage points higher any sponsorship in the full panel, with weaker precision in the bio-observed primary-sponsor column.  Republican legislators are 0.8 percentage points more likely to be primary sponsors and 3.8 percentage points more likely to be sponsors or cosponsors, conditional on bill fixed effects.  Biography-based agricultural identity is positive in the bio-observed sample but imprecise.  These are political-supply estimates, not floor-vote estimates; the source-limited vote evidence is discussed below as mechanism triangulation and in the appendix.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Legislator Political Supply of Cultivated-Meat Restrictions}
+\label{tab:political_supply}
+{\footnotesize
+\input{../cultivated_meat_project/data/final_csv/paper1_political_supply_table.tex}
+}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Linear probability models with bill fixed effects and standard errors clustered by state-session.  Unit is a seated legislator-bill opportunity row.  Outcomes are primary sponsorship and any sponsorship/cosponsorship.  District cattle exposure and general-election margin are standardized.  Full-panel columns omit age and primary-challenge controls because current coverage is not paper-safe for main-text inference.  Bio-observed columns restrict to legislators with observed biography text and add biography-based agricultural identity.  Coefficients should be read as descriptive political-supply associations, not causal effects or a complete voting-behavior model.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Cross-Issue Falsification (Triple-Difference)}
+\label{sec:results_triplediff}
+
+We next report the formal falsification evidence from the multi-issue panel of equation~\eqref{eq:triple_diff}.  This is a negative-control check, not a main identifying design.  The core panel has $N = 1050$ state--issue--year observations and compares cultivated-meat restrictions, plant-based meat labeling restrictions, and raw-milk prohibitions.  The two diagnostic interactions are $\delta_{\mathrm{RM}}$ (ideology $\times$ raw milk) and $\gamma_{\mathrm{CM}}$ (industry $\times$ cultivated meat).  A separate source-screen expands the issue universe to a sparse fourth arm, plant-based dairy labeling, and records GMO/bioengineered labeling and hemp/CBD food as screened-but-excluded candidate arms; those extensions discipline issue selection but are not used to estimate the core triple-difference.
+
+Rebuilding the plant-based-labeling arm as a source-backed issue universe changes the falsification check but does not make it a headline causal result.  In the state--issue--year panel, the ideology coefficient on the plant-based-labeling baseline is negative ($-0.169$ in the meatpacking specification and $-0.198$ in the cattle specification), meaning more conservative states are more likely to have plant-based-labeling restrictions.  The raw-milk interaction is positive and survives the wild-cluster-restricted (WCR) bootstrap check: $\delta_{\mathrm{RM}}=+0.165$ (asymptotic $p=0.030$; WCR $p=0.038$) in the meatpacking specification and $+0.201$ (asymptotic $p=0.003$; WCR $p=0.008$) in the cattle specification.  The implied raw-milk ideology coefficient is close to zero in the meatpacking specification ($-0.003$) and slightly positive in the cattle specification ($+0.003$).  A formal sign-rule check therefore supports the weaker but relevant falsification in all core rows: raw milk does not load in the same conservative-restrictive direction as the two alt-protein issues.  The strict raw-milk sign flip is clearer in the cattle specification than in the meatpacking specification.  Removing Florida's conditional plant-based-labeling row leaves the pattern unchanged: the raw-milk interaction remains positive, and the cattle specification still flips the implied raw-milk ideology coefficient positive.  Appendix Table~\ref{tab:multi_issue_falsification_checks} summarises the core sign-rule classification (\emph{strict sign flip} vs.\ \emph{opposite contrast only}) across the baseline and FL-conditional sensitivity rows.
+
+\paragraph{Mundlak within/between decomposition.}  To address the panel--cross-section divergence directly, we split the lagged ideology and industry covariates into a between-state component (each state's panel mean) and a within-state component (deviation from that mean) and re-estimate equation~\eqref{eq:triple_diff} with both components and their issue interactions \citep{mundlak1978pooling}; state and year fixed effects remain (Appendix Table~\ref{tab:multi_issue_mundlak}).  Between-state main effects are absorbed by state fixed effects; identification of the between component runs through its interactions with issue dummies.  The decomposition shows that the panel raw-milk sign flip is essentially a between-state pattern: the between component $\delta_{\mathrm{RM}}^{\mathrm{between}}=+0.169$ ($p=0.032$, meatpacking) and $+0.205$ ($p=0.003$, cattle), while the within component $\delta_{\mathrm{RM}}^{\mathrm{within}}=+0.095$ ($p=0.264$) and $+0.083$ ($p=0.331$) is positive but imprecise.  Within-state ideology variation in 2019--2025 is small, so this within imprecision is expected and does not undercut the falsification logic.  The clearer reading is that conservative-leaning states are simultaneously more restrictive on alt-protein \emph{and} more permissive on raw milk in levels.  The 50-state LPM cross-section's failure to reproduce the sign flip therefore reflects differences in outcome construction and sample (binary ever-restrictive aggregation, $N=50$) rather than absence of a between-state sign flip in the underlying data; the panel's larger effective issue-by-state sample is more powered to detect it.
+
+The industry $\times$ cultivated meat interaction $\gamma_{\mathrm{CM}}$ remains weaker.  It is negative but imprecise ($p=0.113$) in the meatpacking specification ($-0.110$, asymptotic clustered $p=0.113$; WCR $p=0.141$), but close to zero in the cattle specification ($-0.027$, $p=0.636$; WCR $p=0.624$).  Triple-differencing therefore provides only suggestive evidence on the ``regulation before realized market stakes'' hypothesis; the textual-alignment evidence in Section~\ref{sec:results_alignment} is treated as separate mechanism evidence rather than a substitute causal test.
+
+\paragraph{Robustness: small-cluster inference, spatial correlation, time-varying outcomes.}  The robustness checks reinforce the need to treat the current cross-issue panel as diagnostic rather than headline identification.  Wild cluster bootstrap with $B = 1999$ Rademacher draws preserves the raw-milk ideology interaction in both industry specifications, but does not rescue the industry-by-cultivated-meat contrast beyond the marginal meatpacking result.  Conley spatial heteroskedasticity-and-autocorrelation-consistent (HAC) standard errors at 200, 500, and 1000\,km bandwidths preserve the raw-milk ideology interaction; the meatpacking $\gamma_{\mathrm{CM}}$ cell has a non-positive variance estimate at 1000\,km and is reported as missing rather than coerced.  The code now implements source-backed time-varying raw-milk legality using six within-panel transition/correction states (Montana, Georgia, Iowa, North Dakota, Delaware, and West Virginia), but the non-transition seed rows should receive direct official-page review if this design is promoted from diagnostic to main evidence.
+
+\subsection{Textual Alignment and Possible Template Reuse}
+\label{sec:results_alignment}
+
+Text alignment (Smith--Waterman followed by exact-match extraction via \texttt{difflib.\allowbreak SequenceMatcher}) on the 140 active bill texts identifies 39 cross-state high-similarity pairs.  GPT-4o-mini verification of each pair classifies shared substrings by provision type and diffusion confidence with an explicit anti-overclaim prompt: conservative scoring, federal boilerplate flagged separately.  Of the 39 pairs, the two pairs carrying cultivated-meat-specific shared language with at least medium confidence are:
+
+\begin{itemize}
+    \item \textbf{NE\_LB658 $\leftrightarrow$ OK\_HB1126} (292 characters, \emph{high confidence}): definitional template specific to cultivated meat.  GPT-4 verification classifies this as a definition provision with a unique drafting fingerprint that could not plausibly arise independently.
+    \item \textbf{AZ\_HB2121 $\leftrightarrow$ WV\_SB582} (302 characters, \emph{medium confidence}): prohibition and enforcement language addressing cell-cultured animal products specifically.  Both bills share an identical \$25,000 civil-penalty cap.  West Virginia adds state-specific legislative findings on top of the shared template.
+\end{itemize}
+
+Of the remaining 37 pairs, the majority share federal FDCA boilerplate, state agricultural inspection language, or general food-labeling definitions that arise independently in multiple food codes.  These two verifiable CM-specific substring matches are stronger than timing-only peer proxies because the evidence consists of actual shared statutory text rather than coincident policy timing.  They still do not identify who supplied the language, whether legislators copied from a common source, or whether interest groups coordinated the provisions.  Expanded exact-phrase and site-targeted searches still do not identify a strict source template from the American Legislative Exchange Council (ALEC), National Cattlemen's Beef Association (NCBA)/BeefUSA, Ranchers-Cattlemen Action Legal Fund United Stockgrowers of America (R-CALF USA), Protect the Harvest, or Animal Agriculture Alliance.  The paper therefore claims verified statutory alignment and likely public bill-to-bill/source-state reuse, not identified interest-group model-bill diffusion.
+
+\subsection{Supporting Timing Diagnostic: Agenda Entry}
+
+Table~\ref{tab:stage1} reports the parsimonious Stage~1 estimates.  The dominant predictors of agenda entry are the polynomial duration terms, which are jointly highly significant ($p < 0.001$).  The implied hazard rises steeply after 2021, peaks around 2023--2024, and begins to level off---consistent with an S-shaped national adoption wave across states.
+
+The substantive covariates---log cattle inventory and CW policy ideology---carry signs consistent with theoretical expectations, but differ sharply in precision.  Log cattle inventory is positive yet statistically indistinguishable from zero under state-clustered inference ($\hat{\beta} = 0.164$, $p = 0.184$), whereas CW policy ideology is negative and significant at the 5\% level ($\hat{\beta} = -0.698$, $p = 0.020$), indicating that more conservative policy environments are more likely to place cultivated meat on the legislative agenda.  This ``imprecise-on-exposure, signal-on-ideology'' pattern is substantively informative: it suggests a political/cultural channel that is not well summarized by the cattle-inventory proxy in this short panel, though modest exposure effects cannot be ruled out given the panel's limited power.
+
+Average marginal effects (Table~\ref{tab:ame}) translate the fitted model into modest but economically meaningful changes in predicted probabilities.  To aid interpretation, we scale ideology in standard deviation units: the sample SD of CW policy ideology is 0.770, so a one-SD increase (more liberal) corresponds to an estimated 5.3 percentage-point decrease in the annual probability of agenda entry (\(0.770\times 0.069 \approx 0.053\)).  With $G = 50$ clusters, asymptotic clustered $p$-values can be fragile; we therefore treat wild-cluster-restricted (WCR) bootstrap $p$-values \citep{cameron2008bootstrap} as the headline inference.  The WCR bootstrap (999 replications, Rademacher weights) yields $p_{\text{WCR}} = 0.026$ for CW ideology and $p_{\text{WCR}} = 0.181$ for log cattle inventory---consistent with the asymptotic values but more reliable under the small-cluster design.  Asymptotic cluster-robust standard errors are reported in Table~\ref{tab:stage1} as a secondary reference column.
+
+% --- Table 1: Stage 1 ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Stage 1: Discrete-Time Hazard of Agenda Entry (Parsimonious vs.\ Extended)}
+\label{tab:stage1}
+\input{../cultivated_meat_project/data/final_csv/table1a_stage1_side_by_side.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Logit coefficients with state-clustered standard errors. Risk set: state-years prior to first agenda entry.  All substantive covariates lagged one year.  CW policy ideology: Caughey--Warshaw policy ideology; higher values = more liberal; the negative coefficient indicates that more conservative states have a higher agenda-entry hazard.  With $G=50$ clusters, asymptotic cluster-robust inference is moderate; we therefore report pairs cluster bootstrap inference as a finite-sample check.  *** $p<0.01$, ** $p<0.05$, * $p<0.1$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Supporting Timing Diagnostic: Escalation}
+
+Escalation to bans and moratoria is concentrated in 2023--2025 (Figure~\ref{fig:time_series}) and is mechanically defined on a short post-agenda risk set (133 state-years; 22 events).  Because a regional peer timing proxy is easily confounded with common national waves in this setting, we do \emph{not} emphasize Stage~2 peer benchmarks in the main text.  Appendix~\ref{app:peer_diagnostics} reports a parsimonious peer-only specification (Table~\ref{tab:stage2}), a meatpacking robustness check, and a linear year-trend decomposition showing that the peer association is absorbed once national timing is controlled.
+
+As a robustness check detailed in Appendix~\ref{app:peer_diagnostics}, adding meatpacking employment share---a concentrated-industry proxy---does not improve fit (AIC 116.5 vs.\ 114.6 in the parsimonious model) and yields a coefficient that is insignificant ($p = 0.476$) with a counterintuitive negative sign.  These patterns are more consistent with sparse-event noise and common timing than with a stable structural predictor of escalation.
+
+\subsection{Supporting Timing Diagnostic: Component Timing}
+
+As a supporting diagnostic, we disaggregate first-event timing by policy component (Table~\ref{tab:component}).  The pooled component model stacks the labeling and ban risk sets ($N = 548$, 65 events across 50 states), increasing the number of component events available for comparison but not creating independent state histories.  This specification is best understood as a bridge between the old timing framework and the preferred bill-level severity analysis: it separates information tools from hard restrictions, but it still uses annual first-event timing rather than the full bill corpus.  R\&D employment share is retained because the component-risk design offers more variation for separating its contribution from that of policy ideology.
+
+Three results stand out:
+
+\begin{enumerate}
+    \item \textbf{Labeling bills are significantly more likely than bans.}  The component fixed effect for labeling is positive and significant ($\hat{\alpha}_{\text{labeling}} = 0.637$, $p = 0.007$), indicating that labeling requirements are the more common first-mover instrument.
+
+    \item \textbf{Lower CW policy ideology increases the hazard.}  CW policy ideology is negative and significant ($\hat{\beta} = -0.635$, $p = 0.008$): states with lower CW scores (i.e., more conservative policy environments) are more likely to adopt cultivated-meat restrictions of either type.
+
+    \item \textbf{Research-and-development (R\&D) capacity reduces the hazard.}  The R\&D employment share carries a negative and significant coefficient ($\hat{\beta} = -1.709$, $p = 0.012$), suggesting that states with stronger innovation economies are less likely to restrict cultivated meat---consistent with these states viewing the technology as a commercial opportunity.
+\end{enumerate}
+
+Log cattle inventory is positive and significant ($\hat{\beta} = 0.255$, $p = 0.044$), associating larger cattle-industry presence with higher estimated adoption hazard in this stacked specification (still a correlational pattern subject to the same between-state identification limits as the main model).
+
+\paragraph{Firth correction for small-sample bias.}  Because the events-per-variable (EPV) ratio in the component hazard model is 8.1 ($= 65/8$), at the lower bound of conventional adequacy thresholds, we re-estimate the model using Firth's penalized-likelihood logit \citep{firth1993bias,heinze2002solution,king2001logistic}, which reduces finite-sample bias in maximum-likelihood-estimation (MLE) coefficients.  The Firth estimates (Table~\ref{tab:firth}) are highly consistent with the MLE signs.  Because this is a stacked first-event timing model rather than the preferred bill-level severity model, we use it only to check whether the broad political-economy patterns are mechanically driven by the single agenda-entry outcome.
+
+The interaction model (Appendix Table~\ref{tab:component_interaction}) tests whether these drivers differ across labeling and ban instruments.  None of the interaction terms reach significance, suggesting that the same political and economic forces shape both instrument types.
+
+% --- Table 3: Component Hazard ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Pooled Component Hazard Model: Labeling and Ban Adoption}
+\label{tab:component}
+\input{../cultivated_meat_project/data/final_csv/pooled_component_hazard_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Logit coefficients with state-clustered standard errors.  Risk set: state-year-component observations prior to first adoption of each component.  Components are \emph{labeling} and \emph{ban}.  65 events (35 labeling, 30 ban) across 50 states.  $N = 548$.  Baseline component: ban.  CW policy ideology: higher values = more liberal; negative coefficient indicates conservative states have higher adoption hazard.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Table 4: Firth Component Hazard ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Firth Penalized-Likelihood Logit: Pooled Component Hazard}
+\label{tab:firth}
+\begin{tabular}{lccc}
+\toprule
+Variable & Coef. & Std. err. & $p$ \\
+\midrule
+Intercept                      & $-$2.342 & 1.026 & 0.005 \\
+C(component)[labeling]         & 0.555 & 0.302 & 0.024 \\
+Log cattle inventory            & 0.185 & 0.092 & 0.001 \\
+CW policy ideology             & $-$0.564 & 0.222 & 0.002 \\
+R\&D employment share           & $-$2.066 & 0.725 & 0.002 \\
+$d$                            & $-$5.246 & 1.124 & $<$0.001 \\
+$d^2$                          & 1.948 & 0.449 & $<$0.001 \\
+$d^3$                          & $-$0.172 & 0.045 & $<$0.001 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Firth penalized-likelihood logit \citep{firth1993bias} with penalized likelihood-ratio $p$-values.  Same sample and specification as Table~\ref{tab:component}.  Firth estimation corrects for small-sample bias inherent in MLE when the events-per-variable ratio is low (EPV $= 8.1$).  In-sample area under the receiver-operating-characteristic curve (AUC) $= 0.881$; \citet{greenhill2011separation} discuss graphical diagnostics for binary model fit.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Table 5: Average Marginal Effects ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Average Marginal Effects: Stage 1 Agenda Entry (Parsimonious)}
+\label{tab:ame}
+\begin{tabular}{lcccc}
+\toprule
+Variable & $\partial\Pr/\partial x$ & Std. err. & $z$ & $p$ \\
+\midrule
+Log cattle inventory   & 0.016 & 0.012 & 1.37 & 0.169 \\
+CW policy ideology     & $-$0.069 & 0.027 & $-$2.59 & 0.010 \\
+$d$  (duration)        & 0.337 & 0.072 & 4.68 & $<$0.001 \\
+$d^2$                  & 0.336 & 0.064 & 5.28 & $<$0.001 \\
+$d^3$                  & $-$0.299 & 0.079 & $-$3.80 & $<$0.001 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Average marginal effects evaluated at sample means.  Based on the parsimonious Stage~1 logit model in Table~\ref{tab:stage1}.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+\subsection{Robustness}
+\label{sec:robustness}
+
+Several robustness checks support the main findings (detailed results in Appendix~\ref{app:robustness}; Stage-2 peer benchmarks are isolated in Appendix~\ref{app:peer_diagnostics}):
+
+\paragraph{Extended specification with R\&D.}  The extended Stage~1 specification adds R\&D employment share, a plausible competing channel capturing the state's innovation environment.  Its inclusion attenuates the policy-ideology coefficient (from $p = 0.020$ to $p = 0.050$) without improving the Akaike information criterion (AIC), and R\&D itself is not significant with clustered inference ($p = 0.389$).  Rather than selecting a ``best'' specification ex post, we report the parsimonious and extended specifications side-by-side in the headline table (Table~\ref{tab:stage1}) and interpret the sensitivity as evidence that ideology may partially proxy for innovation capacity in this setting.
+
+\paragraph{Post-2022 federal commercialization robustness.}  Because the first FDA ``no further questions'' response in late 2022 and subsequent 2023 USDA/FSIS and market-entry milestones could induce a level shift not well captured by a smooth cubic duration polynomial, we re-estimate the Stage~1 model adding a post-2022 indicator (year $\geq 2023$) and interactions with the exposure variables.  The resulting coefficients are reported as an appendix robustness check.
+
+\paragraph{Alternative ideology measures.}  Replacing CW policy ideology with (a) a binary Republican-governor indicator or (b) Shor--McCarty legislator ideology scores \citep{shor2011ideological} yields directionally consistent results, though with reduced precision.  The CW series is directly observed through 2024; only 2025 forecasting rows (8\% of the Stage~1 risk set) rely on carried-forward values.  Ideology therefore enters the likelihood primarily through cross-sectional (between-state) differences in this short panel.
+
+\paragraph{Alternative exposure measures.}  Table~\ref{tab:alt_exposure} replaces the baseline exposure variable with three alternatives---livestock receipts share, meatpacking employment share, and animal production establishment share.  None achieves statistical significance in either stage, and the sign pattern varies across proxy families.  The robustness result is therefore a measured-exposure instability result: cattle inventory, livestock receipts, meatpacking employment, and animal-production establishments do not support a single precise incumbent-exposure story in the current sample.
+
+\paragraph{Leave-one-state-out.}  Dropping each state in turn from the Stage~1 regression yields log-cattle-inventory coefficients ranging from 0.075 to 0.177 with no sign changes, indicating that no single state drives the results.
+
+\paragraph{Permutation test.}  A permutation test (1,000 iterations, shuffling covariates across states within years) yields a permutation $p$-value of 0.018 for CW policy ideology, suggesting that the association is unlikely to arise by chance under this test's assumptions.  Log cattle inventory has a permutation $p$-value of 0.198, consistent with its imprecision under clustered standard errors.
+
+\paragraph{Oster (2019) bounds.}  The \citet{oster2019unobservable} $\delta$ coefficient for log cattle inventory is 30.9, indicating that unobservable confounders would need to be approximately 31 times more important than all observed controls to drive the coefficient to zero---far above the conventional threshold of $\delta > 1$ for robust associations.
+
+\paragraph{Shift-share (Bartik) sensitivity for cattle exposure (not headline instrumental variables (IV)).}
+A standing concern is that \texttt{log\_cattle\_inventory} is \emph{confounded}: cattle-heavy states may differ in rural identity, conservative culture, or technology capacity in ways that independently correlate with policy adoption.  A Bartik-style interaction provides a \emph{sensitivity} check against a particular reverse-causality story for measured cattle stocks, but its exclusion restriction is demanding: national cultivated-meat investment shifts can plausibly affect state legislation through salience, media, advocacy, and partisan messaging channels that are not separable from the political outcome.
+\begin{equation}
+    Z_{it} \;=\; \log\!\left(1 + \text{national CM investment}_{t-1}\right)
+              \times \text{state livestock share}_{2016}
+    \label{eq:bartik}
+\end{equation}
+where the \emph{shift} is global cultivated-meat venture and corporate investment in year $t-1$ (Good Food Institute (GFI) annual State-of-the-Industry reports, 2016--2024; ranging from \$38M in 2016 to \$1{,}384M in 2021 and declining to \$32M in 2024), and the \emph{share} is the state's 2016 Animals-and-Products cash receipts as a fraction of the U.S.\ national total (USDA Economic Research Service (ERS) \texttt{CR\_Annual}, frozen at 2016 to predate the 2019--2025 policy panel).  The constructed interaction is therefore best read as a \emph{probe} rather than as a credible source of exogenous variation for a structural cattle effect.
+
+The first stage is strong: regressing log cattle inventory on $Z_{it}$ (standardised) controlling for CW policy ideology and the cubic duration polynomial yields $\hat{\beta} = 1.072$ ($p < 0.001$; $F = 23.2$, well above the conventional threshold of 10).  The reduced form---the association between $Z_{it}$ and agenda entry---is small and insignificant ($\hat{\beta} = 0.012$, $p = 0.557$), and the two-stage least squares (2SLS) estimate of the cattle-inventory coefficient ($\hat{\beta} = 0.011$, $p = 0.774$) is similar in magnitude to the OLS-LPM benchmark ($\hat{\beta} = 0.013$, $p = 0.256$; Appendix Table~\ref{tab:bartik_iv}).  Taken together, the exercise is most informative as a sensitivity check against a simple upward-bias story: it does not uncover a large hidden positive cattle coefficient, and estimates remain imprecise.  The ideology coefficient is stable across all specifications ($\hat{\beta} \approx -0.07$, $p < 0.05$), indicating that conservative policy environment is the more robust Stage-1 correlate in this panel.
+
+A note on inference: \citet{adao2019shift} show that with a single shared shift (here, national investment), the asymptotically valid standard errors for Bartik designs cluster at the shift level (i.e., the year).  With only 7 years of data, year-level clustering gives too few clusters for reliable inference.  State-clustered standard errors are therefore reported throughout; Ad\~ao--Koles\'ar--Morales (AKM)-corrected inference via year-level randomization remains a priority as the panel extends.
+
+\paragraph{Manski (1993) reflection / Stage-2 peer benchmarks.}
+Stage-2 peer timing benchmarks and the linear year-trend decomposition are reported in Appendix~\ref{app:peer_diagnostics} (Tables~\ref{tab:stage2}--\ref{tab:manski_peer}) and are not emphasized in the main narrative.
+
+\paragraph{Livestock exposure $\times$ Republican governor interaction.}  The anticipatory political-economy framework implies that cattle-sector exposure may matter more when political receptivity is high---that is, the effect of perceived incumbent stake $M_{s,t}$ on restriction may be conditional on political/cultural alignment $C_{s,t}$.  Including the interaction of log cattle inventory with a Republican-governor indicator yields an interaction coefficient of $\hat{\beta} = -0.220$ ($p = 0.406$; Appendix Table~\ref{tab:cattle_x_govrepublican}), providing no support for this conditional hypothesis.  The null result is consistent with cattle-state legislators across party lines responding to constituent economic interests \citep{peltzman1976toward}, or with the panel being underpowered to detect heterogeneous effects.
+
+\paragraph{Correlated random effects (CRE)/Mundlak decomposition.}  To decompose between- and within-state variation in the cattle-inventory and ideology effects, we augment the Stage~1 model with Chamberlain--Mundlak state means computed over each state's pre-entry risk-set years \citep{mundlak1978pooling}.  The within-state cattle-inventory coefficient is $\hat{\beta}_{\text{within}} = -0.964$ ($p = 0.478$) and the between-state group-mean coefficient is $\hat{\beta}_{\text{between}} = 1.141$ ($p = 0.400$); neither achieves significance (Appendix Table~\ref{tab:mundlak}).  This decomposition indicates that the cattle-adoption pattern visible in raw data is primarily a cross-sectional (between-state) correlation; the short panel provides insufficient within-state temporal variation to identify a causal effect.
+
+\paragraph{Bayesian within/between decomposition.}  A Bayesian frailty model provides a sharper decomposition of the ideology effect (Appendix Table~\ref{tab:within_between_frailty}).  The between-state CW ideology coefficient is $-1.108$ (posterior mean; 90\% highest-density interval (HDI) $[-1.858, -0.330]$): this credible interval excludes zero, confirming a robust cross-sectional association between conservative policy environments and earlier agenda entry.  The within-state ideology deviation coefficient is $+1.742$ (90\% HDI $[-0.994, +4.794]$), which spans zero by a wide margin.  The within-state ideology SD in this panel is approximately 0.12---far smaller than the 0.77 cross-sectional SD---so the within estimate is both imprecise and economically negligible.  The decomposition has a direct behavioral interpretation: \emph{more conservative states in levels} are more likely to introduce cultivated-meat legislation, but states that shift ideology within the panel do not detectably change their legislative activity.  This rules out a dynamic political-responsiveness story and supports a static-sorting interpretation of the ideology channel.  The cattle inventory between-state coefficient ($+0.165$; 90\% HDI $[-0.080, +0.434]$) is positive but not credibly different from zero, consistent with the frequentist Mundlak result.
+
+\paragraph{Ordered logit.}  As a cross-sectional robustness check that does not require a panel structure, we estimate an ordered logit using each state's maximum policy attainment as of 2025 (0 = no activity, 1 = agenda entry only, 2 = escalation) as the dependent variable, with time-averaged covariates.  The ideology coefficient is large and significant ($\hat{\beta} = -1.114$, $p = 0.005$), supporting the conservative-state pattern in a cross-sectional specification.  The cattle coefficient is positive but imprecise ($\hat{\beta} = +0.274$, $p = 0.111$; Appendix Table~\ref{tab:ordered_logit}), consistent with the panel estimates.
+
+\paragraph{Multiple-testing discipline.}  The paper reports a battery of secondary specifications: alternative ideology measures, alternative exposure measures, leave-one-state-out, permutation, Oster bounds, Bartik IV, Manski reflection, cattle--gov interaction, Mundlak CRE, Bayesian frailty, ordered logit, and post-2022 robustness.  We do not formally adjust the headline Stage~1 $p$-values with a Romano--Wolf or Benjamini--Hochberg correction across this family because (i) the headline test is a pre-committed two-variable Stage~1 specification, not a search across many candidate predictors, and (ii) the secondary specifications are reported as sensitivity checks rather than independent confirmatory tests.  Two borderline findings should be read with this in mind: the contribution-interaction mechanism test in the full escalation risk set is borderline ($p \approx 0.050$) and is not stable in the restricted sample; the cross-issue raw-milk interaction passes a wild-cluster-restricted (WCR) bootstrap correction in the meatpacking ($p = 0.038$) and cattle ($p = 0.008$) specifications, which is the inference standard for that family.  Referees evaluating the paper against a strict family-wise error-rate standard should treat borderline secondary results as suggestive rather than confirmatory; the headline ideology coefficient survives WCR bootstrap, permutation, and Oster-bounds checks individually.
+
+\paragraph{Label measurement-error sensitivity.}  All bill-level outcomes depend on GPT-extracted and adjudicated policy-type labels.  To quantify residual label uncertainty, a Monte Carlo perturbation exercise applies 1,000 random label flips per scenario to the 120 \texttt{codex\_text\_review} rows (holding the 20 independent \texttt{author\_manual} rows fixed), using field-specific false-positive and false-negative rates derived from the pipeline-versus-gold discrepancy.  Scenarios range from symmetric 2.5\%--10\% remaining error to the full raw-pipeline error rate (43\% false-positive rate for \texttt{ban}).  Across all scenarios, the \texttt{labeling} outcome retains the CW-ideology association through perturbation (ideology coefficient remains negative and statistically distinguishable from zero up to the 100\%-pipeline-error scenario), while the \texttt{ban} and \texttt{severity} coefficients are imprecise at baseline and become more so under perturbation.  This confirms the cautious framing already adopted: labeling policy-ideology sorting is the most measurement-stable bill-level finding; ban and severity results cannot be strengthened by appealing to label robustness.  The perturbation rates are calibrated to Annotator~A's per-field disagreement rate in the P13 blind review (the residual uncertainty source after human adjudication, not from unchecked LLM labels), and the exercise quantifies how much of that remaining annotator-level error would be needed to overturn the bill-level LPM estimates.
+
+% (Dropped) Least absolute shrinkage and selection operator (LASSO) one-SE paragraph: in the current run, the one-SE rule shrinks all penalized candidates to zero and the post-selection logit fails to converge; see lasso_onese_selection_summary.csv.
+
+% ============================================================
+\subsection{Placebo Tests}
+\label{sec:placebo}
+% ============================================================
+
+\paragraph{Temporal placebo: pre- and post-milestone splits.}  If the main findings reflect policy dynamics around commercialization salience rather than spurious correlation with omitted trends, the cattle-exposure proxy and ideology associations should be weaker in the pre-milestone window (2019--2022) and stronger in the post-milestone period (2023--2025), when market entry became more visible.  In practice, the pre-milestone subsample is too sparse for the logit specification to converge reliably, so we report the full-panel linear-trend reference and the post-milestone subsample rather than treating the pre-period split as an estimable placebo design (Appendix Table~\ref{tab:temporal_placebo}).
+
+In the full-panel linear-trend reference, the cattle coefficient is positive but imprecise ($\hat{\beta} = 0.090$, $p = 0.402$), while ideology remains negative and significant ($\hat{\beta} = -0.575$, $p = 0.025$).  In the post-milestone window, the cattle coefficient is larger but still imprecise ($\hat{\beta} = +0.274$, $p = 0.124$) while ideology remains negative ($\hat{\beta} = -0.535$, $p = 0.163$).  Figure~\ref{fig:temporal_placebo} visualizes these contrasts.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.78\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_temporal_placebo.png}
+    \caption{Temporal Placebo: Coefficients by Estimation Window}
+    \label{fig:temporal_placebo}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} Coefficient estimates (with 95\% confidence intervals) for log cattle inventory (left panel) and CW policy ideology (right panel) under the estimable temporal-window specifications.  The full-panel reference and post-milestone window use a linear trend to conserve degrees of freedom given low EPV.  The larger post-milestone cattle coefficient is directionally consistent with Prediction~P5, but it is imprecise and should not be interpreted as a clean causal effect.
+    \end{flushleft}
+\end{figure}
+
+This pattern is consistent with Prediction~P5: cattle-sector stakes may have become more politically salient after federal commercialization milestones made market entry more concrete.  However, the split-window designs are underpowered and partly non-convergent, so the temporal placebo is suggestive rather than definitive.
+
+\paragraph{Livestock-composition check: hogs and chickens.}  Because cattle inventory is only a beef/livestock-sector exposure proxy, not the product scope of the project, we also check whether the pattern is simply a generic ``large livestock state'' artifact.  We replace log cattle inventory with (a) log hog inventory and (b) log chicken/broiler inventory and re-estimate the full Stage~1 model.
+
+The hog-inventory coefficient is $\hat{\beta} = -3.189$ ($p = 0.018$) and the chicken-inventory coefficient is $\hat{\beta} = -0.528$ ($p = 0.034$)---both \emph{negative} and statistically significant.  These opposite-signed results are not what a simple generic ``large livestock state'' story would predict: if all livestock scale were merely proxying for the same rural conservative confound, all three livestock measures would be expected to carry the same positive sign.  Instead, states with large hog or chicken industries are \emph{less} likely to have introduced cultivated-meat legislation.  This composition check is consistent with cattle-sector salience relative to hog and chicken inventories, but it does not identify the competitive-threat channel, does not redefine cultivated meat as beef, and does not eliminate broader rural political-economy confounds.
+
+% ============================================================
+\subsection{Mechanism Triangulation: Votes, Lobbying, Contributions, and Case Evidence}
+\label{sec:mechanism}
+% ============================================================
+
+This section reports \emph{exploratory} mechanism probes that complement the main political-supply estimates in Table~\ref{tab:political_supply}.  The estimates are underpowered, partially national in construction, and should not be read as identifying a lobbying-expenditure channel, contribution channel, or final-passage voting model; they are best viewed as triangulation consistent with the political-economy interpretation.  The actor-level evidence is deliberately coverage-limited and descriptive: primary sponsor names are observed for 140 of 140 active-corpus bills, primary sponsor party for 136 of 140 bills, sponsor or cosponsor agriculture-committee traces for 92 of 140 bills, at least one agriculture-facing sponsor/committee-referral trace for 136 of 140 bills, and broad vote/process traces for 76 of 140 bills, of which 74 have named member-level roll-call rows.  These vote records include floor final-passage votes, committee do-pass votes, procedural votes, and event-only or aggregate traces without member names; they help describe where the observed state-level patterns appear in the legislative process, but they are not a complete final-passage denominator.  The 64 active-corpus bills with no combined vote/process trace decompose into two structurally distinct classes: 57 bills (89 percent of the no-trace subset) were never voted on at the member level because they were introduced or referred but died in committee, were withdrawn, or carried over without a recorded action, so no roll-call record exists to recover; the remaining 7 bills reached a floor or committee action but the state's public record contains only a voice vote, an aggregate tally, or a vote event without named legislator rows, which a direct review of state portals, chamber journals, OpenStates events, and LegiScan vote objects confirms is a ceiling of the public record rather than a collection-effort shortfall.  The taxonomy that distinguishes member-level roll-call, voice/aggregate-only, and no-vote-trace events is fixed in advance of analysis (\texttt{cultivated\_meat\_project/quality\_reports/vote\_event\_taxonomy\_2026-04-30.md}); we do not relax the member-level requirement to inflate the denominator, because the seven ceiling bills are non-recoverable by construction.
+
+A lobbying-amplification version of the framework implies that the cattle-exposure effect on agenda entry could be larger in years when incumbent industry lobbying outpaces entrant lobbying---that is, when political inputs make incumbent concerns more salient.  This is an exploratory mechanism implication, not one of the paper's headline predictions in Table~\ref{tab:predictions}.  To probe it, we construct a federal lobbying-imbalance variable from Senate Lobbying Disclosure Act (LDA) filings (2019--2024), defined as the log-ratio of aggregate incumbent spend (National Cattlemen's Beef Association, National Pork Producers Council, National Chicken Council, North American Meat Institute) to aggregate entrant spend (Good Food Institute, UPSIDE Foods, Alliance for Meat, Poultry and Seafood Innovation).  Federal lobbying is a national-level signal---identical for all states in a given year---so it cannot enter the Stage~1 model as a main effect without collinearity with the cubic time polynomial.  The operative state-year variation is therefore in the interaction
+\[
+  \ln(\text{cattle}_{s,t-1}) \;\times\; \widehat{\text{imbalance}}_{t-1},
+\]
+where $\widehat{\text{imbalance}}_{t-1}$ is the within-sample standardized lobbying imbalance.  The interaction is state-year varying (cattle stock varies across states; imbalance varies across years) and is not collinear with the time polynomial.
+
+\input{../cultivated_meat_project/data/final_csv/stage1_mechanism_summary.tex}
+
+Table~\ref{tab:mechanism} reports results on the lobbying-available sample (years 2020--2025; $N = 184$ risk-set observations, 24 Stage~1 events).  The restricted sample has low events-per-variable ($\text{EPV} \approx 4$), so all coefficients should be interpreted with additional caution.  The interaction coefficient is $\hat{\beta} = -0.118$ ($p = 0.260$), negative and statistically indistinguishable from zero; the AIC increases by 1.5 points when the interaction is added, providing no support for the additional parameter.  This is a null result: federal lobbying imbalance does not measurably amplify the cattle-exposure effect at the significance levels achieved in this study.  Two interpretations are consistent with this finding.  First, the \emph{relevant} incumbent mobilisation may occur at the \emph{state} level---state-level political action committee (PAC) contributions, statehouse testimony, and state Farm Bureau activity---none of which are captured by federal LDA filings.  Second, cattle-state legislators may respond directly to constituent economic interests regardless of whether a contemporaneous lobbying campaign reinforces that preference, consistent with the Peltzman (1976) embedded-producer-interest view rather than an active-expenditure channel.
+
+To probe the first interpretation, we collected two measures of state-level incumbent political mobilisation from FollowTheMoney.org (FTM) for the canonical state Farm Bureau affiliate in each state (entity IDs extracted from FTM's Lobbying Client registry).
+
+\textit{State lobbying expenditures.}  The combined panel draws on FollowTheMoney (FTM) entity-level filings and manually sourced state-portal records.  In the active 38-state policy corpus, usable lobbying-compensation coverage is available for 24 states (CO, FL, ID, IN, IA, KY, MA, MI, MN, MS, MT, NC, NE, NJ, NY, OR, PA, SC, TN, TX, VA, VT, WA, and WI).\footnote{FTM entity-search was corrected in 2026: the original \texttt{SearchForm} endpoint returns a JavaScript shell to server-side requests; the underlying \texttt{entitySearch.php} endpoint returns entity links directly.  Manual and portal supplements include MN CFB, IN ILRC, TN TEC, MT LPORS, ID TED, MS SOS, PA LDS, VT LIS, NJ ELEC, VA COIA, and NC SOS source-backed rows.  Several remaining states disclose only lobbyist activity expenditures rather than total compensation, or require authenticated portal access, so their figures are structurally incomparable with compensation-inclusive FTM and portal data.  Maine is not counted as policy-active after the strict exclusion of \texttt{ME\_LD1257}.}  Appending the standardised log of state incumbent lobbying spend as a main effect and as an interaction with cattle exposure, the interaction coefficient is $\hat{\beta} = -0.179$ ($p = 0.085$), negative and statistically indistinguishable from zero.  Tennessee and Montana---both high-cattle states that enacted bans in 2024 and 2023 respectively---introduce cross-cutting variation inconsistent with the P3 direction; New Jersey and Virginia, both low-cattle liberal states with moderate-to-high lobbying expenditure, add further identifying variation in the same direction.  The pattern is consistent with higher lobbying spend in low-cattle states being insufficient to overcome the underlying exposure effect, rather than amplifying it.
+
+The negative interaction should not be over-interpreted: many unobserved state-year shocks could generate a negative cattle$\times$imbalance pattern in a short panel, and the federal imbalance series is coarse.  A Dixit-style ``barrier without high observed spend'' story is one \emph{possible} post-hoc rationalization, but it is not identified here because entrant entry, investment, and pre-legislative deterrence are not directly observed \citep{dixit1980role}.
+
+\textit{State PAC contributions to legislators.}  As a broader alternative covering states where FTM state lobbying records are absent, we construct a parallel panel of state Farm Bureau PAC contributions to state legislators and candidates, also drawn from FTM (campaign finance module).  This measure is available for 36 of the 50 states (including 23 of the 29 ban states), compared with 24 policy-active states in the lobbying panel.
+
+A mechanism refinement motivates a change in the dependent variable.  Incumbent mobilisation should matter most for efforts to \emph{restrict} future entrants---a prediction about regulatory escalation, not legislative attention per se.  ``Agenda entry'' includes both supportive bills (e.g.\ definitions, labeling frameworks) and restrictive bills (bans, moratoria), so using agenda entry as the outcome conflates these effects.  A sharper probe uses \emph{escalation}---the first passage of a ban or moratorium---as the dependent variable.
+
+Using the Stage~2 risk-set ($N = 133$ risk-set observations, 22 escalation events), we append the standardised log of lagged Farm Bureau PAC contributions and interact it with cattle exposure.  The main effect of contributions on escalation is imprecise ($\hat{\beta}=0.540$, $p=0.746$), and the contribution$\times$cattle interaction is also small and imprecise ($\hat{\beta}=-0.044$, $p=0.791$).\footnote{The Stage~2 baseline covariates follow the appendix benchmark specification: cattle exposure and national peer escalation (leave-one-out).}  The interaction should therefore be treated only as a diagnostic for whether economically exposed states with higher PAC activity are more likely to see ban/moratorium bills rather than as evidence of enactment.  A restricted-sample version is similarly null ($\hat{\beta}=-0.011$, $p=0.940$), and the full interaction specification has $\text{EPV}=3.7$, below comfortable levels for reliable inference.
+
+Taken together, the lobbying and contribution tests are consistently imprecise.  State lobbying spend is not distinguishable from zero in predicting ban timing once cattle exposure is controlled, and the Farm Bureau PAC contribution interaction is null in the gold-corrected escalation risk set.  These results do not rule out incumbent political mobilisation, but they provide no stable quantitative evidence that observed spending amplifies the cattle-exposure channel in this short panel.  Distinguishing between Farm Bureau contributions that target Ag committee members specifically, and separating bill-specific advocacy from general PAC activity, remains a priority for future research.
+
+Because these quantitative mobilisation measures are noisy, we add a small source-backed case-evidence exercise in Table~\ref{tab:mechanism_cases}.  The table is purposive rather than representative: it covers selected restrictive-bill states where public legislative, executive, Farm Bureau, cattlemen, or agriculture-committee traces can be documented from official or near-official sources.  The evidence does not establish that organized livestock interests caused adoption, nor does it identify entry deterrence.  It does, however, help distinguish the political-economy interpretation from a purely technocratic food-safety account: in each case, the policy venue or public rationale visibly intersects with agriculture, ranching, meat labeling, or incumbent livestock organizations.  Several cases also discipline the mechanism: Nebraska documents Farm Bureau neutrality on an outright ban, Tennessee stops at permitting and labeling, Oklahoma narrows a ban proposal into a misbranding law, and Georgia, North Carolina, Utah, and South Carolina illustrate disclosure or labeling responses rather than market exclusion.  Appendix Table~\ref{tab:mechanism_case_sources} lists the source registry.
+
+To move one step closer to the political process itself, we also conducted a proof-of-concept audit of committee testimony, witness lists, and public-position records (Appendix Table~\ref{tab:committee_testimony_audit}).  This audit is deliberately source-tiered: Nebraska LB246 and Texas SB261 have direct official committee or witness-list evidence, Utah HB138 has direct official committee-minutes evidence, while Iowa, South Carolina, North Carolina, Oklahoma, and Florida rely on lower-directness committee-route, committee-vote, committee-report, or organization-position records.  The strongest new fact is the Texas witness list, which places multiple cattle and animal-protein organizations on the supporting side of a moratorium while Good Food Institute, the Association for Meat, Poultry, and Seafood Innovation, UPSIDE Foods, and Wildtype appear on the opposing side.  Nebraska remains an important guardrail because its official committee statement and Farm Bureau coverage show contested positions, including Farm Bureau neutrality on the outright ban.  Oklahoma is now better documented as a legislative moderation case: official House agendas, a House committee report on HB2829, and a Senate Agriculture and Wildlife committee vote on HB1126 trace a path from an outright-ban proposal to the narrower misbranding law that was ultimately enacted.  We therefore treat this audit as documentary triangulation of mechanism visibility, not as evidence that testimony caused adoption.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Illustrative Mechanism Case Evidence: Public Agriculture and Livestock Traces}
+\label{tab:mechanism_cases}
+{\tiny
+\renewcommand{\arraystretch}{0.88}
+\input{../cultivated_meat_project/data/final_csv/mechanism_case_table.tex}
+}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Purposive case evidence, not a representative causal sample.  Cases were selected because they are restrictive-bill states with source-backed public traces linking the policy debate to agriculture, ranching, meat labeling, Farm Bureau/cattlemen organizations, or agriculture-committee venues.  ``Interpretation'' uses disciplined categories only: the cases are consistent with incumbent-sensitive precautionary regulation, but they do not prove that organized interests caused the bills and do not identify firm entry deterrence.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% ============================================================
+\subsection{Two ancillary diagnostics (deferred to appendix)}
+% ============================================================
+
+Two ancillary results are deferred to the appendix to keep the main body focused on the response/stringency, severity, cross-issue, and statutory-text evidence.  Appendix~\ref{app:supp_timing} reports a supplementary timing analysis around the late-2022/2023 federal commercialization milestones using frozen pre-milestone state characteristics, including both a continuous interaction design and a binary high- versus low-cattle comparison; the asymptotic post-milestone joint test is significant but does not survive finite-sample randomization inference (RI $p = 0.129$), and we therefore treat the design as a salience benchmark rather than a clean natural experiment.  Appendix~\ref{app:risk_index} presents the stage-aware composite regulatory-risk monitoring index, a model-dependent ranking device that summarizes fitted hazards from the Stage~1 and Stage~2 logit models for descriptive monitoring purposes only; it has not been validated against firm entry or investment outcomes and should not be interpreted as a structural forecast.
+
+% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+% ============================================================
+
+The revised evidence hierarchy changes how the results should be read.  The headline finding is not that a particular hazard coefficient identifies the cause of state adoption.  The headline finding is that cultivated-meat legislation appears before broad consumer access, and that this pre-market regulation is uneven across states, policy instruments, and political suppliers.
+
+\paragraph{The core empirical object is pre-market regulation.}  Federal milestones made cultivated meat commercially credible, but the state response often preceded broad retail sales, measurable consumer harms, or observable employment displacement.  That timing matters economically because it rules out a narrow realized-injury interpretation.  The relevant political-economy question is why states legislate in anticipation of possible market entry, and why some states choose harder instruments such as moratoria and bans while others do not legislate at all.
+
+\paragraph{The current timing results are consistent with political sorting, not clean causal identification.}  The Stage~1 model shows that the timing of legislative activity is strongly clustered in national time.  CW policy ideology is the most stable correlate in the parsimonious state-year specification ($p = 0.020$; WCR bootstrap $p = 0.026$), while log cattle inventory is positive but imprecise under state-clustered inference ($p = 0.184$; WCR $p = 0.181$).  The Bayesian within/between decomposition (Appendix Table~\ref{tab:within_between_frailty}) confirms that the ideology association is driven entirely by cross-sectional sorting: the between-state ideology coefficient ($-1.108$; 90\% HDI $[-1.858, -0.330]$) excludes zero, while the within-state deviation ($+1.742$; 90\% HDI $[-0.994, +4.794]$) does not.  This should be written as evidence that \emph{states with lower CW policy ideology in levels} (more conservative policy environments) are more likely to place cultivated meat on the legislative agenda---not that states whose CW score moves do so.  It should not be written as proof that incumbents caused regulation or that industry exposure does not matter.
+
+\paragraph{Bill-level severity provides the most direct evidence on instrument choice.}  The 140-record active-corpus severity analysis disaggregates the timing approximation into actual instrument choice.  Ordered logit and LPM specifications for the severity ladder agree in sign and significance pattern: instrument-severity outcomes remain weak and statistically imprecise in the current corpus.  The separate passage/status outcome is different: bills in states with lower CW policy ideology scores are more likely to pass at least one chamber, but this is a process correlate rather than evidence that bills are more severe.  Industry exposure is honestly bounded via multi-threshold equivalence: the cattle-inventory confidence interval excludes effects larger than $\pm$20pp per one-SD change on ban probability, but the meatpacking interval does not, and neither measure rules out modest effects.  The defensible claim is therefore limited bounds on measured exposure proxies, not a null on industry influence.
+
+\paragraph{Legislator political supply thickens the state-level mechanism.}  The bill-fixed-effect legislator-bill models ask a different question than the state and bill regressions: conditional on the same bill opportunity, which legislators supply sponsorship and cosponsorship?  Agriculture-committee membership, district cattle exposure, and Republican party affiliation are all positively associated with sponsorship outcomes.  This result helps connect the state-level pattern to concrete legislative actors without requiring the vote universe to be complete.  It should be read as political-supply evidence, not as a final-passage voting model or a causal estimate of legislator identity.
+
+\paragraph{Statutory text alignment is stronger than timing-only peer inference.}  Escalation concentrates in a narrow post-2022 window with few events.  A parsimonious Stage~2 specification with a regional peer proxy is retained only as an appendix benchmark (Appendix~\ref{app:peer_diagnostics}); once a linear national year trend is absorbed, the peer association collapses.  The defensible interpretation is common national salience or common statutory language, not identified peer-to-peer diffusion.  The stronger mechanism evidence is textual rather than temporal: GPT-4o-mini verification of all 39 cross-state candidate pairs identifies 2 pairs with cultivated-meat-specific shared language---a 292-character definitional template between Nebraska and Oklahoma (high confidence) and a 302-character enforcement template between Arizona and West Virginia (medium confidence).  The majority of other shared substrings are FDCA or general food-law boilerplate.  These two verified matches show actual shared statutory text, but they do not identify the source of the language or prove coordinated diffusion.
+
+\paragraph{Federal commercialization milestones are salience benchmarks.}  The supplementary fixed-effect timing design uses late-2022/2023 federal commercialization milestones as a national salience benchmark and asks whether pre-determined state characteristics predict differential post-milestone legislative activity.  This is useful timing evidence, but it is not a clean natural experiment for structural entry deterrence: high-cattle states may differ on many post-2022 political trajectories, cumulative outcome definitions are mechanically persistent, and randomization-inference $p$-values are finite-sample limited (RI $p = 0.129$ in the headline joint test).  The failure to reject under finite-sample RI is part of why we treat this design as a supplementary milestone-salience benchmark rather than a headline causal estimate.  P5 is therefore directionally consistent with differential responsiveness under increased salience, not proof that federal commercialization milestones caused deterrence in the Dixit sense.
+
+\paragraph{Limitations.}
+\begin{enumerate}
+    \item \textbf{Small sample.}  With 50 states and a short 2019--2025 window, the paper's real information content is limited.  Repeated state-years help describe timing but do not create many independent shocks.  Headline conclusions should therefore be based on transparent state-level and bill-level patterns, with hazard estimates treated as diagnostics.
+
+    \item \textbf{Predominantly descriptive.}  The framework summarizes correlates of policy response and severity.  The supplementary fixed-effect timing designs provide suggestive timing evidence but do not establish clean causal effects of exposure on adoption, especially given short panels, cumulative outcomes, and finite-sample inference limits.
+
+    \item \textbf{Stage~2 fragility.}  The parsimonious escalation model relies on a single predictor (peer escalation; pseudo-$R^2 = 0.042$), and adding meatpacking employment as a robustness covariate yields an unstable coefficient that changes sign under alternative outcome definitions (the enacted-only escalation indicator, EPV $= 3.0$).  A Manski (1993) reflection test (Appendix~\ref{app:peer_diagnostics}) shows that the peer-escalation association is entirely absorbed by a linear year trend, suggesting it captures a common national adoption wave rather than genuine peer-to-peer diffusion.  The overall model fit is weak, reflecting the difficulty of modeling a rare, heterogeneous outcome with a small risk set.
+
+    \item \textbf{Model-dependent risk scores.}  The regulatory-risk score is a composite index derived from estimated probabilities; it is not a structural parameter and is sensitive to specification choices.
+
+    \item \textbf{No firm-level validation.}  The risk scores have not been validated against actual firm entry or investment decisions, limiting their practical interpretation.
+
+    \item \textbf{Framing measurement and bill-length artifacts.}  The bill-text framing analysis is based on LLM-extracted indicators and should be treated as descriptive \citep{grimmer2013text}.  In particular, the consumer-safety frame exhibits a strong bill-length artifact in the current sample (the ban--nonban difference collapses in the long-bill subset), so any rhetorical interpretation is cautious and conditional on future human-coded validation.
+
+    \item \textbf{Vote and committee evidence is source-limited.}  The main legislator-bill evidence in Table~\ref{tab:political_supply} is a sponsorship/cosponsorship political-supply model, not a floor-vote model.  The vote/process traces summarized in Section~\ref{sec:mechanism} are used for documentary triangulation.  Combined vote/process traces cover 76 of 140 active-corpus bills, of which 74 carry named member-level roll-call rows.  The 64 bills with no combined trace decompose as 57 bills with no recorded floor or committee roll call (sample selection on bill survival in the legislative process) and 7 bills with voice/aggregate-only public records that confirm no member-level data is publicly available (a ceiling of the public record, not of collection effort).  Two additional Wisconsin bills carry OpenStates vote events without named member rows.  A full legislator-vote panel with bill-survival selection correction remains outside the scope of this paper.
+\end{enumerate}
+
+% ============================================================
+\section{Conclusion}
+% ============================================================
+
+This paper studies a pre-market form of technology regulation: state restrictions on cultivated meat before broad consumer access, measurable consumer harms, or observable state-level displacement existed.  The main contribution is to document and organize this policy-before-market phenomenon in a reproducible state policy corpus, then interpret the observed variation through a political-economy lens.
+
+The paper makes three contributions.  It introduces the Cultivated Meat Policy Database (CMPD), a reproducible 140-bill, 38-state, 2019--2025 corpus paired with a 2018 alternative-protein policy baseline.  It reframes the question from policy-adoption timing to pre-market regulation, with preferred outcomes that include state response and maximum stringency, bill-level severity and passage, and legislator political supply.  And it documents that the restrictions are politically patterned: policy-ideology sorting is the most stable state-level pattern, while agriculture-committee membership, district cattle exposure, and Republican party affiliation predict sponsorship and cosponsorship within bills.  Measured incumbent-sector exposure proxies remain substantively important but statistically unstable at the state and bill levels.  Bill-level severity gives only limited equivalence evidence on industry exposure, the cross-issue panel supports the falsification logic but not a headline causal interpretation, and the stage-aware regulatory-risk monitoring index (Appendix~\ref{app:risk_index}) is offered as a descriptive ranking device rather than a validated forecast.  Section~\ref{sec:discussion} documents the corresponding limitations in detail; we do not repeat that list here.
+
+The central conclusion is therefore deliberately modest: U.S.\ cultivated-meat regulation is politically patterned and appears before broad consumer access exists, but the evidence is descriptive and suggestive rather than structurally causal.  It supports an IO-informed interpretation that some state restrictions could operate as potential market-access barriers under pre-market commercialization salience, not a direct estimate of entry deterrence, welfare effects, lobbying effectiveness, or firm behavior.
+
+Future work can extend the CMPD in three directions.  First, the multi-issue panel should harden the conditional-law treatment in the plant-based arm, add direct official-page review for non-transition raw-milk states, and, if the cross-issue comparison is promoted from a supporting falsification check to a main issue-panel design, build an official 50-state-year CBD/hemp food-regulation arm: state-level variation in CBD-as-food rules persists across the 2019--2025 panel window because the FDA has declined to authorize CBD as a food additive, leaving states to regulate independently.  The current source-screen already records plant-based dairy labeling as a sparse fourth arm, but its positive-state count is too small for a main regression.  GMO labeling variation, by contrast, is largely uninformative for this window because the 2016 National Bioengineered Food Disclosure Standard \citep{publaw114216} federally preempts mandatory state GMO labeling, with USDA disclosure compliance effective January 2022 \citep{usda2018nbfds}; the resulting state-level series is near-flat over 2019--2025 and would be absorbed into issue fixed effects without contributing identifying variation.  Second, the text-alignment/source-attribution work can now start from two public source-state trails (AZ before WV; NE before OK) and investigate whether an upstream institutional template exists or whether these are state-to-state statutory borrowings.  This should become a companion model-bill paper only if a strict upstream source trail is found.  Third, comparing policy measures with firm entry, investment, product-launch, and facility-location data would support a separate long-run IO/firm-entry paper.  A standalone legislator-vote or electoral-accountability paper should wait until vote, primary-challenge, and source-scope coverage improve enough to support a complete outcome universe.
+
+The broader implication is that the U.S.\ system of federalism---which gives states wide latitude to restrict new food technologies even when a federal safety baseline exists---creates a fragmented regulatory landscape that may raise market-access costs and regulatory uncertainty.  This paper does not estimate firm investment or commercialization responses directly, but the statutory fragmentation documented here is a necessary input for evaluating those market effects in future work.  Understanding the political economy of this fragmentation is a prerequisite for designing policy responses that balance legitimate safety and labeling concerns against the possibility that pre-market regulation becomes a market-access barrier.
+
+% ============================================================
+% REFERENCES
+% ============================================================
+\bibliographystyle{apalike}
+\bibliography{references}
+
+% ============================================================
+\clearpage
+\begin{appendices}
+
+\section{Robustness and Supplementary Results}
+\label{app:robustness}
+
+% --- Appendix Table A1: Extended Stage 1 with R&D ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Stage 1: Extended Specification with R\&D Employment Share}
+\label{tab:stage1_extended}
+\input{../cultivated_meat_project/data/final_csv/table1a_stage1_extended_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Logit coefficients with state-clustered standard errors.  Same risk set as Table~\ref{tab:stage1} ($N = 236$, 38 events; EPV $= 6.5$ in the parsimonious specification, $5.6$ in the extended).  Adding R\&D employment share does not improve AIC (154.1 vs.\ 153.6) and attenuates the CW policy ideology coefficient from $p = 0.020$ to $p = 0.050$.  Correlation between R\&D emp.\ share and CW policy ideology: $r = 0.39$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A1b: Post-milestone (2023+) interaction robustness ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\footnotesize
+\caption{Stage 1: Post-2022 Federal Commercialization Interaction Robustness (2023+)}
+\label{tab:stage1_post_fda}
+\input{../cultivated_meat_project/data/final_csv/alt_post_fda_interaction_stage1_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Adds a post-2022 indicator (year $\geq 2023$) and interactions with the baseline exposures to capture a potential discrete level shift following the late-2022/2023 federal commercialization milestone window. This is a descriptive robustness check in an annual panel.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A2: Alternative Exposure Measures ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Alternative Exposure Measures}
+\label{tab:alt_exposure}
+\begin{tabular}{llccccc}
+\toprule
+Stage & Exposure variable & Coef. & Std. err. & $p$ & Pseudo $R^2$ & AIC \\
+\midrule
+\multirow{4}{*}{1} & Livestock receipts share & $-$0.457 & 1.267 & 0.718 & 0.313 & 157.3 \\
+ & Log cattle inventory & 0.164 & 0.123 & 0.184 & 0.321 & 153.6 \\
+ & Meatpacking emp.\ share & $-$34.22 & 45.66 & 0.454 & 0.318 & 156.4 \\
+ & Animal prod.\ estab.\ share & 69.32 & 77.53 & 0.371 & 0.317 & 156.5 \\
+\midrule
+\multirow{4}{*}{2} & Livestock receipts share & $-$1.429 & 1.363 & 0.295 & 0.050 & 126.6 \\
+ & Log cattle inventory & 0.027 & 0.146 & 0.856 & 0.040 & 127.9 \\
+ & Meatpacking emp.\ share & $-$18.27 & 25.60 & 0.476 & 0.042 & 127.6 \\
+ & Animal prod.\ estab.\ share & $-$37.64 & 62.91 & 0.550 & 0.042 & 127.6 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Each row replaces the baseline exposure variable while retaining CW policy ideology and duration polynomial (Stage~1) or peer escalation (Stage~2).  Stage~1: $N = 236$; Stage~2: $N = 133$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A3: Component Hazard with Interactions ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Component Hazard Model with Component Interactions}
+\label{tab:component_interaction}
+\scriptsize
+\input{../cultivated_meat_project/data/final_csv/pooled_component_hazard_interaction_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Logit coefficients with state-clustered standard errors.  Interactions test whether the effect of continuous predictors differs between labeling and ban components.  $N = 548$, 65 events.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A4: LASSO Variable Selection ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Post-Least Absolute Shrinkage and Selection Operator (LASSO) Logit: One-Standard-Error Rule (Stage 1)}
+\label{tab:lasso}
+\scriptsize
+\input{../cultivated_meat_project/data/final_csv/lasso_onese_postlogit_stage1_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Post-selection logit after LASSO with the one-standard-error rule.  Force-kept variables: CW policy ideology, R\&D employment share, and year fixed effects.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A5: Frozen-exposure timing design with randomization inference ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Frozen-Exposure Timing Design: Federal Commercialization Milestones}
+\label{tab:did}
+\begin{tabular}{lccccc}
+\toprule
+Test & Interaction & Coef. & Asym.\ $p$ & RI $p$ \\
+\midrule
+\multicolumn{5}{l}{\textit{Individual frozen-exposure interactions}} \\
+\quad Log cattle inventory $\times$ post & pre\_cattle $\times$ post & 0.046 & 0.142 & 0.299 \\
+\quad CW policy ideology $\times$ post & pre\_ideology $\times$ post & $-$0.090 & 0.227 & 0.392 \\
+\quad Republican governor $\times$ post & pre\_gov\_R $\times$ post & 0.195 & 0.078 & 0.211 \\
+\midrule
+\multicolumn{5}{l}{\textit{Joint tests}} \\
+\quad Joint $F$-test (all interactions) & & 3.830 & 0.015 & 0.129 \\
+\quad Post-milestone joint timing test & & 3.134 & 0.005 & --- \\
+\quad Pre-trend joint (event study) & & 0.000 & 1.000 & --- \\
+\quad Placebo timing (milestone at 2021) & & 0.290 & 0.833 & --- \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Linear probability model with state and year fixed effects.  Exposure values frozen at $\leq$2021 levels.  Risk set: state-years prior to first agenda entry ($N = 236$).  Randomization inference (RI) based on 2,000 permutations of frozen exposure profiles across states.  Asymptotic $p$-values are clustered at the state level.  The discrepancy between asymptotic and RI $p$-values reflects finite-sample over-rejection with 50 clusters and an unbalanced risk set.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A6: Cattle × Republican Governor Interaction ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Stage 1: Cattle Exposure $\times$ Republican Governor Interaction}
+\label{tab:cattle_x_govrepublican}
+\input{../cultivated_meat_project/data/final_csv/alt_cattle_x_govrepublican_stage1_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Logit coefficients with state-clustered standard errors.  Adds a Republican-governor indicator and its interaction with log cattle inventory to the parsimonious Stage~1 specification.  Interaction coefficient: $\hat{\beta} = -0.220$ ($p = 0.406$).  $N = 236$, 38 events.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A7: CRE/Mundlak Device ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Stage 1: Chamberlain--Mundlak Between/Within Decomposition}
+\label{tab:mundlak}
+\input{../cultivated_meat_project/data/final_csv/alt_mundlak_stage1_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Augments the Stage~1 model with state means of log cattle inventory and CW policy ideology computed over each state's pre-entry risk-set years (Chamberlain--Mundlak device).  The ``\_bar'' coefficients capture the between-state component; the unbarred coefficients capture within-state temporal variation.  Neither component achieves significance, indicating that the cross-sectional cattle pattern dominates and within-state variation is insufficient to identify a causal effect.  $N = 236$, 38 events.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A7b: Bayesian Within/Between Frailty Decomposition ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Bayesian Frailty Stage 1: Within/Between Decomposition of Ideology and Cattle Effects}
+\label{tab:within_between_frailty}
+\input{../cultivated_meat_project/data/final_csv/frailty_stage1_within_between_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Bayesian frailty logit (PyMC, No-U-Turn Sampler (NUTS), 4 chains $\times$ 2000 draws, 1000 tuning).  ``Between'' (\_bar) coefficients are on state means of each covariate computed over the pre-entry risk-set years; ``within'' (\_dev) coefficients are on deviations from those means.  The between-state CW ideology coefficient ($-1.108$; 90\% HDI $[-1.858, -0.330]$) excludes zero, confirming a robust cross-sectional sorting pattern.  The within-state ideology deviation coefficient ($+1.742$; 90\% HDI $[-0.994, +4.794]$) spans zero widely---within-state ideology variation (SD $\approx 0.12$) is too small for within-state identification.  $\hat{R} \leq 1.02$ and effective sample size ($\text{ESS}_{\text{bulk}}$) $\geq 800$ for all parameters.  $N = 236$ risk-set observations, 38 first-entry events across 50 states.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table: Multi-Issue Mundlak Within/Between Decomposition ---
+\input{../cultivated_meat_project/data/final_csv/multi_issue_mundlak_summary.tex}
+
+% --- Appendix Table: Multi-Issue Falsification Sign-Rule Check ---
+\input{../cultivated_meat_project/data/final_csv/multi_issue_falsification_checks_summary.tex}
+
+% --- Appendix Table A8: Ordered Logit ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Cross-Sectional Ordered Logit: Maximum Policy Attainment (50 States)}
+\label{tab:ordered_logit}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Variable & Coef. & Std. err. & $z$ & $p$ \\
+\midrule
+Log cattle inventory (time-avg.)  & 0.274 & 0.172 & 1.59 & 0.111 \\
+CW policy ideology (time-avg.)    & $-$1.114 & 0.395 & $-$2.82 & 0.005 \\
+\midrule
+\multicolumn{5}{l}{\textit{Threshold parameters}} \\
+$\tau_1$ (0 vs.\ 1+)              & $-$0.207 & 1.776 & & \\
+$\tau_2$ (0--1 vs.\ 2)            & 1.565  & 1.807 & & \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Ordered logit ($N = 50$ states).  Dependent variable: maximum policy stage reached by 2025 (0 = no activity, 1 = agenda entry without ban/moratorium bill, 2 = ban/moratorium bill).  Covariates are panel means over 2019--2025.  Conservative ideology (lower CW score) strongly predicts higher attainment ($p = 0.005$); cattle exposure is positive but imprecise ($p = 0.111$), consistent with the main panel estimates.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A9: Temporal Placebo Summary ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Temporal Placebo: Stage 1 by Estimation Window}
+\label{tab:temporal_placebo}
+\footnotesize
+\begin{tabular}{lccccccc}
+\toprule
+Window & $N$ & Events & EPV & Cattle coef. & $p$ & Ideology coef. & $p$ \\
+\midrule
+Full panel (2019--2025) & 236 & 38 & 9.75 & 0.090 & 0.402 & $-$0.575 & 0.025 \\
+Pre-milestone (2019--2022)    & --- & --- & --- & \multicolumn{4}{c}{Failed to converge under sparse pre-period events} \\
+Post-milestone (2023--2025)   & 84  & 23 & 5.75 & 0.274  & 0.124 & $-$0.535 & 0.163 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Each estimable row uses a linear trend to conserve degrees of freedom.  The pre-milestone logit split is reported as non-convergent rather than forced into a numeric estimate.  Post-milestone: risk-set years 2023--2025.  The positive but imprecise post-milestone cattle coefficient is directionally consistent with Prediction~P5.  EPV = events per variable (substantive predictors only).
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Figure: Risk Score vs. Livestock ---
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_risk_vs_livestock.png}
+    \caption{Mean Regulatory Risk Score vs.\ Livestock-Industry Exposure (50 States)}
+    \label{fig:risk_vs_livestock}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} Cross-sectional scatter of mean regulatory risk score (2019--2025) against livestock share of agricultural receipts.  Each point is a state.  The fitted line (OLS) has a positive slope, consistent with higher fitted scores in more livestock-exposed states; the substantial vertical dispersion around the line reflects the additional explanatory role of political ideology in the logit model.
+    \end{flushleft}
+\end{figure}
+
+% --- Appendix Table A10: Shift-Share (Bartik) IV Results ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Shift-Share (Bartik) Instrumental Variables (IV): Cattle Exposure and Agenda Entry}
+\label{tab:bartik_iv}
+\footnotesize
+\input{../cultivated_meat_project/data/final_csv/shift_share_iv_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Bartik instrument: $Z_{it} = \log(1 + \text{national cultivated-meat (CM) investment}_{t-1}) \times \text{state livestock share}_{2016}$ (equation~\eqref{eq:bartik}).  All specifications use the Stage~1 risk set ($N=236$, 38 events) and include CW policy ideology and the cubic duration polynomial as controls.  Standard errors clustered by state.  Column~(1) first stage: regresses log cattle inventory on $Z_{it}$; $F=23.2$ exceeds conventional relevance thresholds.  Column~(2) reduced form: association between $Z_{it}$ and agenda entry.  Column~(3) OLS linear probability model (LPM) benchmark.  Column~(4) two-stage least squares (2SLS): instruments log cattle inventory with $Z_{it}$.  The OLS and 2SLS cattle-inventory coefficients are similar in magnitude and both imprecise, consistent with no large discrepancy driven by a simple upward OLS bias story in this sensitivity exercise (not a headline IV claim; see text for exclusion-restriction caveats).  National CM investment data: GFI annual State-of-the-Industry reports (global cultivated meat and seafood investment, 2016--2024).  See text for Ad\~ao--Koles\'ar--Morales (AKM) inference caveat.  *** $p<0.01$, ** $p<0.05$, * $p<0.1$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\section{Source-Backed Mechanism Case Evidence}
+\label{app:mechanism_cases}
+
+This appendix records the source registry behind Table~\ref{tab:mechanism_cases}.  The case evidence is illustrative and purposive: it documents public traces of agriculture, ranching, Farm Bureau/cattlemen organizations, sponsor background, committee venue, or meat-labeling rationale in selected restrictive-bill states.  It is not used as a causal design.
+
+{\scriptsize
+\renewcommand{\arraystretch}{0.92}
+\input{../cultivated_meat_project/data/final_csv/mechanism_case_sources_table.tex}
+}
+
+\noindent\footnotesize\textit{Notes:} Source registry for the illustrative mechanism case table.  Full titles and evidence notes are stored in \texttt{cultivated\_meat\_project/data/manual/mechanism\_case\_sources.csv}.  Source notes should be read as documentary support for interpretation, not as evidence that the listed actors caused adoption.
+\normalsize
+
+\subsection*{Committee testimony and witness-position proof-of-concept}
+\label{app:committee_testimony}
+
+Appendix Table~\ref{tab:committee_testimony_audit} extends the mechanism evidence from broad public traces to a more process-proximate source audit.  The table separates direct official witness or committee-testimony records from weaker committee-report, committee-route, and public-position evidence.  This distinction is substantively important: direct witness lists are closer to organized-interest participation in the legislative process, whereas news reports and association updates document salience and public framing but not the full set of actors who appeared before legislators.
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Committee Testimony and Witness-Position Source Audit}
+\label{tab:committee_testimony_audit}
+{\tiny
+\renewcommand{\arraystretch}{0.86}
+\input{../cultivated_meat_project/data/final_csv/committee_testimony_table.tex}
+}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Proof-of-concept source audit, not a representative sample or causal mechanism test.  ``Direct witness/testimony list'' means an official committee statement or witness list records actors and positions.  ``Committee report or route'' and ``Public position'' are weaker source categories and should be read as documentary triangulation only.  Full actor-level rows, confidence grades, and source notes are stored in \texttt{cultivated\_meat\_project/data/manual/committee\_testimony\_evidence.csv}.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+{\scriptsize
+\renewcommand{\arraystretch}{0.92}
+\input{../cultivated_meat_project/data/final_csv/committee_testimony_sources_table.tex}
+}
+
+\noindent\footnotesize\textit{Notes:} Source registry for Appendix Table~\ref{tab:committee_testimony_audit}.  Full titles and notes are stored in the manual committee-testimony source CSV.  The source audit strengthens process-level descriptive evidence for mechanism visibility, but it does not identify lobbying effectiveness, legislative persuasion, or entry deterrence.
+\normalsize
+
+\section{Stage-2 peer timing benchmarks (diagnostic)}
+\label{app:peer_diagnostics}
+
+This appendix records Stage~2 specifications that include a regional peer timing proxy (\texttt{peer\_escalation}).  The goal is transparency, not a headline causal claim: in a short panel with strong national salience shocks, peer terms can proxy common timing rather than peer-to-peer learning.
+
+% --- Appendix Table: Stage 2 (moved from main text) ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Stage 2: Discrete-Time Hazard of Escalation}
+\label{tab:stage2}
+\input{../cultivated_meat_project/data/final_csv/table1a_stage2_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Logit coefficients with state-clustered standard errors.  Risk set: state-years after first agenda entry and prior to first escalation.  $N = 133$, 38 states, 22 events.  This parsimonious peer-only specification is retained for benchmarking only; the main text does not treat it as evidence of identified interstate diffusion.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\paragraph{Manski (1993) reflection test: Stage-2 peer escalation.}
+The Stage-2 peer-escalation result---states escalate faster when more peers have already passed restrictions in the baseline specification---is interpretable in two ways.  Under peer-to-peer diffusion, peer adoption provides information or political cover that increases a state's own hazard.  Under the \citet{manski1993} reflection problem, observed correlation could simply reflect a common national stimulus (national Farm Bureau coordination, legislative templates, or the 2022--2023 commercialization-salience window) that induces many states to escalate simultaneously, with no direct peer-to-peer causal channel.
+
+To test this, we add a standardised linear year trend to the Stage-2 escalation model and compare the peer-escalation coefficient before and after the year control.  Results are reported in Appendix Table~\ref{tab:manski_peer}.  Using the gold-corrected Stage-2 risk set, the baseline logit yields $\hat{\beta}(\text{peer}) = 7.110$ ($p = 0.006$); adding a linear year trend reduces this to $\hat{\beta}(\text{peer}) = -3.618$ ($p = 0.507$).  The OLS-LPM pattern is similar: $\hat{\beta} = 1.211$ ($p = 0.014$) without the trend, $\hat{\beta} = 0.300$ ($p = 0.635$) with it.  The year trend itself remains positive and significant in the OLS specification ($\hat{\beta} = 0.124$, $p < 0.01$), indicating that a common national escalation wave is present in the data.  Once this common trend is absorbed, no residual peer-to-peer diffusion signal remains.
+
+These results indicate that the Stage-2 peer-escalation association is primarily a temporal phenomenon associated with the national adoption wave rather than evidence of peer-to-peer interstate diffusion.  This is consistent with many states responding to the same national stimuli---federal commercialization milestones, model legislation from national industry associations---rather than learning from or imitating specific geographic neighbors.
+
+% --- Appendix Table A11: Manski Reflection Test for Peer Escalation ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Manski (1993) Reflection Test: Stage-2 Peer Escalation and Year Trend}
+\label{tab:manski_peer}
+\small
+\input{../cultivated_meat_project/data/final_csv/spatial_iv_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} Dependent variable: escalation indicator (1 = first ban/moratorium bill in state-year).  Stage-2 risk set ($N=133$, 22 events; state-years after agenda entry and before first escalation).  Columns~(1) and~(3) are the baseline logit and OLS-LPM specifications without a year control.  Columns~(2) and~(4) add a standardised linear year trend (\texttt{year\_std}) to test the \citet{manski1993} reflection hypothesis: if the peer-escalation coefficient is associated with a common national adoption wave rather than peer-to-peer diffusion, it should collapse toward zero once the common trend is absorbed.  Column~(5) reports the weak first-stage diagnostic for the cross-sectional mean livestock share of all non-own states ($W_{\text{livestock}} = \bar{s}_{-i,2016}$); the first-stage $F = 0.2$ is weak, and the 2SLS column is left blank in the current regeneration environment because the optional \texttt{linearmodels} dependency is unavailable.  The peer-escalation coefficient falls from 7.110 (logit, $p = 0.006$) to -3.618 (logit+year, $p = 0.507$) and from 1.211 (OLS, $p = 0.014$) to 0.300 (OLS+year, $p = 0.635$).  Standard errors clustered by state.  *** $p<0.01$, ** $p<0.05$, * $p<0.1$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Table A12: Binary high-cattle timing comparison ---
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Binary High-Cattle Timing Comparison Around Federal Commercialization Milestones}
+\label{tab:did_binary}
+\scriptsize
+\input{../cultivated_meat_project/data/final_csv/event_study_did_summary.tex}
+\begin{tablenotes}[flushleft]
+\footnotesize
+\item \textit{Notes:} High-cattle group indicator equals 1 if a state's 2019 log cattle inventory is at or above the national median (high-cattle group: $n=25$ states).  Post-milestone indicator equals 1 for years $\geq 2023$ (first full post-milestone year).  Outcomes are cumulative level indicators: \texttt{ever\_entered} ($= 1$ if state has introduced any cultivated-meat bill by year $t$) and \texttt{ever\_escalated} ($= 1$ if state has seen a ban/moratorium bill by year $t$).  Panel: $N = 350$ (50 states $\times$ 7 years, 2019--2025).  Column~(1)/(4): pooled OLS (no fixed effects).  Columns~(2)--(3) and~(5)--(6): two-way fixed effects (state + year fixed effects); TWFE+ adds interactions of post-milestone timing with frozen 2019 log cattle inventory and frozen 2019 CW policy ideology, avoiding time-varying current controls.  Pre-trend diagnostic: in the pre-milestone subsample (2019--2022), state fixed-effects regression of the outcome on high-cattle group $\times$ standardised year trend.  The agenda-entry pre-trend estimate is numerically degenerate in the grouped cumulative series; the escalation pre-trend estimate is imprecise.  Standard errors clustered by state.  *** $p<0.01$, ** $p<0.05$, * $p<0.1$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+% --- Appendix Figure: Parallel-Trends Visualization ---
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_event_study_did.png}
+    \caption{Parallel-Trends Visualization: High vs.\ Low Cattle States, 2019--2025}
+    \label{fig:did_parallel}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} Group-mean cumulative policy-activity rates by year for high-cattle states (above 2019 median log cattle inventory, $n = 25$, solid line) and low-cattle states (below median, $n = 25$, dashed line).  Left panel: \texttt{ever\_entered} (cumulative agenda entry rate).  Right panel: \texttt{ever\_escalated} (cumulative escalation rate).  The vertical dashed line marks the late-2022/2023 federal commercialization milestone window for cultivated chicken (November 2022--June 2023).  Because the outcomes are cumulative and mechanically monotone, the figure is descriptive rather than a standard dynamic adoption design.  The two groups track closely through 2022; after 2023, high-cattle states diverge upward in both outcomes, with the gap widening through 2025 ($\Delta_{\text{entry}} = +0.20$, $\Delta_{\text{escal}} = +0.04$ in 2025), consistent with but not proving differential response to a commercialization-salience shock.
+    \end{flushleft}
+\end{figure}
+
+% --- Appendix Figure: Robustness Specifications Forest Plot ---
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_robustness_specs.png}
+    \caption{Robustness Specifications: Log Cattle Inventory Coefficient (Stage 1)}
+    \label{fig:robustness_specs}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} Coefficient on log cattle inventory across the full suite of Stage~1 robustness specifications (baseline, extended, post-milestone interaction, CRE/Mundlak, and Mundlak device) and temporal window/placebo checks.  All full-panel specifications yield a positive cattle coefficient; none achieve conventional significance under state-clustered inference.  The CRE/Mundlak specification absorbs between-state variation, producing a large negative within-state coefficient that reflects the absence of within-state cattle inventory variation.  Diamonds ($\blacklozenge$) indicate $p < 0.05$; filled circles ($\bullet$) indicate $p \geq 0.05$.  Horizontal bands are 95\% confidence intervals.
+    \end{flushleft}
+\end{figure}
+
+% --- Appendix Figure: Leave-One-State-Out ---
+% \begin{figure}[htbp]
+%     \centering
+%     % \includegraphics[width=0.8\textwidth]{loso_coefficients.pdf}
+%     \caption{Leave-One-State-Out Sensitivity: Log Cattle Inventory Coefficient (Stage 1)}
+%     \label{fig:loso}
+%     \textit{Notes:} Each point shows the coefficient on log cattle inventory when the labeled state is omitted.  Dashed line: full-sample estimate (0.136).  Range: [0.075, 0.177]; no sign changes.
+% \end{figure}
+
+
+
+% ============================================================
+\section{Supplementary Timing Analysis}
+\label{app:supp_timing}
+% ============================================================
+
+The descriptive hazard model summarizes correlates of policy adoption but cannot establish causality because the variation in key covariates is predominantly between states (99\%+ for cattle inventory, policy ideology, and R\&D employment share), with negligible within-state variation over the seven-year panel.  This section therefore reports timing probes around federal commercialization milestones rather than a preferred causal design.
+
+To probe \emph{differential timing} around federal commercialization milestones, we use the late-2022/2023 federal commercialization window---the first FDA ``no further questions'' response, the subsequent GOOD Meat FDA response, USDA/FSIS label and inspection steps, and first U.S.\ restaurant sales---as a national salience benchmark.  This is not a clean natural experiment for structural entry deterrence, but it provides a transparent timing benchmark \citep{borusyak2022quasi,bertrand2004did}: pre-determined state characteristics (frozen at their $\leq$2021 values) are interacted with a post-2023 indicator in a model with state and year fixed effects:
+\begin{equation}
+    A_{s,t} = \alpha_s + \delta_t + \sum_k \gamma_k \cdot \text{pre}_{s,k} \times \mathbf{1}(t \geq 2023) + \varepsilon_{s,t}
+    \label{eq:did}
+\end{equation}
+where $\text{pre}_{s,k}$ denotes the frozen pre-milestone value for log cattle inventory, CW ideology, or Republican governor status.
+
+The pre-milestone diagnostics do not reject differential trend equality for all three exposures (joint $F$-test $p = 1.000$), and a placebo timing test (shifting the milestone window to 2021) produces a null result ($p = 0.833$).  The post-milestone joint timing test is significant under asymptotic inference ($F = 3.134$, $p = 0.0047$; joint interaction $F$-test $p = 0.015$).  However, randomization inference (RI)---which permutes frozen exposure profiles across states and is valid for finite samples with 50 clusters---yields a joint $p$-value of 0.129, indicating that the asymptotic test likely over-rejects in this setting.  Individually, Republican governor status shows the strongest post-milestone differential under the frozen-exposure design ($p = 0.078$), but remains insignificant under RI ($p = 0.211$); cattle and ideology channels are similarly null under RI ($p = 0.299$ and $p = 0.392$, respectively).
+
+These results are directionally consistent with the descriptive hazard model and pass the reported pre-milestone and placebo-timing diagnostics, but the evidence is still suggestive timing evidence rather than causal identification due to the short panel (4 pre-milestone + 3 post-milestone years), rapid risk-set attrition (34 $\to$ 19 $\to$ 11 states), and insufficient power under finite-sample inference.
+
+\subsection{Binary-Treatment Timing Comparison: High versus Low Cattle States}
+\label{sec:did_binary}
+
+As a complementary and more transparent timing comparison, we estimate a binary high-cattle specification using the full 50-state panel.  Group status is fixed at each state's 2019 (pre-policy) log cattle inventory: states at or above the national median are classified as \emph{high-cattle} ($n = 25$; includes TX, IA, MN, KS, NE and similar states); the remaining 25 states form the comparison group.  This pre-determined binary threshold avoids some endogeneity concerns that arise from using continuously-varying or time-varying exposure intensity.  Outcomes are cumulative level indicators: \texttt{ever\_entered} ($= 1$ if the state has introduced any cultivated-meat bill by year $t$) and \texttt{ever\_escalated} ($= 1$ if the state has seen a ban or moratorium bill by year $t$).  These stock variables are convenient for visualization and fixed-effect comparison, but they are mechanically monotone once a state crosses the threshold; they should be read as descriptive adoption stocks rather than as a fully specified dynamic adoption design for first-event hazards.
+
+Pre-milestone trend differences are assessed via a formal linear pre-trend diagnostic: within the pre-milestone subsample (2019--2022), we regress each outcome on a high-cattle-group-by-year-trend interaction with state fixed effects.  For \texttt{ever\_entered}, the pre-trend contrast is numerically degenerate in the current grouped cumulative series ($\hat{\beta} \approx 0$ with zero reported standard error), so we do not treat it as an informative statistical test.  For \texttt{ever\_escalated}, the estimate is small and insignificant ($\hat{\beta}(\text{high cattle} \times \text{year trend}) = 0.032$, $p = 0.382$).  These diagnostics do not show obvious pre-milestone divergence, but the test is low-powered in a short panel.  Figure~\ref{fig:did_parallel} visualises the raw group-mean trajectories: the two groups track closely from 2019 through 2022, with a visible but imprecise divergence beginning in 2023--2024 for agenda entry.
+
+The main fixed-effect comparison exploits the full 2019--2025 panel with state and year fixed effects.  The estimated post-milestone high-cattle coefficient for \texttt{ever\_entered} is $\hat{\delta} = +0.160$ ($p = 0.085$ in pooled OLS; $p = 0.113$ in the two-way fixed-effects (TWFE) specification), indicating that high-cattle states increased their cumulative agenda-entry rate by about 16 percentage points more than low-cattle states after the federal milestone window, relative to the pre-milestone difference.  The coefficient remains positive but becomes smaller and imprecise when TWFE+ adds frozen 2019 exposure and ideology post interactions ($\hat{\delta}=+0.095$, $p=0.548$), so the binary design should be read as suggestive timing evidence rather than a robust causal effect (Appendix Table~\ref{tab:did_binary}).  For \texttt{ever\_escalated}, the coefficient is small and imprecise across specifications ($\hat{\delta}=-0.004$ to $+0.053$; $p=0.526$--$0.977$), likely reflecting insufficient power with few escalation events over 50 states.
+
+The binary comparison complements the continuous interaction design in two ways.  First, it uses a simpler, more transparent group definition that is easy to verify and replicate.  Second, the parallel-trends figure (Figure~\ref{fig:did_parallel}) provides a visual diagnostic: the two groups track closely through 2022 and diverge modestly thereafter in cumulative agenda entry, consistent with \emph{post-milestone divergence among pre-determined high- and low-exposure states}.  This pattern is suggestive, but it does not by itself identify strategic regulatory investment in the Dixit sense (lobbying and entry responses are not observed, and many post-2022 confounders could differ across groups).  Both timing designs agree on the central limitation: with 50 states and a 7-year panel, the evidence is directionally interesting and passes some diagnostics, but remains underpowered for definitive causal attribution.
+
+% ============================================================
+\section{Ancillary Regulatory-Risk Monitoring Index}
+\label{app:risk_index}
+% ============================================================
+
+The composite regulatory-risk score defined in equation~\eqref{eq:risk} is an ancillary monitoring output, not a main empirical result.  It combines predicted entry probability (Stage~1) for states still at risk of first legislative activity with predicted escalation probability (Stage~2) for states that have already entered but have not yet seen a ban or moratorium bill.  Stage~2 fitted values use the appendix benchmark specification in Table~\ref{tab:stage2} (Appendix~\ref{app:peer_diagnostics}); because that specification is not interpreted as identified peer diffusion, the index should be read as a \emph{model-implied monitoring summary} rather than a causal forecast.  Figure~\ref{fig:risk_heatmap} presents a state-by-year heatmap of the score for all 50 states from 2019 to 2025.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_reg_risk_heatmap.png}
+    \caption{Regulatory Risk Score Heatmap: All 50 States, 2019--2025}
+    \label{fig:risk_heatmap}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} Stage-aware composite risk score (equation~\eqref{eq:risk}).  For states in the Stage~1 risk set, the score equals the predicted annual hazard of agenda entry; for states in the Stage~2 risk set, it equals the predicted annual hazard of escalation using the appendix Stage~2 benchmark (Table~\ref{tab:stage2}).  States that have already escalated (Stage~2 exit) are coded zero in post-escalation years.  States sorted top-to-bottom by mean risk score over the panel.
+    \end{flushleft}
+\end{figure}
+
+Several patterns stand out.  First, risk scores are low and relatively uniform across states before 2022, reflecting near-zero predicted hazards in the early panel years.  After 2022, scores diverge sharply: states with high cattle-inventory and conservative ideology that remain in the Stage~1 risk set---notably Idaho ($\hat{P} = 0.607$--$0.672$ in 2024--2025), South Dakota ($0.538$--$0.621$), North Carolina ($0.504$--$0.569$), Arizona ($0.499$), and Oklahoma ($0.494$)---accumulate scores in the 0.40--0.67 range, while states with liberal policy environments and strong R\&D sectors (New Jersey, Rhode Island, Connecticut, Delaware) remain below 0.20.  Second, states that escalate to bans show discrete score drops to zero in post-escalation years (Stage~2 exit), as the composite score is defined as zero for states that have already reached the terminal outcome.  Third, a handful of states that entered the legislative agenda but have not yet escalated---notably South Carolina, Colorado, and Georgia---can show elevated Stage~2 fitted escalation risk in late-panel years under the appendix benchmark specification, which loads on a regional peer proxy that primarily tracks national timing (Appendix~\ref{app:peer_diagnostics}).
+
+Figure~\ref{fig:risk_time_series} plots risk score trajectories for six illustrative states.  Texas had the highest Stage~1 fitted score among eventual ban states in 2019 ($\hat{P} = 0.446$); its 2023 escalation is ex post consistent with that fitted ranking, after which its score drops to zero (inactive).  Idaho, which had the highest Stage~1 fitted score in 2019 ($\hat{P} = 0.484$) and has never entered the legislative agenda, has the highest fitted score of any non-entry state by 2024--2025 ($\hat{P} = 0.607$--$0.672$).  States with liberal ideology and high R\&D employment (e.g., New Jersey, Rhode Island) maintain scores persistently below 0.20 throughout the panel.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{../cultivated_meat_project/data/final_csv/figures/fig_reg_risk_time_series.png}
+    \caption{Regulatory Risk Score: Selected States, 2019--2025}
+    \label{fig:risk_time_series}
+    \begin{flushleft}
+    \footnotesize \textit{Notes:} Predicted regulatory risk scores for six illustrative states.  Shaded region marks the 2022--2023 federal commercialization milestone period.  Risk scores are fitted values from the parsimonious Stage~1 (pre-entry states) and the appendix Stage~2 benchmark (Table~\ref{tab:stage2}).
+    \end{flushleft}
+\end{figure}
+
+The risk score is not a causal structural parameter; it is a model-dependent index that inherits all the limitations of the underlying logit models discussed in Section~\ref{sec:discussion}.  Its practical interpretation is as a \emph{ranking device}: states with higher scores receive higher fitted hazards of agenda entry or escalation under the maintained logit specifications, conditional on the state characteristics observed through 2025.  It is intended for monitoring and transparency; it should not be treated as a validated input into firm entry, location, or investment decisions without external validation.  Figure~\ref{fig:risk_vs_livestock} in the appendix plots the cross-sectional relationship between cattle-industry exposure and mean risk scores, consistent with geographic stratification reflecting both industry structure and political orientation.
+
+\end{appendices}
 
 \end{document}
