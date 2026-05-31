@@ -1,0 +1,2 @@
+exposure_var,formula,interaction_term,coef,se,p_value,pseudo_r2,aic,n_obs
+log_cattle_inventory,agenda_entry ~ C(year) + log_cattle_inventory + log_cattle_inventory_x_post + gov_republican + cw_policy_ideology + peer_agenda_entry_region + rnd_emp_share,log_cattle_inventory_x_post,0.3355,0.2175,0.123,0.2932,175.03,234

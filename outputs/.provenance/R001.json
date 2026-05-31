@@ -1,0 +1,18 @@
+{
+  "code_git_sha": "a9ca8df21080f1527d61fc9c38ee14ddf2dc2efe",
+  "created_at": "2026-05-31T07:54:47.565193+00:00",
+  "description": "DiD interaction: ban x cattle exposure",
+  "input_files": [
+    {
+      "exists": true,
+      "path": "data/clean/analysis_ready.csv",
+      "sha256": "c45873e22b7455f7b98c82b6ac3aa9d45e820423c0d7776e344fe98ce9847ea9"
+    }
+  ],
+  "output_path": "outputs/tables/did_interaction_results.csv",
+  "output_type": "table_or_figure",
+  "parameters": {},
+  "result_id": "R001",
+  "script_or_source": "cultivated_meat_project/code/09_component_hazard.py",
+  "sha256": "29d423cfaf3b050973cc431b86dc89f658626cc7961c41e05e13c30f559c66ed"
+}

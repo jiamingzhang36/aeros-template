@@ -1,2 +1,2 @@
 result_id,output_type,path,script_or_source,description,created_date,linked_claims,notes
-R001,,,,,,C001,
+R001,table_or_figure,outputs/tables/did_interaction_results.csv,cultivated_meat_project/code/09_component_hazard.py,DiD interaction: ban x cattle exposure,2026-05-31T07:54:47.565193+00:00,,
