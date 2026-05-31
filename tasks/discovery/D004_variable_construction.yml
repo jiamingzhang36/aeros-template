@@ -1,6 +1,6 @@
 task_id: D004_variable_construction
 stage: discovery
-depends_on: [D003_design_options, D002_data_scouting]
+depends_on: [D003_design_options, D002_data_scouting, D005_data_probe]
 gate: G2
 goal: >
   G2 Measurement. For every key variable the candidate designs need, specify how

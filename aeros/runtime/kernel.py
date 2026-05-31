@@ -111,12 +111,50 @@ def _escalate(project_root: Path, contract: Contract, feedback: str) -> Path:
     return path
 
 
+def _run_deterministic_task(contract: "Contract", project_root: Path,
+                             state: dict, dry_run: bool) -> int:
+    """Run a zero-agent-calls contract by executing its check scripts directly.
+
+    Tasks with max_agent_calls=0 are deterministic probes (e.g. API calls,
+    data downloads). They produce output via a standalone script listed in the
+    contract's goal; we just run the checks and report pass/fail.
+    """
+    import subprocess
+    if dry_run:
+        print(f"[kernel] DRY RUN: deterministic task {contract.task_id} — run checks only")
+        return 0
+
+    # For D005-style tasks the script is expected to already have been run
+    # (or the pipeline step calls it explicitly). Run the checks to verify.
+    from .checks import run_checks, format_feedback
+    passed, results = run_checks(project_root, contract.checks)
+    for r in results:
+        print(f"[kernel]   check {r.name}: {'PASS' if r.passed else 'FAIL'}")
+    if passed:
+        state_mod.set_status(state, contract.task_id, "passed")
+        state_mod.record_run_summary(state, contract.task_id, calls=0, cost_usd=0.0)
+        state_mod.save_state(project_root, state)
+        print(f"[kernel] task {contract.task_id} PASSED (deterministic).")
+        return 0
+    # Not passed — escalate immediately (no retries for deterministic tasks)
+    feedback = format_feedback(results)
+    path = _escalate(project_root, contract, feedback)
+    state_mod.set_status(state, contract.task_id, "escalated")
+    state_mod.save_state(project_root, state)
+    print(f"[kernel] task {contract.task_id} ESCALATED -> {path}")
+    return 2
+
+
 def run_task(contract_path: str | Path, *, dry_run: bool = False,
              max_retries_override: int | None = None) -> int:
     contract = load_contract(contract_path)
     project_root = find_project_root(Path(contract_path).resolve())
     state = state_mod.load_state(project_root)
     state_mod.set_status(state, contract.task_id, "running")
+
+    # Deterministic probe tasks (max_agent_calls=0) skip the agent loop entirely.
+    if contract.max_agent_calls == 0:
+        return _run_deterministic_task(contract, project_root, state, dry_run)
 
     max_retries = (max_retries_override if max_retries_override is not None
                    else contract.max_retries)

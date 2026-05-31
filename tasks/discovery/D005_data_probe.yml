@@ -1,0 +1,40 @@
+task_id: D005_data_probe
+stage: discovery
+gate: G1
+depends_on: [D002_data_scouting]
+goal: >
+  G1 Data Readiness. Run the data probe to measure real diagnostics from public
+  APIs and write discovery/data_diagnostics.yml with status: measured.
+
+  This is NOT an agent task -- run the deterministic probe script:
+    python3 code/01_ingest/probe_data_diagnostics.py
+
+  The probe measures:
+    n_ban_states_with_firm_presence   (ban states x CM firm presence)
+    bill_text_extractable_states      (LegiScan or public fallback)
+    n_states_with_ban_dates           (known enacted bans)
+    donor_pool_size                   (jurisdictions with investment series)
+
+  Set LEGISCAN_API_KEY env var for full LegiScan API access. Without it,
+  the probe uses public records and falls back for bill-text count.
+
+inputs:
+  - discovery/data_inventory.csv
+  - code/01_ingest/probe_data_diagnostics.py
+
+allowed_outputs:
+  - discovery/data_diagnostics.yml
+
+forbidden_actions:
+  - "Do not write anywhere under data/raw/."
+  - "Do not fabricate diagnostic values; run the probe script to measure them."
+
+checks:
+  - check_data_diagnostics.py
+
+retry_policy:
+  max_retries: 0
+
+budget:
+  max_agent_calls: 0
+  max_dollars: 0.0
