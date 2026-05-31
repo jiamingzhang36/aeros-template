@@ -1,0 +1,12 @@
+{
+  "code_git_sha": "3f4c5c28766684bed55f1a026411fa9f1bbfd2a0",
+  "created_at": "2026-05-31T08:04:06.817364+00:00",
+  "description": "Bill events corpus \u2014 136 rows (paper claims 140)",
+  "input_files": [],
+  "output_path": "data/clean/bill_events.csv",
+  "output_type": "table_or_figure",
+  "parameters": {},
+  "result_id": "R003",
+  "script_or_source": "cultivated_meat_project/code/04_analysis_ready.py",
+  "sha256": "f8a2dc740c4b15b192745b4f94b77c48c53b6b3a0d8285e86dbb24a21a63791f"
+}

@@ -1,0 +1,18 @@
+{
+  "code_git_sha": "3f4c5c28766684bed55f1a026411fa9f1bbfd2a0",
+  "created_at": "2026-05-31T08:04:06.783898+00:00",
+  "description": "Component hazard main coefs",
+  "input_files": [
+    {
+      "exists": true,
+      "path": "data/clean/analysis_ready.csv",
+      "sha256": "c45873e22b7455f7b98c82b6ac3aa9d45e820423c0d7776e344fe98ce9847ea9"
+    }
+  ],
+  "output_path": "outputs/tables/component_hazard_coefficients.csv",
+  "output_type": "table_or_figure",
+  "parameters": {},
+  "result_id": "R002",
+  "script_or_source": "cultivated_meat_project/code/09_component_hazard.py",
+  "sha256": "03a50aad7cf02e3a3b0681cc227716f88d8afb82366ab2d9e7339381f668230c"
+}
