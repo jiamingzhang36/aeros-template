@@ -41,31 +41,26 @@ automation:
       - "data/final_csv/component_hazard_coefficients.csv"
 
 gate_exit_criteria:
+  # G1-G3 criteria delegate to the real checks built by the discovery ratchet,
+  # so the formal gate standard == the epistemic ratchet (data probe -> design
+  # adjudication -> variable construction), not a parallel placeholder standard.
   G1:
     requires:
-      - type: "csv_filter_count"
-        path: "discovery/data_inventory.csv"
-        filters:
-          engineering_status: "verified"
-        min_count: 1
+      - type: "check_passes"           # data diagnostics measured (status: measured + metrics)
+        check: "check_data_diagnostics.py"
   G2:
     requires:
-      - type: "status_not_empty"
-        path: "docs/data_dictionary.md"
-      - type: "markdown_table_min_rows"
-        path: "docs/data_dictionary.md"
-        section: "Variables"
-        min_rows: 1
-      - type: "yaml_field_nonempty"
-        path: "docs/data_contract.yml"
-        field: "required_variables.outcomes"
+      - type: "check_passes"           # variables mapped to real data sources, treatment+outcome buildable
+        check: "check_variable_construction.py"
   G3:
     requires:
+      - type: "check_passes"           # design options valid (>=2 candidates, fallback floor, viability tests)
+        check: "check_design_options.py"
+      - type: "check_passes"           # adjudication consistent: a design selected, claim ceiling earned
+        check: "check_design_selection.py"
       - type: "markdown_status_equals"
         path: "docs/method_card.md"
         value: "filled"
-      - type: "claim_main_has_type"
-        path: "evidence/claim_registry.md"
   G4:
     requires:
       - type: "claim_main_results_registered"

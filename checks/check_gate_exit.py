@@ -319,6 +319,10 @@ def _count_matching_rows(requirement: dict) -> int:
 
 def _check_requirement(req: dict) -> tuple[bool, str]:
     req_type = str(req.get("type", "csv_filter_count"))
+
+    if req_type == "check_passes":
+        return _check_named_check(req)
+
     path = req.get("path")
     if not path:
         raise RuntimeError("exit criterion missing path")
@@ -484,6 +488,30 @@ def _check_requirement(req: dict) -> tuple[bool, str]:
         return _check_markdown_table_rows(file_path, req)
 
     raise RuntimeError(f"unknown criterion type: {req_type}")
+
+
+def _check_named_check(req: dict) -> tuple[bool, str]:
+    """Run a named check script (criterion type: check_passes).
+
+    Lets a gate's exit criteria delegate to the real check we already built
+    (e.g. check_data_diagnostics.py), so the formal gate standard equals the
+    epistemic ratchet rather than a parallel placeholder standard.
+    """
+    import subprocess
+    name = str(req.get("check", "")).strip()
+    if not name:
+        raise RuntimeError("check_passes criterion missing 'check'")
+    script = Path("checks") / name
+    if not script.exists():
+        return False, f"check script not found: {script}"
+    proc = subprocess.run(
+        [sys.executable, str(script)], capture_output=True, text=True,
+    )
+    if proc.returncode == 0:
+        return True, f"ok:{name}"
+    tail = (proc.stdout or proc.stderr or "").strip().splitlines()
+    detail = tail[-1] if tail else "check failed"
+    return False, f"{name} failed: {detail}"
 
 
 def evaluate_through_gate(gate_label: str, project_root: str | Path = ".") -> tuple[bool, list[str]]:

@@ -1,5 +1,5 @@
-current_gate: G0
-gate_status: open
+current_gate: G3
+gate_status: approved
 candidate_gate: G3
 candidate_stage: discovery
 tasks:
@@ -49,10 +49,15 @@ tasks:
     status: passed
     last_run_calls: 0
     last_run_cost_usd: 0.0
-updated_at: '2026-05-31T12:09:35+00:00'
+updated_at: '2026-05-31T12:26:30+00:00'
 current_stage: discovery
 gate_history:
 - at: '2026-05-31T12:09:35+00:00'
+  stage: discovery
+  gate: G3
+  task_id: human_gate
+  reason: human_approved
+- at: '2026-05-31T12:26:30+00:00'
   stage: discovery
   gate: G3
   task_id: human_gate
@@ -91,3 +96,10 @@ gate_decisions:
   owner: jiaming
   note: 'discovery feasibility verified: FEASIBLE, claim ceiling associational, 136-bill
     corpus real'
+- at: '2026-05-31T12:26:30+00:00'
+  stage: discovery
+  gate: G3
+  decision: approve
+  owner: jiaming
+  note: data measured (136-bill corpus), variables built, design adjudicated -> O2
+    associational
