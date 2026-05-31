@@ -237,6 +237,73 @@ variables:
       and have wider confidence intervals; the WGI series is available through the
       World Bank DataBank but coverage of 2024 may be one year lagged"
     constructible: yes
+
+  - name: lobbying_expenditure
+    role: control
+    definition: "annual total federal lobbying expenditure (USD) reported by the National
+      Cattlemen's Beef Association (NCBA), National Pork Producers Council (NPPC), and
+      National Chicken Council (NCC) combined, from OpenSecrets federal lobbying disclosure
+      data; used as a time-varying proxy for incumbent conventional-meat industry political
+      pressure on regulators and legislators, testing the Stigler (1971) capture mechanism
+      (F01); coded at the US federal level and applied uniformly across all states in a
+      given year"
+    source_data_id: D016
+    construction: "register for free OpenSecrets bulk data access; download federal lobbying
+      disclosure CSV records for fiscal years 2018-2026; filter client organization names
+      to NCBA, NPPC, and NCC; sum the annual reported lobbying amount across the three
+      organizations; search the issue-area text fields of each disclosure for explicit
+      mentions of 'cultivated meat', 'cell-based', or 'lab-grown' to identify the year
+      when incumbent-industry lobbying first targeted this sector specifically; record
+      this targeted-lobbying onset year as a supplementary event marker; link the
+      combined annual total to the state-ban panel at the federal level (constant across
+      states within a year)"
+    validity_concern: "OpenSecrets captures only federal lobbying disclosure filings; state-level
+      lobbying by NCBA state affiliates or local cattlemen's associations — which may be
+      more directly relevant to state ban adoption than federal lobbying — is governed
+      by state disclosure laws that vary widely in completeness and electronic availability;
+      the combined three-organization total conflates beef and pork lobbying whose strategic
+      priorities diverge; lobbying amounts are the same for all states in a given year,
+      providing no within-year cross-state variation and limiting identification power
+      in within-state estimators; lobbying expenditure may be endogenous to anticipated
+      regulatory action (incumbents ramp up when they perceive threat), creating reverse
+      causality between lobbying and ban adoption timing"
+    constructible: yes
+
+  - name: regulatory_uncertainty_index
+    role: treatment
+    definition: "quarterly count-based index of cultivated-meat regulatory events per
+      jurisdiction, constructed by aggregating Federal Register notices (D012), LegiScan
+      state bill introductions and committee hearing dates (D007), and GFI Global Policy
+      Report event dates (D002); a higher index value in a jurisdiction-quarter signals
+      greater policy activity and hence greater regulatory uncertainty for that
+      jurisdiction during that period; used as the primary exposure variable in Design O4
+      and as a time-varying covariate in O1 supplementary specifications"
+    source_data_id: D012
+    construction: "query Federal Register API (D012) for all FDA CFSAN and USDA-FSIS
+      documents mentioning 'cultivated meat', 'cell-cultured', or 'lab-grown meat'
+      from 2018 to 2026; extract document type (proposed rule, final rule, guidance,
+      notice), publication date, docket number, and agency; query LegiScan (D007)
+      for all cultivated-meat bill introduction dates and committee hearing dates
+      across all states and years; merge with GFI D002 policy event table; assign
+      each event to a jurisdiction-quarter cell; aggregate event counts by jurisdiction
+      and quarter; apply optional severity weighting (ban enactment > bill passage >
+      committee hearing > Federal Register notice > bill introduction); lag index by
+      one quarter in panel regressions to reduce reverse-causality bias; winsorize
+      top 1 percent of jurisdiction-quarter counts to limit influence of legislative
+      session spikes"
+    validity_concern: "the index conflates uncertainty-increasing events (bill introduction,
+      proposed rules) with uncertainty-resolving events (final rules, withdrawals) by
+      treating all regulatory activity as symmetrically uncertainty-raising; severity
+      weights are analytically arbitrary and not derived from theory; legislative calendar
+      clustering artificially concentrates index values in Q1-Q2 of each year, potentially
+      biasing within-year seasonal variation; the index is endogenous to the investment
+      environment — high investment interest attracts legislative scrutiny and FDA review
+      requests — making causal identification impossible without a credible instrument
+      for regulatory attention; the index spans multiple data sources (D012, D007, D002)
+      each with distinct access procedures, requiring three simultaneous intake pipelines
+      to be operational before construction can begin; O4 max_claim is therefore
+      associational regardless of index quality"
+    constructible: uncertain
 ---
 
 # Variable Construction: Cultivated Meat Policy Database
@@ -500,3 +567,72 @@ environment, not specifically a fast or permissive novel-food approval pathway. 
 should consider pairing this variable with D005 (EU Novel Food application processing
 duration) or D003/D006 (approval timeline days) for a domain-specific regulatory-process
 quality proxy when the O3 mechanism argument requires it.
+
+---
+
+## lobbying_expenditure
+
+**Design use:** Time-varying control in O1 (covariate-augmented DiD) and O4 (regulatory
+uncertainty panel regression) for testing and absorbing the Stigler (1971) regulatory
+capture mechanism (F01); required as an explicit control in design options O1 and O4
+candidate data tables.
+
+**Unit:** US federal annual total, in USD (same value applied to all states in each year).
+
+Federal lobbying expenditures by the three major US conventional-meat industry trade
+associations — NCBA, NPPC, and NCC — proxy the political mobilization capacity of the
+incumbent industry predicted by Stigler's capture theory to precede and explain state
+ban adoption. If lobbying expenditure by these organizations rises in years just before
+state ban enactment, and if states where these organizations lobby most heavily are more
+likely to enact bans, the pattern is consistent with the F01 capture mechanism rather
+than a food-safety motivation.
+
+OpenSecrets (D016) provides federal lobbying disclosure records compiled from FARA and
+LDA filings. Bulk data CSV downloads are available at no cost after free account
+registration, confirmed accessible. The construction is straightforward: filter to three
+named client organizations across 2018–2026, sum annual amounts, and merge with the
+state-ban panel as a federal-year control.
+
+Constructibility is `yes` because D016's bulk access is confirmed, the target organizations
+(NCBA, NPPC, NCC) are identifiable by name in the client field, and the aggregation
+is simple arithmetic. The binding limitation is that federal lobbying is a single
+time-series without state-level variation, so it cannot explain which states adopted
+bans earlier than others within a legislative wave — only whether incumbent pressure
+was nationally rising. For state-specific variation, researchers should investigate
+state-level lobbying disclosure databases, though these vary widely in availability
+and electronic accessibility across the 50 states.
+
+---
+
+## regulatory_uncertainty_index
+
+**Design use:** Primary exposure variable in O4 (Regulatory-uncertainty index and
+investment panel); secondary covariate in O1 supplementary specifications testing
+whether pre-ban legislative activity predicts investment declines before formal enactment.
+
+**Unit:** Jurisdiction × calendar quarter count index (lagged one quarter in regressions).
+
+The regulatory uncertainty index operationalizes the Dixit-Pindyck (1994) real-options
+prediction (F03) that periods of heightened regulatory ambiguity should suppress
+irreversible firm investment. Construction requires merging three event streams: Federal
+Register notices from FDA CFSAN and USDA-FSIS (D012), state bill introduction and
+committee hearing dates from LegiScan (D007), and cross-jurisdiction policy events
+from GFI Global Policy Report (D002). Each event is assigned to a jurisdiction-quarter
+cell and the counts are aggregated to form the index.
+
+Constructibility is `uncertain` for compounding reasons. First, the index spans three
+distinct data sources, each requiring its own access and extraction pipeline; all three
+must be operational simultaneously before construction can begin. Second, the aggregation
+method involves arbitrary choices — whether to weight event types by severity, how to
+define the jurisdiction boundary for federal events that apply nationally, and how to
+handle events in the same jurisdiction-quarter that cut in opposite directions (e.g.,
+a bill introduction raising uncertainty in the same quarter as a regulatory guidance
+reducing it). Third, the Federal Register API is the most reliable of the three sources
+(free, well-documented, no rate-limit barriers for reasonable query volumes), but D007
+full-text access for bill hearing dates may face the same GAITS subscription constraint
+as noted under `bill_text_similarity`. Fourth, and most important for claim level: the
+index is endogenous to the investment environment. Legislators scrutinize sectors that
+attract large capital inflows; FDA review timelines respond to firm application activity;
+both are driven by the same underlying forces as private investment. The associational
+max_claim for O4 is therefore a hard ceiling regardless of how carefully the index is
+constructed.
