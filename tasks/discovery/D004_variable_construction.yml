@@ -15,14 +15,14 @@ goal: >
     ---
     status: filled
     variables:
-      - name: state_ban
+      - name: exposure_or_treatment
         role: treatment        # treatment|outcome|control|instrument|moderator|unit-key|running-variable
-        definition: "binary = 1 in the year a state enacts a ban and all years after"
-        source_data_id: D007   # MUST exist in data_inventory.csv
-        construction: "code from LegiScan enacted-bill dates; cross-check GFI policy tracker"
-        validity_concern: "ambiguity between production bans and labeling-only rules"
-        constructible: yes      # yes | no | uncertain  (be honest)
-      - name: firm_investment
+        definition: "project-specific variable definition"
+        source_data_id: D001   # MUST exist in data_inventory.csv
+        construction: "project-specific construction rule"
+        validity_concern: "main measurement or linkage concern"
+        constructible: uncertain # yes | no | uncertain (be honest)
+      - name: outcome_variable
         role: outcome
         ...
     ---

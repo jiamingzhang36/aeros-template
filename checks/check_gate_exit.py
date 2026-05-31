@@ -497,11 +497,12 @@ def _check_named_check(req: dict) -> tuple[bool, str]:
     (e.g. check_data_diagnostics.py), so the formal gate standard equals the
     epistemic ratchet rather than a parallel placeholder standard.
     """
+    import os
     import subprocess
     name = str(req.get("check", "")).strip()
     if not name:
         raise RuntimeError("check_passes criterion missing 'check'")
-    script = Path("checks") / name
+    script = Path(os.getenv("AEROS_CHECKS_DIR", "checks")) / name
     if not script.exists():
         return False, f"check script not found: {script}"
     proc = subprocess.run(

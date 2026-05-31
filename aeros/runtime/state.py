@@ -84,7 +84,36 @@ def record_run_summary(state: dict[str, Any], task_id: str, *, calls: int,
 
 
 def set_status(state: dict[str, Any], task_id: str, status: str) -> None:
-    task_entry(state, task_id)["status"] = status
+    entry = task_entry(state, task_id)
+    entry["status"] = status
+    if status == "passed":
+        # Timestamp used for make-style staleness: a task is stale if any
+        # dependency passed more recently than it did.
+        entry["passed_at"] = _now()
+
+
+def recompute_candidate_gate(state: dict[str, Any], task_gates: dict[str, str]) -> str:
+    """Derive candidate_gate from currently-passed tasks (can go UP or DOWN).
+
+    candidate = the highest gate whose task is passed. If a task is reset or
+    invalidated, the candidate drops accordingly -- fixing the monotonic-only
+    bug where a withdrawn design still left the candidate at G3.
+    """
+    tasks = state.get("tasks", {})
+    best = "G0"
+    for tid, gate in task_gates.items():
+        if not gate:
+            continue
+        if tasks.get(tid, {}).get("status") == "passed" and _gate_rank(gate) > _gate_rank(best):
+            best = gate
+    prev = str(state.get("candidate_gate", "G0"))
+    state["candidate_gate"] = best
+    if best != prev:
+        state.setdefault("candidate_gate_history", []).append(
+            {"at": _now(), "gate": best, "task_id": "recompute",
+             "reason": "derived_from_passed_tasks"}
+        )
+    return best
 
 
 def _gate_rank(gate: str) -> int:

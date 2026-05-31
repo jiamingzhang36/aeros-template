@@ -94,8 +94,21 @@ def adjudicate(project_root: Path) -> dict:
 
 
 def write_selection(project_root: Path, result: dict) -> Path:
-    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    path = project_root / SELECTION
+    existing_fm = _read_fm(path)
     sel = result["selected"]
+    expected_fm = {
+        "status": "filled",
+        "diagnostics_status": result["diag_status"],
+        "selected_design": sel["id"] if sel else "none",
+        "earned_claim_ceiling": result["earned_claim"] or "none",
+        "ratcheted_from": result["ratcheted_from"],
+    }
+    existing_timestamp = _read_adjudicated_timestamp(path)
+    if existing_fm == expected_fm and existing_timestamp:
+        now = existing_timestamp
+    else:
+        now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     lines = [
         "---",
         "status: filled",
@@ -136,7 +149,6 @@ def write_selection(project_root: Path, result: dict) -> Path:
          if sel else "No claim is earned."),
         "",
     ]
-    path = project_root / SELECTION
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path
 
@@ -147,6 +159,13 @@ def _read_fm(path: Path) -> dict | None:
     t = path.read_text(encoding="utf-8")
     m = re.match(r"^---\n(.*?)\n---\n", t, flags=re.S)
     return (yaml.safe_load(m.group(1)) or {}) if m else (yaml.safe_load(t) or {})
+
+
+def _read_adjudicated_timestamp(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    m = re.search(r"^Adjudicated:\s*(.+)$", path.read_text(encoding="utf-8"), flags=re.M)
+    return m.group(1).strip() if m else None
 
 
 def _is_no(v: object) -> bool:

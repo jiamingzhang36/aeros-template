@@ -1,0 +1,65 @@
+task_id: D004_variable_construction
+stage: discovery
+depends_on: [D003_design_options, D002_data_scouting, D005_data_probe]
+gate: G2
+goal: >
+  G2 Measurement. For every key variable the candidate designs need, specify how
+  it is constructed from a real data source and whether it can actually be built.
+  This is the bridge between the data (G1) and the designs (G3): a design that
+  needs a variable that cannot be constructed is not feasible.
+
+  Read the design options (the variables each design's treatment/outcome/
+  identification needs) and the data inventory (the available sources). Write
+  discovery/variable_construction.md with this front matter:
+
+    ---
+    status: filled
+    variables:
+      - name: state_ban
+        role: treatment        # treatment|outcome|control|instrument|moderator|unit-key|running-variable
+        definition: "binary = 1 in the year a state enacts a ban and all years after"
+        source_data_id: D007   # MUST exist in data_inventory.csv
+        construction: "code from LegiScan enacted-bill dates; cross-check GFI policy tracker"
+        validity_concern: "ambiguity between production bans and labeling-only rules"
+        constructible: yes      # yes | no | uncertain  (be honest)
+      - name: firm_investment
+        role: outcome
+        ...
+    ---
+
+  and a "## <variable name>" prose section per variable.
+
+  Requirements:
+  - Define at least one treatment and one outcome variable.
+  - Every variable maps to a real source_data_id from data_inventory.csv.
+  - Mark constructible honestly (no/uncertain when the data does not clearly
+    support it); do not mark everything 'yes'. The constructible flags are what
+    G1-G3 feasibility reads.
+
+inputs:
+  - discovery/design_options.md
+  - discovery/data_inventory.csv
+  - discovery/literature/framing_deck.yml
+  - project_manifest.yml
+
+allowed_outputs:
+  - discovery/variable_construction.md
+
+forbidden_actions:
+  - "Do not write anywhere under data/raw/ (enforced by a hook)."
+  - "Do not invent data sources; every source_data_id must already be in data_inventory.csv."
+  - "Do not mark a variable constructible=yes unless the named source plausibly supports it; prefer 'uncertain' when unsure."
+
+checks:
+  - check_variable_construction.py
+
+retry_policy:
+  max_retries: 2
+
+escalate_if:
+  - "a treatment or outcome variable is missing, or a source_data_id is not in the inventory"
+  - "checks still fail after max_retries"
+
+budget:
+  max_agent_calls: 3
+  max_dollars: 1.5

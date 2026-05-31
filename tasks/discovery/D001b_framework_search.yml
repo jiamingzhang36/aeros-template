@@ -17,16 +17,14 @@ goal: >
        primary_function = the card's function bucket.
 
     2. FIND APPLIED / BRIDGE PAPERS within that framework: works that apply the
-       framework to regulation, food, agriculture, or novel/regulated industries
+       framework to the instantiated project domain or a close analogue
        (e.g. for "policy diffusion as identification threat", papers applying
-       diffusion/event-history to regulatory adoption; for "regulatory capture",
-       applied capture studies in food or novel industries). Use OpenAlex —
+       diffusion/event-history to comparable adoption settings). Use OpenAlex —
        search the framework's terms AND/OR the citation neighborhood of the
        anchors (works that cite, or are cited by, the anchor).
 
     3. Add TOPIC-SUBSTANTIVE papers for the gap-verification,
-       background-institutional, and data-measurement buckets: cultivated-meat-
-       specific works (regulation, firm outcomes, investment, measurement).
+       background-institutional, and data-measurement buckets: project-specific works matching the literature scope, outcomes, and measurement needs.
 
   Each registered paper's primary_function is the bucket of the framework strand
   that surfaced it, so classification follows from the search, not a guess.

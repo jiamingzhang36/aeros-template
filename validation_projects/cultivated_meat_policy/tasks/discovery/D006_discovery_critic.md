@@ -1,0 +1,1 @@
+../../examples/tasks/discovery/D006_discovery_critic.md

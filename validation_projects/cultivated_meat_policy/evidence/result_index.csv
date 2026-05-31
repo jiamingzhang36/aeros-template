@@ -1,0 +1,4 @@
+result_id,output_type,path,script_or_source,description,created_date,linked_claims,notes
+R001,table_or_figure,outputs/tables/did_interaction_results.csv,cultivated_meat_project/code/09_component_hazard.py,DiD interaction: ban x cattle exposure,2026-05-31T07:54:47.565193+00:00,,
+R002,table_or_figure,outputs/tables/component_hazard_coefficients.csv,cultivated_meat_project/code/09_component_hazard.py,Component hazard main coefficients (log_cattle + labeling),2026-05-31,,
+R003,count,data/clean/bill_events.csv,cultivated_meat_project/code/04_analysis_ready.py,Severity-ladder estimation sample (136 of 140 corpus bills; 4 procurement/scope rows excluded from main ladder),2026-05-31,,NOT A DISCREPANCY: 136=severity sample 140=full corpus — distinct denominators correctly distinguished in paper.tex line 236. AEROS false alarm: compared wrong file (sample_minimal) against paper.

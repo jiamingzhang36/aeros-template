@@ -1,2 +1,1 @@
-issue_id,date_opened,issue_type,description,severity,status,owner,resolution,date_closed
-I001,,,,,,open,,
+Date,Issue ID,Task ID,Severity,Status,Owner,Description,Resolution

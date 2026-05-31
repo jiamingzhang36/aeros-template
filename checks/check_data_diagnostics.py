@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check that data_diagnostics.yml is measured (not stub) and has required metrics."""
+"""Check that data_diagnostics.yml records measured project diagnostics."""
 
 from __future__ import annotations
 
@@ -11,12 +11,6 @@ from pathlib import Path
 import yaml
 
 DIAG = Path("discovery/data_diagnostics.yml")
-REQUIRED_METRICS = [
-    "n_ban_states_with_firm_presence",
-    "bill_text_extractable_states",
-    "n_states_with_ban_dates",
-    "donor_pool_size",
-]
 CHECK_NAME = "check_data_diagnostics"
 
 
@@ -37,22 +31,33 @@ def main(argv: list[str] | None = None) -> int:
     as_json = parser.parse_args(argv).json
 
     if not DIAG.exists():
-        return _emit(as_json, "fail", [f"missing {DIAG} — run D005 probe first"])
+        return _emit(as_json, "fail", [f"missing {DIAG} - run the project data probe first"])
 
     d = yaml.safe_load(DIAG.read_text(encoding="utf-8")) or {}
     failures: list[str] = []
 
     if str(d.get("status", "")).strip().lower() != "measured":
         failures.append(
-            f"status is {d.get('status')!r} — must be 'measured'; "
-            "run python3 code/01_ingest/probe_data_diagnostics.py")
+            f"status is {d.get('status')!r} - must be 'measured' after project-specific data probing"
+        )
 
     diags = d.get("diagnostics", {}) or {}
-    for m in REQUIRED_METRICS:
-        if m not in diags:
-            failures.append(f"missing diagnostic: {m}")
-        elif not isinstance(diags[m], (int, float)):
-            failures.append(f"{m} must be numeric, got {type(diags[m]).__name__}")
+    if not isinstance(diags, dict) or not diags:
+        failures.append("diagnostics must contain at least one measured numeric metric")
+    else:
+        numeric_count = 0
+        for key, value in diags.items():
+            if isinstance(value, (int, float)):
+                numeric_count += 1
+            elif isinstance(value, (dict, list)):
+                # Allow auxiliary structured diagnostics (e.g. per-term counts).
+                # Machine-adjudicable viability tests should reference numeric
+                # top-level metrics.
+                continue
+            else:
+                failures.append(f"{key} must be numeric, got {type(value).__name__}")
+        if numeric_count == 0:
+            failures.append("diagnostics must contain at least one measured numeric metric")
 
     return _emit(as_json, "fail" if failures else "pass", failures)
 

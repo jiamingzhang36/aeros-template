@@ -18,13 +18,12 @@ goal: >
     status: filled
     options:
       - id: O1
-        name: "Staggered DiD on state bans (timing)"
+        name: "Candidate design name"
         project_type: causal      # causal|descriptive|measurement|prediction|policy-translation|mechanism
         identification: "the estimator/variation, citing framing method cards (e.g. F04)"
-        viability_condition: "a CHECKABLE data diagnostic, e.g. >=10-15 states have non-zero
-                              cultivated-meat firm presence in the pre-period (from D001)"
+        viability_condition: "a CHECKABLE data diagnostic, e.g. enough treated units, comparable controls, or observed outcomes from a named data source"
         viability_test:            # the SAME condition in machine-adjudicable form
-          metric: n_ban_states_with_firm_presence   # a named diagnostic measured later
+          metric: diagnostic_metric_name      # a named diagnostic measured later
           op: ">="                 # one of: >= <= > < == always
           threshold: 5
         max_claim: causal          # the STRONGEST claim this design could earn if viable:
@@ -34,7 +33,7 @@ goal: >
         is_fallback_floor: false
         claim_boundary: "what this option can / cannot claim"
       - id: O2
-        name: "Bill-text reuse / model-legislation diffusion"
+        name: "Alternative identification or measurement strategy"
         ...
       - id: O_floor
         name: "Descriptive cross-jurisdiction event-study"
@@ -46,8 +45,6 @@ goal: >
   Requirements:
   - Provide at least THREE candidate designs plus exactly one fallback-floor design
     (always viable, e.g. descriptive) so the project never has zero feasible designs.
-  - Include a TEXT-REUSE / bill-language design as its own option (do not assume the
-    timing DiD is the only identification path).
   - Every causal/mechanism option's threats_addressed must cover ALL framing
     identification-threat cards.
   - Each option's viability_condition must be a concrete data diagnostic that can be

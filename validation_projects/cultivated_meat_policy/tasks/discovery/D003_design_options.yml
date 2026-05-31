@@ -1,0 +1,89 @@
+task_id: D003_design_options
+stage: discovery
+depends_on: [D001b_framework_search, D002_data_scouting, D005_data_probe]
+gate: G3
+goal: >
+  Produce a DECK of ranked candidate research designs in discovery/design_options.md,
+  NOT a single committed design. Empirical design is data-contingent: hold several
+  identification strategies as alternatives, each guarded by a checkable
+  DATA-VIABILITY condition, and let the data (obtained later) decide which is used.
+
+  Read the framing deck (frameworks + roles, esp. identification-threat cards),
+  the data inventory, the gap rows in paper_registry.csv, and the existing
+  design_sketch.md (treat it as the deep-dive on the strongest causal option).
+
+  Write design_options.md with this front matter:
+
+    ---
+    status: filled
+    options:
+      - id: O1
+        name: "Staggered DiD on state bans (timing)"
+        project_type: causal      # causal|descriptive|measurement|prediction|policy-translation|mechanism
+        identification: "the estimator/variation, citing framing method cards (e.g. F04)"
+        viability_condition: "a CHECKABLE data diagnostic, e.g. >=10-15 states have non-zero
+                              cultivated-meat firm presence in the pre-period (from D001)"
+        viability_test:            # the SAME condition in machine-adjudicable form
+          metric: n_ban_states_with_firm_presence   # a named diagnostic measured later
+          op: ">="                 # one of: >= <= > < == always
+          threshold: 5
+        max_claim: causal          # the STRONGEST claim this design could earn if viable:
+                                   #   descriptive | measurement | associational | causal
+        threats_addressed: [F06]   # framing identification-threat card ids this design handles
+        priority: 1                # unique integer; lower = tried first
+        is_fallback_floor: false
+        claim_boundary: "what this option can / cannot claim"
+      - id: O2
+        name: "Bill-text reuse / model-legislation diffusion"
+        ...
+      - id: O_floor
+        name: "Descriptive cross-jurisdiction event-study"
+        is_fallback_floor: true
+        viability_condition: "always viable (descriptive)"
+        priority: 9
+    ---
+
+  Requirements:
+  - Provide at least THREE candidate designs plus exactly one fallback-floor design
+    (always viable, e.g. descriptive) so the project never has zero feasible designs.
+  - Include a TEXT-REUSE / bill-language design as its own option (do not assume the
+    timing DiD is the only identification path).
+  - Every causal/mechanism option's threats_addressed must cover ALL framing
+    identification-threat cards.
+  - Each option's viability_condition must be a concrete data diagnostic that can be
+    evaluated once the data is obtained (name the data_id it is diagnosed from).
+  - Add a "## Selection Rule" section: after data diagnostics, select the lowest-priority
+    option whose viability_condition holds; if only the floor holds, use it and downgrade
+    the claims accordingly.
+  - Add one "## Option <id>" prose section per option.
+
+inputs:
+  - discovery/literature/framing_deck.yml
+  - discovery/data_inventory.csv
+  - discovery/literature/paper_registry.csv
+  - discovery/design_sketch.md
+  - project_manifest.yml
+
+allowed_outputs:
+  - discovery/design_options.md
+
+forbidden_actions:
+  - "Do not write anywhere under data/raw/ (enforced by a hook)."
+  - "Do not commit to a single design; produce ranked alternatives with data gates."
+  - "Do not invent new literature or data; ground options in the framing deck and data_inventory."
+  - "Do not call an option 'causal' unless it names identifying variation and addresses the framing threat cards."
+  - "Do not overstate claim boundaries; for each option state what it CANNOT claim."
+
+checks:
+  - check_design_options.py
+
+retry_policy:
+  max_retries: 2
+
+escalate_if:
+  - "no fallback-floor design, or a causal option ignores a framing threat card"
+  - "checks still fail after max_retries"
+
+budget:
+  max_agent_calls: 3
+  max_dollars: 1.5

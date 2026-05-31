@@ -15,9 +15,13 @@ import csv
 import sys
 from pathlib import Path
 
+import yaml
+
 from .runtime.adjudicate import adjudicate, feasibility, write_selection
 from .runtime.checks import run_checks
 from .runtime.contract import load_contract
+from .runtime.controller import run_iteration
+from .runtime.decision_packet import write_decision_packet
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
 from .runtime.state import approve_gate, block_gate, load_state, save_state
@@ -35,6 +39,53 @@ def _cmd_run(args: argparse.Namespace) -> int:
 def _cmd_init(args: argparse.Namespace) -> int:
     root = init_project(args.path, force=args.force)
     print(f"initialized AEROS project at {root}")
+    return 0
+
+
+def _cmd_start(args: argparse.Namespace) -> int:
+    root = _project_root()
+    idea = (args.idea or "").strip()
+    if not idea:
+        print("FAIL: --idea must not be empty")
+        return 1
+
+    idea_path = root / "discovery" / "idea_memo.md"
+    idea_path.parent.mkdir(parents=True, exist_ok=True)
+    idea_path.write_text(
+        "# Idea Memo\n\n"
+        "## Starting Idea\n\n"
+        f"{idea}\n\n"
+        "## Notes\n\n"
+        "TBD\n",
+        encoding="utf-8",
+    )
+
+    manifest_path = root / "project_manifest.yml"
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
+    if not isinstance(manifest, dict):
+        manifest = {}
+    research = manifest.setdefault("research", {})
+    if isinstance(research, dict):
+        research["topic"] = idea[:120]
+        research["one_sentence_question"] = idea
+        research.setdefault("current_stage", "discovery")
+    manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False, allow_unicode=True), encoding="utf-8")
+
+    state = load_state(root)
+    state["current_stage"] = "discovery"
+    state["current_gate"] = "G0"
+    state["gate_status"] = "open"
+    state["candidate_stage"] = "discovery"
+    state["candidate_gate"] = "G0"
+    state["tasks"] = {}
+    state["gate_history"] = []
+    state["candidate_gate_history"] = []
+    state["gate_decisions"] = []
+    save_state(root, state)
+
+    print(f"wrote {idea_path.relative_to(root)}")
+    print(f"updated {manifest_path.relative_to(root)} research fields")
+    print("gate remains unapproved; run `aeros iterate --dry-run` to preview the first loop")
     return 0
 
 
@@ -204,6 +255,13 @@ def _cmd_gate_block(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_gate_packet(args: argparse.Namespace) -> int:
+    root = _project_root()
+    path = write_decision_packet(root, args.gate, stage=args.stage or "")
+    print(f"decision packet: {path.relative_to(root)}")
+    return 0
+
+
 def _cmd_adjudicate(args: argparse.Namespace) -> int:
     root = _project_root()
     result = adjudicate(root)
@@ -232,6 +290,11 @@ def _cmd_pipeline(args: argparse.Namespace) -> int:
     print("[pipeline] adjudicating designs against data diagnostics...")
     write_selection(root, adjudicate(root))
     return _cmd_feasibility(args)
+
+
+def _cmd_iterate(args: argparse.Namespace) -> int:
+    root = _project_root()
+    return run_iteration(root, args.stage, dry_run=args.dry_run, to_next_gate=args.to_next_gate)
 
 
 def _cmd_feasibility(args: argparse.Namespace) -> int:
@@ -272,6 +335,10 @@ def main(argv: list[str] | None = None) -> int:
     init.add_argument("path", help="target project directory")
     init.add_argument("--force", action="store_true", help="overwrite scaffold files if present")
     init.set_defaults(func=_cmd_init)
+
+    start = sub.add_parser("start", help="start a research loop from an idea")
+    start.add_argument("--idea", required=True, help="one-sentence idea or research question")
+    start.set_defaults(func=_cmd_start)
 
     run = sub.add_parser("run", help="run a single task contract through the agent loop")
     run.add_argument("contract", help="path to a task contract .yml")
@@ -314,6 +381,11 @@ def main(argv: list[str] | None = None) -> int:
     gate_block.add_argument("--reason", default="", help="blocking rationale")
     gate_block.set_defaults(func=_cmd_gate_block)
 
+    gate_packet = gate_sub.add_parser("packet", help="write a human gate decision packet")
+    gate_packet.add_argument("gate", help="gate to summarize, e.g. G3")
+    gate_packet.add_argument("--stage", default="", help="stage name for the packet")
+    gate_packet.set_defaults(func=_cmd_gate_packet)
+
     lt = sub.add_parser("list-tasks", help="list .yml task contracts in the project")
     lt.set_defaults(func=_cmd_list_tasks)
 
@@ -327,6 +399,15 @@ def main(argv: list[str] | None = None) -> int:
     pipe.add_argument("--stage", default="discovery", help="stage to run (default: discovery)")
     pipe.add_argument("--dry-run", action="store_true", help="show the ordered plan; do not run agents")
     pipe.set_defaults(func=_cmd_pipeline)
+
+    iterate = sub.add_parser("iterate", help="run the research controller until the next human gate")
+    iterate.add_argument("--stage", default="discovery", choices=["discovery", "execution"],
+                         help="stage to iterate (default: discovery)")
+    iterate.add_argument("--dry-run", action="store_true",
+                         help="show the controller plan; do not run tasks or write packets")
+    iterate.add_argument("--to-next-gate", action="store_true",
+                         help="stop at the next gate after the current approved gate instead of the stage's highest gate")
+    iterate.set_defaults(func=_cmd_iterate)
 
     args = parser.parse_args(argv)
     return args.func(args)

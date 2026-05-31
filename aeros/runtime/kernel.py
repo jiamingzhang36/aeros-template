@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -60,7 +62,87 @@ def topo_order(contracts: dict) -> list[str]:
     return order
 
 
-def run_pipeline(project_root: Path, stage: str = "discovery", *, dry_run: bool = False) -> int:
+def _task_gates(contracts: dict) -> dict[str, str]:
+    return {tid: c.gate for tid, (c, _) in contracts.items()}
+
+
+def _fingerprint_paths(project_root: Path, rel_paths: list[str]) -> str:
+    digest = hashlib.sha256()
+    for rel in sorted(str(item).rstrip("/") for item in rel_paths if item):
+        # agent_runs is an audit side effect, not a semantic task output.
+        if rel == "agent_runs" or rel.startswith("agent_runs/"):
+            continue
+        path = project_root / rel
+        digest.update(rel.encode("utf-8"))
+        if not path.exists():
+            digest.update(b"\0MISSING")
+            continue
+        files = [path] if path.is_file() else sorted(p for p in path.rglob("*") if p.is_file())
+        for file_path in files:
+            rel_file = file_path.relative_to(project_root).as_posix()
+            digest.update(rel_file.encode("utf-8"))
+            digest.update(b"\0")
+            digest.update(hashlib.sha256(file_path.read_bytes()).digest())
+    return digest.hexdigest()
+
+
+def _dependency_fingerprint(project_root: Path, contract: Contract, contracts: dict) -> str:
+    deps: dict[str, str] = {}
+    for dep in sorted(contract.depends_on):
+        dep_record = contracts.get(dep)
+        if not dep_record:
+            deps[dep] = "missing-contract"
+            continue
+        dep_contract, _ = dep_record
+        deps[dep] = _fingerprint_paths(project_root, dep_contract.allowed_outputs)
+    return hashlib.sha256(json.dumps(deps, sort_keys=True).encode("utf-8")).hexdigest()
+
+
+def _record_task_fingerprints(
+    state: dict,
+    contract: Contract,
+    project_root: Path,
+    contracts: dict,
+) -> None:
+    entry = state_mod.task_entry(state, contract.task_id)
+    entry["input_fingerprint"] = _fingerprint_paths(project_root, contract.inputs)
+    entry["output_fingerprint"] = _fingerprint_paths(project_root, contract.allowed_outputs)
+    entry["dependency_fingerprint"] = _dependency_fingerprint(project_root, contract, contracts)
+
+
+def _stale_reason(
+    state: dict,
+    contract: Contract,
+    project_root: Path,
+    contracts: dict,
+) -> str:
+    entry = state_mod.task_entry(state, contract.task_id)
+    current_input = _fingerprint_paths(project_root, contract.inputs)
+    current_dep = _dependency_fingerprint(project_root, contract, contracts)
+    current_output = _fingerprint_paths(project_root, contract.allowed_outputs)
+
+    # Existing passed tasks are bootstrapped on first run after this feature.
+    if not entry.get("input_fingerprint"):
+        entry["input_fingerprint"] = current_input
+        entry["dependency_fingerprint"] = current_dep
+        entry["output_fingerprint"] = current_output
+        return ""
+    if entry.get("input_fingerprint") != current_input:
+        return "input_changed"
+    if entry.get("dependency_fingerprint") != current_dep:
+        return "dependency_output_changed"
+    if entry.get("output_fingerprint") != current_output:
+        return "output_changed"
+    return ""
+
+
+def run_pipeline(
+    project_root: Path,
+    stage: str = "discovery",
+    *,
+    dry_run: bool = False,
+    stop_gate: str | None = None,
+) -> int:
     """Run a stage's contracts in dependency order, stopping at the first
     escalation. Returns 0 if all passed (or dry-run), non-zero on stop."""
     state = state_mod.load_state(project_root)
@@ -75,9 +157,17 @@ def run_pipeline(project_root: Path, stage: str = "discovery", *, dry_run: bool 
         )
         return 2
     contracts = discover_contracts(project_root, stage)
+    all_contracts = discover_contracts(project_root)
     if not contracts:
         print(f"[pipeline] no contracts for stage {stage!r}")
         return 1
+    if stop_gate:
+        target_rank = state_mod._gate_rank(stop_gate)
+        contracts = {
+            task_id: record
+            for task_id, record in contracts.items()
+            if state_mod._gate_rank(record[0].gate or "") <= target_rank
+        }
     order = topo_order(contracts)
     print(f"[pipeline] {stage}: {len(order)} task(s) in dependency order")
     skipped = 0
@@ -87,16 +177,18 @@ def run_pipeline(project_root: Path, stage: str = "discovery", *, dry_run: bool 
         # Skip tasks already passed in a previous run (idempotent resume).
         task_status = state_mod.task_entry(state, tid).get("status", "pending")
         if task_status == "passed":
-            print(f"  ✓ {tid} (already passed — skipping)")
-            state_mod.advance_gate(
-                state,
-                stage=c.stage,
-                gate=c.gate,
-                task_id=tid,
-                reason="pipeline_resume_passed_task",
-            )
-            skipped += 1
-            continue
+            stale_reason = _stale_reason(state, c, project_root, all_contracts)
+            if stale_reason:
+                print(f"  ! {tid} is stale ({stale_reason}) — re-running")
+                state_mod.set_status(state, tid, "stale")
+                state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
+                state_mod.save_state(project_root, state)
+                task_status = "stale"
+            else:
+                print(f"  ✓ {tid} (already passed — skipping)")
+                state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
+                skipped += 1
+                continue
         print(f"  -> {tid} (gate {c.gate or '?'}, after: {deps})")
         if dry_run:
             continue
@@ -106,13 +198,8 @@ def run_pipeline(project_root: Path, stage: str = "discovery", *, dry_run: bool 
         if rc != 0:
             print(f"[pipeline] stopped at {tid} (escalated). Fix/approve, then re-run.")
             return rc
-        state_mod.advance_gate(
-            state,
-            stage=c.stage,
-            gate=c.gate,
-            task_id=tid,
-            reason="pipeline_task_passed",
-        )
+        task_gates = _task_gates(all_contracts)
+        state_mod.recompute_candidate_gate(state, task_gates)
         state_mod.save_state(project_root, state)
     if dry_run:
         print("[pipeline] (dry-run: no tasks executed)")
@@ -189,13 +276,9 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
         print(f"[kernel]   check {r.name}: {'PASS' if r.passed else 'FAIL'}")
     if passed:
         state_mod.set_status(state, contract.task_id, "passed")
-        state_mod.advance_gate(
-            state,
-            stage=contract.stage,
-            gate=contract.gate,
-            task_id=contract.task_id,
-            reason="deterministic_task_passed",
-        )
+        contracts = discover_contracts(project_root)
+        _record_task_fingerprints(state, contract, project_root, contracts)
+        state_mod.recompute_candidate_gate(state, _task_gates(contracts))
         state_mod.record_run_summary(state, contract.task_id, calls=0, cost_usd=0.0)
         state_mod.save_state(project_root, state)
         print(f"[kernel] task {contract.task_id} PASSED (deterministic).")
@@ -313,13 +396,9 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
 
         if passed:
             state_mod.set_status(state, contract.task_id, "passed")
-            state_mod.advance_gate(
-                state,
-                stage=contract.stage,
-                gate=contract.gate,
-                task_id=contract.task_id,
-                reason="task_passed",
-            )
+            contracts = discover_contracts(project_root)
+            _record_task_fingerprints(state, contract, project_root, contracts)
+            state_mod.recompute_candidate_gate(state, _task_gates(contracts))
             print(f"[kernel] task {contract.task_id} PASSED.")
             _finish("passed")
             return 0

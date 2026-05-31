@@ -75,15 +75,15 @@ def _run_report_files() -> list[Path]:
     files = [
         path
         for path in sorted(REPORTS_DIR.glob("*.md"))
-        if not path.name.startswith("TEMPLATE_") and path.name != "INDEX.csv"
+        if not path.name.startswith(("TEMPLATE_", "EXAMPLE_")) and path.name != "INDEX.csv"
     ]
     return files
 
 
 def build_rows() -> list[dict[str, str]]:
     rows: list[dict[str, str]] = []
-    timestamp = datetime.now(timezone.utc).isoformat()
     for path in _run_report_files():
+        timestamp = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat()
         task_id = _extract_task_id(path)
         row: dict[str, Any] = {
             "run_file": str(path.relative_to(ROOT)),

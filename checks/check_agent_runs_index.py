@@ -25,7 +25,7 @@ RUN_FIELDS = {
 def _run_report_files() -> set[str]:
     return {
         str(path) for path in sorted(REPORT_DIR.glob("*.md"))
-        if not path.name.startswith("TEMPLATE_") and path.name != "INDEX.csv"
+        if not path.name.startswith(("TEMPLATE_", "EXAMPLE_")) and path.name != "INDEX.csv"
     }
 
 
@@ -50,6 +50,9 @@ def main() -> int:
         return 1
 
     rows = _load_index_rows()
+    if not rows and not report_files:
+        print("PASS: agent_runs index is consistent (0 report(s); template state)")
+        return 0
     if not rows:
         failures.append("agent_runs index exists but has no rows")
     index_by_file = {row.get("run_file", ""): row for row in rows if row.get("run_file")}

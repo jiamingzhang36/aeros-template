@@ -1,10 +1,27 @@
-# Draft
+# Paper Draft
 
-This placeholder can be replaced with a LaTeX, Markdown, Quarto, Word, or other manuscript workflow.
+This is a template placeholder. Replace with the instantiated project draft.
 
-Publication-facing claims should be checked against:
+## Abstract
 
-- `docs/method_card.md`
-- `docs/language_constraints.md`
-- `evidence/claim_registry.md`
-- `evidence/result_index.csv`
+TBD
+
+## Introduction
+
+TBD
+
+## Data
+
+TBD
+
+## Methods
+
+TBD
+
+## Results
+
+TBD
+
+## Discussion
+
+TBD

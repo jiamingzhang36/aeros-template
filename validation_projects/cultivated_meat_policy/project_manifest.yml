@@ -1,0 +1,200 @@
+project:
+  name: "AEROS project"
+  version: "1.0"
+  template: "aeros-template"
+  status: "draft"
+  private_by_default: true
+
+research:
+  field_or_domain: ""
+  topic: ""
+  one_sentence_question: ""
+  current_stage: "discovery"
+  human_owner: ""
+  collaborators: []
+
+gate_lifecycle:
+  current_gate: "G0 Project Intake"
+  gates:
+    - "G0 Project Intake"
+    - "G1 Data Readiness"
+    - "G2 Measurement / Variable Construction"
+    - "G3 Research Design"
+    - "G4 Main Estimation"
+    - "G5 Robustness"
+    - "G6 Result Validation"
+    - "G7 Claim Audit"
+    - "G8 Referee Simulation"
+    - "G9 Replication Package"
+
+automation:
+  pipeline:
+    cwd: "~/Desktop/cultured_meat_policy_project/cultivated_meat_project"
+    command:
+      - "python3"
+      - "code/run_all.py"
+      - "--mode"
+      - "light"
+    key_outputs:
+      - "data/final_csv/analysis_ready.csv"
+      - "data/final_csv/bill_events.csv"
+      - "data/final_csv/component_hazard_coefficients.csv"
+
+gate_exit_criteria:
+  # G1-G3 criteria delegate to the real checks built by the discovery ratchet,
+  # so the formal gate standard == the epistemic ratchet (data probe -> design
+  # adjudication -> variable construction), not a parallel placeholder standard.
+  G1:
+    requires:
+      - type: "check_passes"           # data diagnostics measured (status: measured + metrics)
+        check: "check_data_diagnostics.py"
+  G2:
+    requires:
+      - type: "check_passes"           # variables mapped to real data sources, treatment+outcome buildable
+        check: "check_variable_construction.py"
+  G3:
+    requires:
+      - type: "check_passes"           # design options valid (>=2 candidates, fallback floor, viability tests)
+        check: "check_design_options.py"
+      - type: "check_passes"           # adjudication consistent: a design selected, claim ceiling earned
+        check: "check_design_selection.py"
+      - type: "markdown_status_equals"
+        path: "docs/method_card.md"
+        value: "filled"
+  G4:
+    requires:
+      - type: "claim_main_results_registered"
+        path: "evidence/claim_registry.md"
+      - type: "claim_main_results_have_provenance"
+        path: "evidence/claim_registry.md"
+  G5:
+    requires:
+      - type: "file_exists"
+        path: "docs/robustness_checklist.md"
+      - type: "status_not_empty"
+        path: "docs/robustness_checklist.md"
+  G6:
+    requires:
+      - type: "claim_main_results_have_provenance"
+        path: "evidence/claim_registry.md"
+      - type: "result_index_all_have_provenance"
+        path: "evidence/result_index.csv"
+  G7:
+    requires:
+      - type: "claim_no_draft"
+        path: "evidence/claim_registry.md"
+      - type: "claim_main_has_type"
+        path: "evidence/claim_registry.md"
+  G8:
+    requires:
+      - type: "csv_nonempty_rows"
+        path: "evidence/evidence_ledger.csv"
+        min_rows: 1
+      - type: "markdown_nonplaceholder_lines"
+        path: "paper/draft.md"
+        min_lines: 1
+  G9:
+    requires:
+      - type: "file_not_placeholder"
+        path: "code/99_make_all.py"
+        marker: "Project master script placeholder"
+      - type: "result_index_all_have_provenance"
+        path: "evidence/result_index.csv"
+
+layers:
+  research_judgment:
+    required_files:
+      - "discovery/idea_memo.md"
+      - "discovery/01_literature_scope.md"
+      - "discovery/idea_bank.csv"
+      - "discovery/exploration_policy.md"
+      - "discovery/literature/synthesis/literature_map.md"
+      - "discovery/literature/paper_registry.csv"
+      - "discovery/literature/citation_audit.md"
+      - "discovery/data_inventory.csv"
+      - "discovery/feasibility_matrix.md"
+      - "discovery/feasibility_memo.md"
+      - "discovery/design_sketch.md"
+      - "discovery/PROMOTE_TO_HARNESS.md"
+      - "docs/method_card.md"
+      - "evidence/claim_registry.md"
+      - "decisions/decision_log.md"
+      - "decisions/revision_log.md"
+  agent_execution:
+    required_dirs:
+      - "tasks"
+      - "agent_runs"
+      - "audits"
+  mechanical_verification:
+    required_dirs:
+      - "checks"
+  harness:
+    required_files:
+      - "harness/permissions.yml"
+      - "harness/protocols/worker_protocol.md"
+      - "harness/protocols/critic_protocol.md"
+      - "harness/protocols/human_gate.md"
+      - "harness/protocols/full_run_checklist.md"
+      - "harness/agent_roles.yml"
+      - "harness/skill_registry.md"
+      - "harness/skill_invocation_rules.md"
+      - "harness/practical_skill_menu.md"
+      - "harness/skill_map_core.yml"
+      - "harness/skill_map_reference.md"
+  stage_agents:
+    required_files:
+      - "AGENTS.md"
+      - "discovery/AGENTS.md"
+      - "discovery/literature/AGENTS.md"
+      - "execution/AGENTS.md"
+
+protected_files:
+  - "docs/protected_definitions.yml"
+  - "docs/data_contract.yml"
+  - "evidence/claim_registry.md"
+  - "harness/permissions.yml"
+
+never_modify_without_human_approval:
+  - "data/raw/"
+  - "docs/protected_definitions.yml"
+
+default_task_policy:
+  raw_data_write_access: false
+  protected_definition_changes: "requires explicit human approval"
+  claim_strengthening: "requires evidence and claim registry update"
+  preferred_spec_selection: "must not be based on significance alone"
+
+checks:
+  correction_ledger: "checks/check_correction_ledger.py"
+  discovery_completeness: "checks/check_discovery_completeness.py"
+  gate_exit: "checks/check_gate_exit.py"
+  idea_bank: "checks/check_idea_bank.py"
+  stage_agents: "checks/check_stage_agents.py"
+  skill_layer: "checks/check_skill_layer.py"
+  feasibility_matrix: "checks/check_feasibility_matrix.py"
+  literature_tools: "checks/check_literature_tools.py"
+  framing_deck: "checks/check_framing_deck.py"
+  literature_registry: "checks/check_literature_registry.py"
+  literature_functions: "checks/check_literature_functions.py"
+  citation_audit: "checks/check_citation_audit.py"
+  anchors_in_registry: "checks/check_anchors_in_registry.py"
+  git_guardrails: "checks/check_git_guardrails.py"
+  data_inventory: "checks/check_data_inventory.py"
+  data_diagnostics: "checks/check_data_diagnostics.py"
+  design_options: "checks/check_design_options.py"
+  design_selection: "checks/check_design_selection.py"
+  variable_construction: "checks/check_variable_construction.py"
+  data_contract: "checks/check_data_contract.py"
+  protected_definitions: "checks/check_protected_definitions.py"
+  claim_registry: "checks/check_claim_registry.py"
+  claim_ceiling: "checks/check_claim_ceiling.py"
+  claim_method_consistency: "checks/check_claim_method_consistency.py"
+  paper_numbers: "checks/check_paper_numbers.py"
+  output_reproducibility: "checks/check_output_reproducibility.py"
+  project_status: "checks/check_project_status.py"
+  provenance: "checks/check_provenance.py"
+  task_contract: "checks/check_task_contract.py"
+  agent_run_report: "checks/check_agent_run_report.py"
+  agent_runs_tools: "checks/check_agent_runs_tools.py"
+  pipeline_runs: "checks/check_pipeline_runs.py"
+  replication_package: "checks/check_replication_package.py"

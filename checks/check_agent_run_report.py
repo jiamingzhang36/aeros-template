@@ -202,7 +202,7 @@ def _extract_commands_used(text: str) -> list[str]:
 def _validate_agent_run_reports() -> list[str]:
     failures: list[str] = []
     for path in sorted(Path("agent_runs").glob("*.md")):
-        if path.name.startswith("TEMPLATE_"):
+        if path.name.startswith(("TEMPLATE_", "EXAMPLE_")):
             continue
 
         text = path.read_text(encoding="utf-8")
