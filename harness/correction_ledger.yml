@@ -79,3 +79,12 @@ corrections:
     root_cause: "no per-call cost cap; 30-min timeout; killing children not parents"
     lesson: "Per-call hard cost cap via claude --max-budget-usd; 8-min agent timeout; kill the kernel parent before child agents."
     enforced_by: aeros/runtime/agent.py
+
+  - id: C008
+    date: "2026-05-31"
+    type: agent-lesson
+    scope: [all]
+    symptom: "G6 check_paper_numbers reported a discrepancy (140 vs 136 bills) that was a false alarm: AEROS compared the paper against the wrong data file (sample_minimal path) instead of the canonical corpus file"
+    root_cause: "G6/check_paper_numbers does not know WHICH file is the canonical source for each paper number — it searched any available CSV and picked the wrong denominator (severity-ladder sample vs full corpus)"
+    lesson: "When checking paper numbers against data files, always verify WHICH file is the canonical source for that specific number. A research corpus can have multiple valid denominators (full corpus, estimation sample, risk set) that are all correct but serve different roles. Before flagging a discrepancy, confirm: (1) which file the paper claims to use for that statistic, (2) whether the difference reflects a real error or a legitimate distinction between denominators. Do not flag 136 vs 140 as a discrepancy when the paper explicitly distinguishes a severity-ladder sample from the full corpus."
+    enforced_by: prompt-only

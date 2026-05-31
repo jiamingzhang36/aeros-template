@@ -1,57 +1,85 @@
 #!/usr/bin/env python3
-"""AEROS master pipeline: delegates to the real CMPD run_all.py (--mode light).
+"""AEROS master pipeline: delegates to a configured project pipeline.
 
 This script is the bridge between AEROS's check_pipeline_runs check and the
-actual research pipeline. It runs the existing analysis in light mode (reuses
-extracted/API inputs, does not rerun LLM extraction) and then records a summary
-of the key output files for AEROS provenance tracking.
+actual research pipeline. Configure the delegate in project_manifest.yml under
+automation.pipeline, or with AEROS_PIPELINE_* environment variables.
 """
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
 
+import yaml
+
 AEROS_ROOT = Path(__file__).resolve().parent.parent
-CMPD_ROOT  = Path.home() / "Desktop/cultured_meat_policy_project/cultivated_meat_project"
-RUN_ALL    = CMPD_ROOT / "code" / "run_all.py"
+MANIFEST = AEROS_ROOT / "project_manifest.yml"
+
+
+def _load_pipeline_config() -> dict:
+    manifest = yaml.safe_load(MANIFEST.read_text(encoding="utf-8")) or {}
+    automation = manifest.get("automation", {}) or {}
+    configured = automation.get("pipeline", {}) or {}
+    env_command = os.getenv("AEROS_PIPELINE_COMMAND", "").strip()
+    env_cwd = os.getenv("AEROS_PIPELINE_CWD", "").strip()
+    env_outputs = os.getenv("AEROS_PIPELINE_OUTPUTS", "").strip()
+
+    command = env_command.split() if env_command else configured.get("command", [])
+    cwd = env_cwd or configured.get("cwd", ".")
+    key_outputs = (
+        [item.strip() for item in env_outputs.split(",") if item.strip()]
+        if env_outputs
+        else configured.get("key_outputs", [])
+    )
+    return {"command": command, "cwd": cwd, "key_outputs": key_outputs}
+
+
+def _resolve(path: str, *, base: Path) -> Path:
+    p = Path(path).expanduser()
+    return p if p.is_absolute() else base / p
 
 
 def main() -> int:
-    if not RUN_ALL.exists():
-        print(f"SKIP: CMPD run_all.py not found at {RUN_ALL}")
-        print("(Set CMPD_ROOT if the project is elsewhere.)")
+    config = _load_pipeline_config()
+    command = list(config["command"] or [])
+    if not command:
+        print("SKIP: no automation.pipeline.command configured")
+        print("Set project_manifest.yml automation.pipeline.command or AEROS_PIPELINE_COMMAND.")
         return 0
 
-    print(f"=== AEROS → CMPD pipeline (light mode) ===")
-    print(f"  CMPD root : {CMPD_ROOT}")
-    print(f"  script    : {RUN_ALL}")
+    cwd = _resolve(str(config["cwd"]), base=AEROS_ROOT)
+    executable = _resolve(command[0], base=cwd)
+    if executable.exists():
+        command[0] = str(executable)
+    if not cwd.exists():
+        print(f"FAIL: configured pipeline cwd does not exist: {cwd}")
+        return 1
 
-    result = subprocess.run(
-        [sys.executable, str(RUN_ALL), "--mode", "light"],
-        cwd=str(CMPD_ROOT),
-    )
+    print("=== AEROS delegated pipeline ===")
+    print(f"  cwd     : {cwd}")
+    print(f"  command : {' '.join(command)}")
+
+    result = subprocess.run(command, cwd=str(cwd))
 
     if result.returncode != 0:
-        print(f"FAIL: run_all.py exited with code {result.returncode}")
+        print(f"FAIL: delegated pipeline exited with code {result.returncode}")
         return result.returncode
 
-    # Confirm key output files exist (provenance check)
-    key_outputs = [
-        CMPD_ROOT / "data/final_csv/analysis_ready.csv",
-        CMPD_ROOT / "data/final_csv/bill_events.csv",
-        CMPD_ROOT / "data/final_csv/component_hazard_coefficients.csv",
-    ]
+    key_outputs = [_resolve(str(path), base=cwd) for path in config["key_outputs"]]
     missing = [p for p in key_outputs if not p.exists()]
     if missing:
         print("WARN: some expected output files not found:")
         for p in missing:
             print(f"  {p}")
-    else:
+    elif key_outputs:
         print("PASS: all key output files present")
+    else:
+        print("PASS: pipeline completed; no key_outputs configured")
 
-    print("=== CMPD pipeline complete ===")
+    print("=== delegated pipeline complete ===")
     return 0
 
 

@@ -25,6 +25,12 @@ inputs:
 allowed_outputs:
   - discovery/data_diagnostics.yml
 
+run:
+  command:
+    - "python3"
+    - "code/01_ingest/probe_data_diagnostics.py"
+  cwd: "."
+
 forbidden_actions:
   - "Do not write anywhere under data/raw/."
   - "Do not fabricate diagnostic values; run the probe script to measure them."
