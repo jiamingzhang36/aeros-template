@@ -68,18 +68,31 @@ def run_pipeline(project_root: Path, stage: str = "discovery", *, dry_run: bool 
         print(f"[pipeline] no contracts for stage {stage!r}")
         return 1
     order = topo_order(contracts)
+    state = state_mod.load_state(project_root)
     print(f"[pipeline] {stage}: {len(order)} task(s) in dependency order")
+    skipped = 0
     for tid in order:
         c, path = contracts[tid]
         deps = ", ".join(c.depends_on) or "—"
+        # Skip tasks already passed in a previous run (idempotent resume).
+        task_status = state_mod.task_entry(state, tid).get("status", "pending")
+        if task_status == "passed":
+            print(f"  ✓ {tid} (already passed — skipping)")
+            skipped += 1
+            continue
         print(f"  -> {tid} (gate {c.gate or '?'}, after: {deps})")
         if dry_run:
             continue
         rc = run_task(path, dry_run=False)
+        # Reload state after each task (run_task writes it).
+        state = state_mod.load_state(project_root)
         if rc != 0:
             print(f"[pipeline] stopped at {tid} (escalated). Fix/approve, then re-run.")
             return rc
-    print("[pipeline] all tasks passed." if not dry_run else "[pipeline] (dry-run: no tasks executed)")
+    if dry_run:
+        print("[pipeline] (dry-run: no tasks executed)")
+    else:
+        print(f"[pipeline] all tasks passed. ({skipped} skipped as already-passed)")
     return 0
 
 
