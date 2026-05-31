@@ -5,11 +5,12 @@ diagnostics:
   n_states_with_ban_dates: 5
   n_ban_states_with_firm_presence: 0
   n_states_with_firm_presence: 9
-  bill_text_extractable_states: 5
+  bill_text_extractable_states: 9
   donor_pool_size: 12
   federal_register_cm_notices: 0
   fr_by_term: {}
   openalex_policy_papers: 0
+  total_bills_in_corpus: 136
 notes:
   n_states_with_ban_dates: 'Hard-coded from public legislative records: [''Alabama'',
     ''Florida'', ''Idaho'', ''Iowa'', ''Tennessee'']'
@@ -20,9 +21,8 @@ notes:
   n_states_with_firm_presence: 'From GFI annual reports: [''California'', ''Illinois'',
     ''Maryland'', ''Massachusetts'', ''New Jersey'', ''New York'', ''Pennsylvania'',
     ''Texas'', ''Washington'']'
-  bill_text_extractable_states: 'Fallback: bill text for all known ban states is publicly
-    available on state legislature websites and LegiScan (no key needed for lookup).
-    Set LEGISCAN_API_KEY for full API probe.'
+  bill_text_extractable_states: 'From real corpus: 9 states with enacted CM bills'
   donor_pool_size: 'Jurisdictions with GFI investment series: [''United States'',
     ''Singapore'', ''Netherlands'', ''Israel'', ''United Kingdom'', ''Germany'', ''France'',
     ''Australia'', ''Japan'', ''China'', ''Canada'', ''South Korea'']'
+  total_bills_in_corpus: 136 bills from real bill_events.csv corpus
