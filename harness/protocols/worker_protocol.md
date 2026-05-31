@@ -6,7 +6,7 @@ Use this protocol for the agent that performs the task.
 
 1. Read `AGENTS.md`.
 2. Read `project_manifest.yml`.
-3. Read the task file in `tasks/`.
+3. Read the task file in `tasks/discovery/` or `tasks/execution/`.
 4. Read `harness/permissions.yml`.
 5. Read protected files named by the task.
 6. Identify allowed files, forbidden files, required checks, and done conditions.

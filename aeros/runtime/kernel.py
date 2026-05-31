@@ -63,12 +63,22 @@ def topo_order(contracts: dict) -> list[str]:
 def run_pipeline(project_root: Path, stage: str = "discovery", *, dry_run: bool = False) -> int:
     """Run a stage's contracts in dependency order, stopping at the first
     escalation. Returns 0 if all passed (or dry-run), non-zero on stop."""
+    state = state_mod.load_state(project_root)
+    approved_for_execution = (
+        state.get("gate_status") == "approved"
+        and state_mod._gate_rank(str(state.get("current_gate", "G0"))) >= state_mod._gate_rank("G3")
+    )
+    if stage == "execution" and not dry_run and not approved_for_execution:
+        print(
+            "[pipeline] execution requires a human-approved gate. "
+            "Run: aeros gate approve G3 --stage discovery --owner <name> --note <why>"
+        )
+        return 2
     contracts = discover_contracts(project_root, stage)
     if not contracts:
         print(f"[pipeline] no contracts for stage {stage!r}")
         return 1
     order = topo_order(contracts)
-    state = state_mod.load_state(project_root)
     print(f"[pipeline] {stage}: {len(order)} task(s) in dependency order")
     skipped = 0
     for tid in order:
@@ -78,6 +88,13 @@ def run_pipeline(project_root: Path, stage: str = "discovery", *, dry_run: bool 
         task_status = state_mod.task_entry(state, tid).get("status", "pending")
         if task_status == "passed":
             print(f"  ✓ {tid} (already passed — skipping)")
+            state_mod.advance_gate(
+                state,
+                stage=c.stage,
+                gate=c.gate,
+                task_id=tid,
+                reason="pipeline_resume_passed_task",
+            )
             skipped += 1
             continue
         print(f"  -> {tid} (gate {c.gate or '?'}, after: {deps})")
@@ -89,9 +106,18 @@ def run_pipeline(project_root: Path, stage: str = "discovery", *, dry_run: bool 
         if rc != 0:
             print(f"[pipeline] stopped at {tid} (escalated). Fix/approve, then re-run.")
             return rc
+        state_mod.advance_gate(
+            state,
+            stage=c.stage,
+            gate=c.gate,
+            task_id=tid,
+            reason="pipeline_task_passed",
+        )
+        state_mod.save_state(project_root, state)
     if dry_run:
         print("[pipeline] (dry-run: no tasks executed)")
     else:
+        state_mod.save_state(project_root, state)
         print(f"[pipeline] all tasks passed. ({skipped} skipped as already-passed)")
     return 0
 
@@ -134,17 +160,42 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
     """
     import subprocess
     if dry_run:
-        print(f"[kernel] DRY RUN: deterministic task {contract.task_id} — run checks only")
+        command = " ".join(contract.run_command) if contract.run_command else "(no command)"
+        print(f"[kernel] DRY RUN: deterministic task {contract.task_id}")
+        print(f"[kernel]   command: {command}")
+        print(f"[kernel]   checks : {contract.checks}")
         return 0
 
-    # For D005-style tasks the script is expected to already have been run
-    # (or the pipeline step calls it explicitly). Run the checks to verify.
+    if contract.run_command:
+        cwd = (project_root / contract.run_cwd).resolve()
+        print(f"[kernel] deterministic command: {' '.join(contract.run_command)}")
+        result = subprocess.run(
+            contract.run_command,
+            cwd=str(cwd),
+            timeout=contract.timeout_seconds,
+            check=False,
+        )
+        if result.returncode != 0:
+            feedback = f"Deterministic command failed with exit code {result.returncode}"
+            path = _escalate(project_root, contract, feedback)
+            state_mod.set_status(state, contract.task_id, "escalated")
+            state_mod.save_state(project_root, state)
+            print(f"[kernel] task {contract.task_id} ESCALATED -> {path}")
+            return 2
+
     from .checks import run_checks, format_feedback
     passed, results = run_checks(project_root, contract.checks)
     for r in results:
         print(f"[kernel]   check {r.name}: {'PASS' if r.passed else 'FAIL'}")
     if passed:
         state_mod.set_status(state, contract.task_id, "passed")
+        state_mod.advance_gate(
+            state,
+            stage=contract.stage,
+            gate=contract.gate,
+            task_id=contract.task_id,
+            reason="deterministic_task_passed",
+        )
         state_mod.record_run_summary(state, contract.task_id, calls=0, cost_usd=0.0)
         state_mod.save_state(project_root, state)
         print(f"[kernel] task {contract.task_id} PASSED (deterministic).")
@@ -262,6 +313,13 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
 
         if passed:
             state_mod.set_status(state, contract.task_id, "passed")
+            state_mod.advance_gate(
+                state,
+                stage=contract.stage,
+                gate=contract.gate,
+                task_id=contract.task_id,
+                reason="task_passed",
+            )
             print(f"[kernel] task {contract.task_id} PASSED.")
             _finish("passed")
             return 0

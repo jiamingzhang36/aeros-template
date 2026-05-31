@@ -1,6 +1,6 @@
 protected_definitions:
   version: "0.1"
-  status: "draft"
+  status: "draft" # draft | locked
   change_policy: "Human approval required before modifying any protected definition."
 
 key_exposure:

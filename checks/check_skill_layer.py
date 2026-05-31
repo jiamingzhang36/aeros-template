@@ -31,22 +31,28 @@ REQUIRED_FILES = {
         "## Optional Skills",
         "## Reference Skills",
     ],
-    Path("harness/external_skill_map.yml"): [
-        "awesome_econ_ai_stuff:",
-        "econ_writing_skill:",
-        "local_codex_skills:",
-        "academic_research_suite:",
+    Path("harness/skill_map_core.yml"): [
+        "sources:",
+        "skill_stage_taxonomy:",
+        "skills:",
         "research_ideation:",
         "lit_review_assistant:",
-        "econ_writing_skill:",
+        "academic_research_suite_deep_research:",
+        "data_inventory:",
         "causal_id_review:",
-        "replication_check:",
-        "pre_submission_audit:",
+        "did_checklist:",
+        "code_review_econ:",
+        "econ_writing_skill:",
+    ],
+    Path("harness/skill_map_reference.md"): [
+        "# External Skill Reference Catalog",
+        "## Optional Skills (task-specific)",
+        "## Reference Skills (inspiration / review framing)",
     ],
 }
-SKILL_MAP = Path("harness/external_skill_map.yml")
-ALLOWED_TIERS = {"core", "optional", "reference"}
-MAX_CORE_SKILLS = 10
+SKILL_MAP = Path("harness/skill_map_core.yml")
+ALLOWED_TIERS = {"core"}
+MAX_CORE_SKILLS = 8
 
 
 def main() -> int:
@@ -62,7 +68,7 @@ def main() -> int:
             failures.append(f"{path}: missing required content {missing}")
 
     if yaml is None:
-        failures.append("PyYAML is required to validate harness/external_skill_map.yml")
+        failures.append("PyYAML is required to validate harness/skill_map_core.yml")
     elif SKILL_MAP.exists():
         data = yaml.safe_load(SKILL_MAP.read_text(encoding="utf-8"))
         skills = data.get("skills", {})
@@ -72,12 +78,10 @@ def main() -> int:
             if tier not in ALLOWED_TIERS:
                 failures.append(f"{key}: invalid or missing tier {tier!r}")
             default_use = skill.get("default_use")
-            if not isinstance(default_use, bool):
-                failures.append(f"{key}: default_use must be true/false")
+            if default_use is not True:
+                failures.append(f"{key}: core skills in skill_map_core.yml must have default_use=true")
             if tier == "core":
                 core_count += 1
-            if default_use and tier != "core":
-                failures.append(f"{key}: only core skills may have default_use=true")
         if core_count > MAX_CORE_SKILLS:
             failures.append(f"too many core skills: {core_count} > {MAX_CORE_SKILLS}")
 

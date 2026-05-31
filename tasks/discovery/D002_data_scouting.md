@@ -1,0 +1,1 @@
+../../examples/tasks/discovery/D002_data_scouting.md

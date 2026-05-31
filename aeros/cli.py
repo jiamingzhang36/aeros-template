@@ -1,7 +1,7 @@
 """AEROS runtime CLI.
 
-    aeros run  tasks/discovery/D001_literature_search.yml [--dry-run]
-    aeros check tasks/discovery/D001_literature_search.yml
+    aeros run  tasks/discovery/D001a_framing.yml [--dry-run]
+    aeros check tasks/discovery/D001a_framing.yml
     aeros status
     aeros list-tasks
 
@@ -11,14 +11,16 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import sys
 from pathlib import Path
 
 from .runtime.adjudicate import adjudicate, feasibility, write_selection
 from .runtime.checks import run_checks
 from .runtime.contract import load_contract
+from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
-from .runtime.state import load_state
+from .runtime.state import approve_gate, block_gate, load_state, save_state
 
 
 def _project_root() -> Path:
@@ -28,6 +30,12 @@ def _project_root() -> Path:
 def _cmd_run(args: argparse.Namespace) -> int:
     return run_task(args.contract, dry_run=args.dry_run,
                     max_retries_override=args.max_retries)
+
+
+def _cmd_init(args: argparse.Namespace) -> int:
+    root = init_project(args.path, force=args.force)
+    print(f"initialized AEROS project at {root}")
+    return 0
 
 
 def _cmd_check(args: argparse.Namespace) -> int:
@@ -46,7 +54,15 @@ def _cmd_status(args: argparse.Namespace) -> int:
     root = _project_root()
     state = load_state(root)
     print(f"project root : {root}")
+    print(f"current stage: {state.get('current_stage', '?')}")
     print(f"current gate : {state.get('current_gate', '?')}")
+    print(f"gate status  : {state.get('gate_status', 'open')}")
+    print(f"candidate   : {state.get('candidate_stage', '?')} / {state.get('candidate_gate', '?')}")
+    history = state.get("gate_history", [])
+    if history:
+        last = history[-1]
+        print(f"last gate move: {last.get('gate', '?')} via {last.get('task_id', '?')}"
+              f" ({last.get('reason', '?')})")
     tasks = state.get("tasks", {})
     if not tasks:
         print("tasks        : (none run yet)")
@@ -58,6 +74,107 @@ def _cmd_status(args: argparse.Namespace) -> int:
               f"${entry.get('last_run_cost_usd',0.0):.4f}  "
               f"cumulative={entry.get('agent_calls_total',0)} call(s)/"
               f"${entry.get('cost_usd_total',0.0):.4f}")
+    return 0
+
+
+def _append_decision_log(root: Path, decision: dict[str, str]) -> Path:
+    path = root / "decisions" / "decision_log.csv"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fieldnames = [
+        "Date",
+        "Decision ID",
+        "Task ID",
+        "Agent Recommendation",
+        "Critic Verdict",
+        "Human Decision",
+        "Rationale",
+        "Owner",
+        "Follow-up",
+    ]
+    exists = path.exists()
+    with path.open("a", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        if not exists or path.stat().st_size == 0:
+            writer.writeheader()
+        decision_id = f"{decision['gate']}-{decision['decision']}-{decision['at']}"
+        writer.writerow(
+            {
+                "Date": decision["at"],
+                "Decision ID": decision_id,
+                "Task ID": "human_gate",
+                "Agent Recommendation": "",
+                "Critic Verdict": "",
+                "Human Decision": f"{decision['decision']} {decision['gate']}",
+                "Rationale": decision.get("note", ""),
+                "Owner": decision.get("owner", ""),
+                "Follow-up": "",
+            }
+        )
+    return path
+
+
+def _cmd_gate_status(args: argparse.Namespace) -> int:
+    root = _project_root()
+    state = load_state(root)
+    print(f"current stage: {state.get('current_stage', '?')}")
+    print(f"current gate : {state.get('current_gate', '?')}")
+    print(f"gate status  : {state.get('gate_status', 'open')}")
+    print(f"candidate   : {state.get('candidate_stage', '?')} / {state.get('candidate_gate', '?')}")
+    decisions = state.get("gate_decisions", [])
+    if decisions:
+        last = decisions[-1]
+        print(f"last decision: {last.get('decision')} {last.get('gate')} "
+              f"by {last.get('owner') or '?'}")
+        if last.get("note"):
+            print(f"note         : {last.get('note')}")
+    return 0
+
+
+def _cmd_gate_history(args: argparse.Namespace) -> int:
+    root = _project_root()
+    state = load_state(root)
+    history = state.get("gate_history", [])
+    if not history:
+        print("no gate history recorded")
+        return 0
+    limit = args.limit or len(history)
+    for row in history[-limit:]:
+        print(f"{row.get('at')}  {row.get('stage')}  {row.get('gate')}  "
+              f"{row.get('task_id')}  {row.get('reason')}")
+    return 0
+
+
+def _cmd_gate_approve(args: argparse.Namespace) -> int:
+    root = _project_root()
+    state = load_state(root)
+    decision = approve_gate(
+        state,
+        stage=args.stage,
+        gate=args.gate,
+        owner=args.owner or "",
+        note=args.note or "",
+    )
+    save_state(root, state)
+    log_path = _append_decision_log(root, decision)
+    print(f"approved {args.gate} for stage {args.stage}")
+    print(f"decision log: {log_path.relative_to(root)}")
+    return 0
+
+
+def _cmd_gate_block(args: argparse.Namespace) -> int:
+    root = _project_root()
+    state = load_state(root)
+    decision = block_gate(
+        state,
+        stage=args.stage,
+        gate=args.gate,
+        owner=args.owner or "",
+        reason=args.reason or "",
+    )
+    save_state(root, state)
+    log_path = _append_decision_log(root, decision)
+    print(f"blocked {args.gate} for stage {args.stage}")
+    print(f"decision log: {log_path.relative_to(root)}")
     return 0
 
 
@@ -125,6 +242,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="aeros", description="AEROS runtime")
     sub = parser.add_subparsers(dest="command", required=True)
 
+    init = sub.add_parser("init", help="create a minimal AEROS project scaffold")
+    init.add_argument("path", help="target project directory")
+    init.add_argument("--force", action="store_true", help="overwrite scaffold files if present")
+    init.set_defaults(func=_cmd_init)
+
     run = sub.add_parser("run", help="run a single task contract through the agent loop")
     run.add_argument("contract", help="path to a task contract .yml")
     run.add_argument("--dry-run", action="store_true",
@@ -139,6 +261,30 @@ def main(argv: list[str] | None = None) -> int:
 
     st = sub.add_parser("status", help="show runtime state (gate, per-task status, budget)")
     st.set_defaults(func=_cmd_status)
+
+    gate = sub.add_parser("gate", help="inspect or record human gate decisions")
+    gate_sub = gate.add_subparsers(dest="gate_command", required=True)
+
+    gate_status = gate_sub.add_parser("status", help="show current gate status")
+    gate_status.set_defaults(func=_cmd_gate_status)
+
+    gate_history = gate_sub.add_parser("history", help="show gate movement history")
+    gate_history.add_argument("--limit", type=int, default=20, help="number of entries to show")
+    gate_history.set_defaults(func=_cmd_gate_history)
+
+    gate_approve = gate_sub.add_parser("approve", help="record a human gate approval")
+    gate_approve.add_argument("gate", help="gate to approve, e.g. G3")
+    gate_approve.add_argument("--stage", default="discovery", help="stage name")
+    gate_approve.add_argument("--owner", default="", help="human owner / approver")
+    gate_approve.add_argument("--note", default="", help="approval rationale")
+    gate_approve.set_defaults(func=_cmd_gate_approve)
+
+    gate_block = gate_sub.add_parser("block", help="record a human gate block")
+    gate_block.add_argument("gate", help="gate to block, e.g. G6")
+    gate_block.add_argument("--stage", default="execution", help="stage name")
+    gate_block.add_argument("--owner", default="", help="human owner / blocker")
+    gate_block.add_argument("--reason", default="", help="blocking rationale")
+    gate_block.set_defaults(func=_cmd_gate_block)
 
     lt = sub.add_parser("list-tasks", help="list .yml task contracts in the project")
     lt.set_defaults(func=_cmd_list_tasks)

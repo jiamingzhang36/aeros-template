@@ -1,0 +1,93 @@
+current_gate: G3
+gate_status: approved
+candidate_gate: G3
+candidate_stage: discovery
+tasks:
+  D002_data_scouting:
+    status: passed
+    agent_calls_total: 3
+    cost_usd_total: 2.472733
+    last_call: '2026-05-31T00:16:44+00:00'
+    last_run_calls: 1
+    last_run_cost_usd: 0.96675
+  D001a_framing:
+    status: passed
+    agent_calls_total: 17
+    cost_usd_total: 14.798178
+    last_call: '2026-05-31T06:37:19+00:00'
+    last_run_calls: 2
+    last_run_cost_usd: 1.851738
+  D001b_framework_search:
+    status: passed
+    agent_calls_total: 6
+    cost_usd_total: 6.37586
+    last_call: '2026-05-31T00:33:05+00:00'
+    last_run_calls: 2
+    last_run_cost_usd: 0.458266
+  D003_design_sketch:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.341229
+    last_call: '2026-05-30T00:44:43+00:00'
+    last_run_calls: 1
+    last_run_cost_usd: 0.341229
+  D003_design_options:
+    status: passed
+    agent_calls_total: 8
+    cost_usd_total: 2.320273
+    last_call: '2026-05-31T06:56:36+00:00'
+    last_run_calls: 1
+    last_run_cost_usd: 0.885907
+  D004_variable_construction:
+    status: passed
+    agent_calls_total: 3
+    cost_usd_total: 2.061111
+    last_call: '2026-05-31T07:01:32+00:00'
+    last_run_calls: 1
+    last_run_cost_usd: 0.836908
+  D005_data_probe:
+    status: passed
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+updated_at: '2026-05-31T12:09:35+00:00'
+current_stage: discovery
+gate_history:
+- at: '2026-05-31T12:09:35+00:00'
+  stage: discovery
+  gate: G3
+  task_id: human_gate
+  reason: human_approved
+candidate_gate_history:
+- at: '2026-05-31T09:16:29+00:00'
+  stage: discovery
+  gate: G0
+  task_id: D001a_framing
+  reason: pipeline_resume_passed_task
+- at: '2026-05-31T09:16:29+00:00'
+  stage: discovery
+  gate: G1
+  task_id: D002_data_scouting
+  reason: pipeline_resume_passed_task
+- at: '2026-05-31T09:16:29+00:00'
+  stage: discovery
+  gate: G1
+  task_id: D005_data_probe
+  reason: pipeline_resume_passed_task
+- at: '2026-05-31T09:16:29+00:00'
+  stage: discovery
+  gate: G3
+  task_id: D003_design_options
+  reason: pipeline_resume_passed_task
+- at: '2026-05-31T12:05:55+00:00'
+  stage: discovery
+  gate: G3
+  task_id: D003_design_options
+  reason: pipeline_resume_passed_task
+gate_decisions:
+- at: '2026-05-31T12:09:35+00:00'
+  stage: discovery
+  gate: G3
+  decision: approve
+  owner: jiaming
+  note: 'discovery feasibility verified: FEASIBLE, claim ceiling associational, 136-bill
+    corpus real'

@@ -1,0 +1,41 @@
+task_id: T004_result_validation
+stage: execution
+gate: G6
+depends_on: [T003_design_audit]
+goal: >
+  Validate that registered results, output files, provenance records, tables,
+  figures, and publication-facing numbers are mutually consistent.
+
+inputs:
+  - evidence/result_index.csv
+  - evidence/claim_registry.md
+  - docs/method_card.md
+  - outputs/.provenance/
+  - paper/
+
+allowed_outputs:
+  - audits/result_validation_report.md
+  - agent_runs/
+
+forbidden_actions:
+  - "Do not edit paper text or results unless explicitly instructed."
+  - "Do not change protected definitions."
+  - "Do not reinterpret policy translation as forecast."
+
+checks:
+  - check_paper_numbers.py
+  - check_output_reproducibility.py
+  - check_provenance.py
+  - check_agent_run_report.py
+
+retry_policy:
+  max_retries: 1
+
+escalate_if:
+  - "registered numbers mismatch generated outputs"
+  - "checks still fail after max_retries"
+
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 480

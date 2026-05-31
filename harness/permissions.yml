@@ -30,7 +30,7 @@ ask:
     - "docs/method_card.md"
     - "docs/data_contract.yml"
     - "evidence/claim_registry.md"
-    - "decisions/decision_log.md"
+    - "decisions/decision_log.csv"
   actions:
     - "change preferred specification"
     - "change sample restriction"

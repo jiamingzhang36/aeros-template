@@ -7,7 +7,7 @@ ratcheted_from: []
 ---
 # Design Selection / Claim Adjudication
 
-Adjudicated: 2026-05-31T09:16:30+00:00
+Adjudicated: 2026-05-31T12:05:55+00:00
 
 Diagnostics are measured; this selection earns the claim ceiling below.
 

@@ -30,6 +30,8 @@ class Contract:
     correction_scopes: list[str]
     depends_on: list[str]
     timeout_seconds: int
+    run_command: list[str]
+    run_cwd: str
     raw: dict[str, Any] = field(default_factory=dict)
     path: Path | None = None
 
@@ -48,6 +50,7 @@ def load_contract(path: str | Path) -> Contract:
 
     retry = data.get("retry_policy", {}) or {}
     budget = data.get("budget", {}) or {}
+    run = data.get("run", {}) or {}
     return Contract(
         task_id=str(data["task_id"]),
         stage=str(data["stage"]),
@@ -67,6 +70,8 @@ def load_contract(path: str | Path) -> Contract:
         or ["all", str(data.get("stage", ""))],
         depends_on=list(data.get("depends_on", []) or []),
         timeout_seconds=int(budget.get("timeout_seconds", 480)),
+        run_command=list(run.get("command", []) or []),
+        run_cwd=str(run.get("cwd", ".") or "."),
         raw=data,
         path=path,
     )

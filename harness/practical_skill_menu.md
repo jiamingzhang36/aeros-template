@@ -16,8 +16,6 @@ These are the default shortlist. They cover the common research lifecycle withou
 | `data-inventory` | Identify and document real data sources | data scouting | Feasibility requires access path and limitations |
 | `causal-id-review` | Review whether a causal design is plausible | design formation | Review only; human approves design |
 | `did-checklist` | Check DiD/event-study assumptions and risks | design formation | Do not approve design automatically |
-| `data-quality-checker` | Audit missingness, duplicates, ranges, and units | execution analysis | Never modify `data/raw/` |
-| `replication-check` | Check reproducibility and package readiness | engineering maintenance | Failures block submission-facing claims |
 | `code-review-econ` | Review empirical code for research risks | engineering maintenance | Review only; no silent fixes |
 | `econ-write` | Draft or revise economics prose | writing revision | Must follow claim registry and language constraints |
 
@@ -35,7 +33,7 @@ Use these only when a task clearly needs the specialized operation.
 | Regression outputs | `regression-table`, `summary-stats-table`, `latex-tables` |
 | Figures and visualization | `econ-plots`, `econ-visualization` |
 | Manuscript build / LaTeX | `latex-compile-qa` |
-| Results prose | `results-narrator` |
+| Results prose | `results-narrator`, `econ-plots` |
 | Later-stage submission work | `pre-submission-audit`, `response-letter`, `journal-adapt` |
 | Policy background | `policy-timeline` |
 | Repository hygiene | `project-rigor-check` |

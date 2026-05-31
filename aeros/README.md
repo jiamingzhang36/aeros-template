@@ -22,7 +22,7 @@ python3 -m pip install -e .   # provides the `aeros` command
 
 | File | Role |
 | --- | --- |
-| `aeros/cli.py` | entry point: `python3 -m aeros.cli run <contract>` |
+| `aeros/cli.py` | entry point: `aeros <command>` or `python3 -m aeros.cli <command>` |
 | `aeros/runtime/contract.py` | load + validate a task contract (YAML) |
 | `aeros/runtime/agent.py` | build prompt, shell out to `claude -p` |
 | `aeros/runtime/checks.py` | run checks (prefers `--json`), format agent-actionable feedback |
@@ -36,9 +36,13 @@ python3 -m pip install -e .   # provides the `aeros` command
 ```bash
 aeros list-tasks                 # list .yml task contracts in the project
 aeros status                     # gate, per-task status, agent-call budget
+aeros gate status                # current human gate state
+aeros gate approve G3 --stage discovery --owner <name> --note <why>
+aeros pipeline --stage discovery # run a stage in dependency order
 aeros check   <contract.yml>     # run a contract's checks, no agent call
 aeros run     <contract.yml>     # the full loop: agent -> checks -> retry/escalate
 aeros run     <contract.yml> --dry-run   # print prompt + planned checks only
+aeros init    <path>             # create a minimal project scaffold
 ```
 
 (Before install, `python3 -m aeros.cli <command>` is identical.)
@@ -48,7 +52,7 @@ aeros run     <contract.yml> --dry-run   # print prompt + planned checks only
 Dry run (no agent call — prints the exact prompt and planned checks):
 
 ```bash
-aeros run tasks/discovery/D001_literature_search.yml --dry-run
+aeros run tasks/discovery/D001a_framing.yml --dry-run
 ```
 
 Live run (requires an authenticated `claude` CLI on PATH):
@@ -56,14 +60,13 @@ Live run (requires an authenticated `claude` CLI on PATH):
 ```bash
 # 1. Fill discovery/01_literature_scope.md with a real topic first.
 # 2. Then:
-aeros run tasks/discovery/D001_literature_search.yml
+aeros run tasks/discovery/D001a_framing.yml
 ```
 
-The kernel will: build a prompt from the contract + scope, call the agent,
-run `check_literature_registry.py`, and on failure feed the structured check
-errors back into a retry (up to `retry_policy.max_retries`). After the budget
-or retries are exhausted it writes `decisions/escalations/<task_id>.md` for a
-human decision.
+The kernel will: build a prompt from the contract + inputs, call the agent
+or deterministic command, run the contract's checks, and feed structured
+failures back into a retry when allowed. After the budget or retries are
+exhausted it writes `decisions/escalations/<task_id>.md` for a human decision.
 
 ## Permission enforcement is real, not advisory
 
@@ -78,7 +81,6 @@ echo '{"tool_name":"Write","tool_input":{"file_path":"data/raw/x.csv"}}' \
 
 ## What is NOT done yet (Phase 2+)
 
-- Stage-level runs (`--stage discovery`), gate orchestration (`--until G3`).
-- Critic agent and human-gate review memos.
-- Provenance capture of model version / prompt for reproducibility.
-- `--json` output on checks other than `check_literature_registry.py`.
+- Critic agent persona orchestration beyond task contracts and reports.
+- Full JSON output for every individual check script, not only the harness summary.
+- A polished separation between reusable runtime, generic scaffold, and project instance.

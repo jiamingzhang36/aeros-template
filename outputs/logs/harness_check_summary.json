@@ -1,0 +1,174 @@
+{
+  "status": "fail",
+  "failures": 1,
+  "checks": [
+    {
+      "name": "checks/check_stage_agents.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.092,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_skill_layer.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.32,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_correction_ledger.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.187,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_discovery_completeness.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.102,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_gate_exit.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.233,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_idea_bank.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.108,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_feasibility_matrix.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.102,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_literature_tools.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.8,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_git_guardrails.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.558,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_data_inventory.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.084,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_design_selection.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.367,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_data_contract.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.078,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_protected_definitions.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.215,
+      "draft_warning_seen": true
+    },
+    {
+      "name": "checks/check_claim_registry.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.078,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_claim_ceiling.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.213,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_claim_method_consistency.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.104,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_paper_numbers.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.074,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_output_reproducibility.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.066,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_project_status.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.298,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_provenance.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.094,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_task_contract.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.096,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_agent_runs_tools.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.773,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_pipeline_runs.py",
+      "status": "timeout",
+      "exit_code": 124,
+      "elapsed_seconds": 1.117,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_replication_package.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.077,
+      "draft_warning_seen": false
+    }
+  ]
+}

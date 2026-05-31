@@ -1,0 +1,174 @@
+{
+  "status": "pass",
+  "failures": 0,
+  "checks": [
+    {
+      "name": "checks/check_stage_agents.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.026,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_skill_layer.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.047,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_correction_ledger.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.087,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_discovery_completeness.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.027,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_gate_exit.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.064,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_idea_bank.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.026,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_feasibility_matrix.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.023,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_literature_tools.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.176,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_git_guardrails.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.118,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_data_inventory.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.029,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_design_selection.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.048,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_data_contract.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.022,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_protected_definitions.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.038,
+      "draft_warning_seen": true
+    },
+    {
+      "name": "checks/check_claim_registry.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.024,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_claim_ceiling.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.038,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_claim_method_consistency.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.036,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_paper_numbers.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.023,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_output_reproducibility.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.023,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_project_status.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.053,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_provenance.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.029,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_task_contract.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.035,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_agent_runs_tools.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.18,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_pipeline_runs.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.109,
+      "draft_warning_seen": false
+    },
+    {
+      "name": "checks/check_replication_package.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.023,
+      "draft_warning_seen": false
+    }
+  ]
+}

@@ -14,7 +14,7 @@ It defines how an agent receives a task, what it may read or change, what it mus
 6. Worker run report: `agent_runs/TEMPLATE_agent_run_report.md`
 7. Critic protocol: `harness/protocols/critic_protocol.md`
 8. Human decision gate: `harness/protocols/human_gate.md`
-9. Skill layer: `harness/skill_registry.md`, `harness/skill_invocation_rules.md`, and `harness/external_skill_map.yml`
+9. Skill layer: `harness/skill_registry.md`, `harness/skill_invocation_rules.md`, `harness/skill_map_core.yml`, and `harness/skill_map_reference.md`
 
 ## Default Run Flow
 

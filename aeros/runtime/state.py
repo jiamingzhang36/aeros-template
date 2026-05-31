@@ -13,6 +13,7 @@ from typing import Any
 import yaml
 
 STATE_FILENAME = "aeros_state.yml"
+GATE_ORDER = {f"G{i}": i for i in range(10)}
 
 
 def _now() -> str:
@@ -26,9 +27,27 @@ def state_path(project_root: Path) -> Path:
 def load_state(project_root: Path) -> dict[str, Any]:
     path = state_path(project_root)
     if not path.exists():
-        return {"current_gate": "G0", "tasks": {}}
+        return {
+            "current_stage": "discovery",
+            "current_gate": "G0",
+            "gate_status": "open",
+            "candidate_stage": "discovery",
+            "candidate_gate": "G0",
+            "tasks": {},
+            "gate_history": [],
+            "candidate_gate_history": [],
+            "gate_decisions": [],
+        }
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    data.setdefault("current_stage", "discovery")
+    data.setdefault("current_gate", "G0")
+    data.setdefault("gate_status", "open")
+    data.setdefault("candidate_stage", data.get("current_stage", "discovery"))
+    data.setdefault("candidate_gate", data.get("current_gate", "G0"))
     data.setdefault("tasks", {})
+    data.setdefault("gate_history", [])
+    data.setdefault("candidate_gate_history", [])
+    data.setdefault("gate_decisions", [])
     return data
 
 
@@ -66,3 +85,88 @@ def record_run_summary(state: dict[str, Any], task_id: str, *, calls: int,
 
 def set_status(state: dict[str, Any], task_id: str, status: str) -> None:
     task_entry(state, task_id)["status"] = status
+
+
+def _gate_rank(gate: str) -> int:
+    return GATE_ORDER.get(str(gate).split()[0], -1)
+
+
+def advance_gate(state: dict[str, Any], *, stage: str, gate: str,
+                 task_id: str, reason: str) -> None:
+    """Record the highest gate suggested by completed task progress.
+
+    This is intentionally not the formal current_gate. Formal gate movement is
+    a human/criteria decision and happens through approve_gate().
+    """
+    if not gate:
+        return
+    candidate = str(state.get("candidate_gate", state.get("current_gate", "G0")))
+    if _gate_rank(gate) < _gate_rank(candidate):
+        return
+    state["candidate_stage"] = stage
+    state["candidate_gate"] = gate
+    state.setdefault("candidate_gate_history", []).append(
+        {
+            "at": _now(),
+            "stage": stage,
+            "gate": gate,
+            "task_id": task_id,
+            "reason": reason,
+        }
+    )
+
+
+def approve_gate(state: dict[str, Any], *, stage: str, gate: str,
+                 owner: str, note: str) -> dict[str, Any]:
+    """Record a human approval and advance to the approved gate if needed."""
+    decision = {
+        "at": _now(),
+        "stage": stage,
+        "gate": gate,
+        "decision": "approve",
+        "owner": owner,
+        "note": note,
+    }
+    state["current_stage"] = stage
+    state["current_gate"] = gate
+    state["gate_status"] = "approved"
+    state["candidate_stage"] = stage
+    state["candidate_gate"] = gate
+    state.setdefault("gate_decisions", []).append(decision)
+    state.setdefault("gate_history", []).append(
+        {
+            "at": decision["at"],
+            "stage": stage,
+            "gate": gate,
+            "task_id": "human_gate",
+            "reason": "human_approved",
+        }
+    )
+    return decision
+
+
+def block_gate(state: dict[str, Any], *, stage: str, gate: str,
+               owner: str, reason: str) -> dict[str, Any]:
+    """Record a human block without marking the gate approved."""
+    decision = {
+        "at": _now(),
+        "stage": stage,
+        "gate": gate,
+        "decision": "block",
+        "owner": owner,
+        "note": reason,
+    }
+    state["gate_status"] = "blocked"
+    state["blocked_stage"] = stage
+    state["blocked_gate"] = gate
+    state.setdefault("gate_decisions", []).append(decision)
+    state.setdefault("gate_history", []).append(
+        {
+            "at": decision["at"],
+            "stage": stage,
+            "gate": gate,
+            "task_id": "human_gate",
+            "reason": "human_blocked",
+        }
+    )
+    return decision

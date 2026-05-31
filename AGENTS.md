@@ -8,11 +8,21 @@ You help with discovery, literature classification, data feasibility, code execu
 
 You are not the final research decision maker.
 
-## Required Reading Order
+## Required Reading by Mode
 
-Before any task, read:
+Discovery mode (quick onboarding):
 
-1. `README.md`
+Before any discovery task, read:
+
+1. `AGENTS.md`
+2. `README.md`
+3. `discovery/AGENTS.md`
+
+Execution mode (first full execution task):
+
+Before any execution task, read:
+
+1. `AGENTS.md`
 2. `project_manifest.yml`
 3. `harness/permissions.yml`
 4. `harness/protocols/worker_protocol.md`
@@ -21,22 +31,15 @@ Before any task, read:
 7. `docs/method_card.md`
 8. `docs/protected_definitions.yml`
 9. `evidence/claim_registry.md`
-10. `decisions/decision_log.md`
+10. `decisions/decision_log.csv`
 
 If a task file names additional required files, read those after the required reading order.
 
 ## Hard Rules
 
-- Do not modify `data/raw/`.
+The universal rules are in [harness/common_rules.md](harness/common_rules.md), and apply across all stages.
+
 - Do not bypass `harness/permissions.yml`.
-- Do not silently change treatment, exposure, or key-variable definitions.
-- Do not silently change sample restrictions.
-- Do not silently change outcome definitions.
-- Do not silently change fixed effects or clustering.
-- Do not choose preferred specifications based on statistical significance.
-- Do not turn descriptive findings into causal claims.
-- Do not turn historical estimates into forecasts.
-- Do not generalize beyond the protected population, period, geography, or outcome definitions.
 - If evidence is ambiguous, mark it as ambiguous.
 
 ## Discovery Rules
@@ -113,7 +116,7 @@ Every task contract must include a Mainline Alignment Gate section before execut
 
 ## Execution Rules
 
-- Work from task files in `tasks/`.
+- Work from task files in `tasks/discovery/` (discovery phase) or `tasks/execution/` (execution phase).
 - For execution-stage tasks, also read `execution/AGENTS.md`.
 - Only modify files allowed by the task.
 - Write an agent run report after every task.
@@ -137,7 +140,7 @@ Every task contract must include a Mainline Alignment Gate section before execut
 - External economics skills may be used only under AEROS task, evidence, permission, and claim rules.
 - Treat `harness/skill_registry.md` as the skill taxonomy.
 - Treat `harness/skill_invocation_rules.md` as the rulebook for using external skills.
-- Treat `harness/external_skill_map.yml` as the default map from external skill stages to AEROS stages.
+- Treat `harness/skill_map_core.yml` as the default map from external skill stages to AEROS stages, and `harness/skill_map_reference.md` as the non-core catalog.
 - A skill may propose, search, draft, code, or visualize; it may not override extraction-card rules, data feasibility rules, protected definitions, claim registry boundaries, critic review, or human gates.
 - If a skill's instruction conflicts with AEROS, follow AEROS and record the conflict in the run report.
 

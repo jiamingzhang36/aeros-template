@@ -8,10 +8,11 @@ Before invoking or following an external skill, the agent must read:
 
 1. `AGENTS.md`
 2. the active stage `AGENTS.md`
-3. the active task file in `tasks/`
+3. the active task file in `tasks/discovery/` or `tasks/execution/`
 4. `harness/skill_registry.md`
 5. `harness/practical_skill_menu.md`
-6. `harness/external_skill_map.yml`
+6. `harness/skill_map_core.yml`
+7. `harness/skill_map_reference.md`
 
 The task file and AEROS rules define the allowed files, outputs, and checks.
 

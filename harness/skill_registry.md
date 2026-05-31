@@ -31,7 +31,7 @@ The external econ-skills ecosystem suggests a useful stage taxonomy:
 | Analysis | `code/`, `outputs/`, and `checks/` | R, Python, or Stata econometrics skill | Must respect protected definitions and task contracts |
 | Writing | `paper/`, `docs/language_constraints.md`, `evidence/claim_registry.md` | economics writing skill | Must not strengthen claims beyond registered evidence |
 | Communication | `outputs/`, `paper/`, presentations | visualization / Beamer / policy writing skill | Must preserve units, uncertainty, and evidence boundaries |
-| Engineering | `harness/`, `tasks/`, `checks/` | spec-driven or maintenance skill | Must not weaken AEROS permissions or checks |
+| Engineering | `harness/`, `tasks/discovery/`, `tasks/execution/`, `checks/` | spec-driven or maintenance skill | Must not weaken AEROS permissions or checks |
 
 ## Local Skill Stages
 
@@ -61,7 +61,7 @@ It maps common tasks to useful skill types:
 - replication checks and economics code review
 - paper drafting, results narration, tables, figures, LaTeX QA, pre-submission audit, and response letters
 
-The menu is advisory. `harness/external_skill_map.yml` is the machine-readable map.
+The menu is advisory. `harness/skill_map_core.yml` is the machine-readable core map, and `harness/skill_map_reference.md` stores the optional/reference catalog.
 
 ## Skill Use Status
 
@@ -76,7 +76,7 @@ Each skill should be classified as:
 
 AEROS keeps the operational skill set small.
 
-- `core`: default shortlist for common empirical research work. Keep this at 10 or fewer skills.
+- `core`: default shortlist for common empirical research work. Keep this at 8 or fewer skills.
 - `optional`: task-specific tools used only when the task clearly needs them.
 - `reference`: external inspiration or heavy workflows; do not invoke by default.
 
@@ -90,14 +90,12 @@ The default shortlist is:
 4. `data-inventory`
 5. `causal-id-review`
 6. `did-checklist`
-7. `data-quality-checker`
-8. `replication-check`
-9. `code-review-econ`
-10. `econ-write`
+7. `code-review-econ`
+8. `econ-write`
 
 ## Minimum Metadata
 
-Any skill listed in `harness/external_skill_map.yml` should record:
+Any skill listed in `harness/skill_map_core.yml` should record:
 
 - `name`
 - `source`

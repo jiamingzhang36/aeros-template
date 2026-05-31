@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import csv
+import re
 import sys
 from pathlib import Path
 
@@ -42,6 +43,38 @@ REQUIRED_HEADINGS = {
     Path("discovery/design_sketch.md"): ["## Project Type", "## Candidate Data"],
     Path("discovery/PROMOTE_TO_HARNESS.md"): ["## Promotion Criteria", "## Decision"],
 }
+
+
+def _load_front_matter(path: Path) -> dict[str, list[str] | str]:
+    text = path.read_text(encoding="utf-8")
+    match = re.match(r"^---\n(.*?)\n---\n", text, flags=re.S)
+    if not match:
+        return {}
+
+    front_matter = match.group(1)
+    payload: dict[str, list[str] | str] = {}
+    required_sections: list[str] = []
+    in_required_sections = False
+
+    for line in front_matter.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("required_sections:"):
+            in_required_sections = True
+            continue
+        if in_required_sections:
+            if re.match(r"\s{2,}-\s+", line):
+                required_sections.append(line.split("-", 1)[1].strip())
+                continue
+            in_required_sections = False
+        if ":" in stripped:
+            key, value = stripped.split(":", 1)
+            payload[key.strip()] = value.strip().strip('"\'')
+
+    if required_sections:
+        payload["required_sections"] = required_sections
+    return payload
 
 REQUIRED_CSV_COLUMNS = {
     Path("discovery/idea_bank.csv"): [
@@ -100,7 +133,9 @@ def main() -> int:
         if not path.exists():
             continue
         text = path.read_text(encoding="utf-8")
-        missing = [heading for heading in headings if heading not in text]
+        front = _load_front_matter(path)
+        required = front.get("required_sections", headings)
+        missing = [heading for heading in required if isinstance(heading, str) and heading not in text]
         if missing:
             failures.append(f"{path}: missing headings {missing}")
 

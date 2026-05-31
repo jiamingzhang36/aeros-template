@@ -32,7 +32,7 @@ Start in `discovery/` unless the project already has a clear question, feasible 
 
 5. Task Specification
 
-   `tasks/` turns open-ended requests into scoped issue-style work.
+   `tasks/discovery/` and `tasks/execution/` turn open-ended requests into scoped issue-style work.
 
 6. Execution Pipeline
 
@@ -44,7 +44,7 @@ Start in `discovery/` unless the project already has a clear question, feasible 
 
 8. Agent Roles / Skills
 
-   `harness/agent_roles.yml` separates worker, critic, and human-gate responsibilities. `harness/skill_registry.md`, `harness/skill_invocation_rules.md`, and `harness/external_skill_map.yml` map external economics skills into AEROS without letting them override evidence rules.
+   `harness/agent_roles.yml` separates worker, critic, and human-gate responsibilities. `harness/skill_registry.md`, `harness/skill_invocation_rules.md`, `harness/skill_map_core.yml`, and `harness/skill_map_reference.md` map external economics skills into AEROS without letting them override evidence rules.
 
 9. Critic Review
 
@@ -64,7 +64,9 @@ code/                setup, ingest, clean, construct, analysis, robustness, tabl
 outputs/             tables, figures, logs, and model outputs
 paper/               manuscript, appendix, references, and paper build files
 evidence/            claim registry, evidence ledger, and result index
-tasks/               issue-style task contracts and gate tasks
+ tasks/               parent task directory
+ tasks/discovery/     discovery-phase issue-style task contracts
+ tasks/execution/     execution-phase issue-style task contracts
 checks/              deterministic harness checks
 agent_runs/          worker run reports, critic reports, commands, and diffs
 audits/              discovery, data, design, result, claim, and referee audit reports
@@ -83,7 +85,7 @@ Use the skill layer when a task would benefit from a specialized skill, but keep
 - `harness/skill_registry.md` explains the local stage taxonomy.
 - `harness/practical_skill_menu.md` gives a task-to-skill routing guide for common research work.
 - `harness/skill_invocation_rules.md` defines how a task may invoke an external skill.
-- `harness/external_skill_map.yml` maps examples such as research ideation, literature review assistant, R/Python/Stata econometrics, LaTeX tables, visualization, API data fetching, and economics writing.
+- `harness/skill_map_core.yml` and `harness/skill_map_reference.md` map examples such as research ideation, literature review assistant, R/Python/Stata econometrics, LaTeX tables, visualization, API data fetching, and economics writing.
 
 External skills can accelerate work. They cannot invent citations, skip extraction cards, change protected definitions, choose preferred specifications by significance, or strengthen claims beyond the evidence registry.
 
@@ -176,3 +178,27 @@ Gap claims require extracted `gap-verification` papers.
 ## Harness Principle
 
 Do not let the worker agent be the only judge of its own output. A substantial task should have a task contract, a run report, mechanical checks, critic review when risk is high, and a human decision when protected definitions or claim boundaries are affected.
+
+## Migration Compatibility Notes (May 2026)
+
+- Task templates were moved to `examples/tasks/`:
+  - `examples/tasks/TEMPLATE_task.md`
+  - `examples/tasks/discovery/`
+  - `examples/tasks/execution/`
+- Backward-compatible compatibility entries are kept:
+  - `tasks/TEMPLATE_task.md -> ../examples/tasks/TEMPLATE_task.md`
+  - `tasks/discovery/*.md -> ../../examples/tasks/discovery/*.md`
+  - `tasks/execution/*.md -> ../../examples/tasks/execution/*.md`
+- If automation or scripts expect files under `tasks/`, they continue to work through these links.
+
+- Check aggregation was introduced:
+  - `checks/check_literature_tools.py`
+  - `checks/check_git_guardrails.py`
+  - `checks/check_agent_runs_tools.py`
+- Default harness check entry points now call these grouped checks in `checks/run_harness_checks.py`, and check references in `project_manifest.yml` were updated accordingly.
+
+- Shared hard governance rules were centralized at `harness/common_rules.md` and referenced from:
+  - `AGENTS.md`
+  - `discovery/AGENTS.md`
+  - `discovery/literature/AGENTS.md`
+  - `execution/AGENTS.md`
