@@ -1,0 +1,54 @@
+task_id: T013_compliance_release_review
+stage: execution
+gate: G13
+depends_on: [T012_claim_upgrade_review]
+goal: >
+  Produce a compliance and release review before any public release, external
+  dissemination, or stronger claim language. Review provider/API terms, data
+  license/access status, IRB/human-subjects/privacy status, and public release
+  options. This task may recommend a release status but must not approve public
+  release without a human gate.
+
+inputs:
+  - project_manifest.yml
+  - evidence/result_index.csv
+  - evidence/claim_registry.md
+  - outputs/audit_runs/
+  - outputs/.provenance/
+  - audits/claim_upgrade_review_report.md
+  - README_replication.md
+  - data/README_data.md
+
+allowed_outputs:
+  - compliance/provider_terms_review.md
+  - compliance/data_license_review.md
+  - compliance/irb_ethics_review.md
+  - compliance/public_release_decision.md
+  - audits/compliance_gate_report.md
+  - agent_runs/
+
+forbidden_actions:
+  - "Do not approve public release."
+  - "Do not interpret provider terms as legal advice."
+  - "Do not mark claims supported."
+  - "Do not edit data, paper, or protected definitions."
+
+checks:
+  - check_compliance_gate.py
+  - check_claim_registry.py
+  - check_provenance.py
+  - check_agent_run_report.py
+
+retry_policy:
+  max_retries: 1
+
+escalate_if:
+  - "public release requires human/legal review"
+  - "provider terms or data licenses are unclear"
+  - "human-subjects or privacy status is ambiguous"
+  - "checks still fail after max_retries"
+
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 480

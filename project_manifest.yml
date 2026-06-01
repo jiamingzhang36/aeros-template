@@ -27,6 +27,7 @@ gate_lifecycle:
   - G10 Paper Package Draft
   - G11 Expanded Collection
   - G12 Claim Upgrade Review
+  - G13 Compliance / Release Gate
 automation:
   agent_provider: manual
   provider_connector:
@@ -126,6 +127,10 @@ gate_exit_criteria:
       check: check_claim_upgrade_review.py
     - type: claim_no_draft
       path: evidence/claim_registry.md
+  G13:
+    requires:
+    - type: check_passes
+      check: check_compliance_gate.py
 layers:
   research_judgment:
     required_files:
@@ -217,6 +222,7 @@ checks:
   expanded_result_validation: checks/check_expanded_result_validation.py
   claim_upgrade_review: checks/check_claim_upgrade_review.py
   provider_collection: checks/check_provider_collection.py
+  compliance_gate: checks/check_compliance_gate.py
   output_reproducibility: checks/check_output_reproducibility.py
   project_status: checks/check_project_status.py
   provenance: checks/check_provenance.py
