@@ -34,10 +34,12 @@ goal: >
         decision: proposed               # always 'proposed'; the human sets keep/drop
         anchors:
           - author: "Stigler"
-            year: 1971
-            title: "The Theory of Economic Regulation"
-            openalex_id: "Wxxxxxxxxx"    # REQUIRED: verify via OpenAlex, record the id or a doi
-            kind: theory                 # empirical | review | theory | method | data
+          year: 1971
+          title: "The Theory of Economic Regulation"
+          openalex_id: ""              # optional here; D001b resolves pending anchors
+          doi: ""                      # optional here; D001b resolves pending anchors
+          verification_status: pending # pending | verified
+          kind: theory                 # empirical | review | theory | method | data
 
   Rules for the deck:
   - You MUST propose at least one card for each of: gap-verification,
@@ -47,12 +49,16 @@ goal: >
     is related) and a `caveat` (the threat/limit it raises). A framework can be a
     threat to identification (e.g. policy diffusion -> endogenous treatment timing,
     Manski reflection problem), not only a method to borrow.
-  - gap-verification MUST name >= 1 EMPIRICAL closest rival (anchor kind=empirical):
+  - gap-verification MUST name >= 1 EMPIRICAL closest rival candidate (anchor kind=empirical):
     the paper(s) most likely to make THIS study redundant. A review or perspective is
     NOT a closest rival; do not use one to fill the gap bucket. Do NOT pad the gap
     bucket with analogies to hit a count -- if the genuine closest-rival set is one
     paper, name one. Analogies from adjacent regulated industries belong in
     background-institutional, not gap-verification.
+  - This is a fast framing task, not the verification/search task. Do NOT call
+    OpenAlex here. Set verification_status: pending unless you already know a
+    real DOI/OpenAlex ID from the input context. D001b will verify and register
+    anchors.
 
 inputs:
   - discovery/idea_memo.md
@@ -65,7 +71,7 @@ allowed_outputs:
 forbidden_actions:
   - "Do not write anywhere under data/raw/ (enforced by a hook)."
   - "Do not enumerate a full paper list or write paper_registry.csv; this step names frameworks + seminal anchors only."
-  - "Do not fabricate anchors. Verify every anchor against the OpenAlex API (https://api.openalex.org/works?search=...) and record its real openalex_id or doi. If you cannot verify an anchor, drop it rather than guess."
+  - "Do not call OpenAlex in this task. Name plausible anchor candidates with verification_status: pending; D001b handles verification and registration."
   - "Do not set any card's decision to keep or drop; leave it 'proposed' for the human gate."
 
 checks:

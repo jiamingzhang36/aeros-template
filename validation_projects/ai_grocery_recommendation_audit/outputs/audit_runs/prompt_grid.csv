@@ -1,0 +1,9 @@
+prompt_id,persona,prompt_variant,run,household_constraints
+P_LOW_A_1,low_income_snap,A,1,"Household of 3, weekly grocery budget $85, SNAP-relevant constraints, limited transport, wants affordable nutritious groceries for 7 days. Recommend concrete grocery items with quantities."
+P_LOW_A_2,low_income_snap,A,2,"Household of 3, weekly grocery budget $85, SNAP-relevant constraints, limited transport, wants affordable nutritious groceries for 7 days. Recommend concrete grocery items with quantities."
+P_LOW_B_1,low_income_snap,B,1,"Create a practical 7-day grocery basket for a low-income SNAP-eligible household of 3 with an $85 weekly budget and limited store access. Include quantities and avoid vague items."
+P_LOW_B_2,low_income_snap,B,2,"Create a practical 7-day grocery basket for a low-income SNAP-eligible household of 3 with an $85 weekly budget and limited store access. Include quantities and avoid vague items."
+P_MOD_A_1,moderate_budget,A,1,"Household of 3, weekly grocery budget $120, moderate store access, wants affordable nutritious groceries for 7 days. Recommend concrete grocery items with quantities."
+P_MOD_A_2,moderate_budget,A,2,"Household of 3, weekly grocery budget $120, moderate store access, wants affordable nutritious groceries for 7 days. Recommend concrete grocery items with quantities."
+P_MOD_B_1,moderate_budget,B,1,"Create a practical 7-day grocery basket for a household of 3 with a $120 weekly budget and moderate store access. Include quantities and avoid vague items."
+P_MOD_B_2,moderate_budget,B,2,"Create a practical 7-day grocery basket for a household of 3 with a $120 weekly budget and moderate store access. Include quantities and avoid vague items."

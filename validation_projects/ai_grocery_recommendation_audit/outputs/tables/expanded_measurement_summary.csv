@@ -1,0 +1,5 @@
+persona,runs,mean_affordability_ratio,max_affordability_ratio,mean_vague_items,mean_nutrition_flags,within_budget_share
+low_income_snap_senior,3,0.973,1.0,0.667,0.0,1.0
+low_income_snap_single_parent,3,0.94,0.96,0.667,0.0,1.0
+moderate_budget_family,3,0.96,0.99,1.333,0.0,1.0
+student_low_time_low_budget,3,0.973,1.0,1.333,0.0,1.0

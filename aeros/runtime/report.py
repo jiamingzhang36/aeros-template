@@ -82,7 +82,15 @@ def write_run_report(project_root: Path, run: RunRecord) -> Path:
     path = out_dir / f"{c.task_id}_{now.strftime('%Y%m%d_%H%M%S')}.md"
 
     files_read = "\n".join(f"- {p}" for p in c.inputs) or "- (none)"
-    files_mod = "\n".join(f"- {p}" for p in c.allowed_outputs) or "- (none)"
+    allowed_outputs = "\n".join(f"- {p}" for p in c.allowed_outputs) or "- (none)"
+    any_agent_completed = any(rec.agent_ok for rec in run.attempts)
+    if any_agent_completed:
+        files_mod = (
+            "- Not mechanically diffed by the runtime; inspect allowed outputs below "
+            "and the attempt feedback log."
+        )
+    else:
+        files_mod = "- (none observed; agent did not complete)"
     human_needed = (
         "- Review escalation in decisions/escalations/ and choose "
         "approve / revise / pause / drop."
@@ -118,6 +126,10 @@ def write_run_report(project_root: Path, run: RunRecord) -> Path:
 ## Files Modified
 
 {files_mod}
+
+## Allowed Outputs
+
+{allowed_outputs}
 
 ## Commands Run
 

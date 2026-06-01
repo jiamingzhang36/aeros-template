@@ -9,8 +9,8 @@ enforces that:
   - it proposes frameworks for the function buckets that keyword search cannot
     reach on its own (method-identification, theory-mechanism) plus the gap
     bucket -- the three that a topic-only search leaves empty;
-  - every named anchor carries a verifiable locator (doi or openalex_id), so
-    the reasoning step cannot fabricate citations.
+  - every named anchor is explicitly marked pending or verified. Verified
+    anchors carry a locator; pending anchors must be resolved by the search task.
 """
 
 from __future__ import annotations
@@ -48,7 +48,8 @@ REMEDIATION_HINT = (
     "Fix framing_deck.yml: each card needs function (one of the 6), a non-empty "
     "framework, rationale, role (motivation|mechanism-tested|identification-threat|"
     "measurement-strategy|robustness-comparison), and caveat; plus >=1 anchor with "
-    "a real doi or openalex_id (verify via OpenAlex; do not fabricate). The deck "
+    "title/year/kind and verification_status=pending or verified. If verified, include "
+    "a real doi or openalex_id; if pending, D001b must resolve it. The deck "
     "must cover gap-verification, method-identification, and theory-mechanism. "
     "gap-verification must name >=1 EMPIRICAL closest rival (anchor kind=empirical, "
     "not review/perspective/theory); do not pad with analogies."
@@ -133,9 +134,15 @@ def main(argv: list[str] | None = None) -> int:
                     continue
                 if _placeholder(a.get("title")):
                     failures.append(f"{cid} anchor#{j+1}: empty title")
-                if _placeholder(a.get("doi")) and _placeholder(a.get("openalex_id")):
+                if _placeholder(a.get("year")):
+                    failures.append(f"{cid} anchor#{j+1}: empty year")
+                verification = str(a.get("verification_status", "pending")).strip().lower()
+                if verification not in {"pending", "verified"}:
                     failures.append(
-                        f"{cid} anchor#{j+1}: needs a real doi or openalex_id (verify, do not fabricate)")
+                        f"{cid} anchor#{j+1}: verification_status must be pending or verified")
+                if verification == "verified" and _placeholder(a.get("doi")) and _placeholder(a.get("openalex_id")):
+                    failures.append(
+                        f"{cid} anchor#{j+1}: verified anchors need a real doi or openalex_id")
                 if is_gap:
                     kind = str(a.get("kind", "")).strip().lower()
                     if kind in NON_EMPIRICAL_KINDS:

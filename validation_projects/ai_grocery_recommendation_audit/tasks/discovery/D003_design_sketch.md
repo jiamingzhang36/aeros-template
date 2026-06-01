@@ -1,0 +1,1 @@
+../../examples/tasks/discovery/D003_design_sketch.md

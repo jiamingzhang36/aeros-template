@@ -1,0 +1,10 @@
+status: draft
+mode: smoke
+entrypoint:
+  command:
+    - python3
+    - code/99_make_all.py
+    - --mode
+    - smoke
+registered_outputs: []
+notes: "Instantiate this manifest for a concrete project before main execution."

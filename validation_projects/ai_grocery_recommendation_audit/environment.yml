@@ -1,0 +1,9 @@
+name: aeros-project
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pyyaml=6.0.2
+  - pip
+  - pip:
+      - -r requirements-min.txt

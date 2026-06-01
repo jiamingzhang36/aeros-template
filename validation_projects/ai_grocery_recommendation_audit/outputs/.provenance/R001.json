@@ -1,0 +1,11 @@
+{
+  "result_id": "R001",
+  "output_path": "outputs/tables/measurement_smoke_summary.csv",
+  "created_at": "2026-06-01T11:54:06+00:00",
+  "script_or_source": "code/02_analysis/run_measurement_smoke.py",
+  "sha256": "b25de3769a3dd9bf4cd562a7c7002ad138562f6059b5b8b4af35984bb797ac5f",
+  "inputs": [
+    "hard-coded toy RESPONSES in smoke script"
+  ],
+  "claim_boundary": "smoke validation only; not final empirical evidence"
+}

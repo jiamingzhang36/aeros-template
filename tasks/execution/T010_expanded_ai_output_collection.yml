@@ -1,0 +1,44 @@
+task_id: T010_expanded_ai_output_collection
+stage: execution
+gate: G11
+depends_on: [T009_expanded_collection_design]
+goal: >
+  Collect or import expanded AI recommendation outputs according to the
+  approved expanded prompt grid. Preserve prompt text, model metadata,
+  timestamps, output text, and run identifiers. This task records outputs but
+  does not validate paper claims.
+
+inputs:
+  - execution/collection/expanded_collection_plan.md
+  - outputs/audit_runs/expanded_prompt_grid.csv
+  - docs/protected_definitions.yml
+
+allowed_outputs:
+  - outputs/audit_runs/expanded_ai_outputs.jsonl
+  - outputs/.provenance/
+  - audits/expanded_collection_run_report.md
+  - agent_runs/
+
+forbidden_actions:
+  - "Do not collect outputs from an unapproved prompt grid."
+  - "Do not expose restricted or private data in prompts."
+  - "Do not edit claims, manuscript text, or protected definitions."
+
+checks:
+  - check_expanded_collection_design.py
+  - check_expanded_collection_outputs.py
+  - check_provenance.py
+  - check_agent_run_report.py
+
+retry_policy:
+  max_retries: 1
+
+escalate_if:
+  - "model/provider rate limits or terms require human decision"
+  - "prompt grid cannot be collected as approved"
+  - "checks still fail after max_retries"
+
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 900

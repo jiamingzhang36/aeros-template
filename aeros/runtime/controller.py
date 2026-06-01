@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 
 from . import state as state_mod
@@ -16,6 +17,8 @@ from .kernel import (
     run_pipeline,
     topo_order,
 )
+
+print = partial(print, flush=True)
 
 
 @dataclass(frozen=True)
@@ -48,7 +51,7 @@ def _highest_gate(contracts: dict, default: str = "G0") -> str:
 
 def _execution_allowed(state: dict) -> bool:
     return (
-        state.get("gate_status") == "approved"
+        state.get("gate_status") in {"approved", "blocked"}
         and state_mod._gate_rank(str(state.get("current_gate", "G0"))) >= state_mod._gate_rank("G3")
     )
 
@@ -75,6 +78,25 @@ def _contracts_through_gate(contracts: dict, target_gate: str) -> dict:
     }
 
 
+def _with_dependency_closure(selected: dict, all_contracts: dict) -> dict:
+    """Include dependencies even when their gate is beyond the target gate.
+
+    Some discovery artifacts are logically upstream even if their human gate is
+    later (for example, variable construction can depend on design options).
+    A next-gate run should not execute a task with missing prerequisites.
+    """
+    out = dict(selected)
+    changed = True
+    while changed:
+        changed = False
+        for contract, _path in list(out.values()):
+            for dep in contract.depends_on:
+                if dep in all_contracts and dep not in out:
+                    out[dep] = all_contracts[dep]
+                    changed = True
+    return out
+
+
 def build_iterate_plan(
     project_root: Path,
     stage: str = "discovery",
@@ -99,7 +121,13 @@ def build_iterate_plan(
         _next_gate_after(str(state.get("current_gate", "G0")), contracts)
         if to_next_gate else _highest_gate(contracts)
     )
-    runnable_contracts = _contracts_through_gate(contracts, target_gate) if to_next_gate else contracts
+    if to_next_gate:
+        runnable_contracts = _with_dependency_closure(
+            _contracts_through_gate(contracts, target_gate),
+            all_contracts,
+        )
+    else:
+        runnable_contracts = contracts
     probe_state = deepcopy(state)
     steps: list[IterateStep] = []
     for task_id in topo_order(runnable_contracts):
@@ -151,6 +179,8 @@ def run_iteration(
     *,
     dry_run: bool = False,
     to_next_gate: bool = False,
+    task_timeout_override: int | None = None,
+    max_retries_override: int | None = None,
 ) -> int:
     plan = build_iterate_plan(project_root, stage, to_next_gate=to_next_gate)
     print(format_iterate_plan(plan))
@@ -163,7 +193,14 @@ def run_iteration(
     if dry_run:
         return 0
 
-    rc = run_pipeline(project_root, stage, dry_run=False, stop_gate=plan.target_gate if to_next_gate else None)
+    rc = run_pipeline(
+        project_root,
+        stage,
+        dry_run=False,
+        stop_gate=plan.target_gate if to_next_gate else None,
+        task_timeout_override=task_timeout_override,
+        max_retries_override=max_retries_override,
+    )
     if rc != 0:
         packet = write_decision_packet(project_root, plan.target_gate, stage=stage)
         print(f"[iterate] stopped; decision packet -> {packet.relative_to(project_root)}")

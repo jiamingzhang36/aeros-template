@@ -1,0 +1,13 @@
+{
+  "result_id": "R005",
+  "output_path": "outputs/tables/expanded_robustness_summary.csv",
+  "created_at": "2026-06-01T11:56:37+00:00",
+  "script_or_source": "outputs/audit_runs/expanded_ai_outputs.jsonl",
+  "sha256": "f1db1512394325e5d37df6f76238b96e0e29877791c0673abe35e821e9dba809",
+  "inputs": [
+    "outputs/audit_runs/expanded_prompt_grid.csv",
+    "outputs/audit_runs/expanded_ai_outputs.jsonl"
+  ],
+  "claim_boundary": "expanded current-Codex-session validation outputs only; no automatic supported-claim upgrade",
+  "description": "Expanded current-Codex-session prompt-variant robustness summary."
+}

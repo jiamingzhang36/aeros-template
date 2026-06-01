@@ -1,0 +1,1 @@
+../../examples/tasks/execution/T006_referee_panel.md

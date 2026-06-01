@@ -22,7 +22,11 @@ def run_check(project_root: Path, check_name: str) -> CheckResult:
     """Run one check script. Prefer --json; fall back to exit-code parsing."""
     script = project_root / "checks" / check_name
     if not script.exists():
-        return CheckResult(check_name, False, [f"check script not found: {script}"], "", "")
+        template_script = Path(__file__).resolve().parents[2] / "checks" / check_name
+        if template_script.exists():
+            script = template_script
+        else:
+            return CheckResult(check_name, False, [f"check script not found: {script}"], "", "")
 
     # First try structured JSON output.
     proc = subprocess.run(

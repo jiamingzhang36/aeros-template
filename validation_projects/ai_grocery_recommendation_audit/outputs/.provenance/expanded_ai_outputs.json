@@ -1,0 +1,9 @@
+{
+  "artifact": "outputs/audit_runs/expanded_ai_outputs.jsonl",
+  "created_date": "2026-06-01",
+  "created_by": "current_codex_session_model",
+  "task_id": "T010_expanded_ai_output_collection",
+  "source_grid": "outputs/audit_runs/expanded_prompt_grid.csv",
+  "collection_mode": "current Codex-session validation import",
+  "claim_boundary": "validation collection only; not deployed AI system evidence"
+}

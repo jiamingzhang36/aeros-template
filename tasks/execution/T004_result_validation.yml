@@ -1,7 +1,7 @@
 task_id: T004_result_validation
 stage: execution
 gate: G6
-depends_on: [T003_design_audit]
+depends_on: [T004b_robustness_plan]
 goal: >
   Validate that registered results, output files, provenance records, tables,
   figures, and publication-facing numbers are mutually consistent.

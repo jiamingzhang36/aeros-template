@@ -1,0 +1,18 @@
+status: measured
+measured_on: '2026-06-01T02:24:37+00:00'
+source: code/01_ingest/probe_data_diagnostics.py
+diagnostics:
+  candidate_sources_total: 7
+  public_or_located_sources: 5
+  high_priority_sources: 4
+  public_high_priority_sources: 2
+  sources_with_next_probe: 7
+  restricted_or_paid_sources: 1
+  nutrition_measurement_sources: 2
+  affordability_measurement_sources: 2
+notes:
+  scope: 'G1 readiness only: measures scouted source coverage and probe specificity
+    from discovery/data_inventory.csv; no raw data were downloaded.'
+  interpretation: The project has enough located/public candidate sources to proceed
+    to measurement design, but retailer price capture and AI output collection still
+    require explicit protocols before causal or strong empirical claims.

@@ -1,0 +1,43 @@
+protected_definitions:
+  version: "0.1"
+  status: "draft" # draft | locked
+  change_policy: "Human approval required before modifying any protected definition."
+
+key_exposure:
+  name: ""
+  definition: ""
+  source: ""
+  allowed_values: []
+  notes: ""
+
+sample:
+  population: ""
+  geography: ""
+  period: ""
+  inclusion_rules: []
+  exclusion_rules: []
+  notes: ""
+
+outcomes:
+  - name: ""
+    definition: ""
+    source: ""
+    unit: ""
+    transformation: ""
+    notes: ""
+
+model:
+  preferred_specification: ""
+  fixed_effects: []
+  controls: []
+  standard_errors: ""
+  clustering: ""
+  weighting: ""
+  notes: ""
+
+claim_boundaries:
+  causal_language_allowed: false
+  forecast_language_allowed: false
+  policy_translation_allowed: "only if explicitly supported"
+  external_validity_limits: []
+  prohibited_generalizations: []

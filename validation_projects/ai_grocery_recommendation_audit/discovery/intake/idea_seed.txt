@@ -1,0 +1,1 @@
+We audit whether AI-generated grocery recommendations are stable, affordable, nutritionally reasonable, and equitable across realistic household constraints, with special attention to low-income and SNAP-relevant food choice environments.

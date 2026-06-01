@@ -1,0 +1,2 @@
+# AEROS harness/runtime requirements
+PyYAML==6.0.2

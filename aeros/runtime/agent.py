@@ -10,10 +10,16 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import select
 import shutil
 import subprocess
+import time
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
+from urllib import error as urlerror
+from urllib import request
 
 import yaml
 
@@ -69,6 +75,189 @@ class AgentResult:
     output_tokens: int = 0
     num_turns: int = 0
     duration_ms: int = 0
+
+
+def _agent_provider(project_root: Path) -> str:
+    """Select the worker backend.
+
+    Env wins so validation runs can switch provider without editing a project:
+    AEROS_AGENT_PROVIDER=claude|openai|manual.
+    """
+    provider = os.getenv("AEROS_AGENT_PROVIDER", "").strip().lower()
+    if provider:
+        return provider
+    manifest = project_root / "project_manifest.yml"
+    if manifest.exists():
+        try:
+            data = yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
+        except yaml.YAMLError:
+            data = {}
+        automation = data.get("automation", {}) if isinstance(data, dict) else {}
+        if isinstance(automation, dict):
+            provider = str(automation.get("agent_provider", "") or "").strip().lower()
+            if provider:
+                return provider
+    return "claude"
+
+
+def _task_id_from_prompt(prompt: str) -> str:
+    match = re.search(r"executing task\s+([A-Za-z0-9_.-]+)", prompt)
+    return match.group(1) if match else "task"
+
+
+def _allowed_outputs_from_prompt(prompt: str) -> list[str]:
+    match = re.search(
+        r"## You may write ONLY these files\n(?P<body>.*?)(?:\n\n## |\Z)",
+        prompt,
+        flags=re.S,
+    )
+    if not match:
+        return []
+    out: list[str] = []
+    for line in match.group("body").splitlines():
+        line = line.strip()
+        if line.startswith("- "):
+            rel = line[2:].strip()
+            if rel:
+                out.append(rel)
+    return out
+
+
+def _safe_output_path(project_root: Path, rel: str, allowed_outputs: list[str]) -> Path:
+    rel = rel.strip().lstrip("/")
+    if rel not in allowed_outputs:
+        raise ValueError(f"provider attempted to write non-allowed output: {rel}")
+    path = (project_root / rel).resolve()
+    root = project_root.resolve()
+    if root not in [path, *path.parents]:
+        raise ValueError(f"provider attempted to write outside project root: {rel}")
+    return path
+
+
+def _write_manual_prompt(prompt: str, project_root: Path) -> Path:
+    task_id = _task_id_from_prompt(prompt)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    out_dir = project_root / "outputs" / "pending_tasks"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / f"{task_id}_{stamp}.md"
+    path.write_text(
+        "# Manual AEROS Task Prompt\n\n"
+        "AEROS_AGENT_PROVIDER=manual wrote this prompt instead of calling an agent.\n\n"
+        "Fill the allowed output files, then run `aeros check <task-contract>`.\n\n"
+        "```text\n"
+        f"{prompt}\n"
+        "```\n",
+        encoding="utf-8",
+    )
+    return path
+
+
+def _extract_json_object(text: str) -> dict:
+    text = (text or "").strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start < 0 or end < start:
+            raise
+        data = json.loads(text[start:end + 1])
+    if not isinstance(data, dict):
+        raise ValueError("provider response JSON must be an object")
+    return data
+
+
+def _apply_file_response(project_root: Path, allowed_outputs: list[str], text: str) -> None:
+    data = _extract_json_object(text)
+    files = data.get("files")
+    if not isinstance(files, list) or not files:
+        raise ValueError("provider response must include non-empty files[]")
+    for item in files:
+        if not isinstance(item, dict):
+            raise ValueError("each files[] item must be an object")
+        rel = str(item.get("path", "") or "").strip()
+        content = item.get("content")
+        if not isinstance(content, str):
+            raise ValueError(f"file {rel or '?'} content must be a string")
+        path = _safe_output_path(project_root, rel, allowed_outputs)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+
+
+def _run_openai_agent(prompt: str, project_root: Path, timeout: int) -> AgentResult:
+    api_key = os.getenv("OPENAI_API_KEY", "").strip()
+    if not api_key:
+        return AgentResult(False, "", "OPENAI_API_KEY is not set.")
+    model = os.getenv("AEROS_OPENAI_MODEL", "gpt-5").strip() or "gpt-5"
+    allowed_outputs = _allowed_outputs_from_prompt(prompt)
+    file_instruction = (
+        "\n\n## Output protocol for this provider\n"
+        "Return ONLY valid JSON with this shape:\n"
+        "{\"files\":[{\"path\":\"relative/path/from_allowed_outputs\",\"content\":\"full file content\"}]}\n"
+        "Every path must be one of the allowed outputs. Do not include markdown fences.\n"
+    )
+    payload = {
+        "model": model,
+        "input": prompt + file_instruction,
+    }
+    body = json.dumps(payload).encode("utf-8")
+    req = request.Request(
+        "https://api.openai.com/v1/responses",
+        data=body,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    started = time.monotonic()
+    try:
+        with request.urlopen(req, timeout=timeout) as resp:
+            raw = resp.read().decode("utf-8")
+    except urlerror.HTTPError as exc:
+        detail = exc.read().decode("utf-8", errors="replace")
+        return AgentResult(False, "", f"OpenAI provider HTTP {exc.code}: {detail}")
+    except (urlerror.URLError, TimeoutError) as exc:
+        return AgentResult(False, "", f"OpenAI provider failed: {exc}")
+
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError:
+        return AgentResult(False, raw, "OpenAI provider returned non-JSON response")
+
+    output_text = data.get("output_text")
+    if not output_text:
+        chunks: list[str] = []
+        for item in data.get("output", []) or []:
+            if not isinstance(item, dict):
+                continue
+            for content in item.get("content", []) or []:
+                if isinstance(content, dict) and content.get("type") in {"output_text", "text"}:
+                    chunks.append(str(content.get("text", "")))
+        output_text = "\n".join(chunks).strip()
+    if not output_text:
+        return AgentResult(False, raw, "OpenAI provider returned no output text")
+
+    try:
+        _apply_file_response(project_root, allowed_outputs, output_text)
+    except Exception as exc:  # noqa: BLE001
+        return AgentResult(False, output_text, f"OpenAI provider file application failed: {exc}")
+
+    usage = data.get("usage", {}) or {}
+    input_tokens = int(usage.get("input_tokens", 0) or 0)
+    output_tokens = int(usage.get("output_tokens", 0) or 0)
+    return AgentResult(
+        True,
+        output_text,
+        "",
+        cost_usd=0.0,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        duration_ms=int((time.monotonic() - started) * 1000),
+    )
 
 
 def _column_block(contract: Contract) -> str:
@@ -136,38 +325,108 @@ def build_prompt(contract: Contract, inputs_text: str, feedback: str | None,
 
 def run_agent(prompt: str, project_root: Path, timeout: int = 480,
               max_budget_usd: float | None = None) -> AgentResult:
+    provider = _agent_provider(project_root)
+    if provider == "manual":
+        path = _write_manual_prompt(prompt, project_root)
+        return AgentResult(
+            False,
+            "",
+            f"manual provider wrote prompt to {path.relative_to(project_root)}",
+        )
+    if provider == "openai":
+        return _run_openai_agent(prompt, project_root, timeout)
+    if provider != "claude":
+        return AgentResult(
+            False,
+            "",
+            f"unknown AEROS_AGENT_PROVIDER {provider!r}; expected claude, openai, or manual",
+        )
+
     binary = shutil.which("claude")
     if not binary:
         return AgentResult(False, "", "`claude` CLI not found on PATH.")
-    cmd = [binary, "-p", prompt, "--output-format", "json"]
+    cmd = [binary, "-p", prompt, "--output-format", "stream-json", "--verbose"]
     if max_budget_usd is not None and max_budget_usd > 0:
         # Hard per-call dollar cap (claude --max-budget-usd). This is what makes
         # max_dollars an enforceable ceiling instead of a between-calls guardrail:
         # a single runaway call can no longer overshoot the budget.
         cmd += ["--max-budget-usd", f"{max_budget_usd:.2f}"]
+    started = time.monotonic()
+    last_heartbeat = started
+    output_lines: list[str] = []
+    final: dict | None = None
+    rate_limited = False
     try:
-        proc = subprocess.run(
+        proc = subprocess.Popen(
             cmd,
-            cwd=str(project_root), text=True, capture_output=True, timeout=timeout,
-            env=_agent_env(),
+            cwd=str(project_root), text=True, stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT, env=_agent_env(), bufsize=1,
         )
-    except subprocess.TimeoutExpired:
-        return AgentResult(False, "", f"agent timed out after {timeout}s")
+        assert proc.stdout is not None
+        while True:
+            elapsed = time.monotonic() - started
+            if elapsed > timeout:
+                proc.kill()
+                proc.wait()
+                suffix = " (rate limit event observed)" if rate_limited else ""
+                return AgentResult(False, "\n".join(output_lines),
+                                   f"agent timed out after {timeout}s{suffix}")
+            ready, _, _ = select.select([proc.stdout], [], [], 1.0)
+            if ready:
+                line = proc.stdout.readline()
+                if line:
+                    line = line.rstrip("\n")
+                    output_lines.append(line)
+                    try:
+                        event = json.loads(line)
+                    except (json.JSONDecodeError, ValueError):
+                        print(f"[agent] {line}", flush=True)
+                    else:
+                        event_type = str(event.get("type", "event"))
+                        if event_type == "assistant":
+                            print("[agent] assistant response event", flush=True)
+                        elif event_type == "result":
+                            final = event
+                            print("[agent] result event received", flush=True)
+                        elif event_type == "rate_limit_event":
+                            rate_limited = True
+                            print("[agent] rate limit event observed", flush=True)
+                        elif event_type in {"system", "user"}:
+                            print(f"[agent] {event_type} event", flush=True)
+                        else:
+                            print(f"[agent] {event_type}", flush=True)
+                elif proc.poll() is not None:
+                    break
+            if proc.poll() is not None:
+                remainder = proc.stdout.read()
+                if remainder:
+                    for line in remainder.splitlines():
+                        output_lines.append(line)
+                        try:
+                            event = json.loads(line)
+                        except (json.JSONDecodeError, ValueError):
+                            continue
+                        if str(event.get("type", "")) == "result":
+                            final = event
+                break
+            now = time.monotonic()
+            if now - last_heartbeat >= 30:
+                print(f"[agent] still running ({int(now - started)}s elapsed)...", flush=True)
+                last_heartbeat = now
+    except OSError as exc:
+        return AgentResult(False, "", str(exc))
 
     # The CLI emits a result JSON even when it errors (is_error:true), and that
     # JSON still carries total_cost_usd. Parse it FIRST so a failed-but-billed
     # call (e.g. quota exhaustion, mid-run abort) is still accounted for -- a $0
     # cost on a failed call is exactly the "burned overnight" blind spot.
-    try:
-        data = json.loads((proc.stdout or "").strip())
-    except (json.JSONDecodeError, ValueError):
-        data = None
+    data = final
 
     if data is None:
         # Non-JSON output (older CLI or hard crash): fall back to returncode.
         if proc.returncode != 0:
-            return AgentResult(False, "", (proc.stderr or proc.stdout or "").strip())
-        return AgentResult(True, (proc.stdout or "").strip(), "")
+            return AgentResult(False, "", "\n".join(output_lines).strip())
+        return AgentResult(True, "\n".join(output_lines).strip(), "")
 
     usage = data.get("usage", {}) or {}
     cost = float(data.get("total_cost_usd", 0.0) or 0.0)

@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import datetime, timezone
+from functools import partial
 from pathlib import Path
 
 from . import state as state_mod
@@ -12,6 +13,8 @@ from .agent import build_prompt, run_agent
 from .checks import format_feedback, run_checks
 from .contract import Contract, load_contract
 from .report import AttemptRecord, RunRecord, write_run_report
+
+print = partial(print, flush=True)
 
 
 def find_project_root(start: Path) -> Path:
@@ -66,11 +69,29 @@ def _task_gates(contracts: dict) -> dict[str, str]:
     return {tid: c.gate for tid, (c, _) in contracts.items()}
 
 
+def _with_dependency_closure(selected: dict, all_contracts: dict) -> dict:
+    out = dict(selected)
+    changed = True
+    while changed:
+        changed = False
+        for contract, _path in list(out.values()):
+            for dep in contract.depends_on:
+                if dep in all_contracts and dep not in out:
+                    out[dep] = all_contracts[dep]
+                    changed = True
+    return out
+
+
 def _fingerprint_paths(project_root: Path, rel_paths: list[str]) -> str:
     digest = hashlib.sha256()
     for rel in sorted(str(item).rstrip("/") for item in rel_paths if item):
         # agent_runs is an audit side effect, not a semantic task output.
         if rel == "agent_runs" or rel.startswith("agent_runs/"):
+            continue
+        # pending manual prompts are runtime control artifacts, not semantic
+        # research outputs. Including them makes manual recovery invalidate
+        # broad task outputs such as outputs/.
+        if rel == "outputs/pending_tasks" or rel.startswith("outputs/pending_tasks/"):
             continue
         path = project_root / rel
         digest.update(rel.encode("utf-8"))
@@ -80,6 +101,8 @@ def _fingerprint_paths(project_root: Path, rel_paths: list[str]) -> str:
         files = [path] if path.is_file() else sorted(p for p in path.rglob("*") if p.is_file())
         for file_path in files:
             rel_file = file_path.relative_to(project_root).as_posix()
+            if rel_file == "outputs/pending_tasks" or rel_file.startswith("outputs/pending_tasks/"):
+                continue
             digest.update(rel_file.encode("utf-8"))
             digest.update(b"\0")
             digest.update(hashlib.sha256(file_path.read_bytes()).digest())
@@ -142,12 +165,14 @@ def run_pipeline(
     *,
     dry_run: bool = False,
     stop_gate: str | None = None,
+    task_timeout_override: int | None = None,
+    max_retries_override: int | None = None,
 ) -> int:
     """Run a stage's contracts in dependency order, stopping at the first
     escalation. Returns 0 if all passed (or dry-run), non-zero on stop."""
     state = state_mod.load_state(project_root)
     approved_for_execution = (
-        state.get("gate_status") == "approved"
+        state.get("gate_status") in {"approved", "blocked"}
         and state_mod._gate_rank(str(state.get("current_gate", "G0"))) >= state_mod._gate_rank("G3")
     )
     if stage == "execution" and not dry_run and not approved_for_execution:
@@ -168,6 +193,7 @@ def run_pipeline(
             for task_id, record in contracts.items()
             if state_mod._gate_rank(record[0].gate or "") <= target_rank
         }
+        contracts = _with_dependency_closure(contracts, all_contracts)
     order = topo_order(contracts)
     print(f"[pipeline] {stage}: {len(order)} task(s) in dependency order")
     skipped = 0
@@ -192,7 +218,9 @@ def run_pipeline(
         print(f"  -> {tid} (gate {c.gate or '?'}, after: {deps})")
         if dry_run:
             continue
-        rc = run_task(path, dry_run=False)
+        rc = run_task(path, dry_run=False,
+                      task_timeout_override=task_timeout_override,
+                      max_retries_override=max_retries_override)
         # Reload state after each task (run_task writes it).
         state = state_mod.load_state(project_root)
         if rc != 0:
@@ -213,7 +241,13 @@ def _read_inputs(project_root: Path, contract: Contract) -> str:
     blocks: list[str] = []
     for rel in contract.inputs:
         p = project_root / rel
-        if p.exists():
+        if p.is_dir():
+            files = sorted(x for x in p.rglob("*") if x.is_file())
+            listing = "\n".join(f"- {x.relative_to(project_root).as_posix()}" for x in files[:200])
+            if len(files) > 200:
+                listing += f"\n- ... ({len(files) - 200} more file(s))"
+            blocks.append(f"--- {rel} (DIRECTORY) ---\n{listing or '(empty directory)'}")
+        elif p.exists():
             blocks.append(f"--- {rel} ---\n{p.read_text(encoding='utf-8')}")
         else:
             blocks.append(f"--- {rel} (MISSING) ---")
@@ -225,10 +259,13 @@ def _escalate(project_root: Path, contract: Contract, feedback: str) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{contract.task_id}.md"
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    why = "Automated retries exhausted; checks still failing."
+    if "Agent invocation failed" in (feedback or ""):
+        why = "Automated retries exhausted after agent invocation failure."
     path.write_text(
         f"# Escalation: {contract.task_id}\n\n"
         f"Raised: {stamp}\n\n"
-        f"## Why\nAutomated retries exhausted; checks still failing.\n\n"
+        f"## Why\n{why}\n\n"
         f"## Last check feedback\n\n{feedback or '(no structured feedback)'}\n\n"
         f"## Human options\n- approve (accept current state)\n"
         f"- revise: <instruction>\n- pause\n- drop\n",
@@ -238,7 +275,8 @@ def _escalate(project_root: Path, contract: Contract, feedback: str) -> Path:
 
 
 def _run_deterministic_task(contract: "Contract", project_root: Path,
-                             state: dict, dry_run: bool) -> int:
+                             state: dict, dry_run: bool,
+                             task_timeout_override: int | None = None) -> int:
     """Run a zero-agent-calls contract by executing its check scripts directly.
 
     Tasks with max_agent_calls=0 are deterministic probes (e.g. API calls,
@@ -259,7 +297,7 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
         result = subprocess.run(
             contract.run_command,
             cwd=str(cwd),
-            timeout=contract.timeout_seconds,
+            timeout=task_timeout_override or contract.timeout_seconds,
             check=False,
         )
         if result.returncode != 0:
@@ -293,7 +331,8 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
 
 
 def run_task(contract_path: str | Path, *, dry_run: bool = False,
-             max_retries_override: int | None = None) -> int:
+             max_retries_override: int | None = None,
+             task_timeout_override: int | None = None) -> int:
     contract = load_contract(contract_path)
     project_root = find_project_root(Path(contract_path).resolve())
     state = state_mod.load_state(project_root)
@@ -301,7 +340,8 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
 
     # Deterministic probe tasks (max_agent_calls=0) skip the agent loop entirely.
     if contract.max_agent_calls == 0:
-        return _run_deterministic_task(contract, project_root, state, dry_run)
+        return _run_deterministic_task(contract, project_root, state, dry_run,
+                                       task_timeout_override=task_timeout_override)
 
     max_retries = (max_retries_override if max_retries_override is not None
                    else contract.max_retries)
@@ -361,7 +401,7 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
               f"(spent ${run_cost:.4f}/{contract.max_dollars:.2f}, call cap ${call_cap:.2f})...")
 
         result = run_agent(prompt, project_root,
-                           timeout=contract.timeout_seconds,
+                           timeout=task_timeout_override or contract.timeout_seconds,
                            max_budget_usd=call_cap)
         # Account for spend regardless of outcome (a failed call can still cost).
         run_calls += 1

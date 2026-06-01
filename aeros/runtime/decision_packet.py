@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import yaml
+import csv
 
 from . import state as state_mod
 
@@ -77,6 +78,134 @@ def _front_matter(path: Path) -> dict[str, Any]:
 def _claim_ceiling(project_root: Path) -> str:
     fm = _front_matter(project_root / "discovery" / "design_selection.md")
     return str(fm.get("earned_claim_ceiling") or "none")
+
+
+def _discover_contract_ids(project_root: Path) -> set[str]:
+    ids: set[str] = set()
+    from .contract import load_contract
+
+    for path in sorted((project_root / "tasks").rglob("*.yml")):
+        try:
+            ids.add(load_contract(path).task_id)
+        except Exception:  # noqa: BLE001
+            continue
+    return ids
+
+
+def _result_rows(project_root: Path) -> list[dict[str, str]]:
+    path = project_root / "evidence" / "result_index.csv"
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as handle:
+        return [row for row in csv.DictReader(handle) if row.get("result_id", "").strip()]
+
+
+def _claim_rows(project_root: Path) -> list[dict[str, str]]:
+    path = project_root / "evidence" / "claim_registry.md"
+    if not path.exists():
+        return []
+    rows: list[dict[str, str]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.startswith("| C") or line.startswith("| Claim ID"):
+            continue
+        cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+        if len(cells) < 8:
+            continue
+        rows.append({
+            "claim_id": cells[0],
+            "claim": cells[1],
+            "type": cells[2],
+            "status": cells[3],
+            "evidence_ids": cells[4],
+            "result_ids": cells[5],
+            "boundary": cells[6],
+            "approved": cells[7],
+        })
+    return rows
+
+
+def _protocol_summary(project_root: Path) -> tuple[dict[str, Any], str]:
+    path = project_root / "execution" / "protocol" / "main_execution_protocol.md"
+    if not path.exists():
+        return {}, ""
+    text = path.read_text(encoding="utf-8")
+    fm = _front_matter(path)
+    match = re.search(r"^## Claim Boundary\n(?P<body>.*?)(?=^## |\Z)", text, flags=re.S | re.M)
+    boundary = match.group("body").strip().replace("\n", " ") if match else ""
+    return fm, boundary
+
+
+def _evidence_overview(project_root: Path, state: dict[str, Any], target_gate: str) -> list[str]:
+    lines: list[str] = ["## Evidence Overview", ""]
+
+    contract_ids = _discover_contract_ids(project_root)
+    tasks = state.get("tasks", {}) or {}
+    passed = sorted(task_id for task_id, entry in tasks.items() if entry.get("status") == "passed")
+    stale_state = sorted(task_id for task_id in tasks if task_id not in contract_ids)
+    if passed:
+        lines.extend(["### Passed Runtime Tasks", ""])
+        for task_id in passed:
+            suffix = " (no current contract)" if task_id in stale_state else ""
+            lines.append(f"- {task_id}{suffix}")
+        lines.append("")
+    if stale_state:
+        lines.extend([
+            "### State Hygiene",
+            "",
+            "The state contains task entries whose contracts no longer exist:",
+            "",
+        ])
+        for task_id in stale_state:
+            lines.append(f"- {task_id}")
+        lines.extend(["", "Run `aeros state prune` if these are historical artifacts.", ""])
+
+    protocol_fm, boundary = _protocol_summary(project_root)
+    if protocol_fm or boundary:
+        lines.extend(["### Execution Protocol", ""])
+        lines.append(f"- Status: {protocol_fm.get('status', 'unknown')}")
+        lines.append(f"- Claim ceiling: {protocol_fm.get('claim_ceiling', 'unknown')}")
+        result_ids = protocol_fm.get("result_ids") or []
+        lines.append(f"- Planned result IDs: {', '.join(result_ids) if result_ids else '(none)'}")
+        if boundary:
+            lines.append(f"- Claim boundary: {boundary}")
+        lines.append("")
+
+    results = _result_rows(project_root)
+    lines.extend(["### Registered Results", ""])
+    if not results:
+        lines.append("- None registered yet.")
+    else:
+        for row in results:
+            notes = row.get("notes", "")
+            lines.append(
+                f"- {row.get('result_id')}: {row.get('description') or row.get('path')} "
+                f"(`{row.get('path')}`; claims: {row.get('linked_claims') or 'none'}"
+                f"{'; ' + notes if notes else ''})"
+            )
+    lines.append("")
+
+    claims = _claim_rows(project_root)
+    lines.extend(["### Claim Registry Summary", ""])
+    if not claims:
+        lines.append("- No claims registered yet.")
+    else:
+        for row in claims:
+            lines.append(
+                f"- {row['claim_id']} [{row['type']}, {row['status']}, approved={row['approved']}]: "
+                f"{row['claim']} Boundary: {row['boundary']}"
+            )
+    lines.append("")
+
+    if _gate_rank(target_gate) >= _gate_rank("G4"):
+        lines.extend([
+            "### Gate-Specific Review Focus",
+            "",
+            "- Confirm whether this is smoke execution or final empirical execution.",
+            "- Confirm every registered result has provenance and a bounded claim.",
+            "- Confirm draft claims are not being treated as supported manuscript claims.",
+            "",
+        ])
+    return lines
 
 
 def _recommendation(ok: bool, target_gate: str, state: dict[str, Any]) -> str:
@@ -144,6 +273,8 @@ def build_decision_packet(project_root: Path, target_gate: str, *, stage: str = 
     if not any_failures:
         lines.append("None. All criteria through the target gate passed.")
         lines.append("")
+
+    lines.extend(_evidence_overview(project_root, state, target_gate))
 
     lines.extend([
         "## Key Risks for Human Review",

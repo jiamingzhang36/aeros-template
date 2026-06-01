@@ -1,0 +1,12 @@
+{
+  "result_id": "R003",
+  "output_path": "outputs/tables/pilot_robustness_summary.csv",
+  "created_at": "2026-06-01T11:05:46+00:00",
+  "script_or_source": "code/02_analysis/analyze_pilot_outputs.py",
+  "sha256": "e10682da12465ccdfa55afab694c21fbe494defa624fc51fac59d569410744c8",
+  "inputs": [
+    "outputs/audit_runs/prompt_grid.csv",
+    "outputs/audit_runs/manual_ai_outputs.jsonl"
+  ],
+  "claim_boundary": "pilot current-Codex-session outputs only; not platform-wide evidence"
+}

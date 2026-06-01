@@ -12,7 +12,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import os
 import sys
+from functools import partial
 from pathlib import Path
 
 import yaml
@@ -24,7 +26,18 @@ from .runtime.controller import run_iteration
 from .runtime.decision_packet import write_decision_packet
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
-from .runtime.state import approve_gate, block_gate, load_state, save_state
+from .runtime.kernel import _record_task_fingerprints, _task_gates, discover_contracts
+from .runtime.state import (
+    approve_gate,
+    block_gate,
+    load_state,
+    record_run_summary,
+    recompute_candidate_gate,
+    save_state,
+    set_status,
+)
+
+print = partial(print, flush=True)
 
 
 def _project_root() -> Path:
@@ -33,7 +46,8 @@ def _project_root() -> Path:
 
 def _cmd_run(args: argparse.Namespace) -> int:
     return run_task(args.contract, dry_run=args.dry_run,
-                    max_retries_override=args.max_retries)
+                    max_retries_override=args.max_retries,
+                    task_timeout_override=args.task_timeout)
 
 
 def _cmd_init(args: argparse.Namespace) -> int:
@@ -101,6 +115,64 @@ def _cmd_check(args: argparse.Namespace) -> int:
     return 0 if passed else 1
 
 
+def _resolve_contract(root: Path, task_or_contract: str):
+    candidate = Path(task_or_contract)
+    if candidate.exists():
+        contract = load_contract(candidate)
+        return contract, candidate
+    contracts = discover_contracts(root)
+    if task_or_contract not in contracts:
+        known = ", ".join(sorted(contracts)) or "(none)"
+        raise KeyError(f"unknown task_id {task_or_contract!r}; known tasks: {known}")
+    return contracts[task_or_contract]
+
+
+def _latest_pending_prompt(root: Path, task_id: str) -> Path | None:
+    pending_dir = root / "outputs" / "pending_tasks"
+    matches = sorted(pending_dir.glob(f"{task_id}_*.md")) if pending_dir.exists() else []
+    return matches[-1] if matches else None
+
+
+def _cmd_recover(args: argparse.Namespace) -> int:
+    root = _project_root()
+    try:
+        contract, path = _resolve_contract(root, args.task)
+    except (KeyError, FileNotFoundError, ValueError) as exc:
+        print(f"FAIL: {exc}")
+        return 1
+
+    prompt = _latest_pending_prompt(root, contract.task_id)
+    if prompt:
+        print(f"latest pending prompt: {prompt.relative_to(root)}")
+    else:
+        print("latest pending prompt: (none found)")
+
+    if not args.check:
+        print("REFUSED: recover requires --check so state only advances after mechanical checks pass")
+        return 2
+
+    passed, results = run_checks(root, contract.checks)
+    for result in results:
+        print(f"{'PASS' if result.passed else 'FAIL'}  {result.name}")
+        for failure in result.failures:
+            print(f"      - {failure}")
+    if not passed:
+        print(f"FAILED: {contract.task_id} was not recovered; fix artifacts and rerun recover --check")
+        return 1
+
+    state = load_state(root)
+    set_status(state, contract.task_id, "passed")
+    all_contracts = discover_contracts(root)
+    _record_task_fingerprints(state, contract, root, all_contracts)
+    recompute_candidate_gate(state, _task_gates(all_contracts))
+    record_run_summary(state, contract.task_id, calls=0, cost_usd=0.0)
+    save_state(root, state)
+    print(f"recovered {contract.task_id} from {Path(path).relative_to(root)}")
+    print(f"candidate: {state.get('candidate_stage', '?')} / {state.get('candidate_gate', '?')}")
+    print("gate was not approved automatically")
+    return 0
+
+
 def _cmd_status(args: argparse.Namespace) -> int:
     root = _project_root()
     state = load_state(root)
@@ -125,6 +197,30 @@ def _cmd_status(args: argparse.Namespace) -> int:
               f"${entry.get('last_run_cost_usd',0.0):.4f}  "
               f"cumulative={entry.get('agent_calls_total',0)} call(s)/"
               f"${entry.get('cost_usd_total',0.0):.4f}")
+    return 0
+
+
+def _cmd_state_prune(args: argparse.Namespace) -> int:
+    root = _project_root()
+    state = load_state(root)
+    contracts = discover_contracts(root)
+    tasks = state.get("tasks", {})
+    stale_task_ids = sorted(task_id for task_id in tasks if task_id not in contracts)
+    if not stale_task_ids:
+        print("no stale task state entries found")
+        return 0
+    print("stale task state entries:")
+    for task_id in stale_task_ids:
+        print(f"  - {task_id}")
+    if args.dry_run:
+        print("dry-run: state not modified")
+        return 0
+    for task_id in stale_task_ids:
+        tasks.pop(task_id, None)
+    recompute_candidate_gate(state, _task_gates(contracts))
+    save_state(root, state)
+    print(f"pruned {len(stale_task_ids)} stale task state entr{'y' if len(stale_task_ids) == 1 else 'ies'}")
+    print(f"candidate: {state.get('candidate_stage', '?')} / {state.get('candidate_gate', '?')}")
     return 0
 
 
@@ -200,12 +296,22 @@ def _cmd_gate_approve(args: argparse.Namespace) -> int:
 
     # A human gate is a stamp ON TOP of satisfied criteria, not instead of them.
     # Verify the gate's exit criteria before allowing approval.
-    sys.path.insert(0, str(root / "checks"))
+    checks_dir = root / "checks"
+    if not (checks_dir / "check_gate_exit.py").exists():
+        checks_dir = Path(__file__).resolve().parents[1] / "checks"
+    sys.path.insert(0, str(checks_dir))
+    old_checks_dir = os.environ.get("AEROS_CHECKS_DIR")
+    os.environ["AEROS_CHECKS_DIR"] = str(checks_dir)
     try:
         from check_gate_exit import evaluate_through_gate  # noqa: E402
         ok, failures = evaluate_through_gate(args.gate, project_root=str(root))
     except Exception as exc:  # noqa: BLE001
         ok, failures = False, [f"could not evaluate gate criteria: {exc}"]
+    finally:
+        if old_checks_dir is None:
+            os.environ.pop("AEROS_CHECKS_DIR", None)
+        else:
+            os.environ["AEROS_CHECKS_DIR"] = old_checks_dir
 
     note = args.note or ""
     if not ok:
@@ -283,7 +389,9 @@ def _cmd_adjudicate(args: argparse.Namespace) -> int:
 
 def _cmd_pipeline(args: argparse.Namespace) -> int:
     root = _project_root()
-    rc = run_pipeline(root, args.stage, dry_run=args.dry_run)
+    rc = run_pipeline(root, args.stage, dry_run=args.dry_run,
+                      task_timeout_override=args.task_timeout,
+                      max_retries_override=args.max_retries)
     if rc != 0 or args.dry_run:
         return rc
     # after the stage runs, adjudicate designs and print the feasibility verdict
@@ -294,7 +402,14 @@ def _cmd_pipeline(args: argparse.Namespace) -> int:
 
 def _cmd_iterate(args: argparse.Namespace) -> int:
     root = _project_root()
-    return run_iteration(root, args.stage, dry_run=args.dry_run, to_next_gate=args.to_next_gate)
+    return run_iteration(
+        root,
+        args.stage,
+        dry_run=args.dry_run,
+        to_next_gate=args.to_next_gate,
+        task_timeout_override=args.task_timeout,
+        max_retries_override=args.max_retries,
+    )
 
 
 def _cmd_feasibility(args: argparse.Namespace) -> int:
@@ -346,14 +461,35 @@ def main(argv: list[str] | None = None) -> int:
                      help="print the agent prompt and planned checks; do not call the agent")
     run.add_argument("--max-retries", type=int, default=None,
                      help="override the contract's retry_policy.max_retries")
+    run.add_argument("--task-timeout", type=int, default=None,
+                     help="override this task's agent/command timeout in seconds")
     run.set_defaults(func=_cmd_run)
 
     chk = sub.add_parser("check", help="run a contract's checks without calling the agent")
     chk.add_argument("contract", help="path to a task contract .yml")
     chk.set_defaults(func=_cmd_check)
 
+    recover = sub.add_parser(
+        "recover",
+        help="mark a manually completed task passed after its checks succeed",
+    )
+    recover.add_argument("task", help="task_id or path to a task contract .yml")
+    recover.add_argument("--check", action="store_true",
+                         help="run the task checks and recover only if they pass")
+    recover.set_defaults(func=_cmd_recover)
+
     st = sub.add_parser("status", help="show runtime state (gate, per-task status, budget)")
     st.set_defaults(func=_cmd_status)
+
+    state_parser = sub.add_parser("state", help="inspect or clean runtime state")
+    state_sub = state_parser.add_subparsers(dest="state_command", required=True)
+    state_prune = state_sub.add_parser(
+        "prune",
+        help="remove task state entries whose contracts no longer exist",
+    )
+    state_prune.add_argument("--dry-run", action="store_true",
+                             help="show stale entries without modifying aeros_state.yml")
+    state_prune.set_defaults(func=_cmd_state_prune)
 
     gate = sub.add_parser("gate", help="inspect or record human gate decisions")
     gate_sub = gate.add_subparsers(dest="gate_command", required=True)
@@ -398,6 +534,10 @@ def main(argv: list[str] | None = None) -> int:
     pipe = sub.add_parser("pipeline", help="run a stage's tasks in dependency order, then adjudicate + feasibility")
     pipe.add_argument("--stage", default="discovery", help="stage to run (default: discovery)")
     pipe.add_argument("--dry-run", action="store_true", help="show the ordered plan; do not run agents")
+    pipe.add_argument("--task-timeout", type=int, default=None,
+                      help="override each task's agent/command timeout in seconds")
+    pipe.add_argument("--max-retries", type=int, default=None,
+                      help="override each task's retry_policy.max_retries")
     pipe.set_defaults(func=_cmd_pipeline)
 
     iterate = sub.add_parser("iterate", help="run the research controller until the next human gate")
@@ -407,6 +547,10 @@ def main(argv: list[str] | None = None) -> int:
                          help="show the controller plan; do not run tasks or write packets")
     iterate.add_argument("--to-next-gate", action="store_true",
                          help="stop at the next gate after the current approved gate instead of the stage's highest gate")
+    iterate.add_argument("--task-timeout", type=int, default=None,
+                         help="override each task's agent/command timeout in seconds")
+    iterate.add_argument("--max-retries", type=int, default=None,
+                         help="override each task's retry_policy.max_retries")
     iterate.set_defaults(func=_cmd_iterate)
 
     args = parser.parse_args(argv)

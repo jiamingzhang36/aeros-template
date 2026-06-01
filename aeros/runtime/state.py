@@ -6,6 +6,7 @@ the record of money/agent-calls already spent.
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -13,7 +14,6 @@ from typing import Any
 import yaml
 
 STATE_FILENAME = "aeros_state.yml"
-GATE_ORDER = {f"G{i}": i for i in range(10)}
 
 
 def _now() -> str:
@@ -117,7 +117,8 @@ def recompute_candidate_gate(state: dict[str, Any], task_gates: dict[str, str]) 
 
 
 def _gate_rank(gate: str) -> int:
-    return GATE_ORDER.get(str(gate).split()[0], -1)
+    match = re.match(r"^G(\d+)$", str(gate).split()[0])
+    return int(match.group(1)) if match else -1
 
 
 def advance_gate(state: dict[str, Any], *, stage: str, gate: str,

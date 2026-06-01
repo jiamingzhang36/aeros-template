@@ -1,0 +1,42 @@
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+
+# AEROS runtime: per-run state, regenerated on each run.
+aeros_state.yml
+
+# Python packaging build artifacts.
+*.egg-info/
+build/
+dist/
+
+# Large or sensitive data should not be committed by default.
+data/raw/*
+!data/raw/.gitkeep
+data/intermediate/*
+!data/intermediate/.gitkeep
+data/parquet/*
+!data/parquet/.gitkeep
+data/clean/*
+!data/clean/.gitkeep
+data/snapshots/*
+!data/snapshots/.gitkeep
+
+# Generated outputs can be committed selectively when needed.
+outputs/logs/*.log
+
+# Large model artifacts are usually regenerated or archived separately.
+outputs/model_outputs/*
+!outputs/model_outputs/.gitkeep
+
+# Literature PDFs may have copyright or license limits; keep paths/URLs in the registry.
+discovery/literature/pdfs/*
+!discovery/literature/pdfs/.gitkeep
+
+# Local check artifacts.
+.aeros/
+outputs/logs/rigor_check_latest.*

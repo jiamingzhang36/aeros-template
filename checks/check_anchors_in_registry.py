@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Recall floor: every non-dropped framing-deck anchor must reach the registry.
+"""Recall floor: every verified non-dropped framing-deck anchor must reach the registry.
 
 This is the check that makes "passing != thorough" bite for the search step.
 The framing deck (human-reasoned, human-gated) commits to seminal anchors per
-framework; D001b must actually register them. An anchor counts as covered if
-its DOI matches a registry row, or its normalized title matches a registry
-title. If the deck is absent, there is nothing to enforce (PASS).
+framework; D001b must actually register verified anchors. Pending anchors are
+candidates for D001b to resolve, not fabricated commitments. An anchor counts
+as covered if its DOI matches a registry row, or its normalized title matches
+a registry title. If the deck is absent, there is nothing to enforce (PASS).
 """
 
 from __future__ import annotations
@@ -24,9 +25,9 @@ REGISTRY = Path("discovery/literature/paper_registry.csv")
 CHECK_NAME = "check_anchors_in_registry"
 
 REMEDIATION_HINT = (
-    "Register every non-dropped framing-deck anchor in paper_registry.csv "
-    "(carry its DOI and exact title). The deck's seminal anchors are the recall "
-    "floor for the framework search; they must appear in the registry."
+    "Register every verified non-dropped framing-deck anchor in paper_registry.csv "
+    "(carry its DOI and exact title). Pending anchors should be resolved by D001b "
+    "or named in citation_audit.md if unresolved."
 )
 
 
@@ -82,6 +83,8 @@ def main(argv: list[str] | None = None) -> int:
         cid = card.get("id", "?")
         for a in card.get("anchors", []) or []:
             if not isinstance(a, dict):
+                continue
+            if str(a.get("verification_status", "pending")).strip().lower() != "verified":
                 continue
             checked += 1
             title = _norm_title(a.get("title", ""))

@@ -502,7 +502,10 @@ def _check_named_check(req: dict) -> tuple[bool, str]:
     name = str(req.get("check", "")).strip()
     if not name:
         raise RuntimeError("check_passes criterion missing 'check'")
-    script = Path(os.getenv("AEROS_CHECKS_DIR", "checks")) / name
+    checks_dir = Path(os.getenv("AEROS_CHECKS_DIR", "checks"))
+    if not checks_dir.exists():
+        checks_dir = Path(__file__).resolve().parent
+    script = checks_dir / name
     if not script.exists():
         return False, f"check script not found: {script}"
     proc = subprocess.run(

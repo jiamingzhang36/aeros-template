@@ -1,0 +1,7 @@
+# AEROS correction ledger - instantiated projects can record recurring mistakes here.
+#
+# Each correction should describe the error, root cause, lesson, and enforcement
+# mechanism. Template default is intentionally empty: do not ship project-specific
+# institutional memory in the reusable scaffold.
+
+corrections: []

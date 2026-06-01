@@ -1,0 +1,83 @@
+---
+status: filled
+variables:
+  - name: household_persona
+    role: treatment
+    definition: "Pre-registered synthetic household constraint profile used to prompt the AI recommender, including budget, household size, food access, dietary needs, and SNAP-relevant context."
+    source_data_id: D007
+    construction: "Define a small prompt grid before output collection; each generated recommendation inherits the persona id from the prompt protocol."
+    validity_concern: "Personas are synthetic and may not represent the full distribution of low-income or SNAP households."
+    constructible: uncertain
+  - name: recommendation_basket
+    role: outcome
+    definition: "Parsed set of grocery items, quantities, and stated rationale produced by an AI recommendation run."
+    source_data_id: D007
+    construction: "Collect model responses under the prompt grid and parse item names, quantities, and substitutions into a structured basket table."
+    validity_concern: "LLM outputs may be vague, omit package sizes, or mix meals and grocery items, requiring transparent parsing rules."
+    constructible: uncertain
+  - name: nutrition_score
+    role: outcome
+    definition: "Numeric score measuring how well the recommendation basket aligns with dietary guidelines and nutrient reasonableness."
+    source_data_id: D001
+    construction: "Match parsed food items to FoodData Central records, compute nutrient/food-group indicators, and compare against pre-specified thresholds."
+    validity_concern: "Food-item matching can be ambiguous and nutrient values may not reflect preparation, brand, or serving-size assumptions."
+    constructible: uncertain
+  - name: affordability_ratio
+    role: outcome
+    definition: "Estimated basket cost divided by the relevant SNAP/Thrifty Food Plan benchmark for the household profile."
+    source_data_id: D002
+    construction: "Use TFP/SNAP benchmark costs as denominator and retailer or proxy price estimates as numerator once price capture is validated."
+    validity_concern: "Current G1 diagnostics identify affordability sources but do not yet validate local retailer price collection."
+    constructible: uncertain
+  - name: local_access_constraint
+    role: moderator
+    definition: "Food-access context assigned to a persona, such as low-access tract or limited vehicle/store access."
+    source_data_id: D003
+    construction: "Map persona scenarios to ERS Food Access Research Atlas categories or use them as qualitative scenario labels."
+    validity_concern: "Tract-level indicators may not correspond to an individual household's actual shopping options."
+    constructible: uncertain
+  - name: model_run_id
+    role: unit-key
+    definition: "Unique identifier for each model, prompt, persona, timestamp, and repetition."
+    source_data_id: D007
+    construction: "Create one identifier per prompt-response attempt before collecting AI outputs."
+    validity_concern: "Hidden model updates and provider settings can change outputs even with identical prompts."
+    constructible: yes
+  - name: recommendation_stability
+    role: outcome
+    definition: "Within-persona similarity of recommended baskets across repeated model calls."
+    source_data_id: D007
+    construction: "Run repeated prompts per persona and compute overlap or distance metrics over parsed basket items and scores."
+    validity_concern: "Stability depends on model temperature/default settings and may be confounded by unobserved provider updates."
+    constructible: uncertain
+---
+
+# Variable Construction
+
+## household_persona
+
+The treatment/exposure is not a policy shock; it is the audit profile supplied to the AI system. It must be defined before collection, with clear low-income and SNAP-relevant constraints. This variable is constructible only after the prompt grid is approved.
+
+## recommendation_basket
+
+The main raw outcome is the generated grocery basket. It will be constructed from AI output text, not from an external public dataset. The key challenge is parsing vague recommendations into purchasable items without silently adding information the model did not provide.
+
+## nutrition_score
+
+Nutrition scoring depends on matching recommendation items to FoodData Central or another validated nutrition source. At G2 this is uncertain because source existence has been established but item-level match quality has not yet been probed.
+
+## affordability_ratio
+
+Affordability requires both a policy benchmark and a basket cost estimate. The Thrifty Food Plan can provide the benchmark side, but real or proxy prices still need validation, so constructibility remains uncertain.
+
+## local_access_constraint
+
+Food access can be represented using ERS sources or as a persona-level scenario. It is useful for equity comparisons but must not be overstated as individual-level observed access.
+
+## model_run_id
+
+This identifier is directly constructible because it is generated by the audit protocol. It is essential for reproducibility, repeated-run stability, and stale-output detection.
+
+## recommendation_stability
+
+Stability is a derived outcome from repeated recommendations for the same persona. It is conceptually straightforward but depends on successful collection and parsing of multiple model outputs.

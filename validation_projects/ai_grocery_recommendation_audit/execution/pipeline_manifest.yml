@@ -1,0 +1,12 @@
+status: filled
+mode: smoke
+entrypoint:
+  command:
+    - python3
+    - code/02_analysis/run_measurement_smoke.py
+registered_outputs:
+  - result_id: R001
+    path: outputs/tables/measurement_smoke_summary.csv
+    provenance: outputs/.provenance/R001.json
+    claim_id: C001
+notes: "Smoke pipeline for validation only; not final empirical evidence."

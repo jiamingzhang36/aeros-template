@@ -1,0 +1,1 @@
+../../examples/tasks/discovery/D005_literature_synthesis.md

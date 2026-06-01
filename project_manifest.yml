@@ -24,7 +24,11 @@ gate_lifecycle:
   - G7 Claim Audit
   - G8 Referee Simulation
   - G9 Replication Package
+  - G10 Paper Package Draft
+  - G11 Expanded Collection
+  - G12 Claim Upgrade Review
 automation:
+  agent_provider: manual
   pipeline:
     cwd: .
     command:
@@ -54,6 +58,8 @@ gate_exit_criteria:
       value: filled
   G4:
     requires:
+    - type: check_passes
+      check: check_execution_protocol.py
     - type: claim_main_results_registered
       path: evidence/claim_registry.md
     - type: claim_main_results_have_provenance
@@ -91,6 +97,26 @@ gate_exit_criteria:
       marker: Project master script placeholder
     - type: result_index_all_have_provenance
       path: evidence/result_index.csv
+  G10:
+    requires:
+    - type: check_passes
+      check: check_paper_package.py
+    - type: check_passes
+      check: check_paper_numbers.py
+  G11:
+    requires:
+    - type: check_passes
+      check: check_expanded_collection_design.py
+    - type: check_passes
+      check: check_expanded_collection_outputs.py
+    - type: check_passes
+      check: check_expanded_result_validation.py
+  G12:
+    requires:
+    - type: check_passes
+      check: check_claim_upgrade_review.py
+    - type: claim_no_draft
+      path: evidence/claim_registry.md
 layers:
   research_judgment:
     required_files:
@@ -176,9 +202,15 @@ checks:
   claim_ceiling: checks/check_claim_ceiling.py
   claim_method_consistency: checks/check_claim_method_consistency.py
   paper_numbers: checks/check_paper_numbers.py
+  paper_package: checks/check_paper_package.py
+  expanded_collection_design: checks/check_expanded_collection_design.py
+  expanded_collection_outputs: checks/check_expanded_collection_outputs.py
+  expanded_result_validation: checks/check_expanded_result_validation.py
+  claim_upgrade_review: checks/check_claim_upgrade_review.py
   output_reproducibility: checks/check_output_reproducibility.py
   project_status: checks/check_project_status.py
   provenance: checks/check_provenance.py
+  execution_protocol: checks/check_execution_protocol.py
   task_contract: checks/check_task_contract.py
   agent_run_report: checks/check_agent_run_report.py
   agent_runs_tools: checks/check_agent_runs_tools.py

@@ -1,0 +1,30 @@
+# Fill this file at the start of a substantial agent run.
+
+run:
+  task_id: ""
+  task_file: ""
+  worker: ""
+  critic_required: true
+  human_gate_required: true
+  branch_or_worktree: ""
+  start_commit: ""
+
+scope:
+  allowed_paths: []
+  forbidden_paths:
+    - "data/raw/**"
+  protected_paths:
+    - "docs/protected_definitions.yml"
+    - "docs/method_card.md"
+    - "docs/data_contract.yml"
+    - "evidence/claim_registry.md"
+
+checks:
+  required: []
+  skipped: []
+  skip_reasons: {}
+
+completion:
+  run_report: ""
+  critic_report: ""
+  human_decision_log_entry: ""

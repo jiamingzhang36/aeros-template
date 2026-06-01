@@ -1,0 +1,5 @@
+persona,prompt_variant,runs,mean_affordability_ratio,mean_nutrition_flags
+low_income_snap,A,2,1.004,1.0
+low_income_snap,B,2,0.98,0.0
+moderate_budget,A,2,0.917,0.0
+moderate_budget,B,2,0.913,0.0

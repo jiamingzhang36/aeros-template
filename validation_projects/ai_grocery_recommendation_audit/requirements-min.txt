@@ -1,0 +1,2 @@
+# Minimum pinned dependencies for template checks and metadata.
+PyYAML==6.0.2

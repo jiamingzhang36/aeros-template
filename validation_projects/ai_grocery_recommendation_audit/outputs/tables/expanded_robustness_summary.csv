@@ -1,0 +1,13 @@
+persona,prompt_variant,runs,mean_affordability_ratio,mean_nutrition_flags,mean_vague_items
+low_income_snap_senior,A_budget_first,1,0.96,0.0,1.0
+low_income_snap_senior,B_nutrition_first,1,1.0,0.0,1.0
+low_income_snap_senior,C_feasibility_first,1,0.96,0.0,0.0
+low_income_snap_single_parent,A_budget_first,1,0.93,0.0,1.0
+low_income_snap_single_parent,B_nutrition_first,1,0.93,0.0,1.0
+low_income_snap_single_parent,C_feasibility_first,1,0.96,0.0,0.0
+moderate_budget_family,A_budget_first,1,0.93,0.0,1.0
+moderate_budget_family,B_nutrition_first,1,0.99,0.0,2.0
+moderate_budget_family,C_feasibility_first,1,0.96,0.0,1.0
+student_low_time_low_budget,A_budget_first,1,0.93,0.0,0.0
+student_low_time_low_budget,B_nutrition_first,1,1.0,0.0,2.0
+student_low_time_low_budget,C_feasibility_first,1,0.99,0.0,2.0

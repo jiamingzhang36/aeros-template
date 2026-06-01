@@ -1,0 +1,48 @@
+task_id: T011_expanded_result_validation
+stage: execution
+gate: G11
+depends_on: [T010_expanded_ai_output_collection]
+goal: >
+  Validate expanded collection outputs, register expanded result IDs, and decide
+  whether the active claim remains ambiguous or can be proposed for bounded
+  human approval. This task may propose a claim update but must not approve it.
+
+inputs:
+  - outputs/audit_runs/expanded_ai_outputs.jsonl
+  - outputs/audit_runs/expanded_prompt_grid.csv
+  - evidence/result_index.csv
+  - evidence/claim_registry.md
+  - paper/draft.md
+
+allowed_outputs:
+  - outputs/tables/expanded_measurement_summary.csv
+  - outputs/tables/expanded_robustness_summary.csv
+  - outputs/.provenance/
+  - evidence/result_index.csv
+  - audits/expanded_result_validation_report.md
+  - agent_runs/
+
+forbidden_actions:
+  - "Do not mark any claim supported without human gate approval."
+  - "Do not change protected definitions."
+  - "Do not present expanded outputs as final evidence before G11 approval."
+
+checks:
+  - check_expanded_collection_outputs.py
+  - check_expanded_result_validation.py
+  - check_output_reproducibility.py
+  - check_provenance.py
+  - check_agent_run_report.py
+
+retry_policy:
+  max_retries: 1
+
+escalate_if:
+  - "expanded evidence would require claim upgrade"
+  - "result validation reveals collection bias or missing metadata"
+  - "checks still fail after max_retries"
+
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 900
