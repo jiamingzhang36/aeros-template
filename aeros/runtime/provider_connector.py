@@ -130,12 +130,71 @@ class OpenAIProvider(BaseProvider):
         )
 
 
+class ClaudeCLIProvider(BaseProvider):
+    """Collect real responses via the authenticated `claude` CLI (no API key).
+
+    Reuses the user's Claude subscription auth, exactly like the worker-agent
+    runner. CLAUDECODE is dropped so the call is not blocked as a nested session.
+    Cost is the notional total_cost_usd the CLI reports (subscription-covered;
+    informational, recorded for provenance).
+    """
+
+    provider_name = "claude-cli"
+
+    def complete(self, prompt: str, metadata: dict[str, str]) -> ProviderResponse:
+        import shutil
+        import subprocess
+
+        binary = shutil.which("claude")
+        if not binary:
+            raise ProviderError("`claude` CLI not found on PATH")
+        env = dict(os.environ)
+        env.pop("CLAUDECODE", None)
+        prompt_id = metadata.get("prompt_id", "unknown_prompt")
+        started = time.monotonic()
+        try:
+            proc = subprocess.run(
+                [binary, "-p", prompt, "--output-format", "json"],
+                capture_output=True, text=True, timeout=self.timeout_seconds, env=env,
+            )
+        except subprocess.TimeoutExpired as exc:
+            raise ProviderError(f"claude CLI timed out after {self.timeout_seconds}s") from exc
+
+        try:
+            data = json.loads((proc.stdout or "").strip())
+        except (json.JSONDecodeError, ValueError) as exc:
+            raise ProviderError(
+                f"claude CLI returned non-JSON (rc={proc.returncode}): "
+                f"{(proc.stderr or proc.stdout or '').strip()[:200]}"
+            ) from exc
+
+        if data.get("is_error") or proc.returncode != 0:
+            raise ProviderError(f"claude CLI error: {str(data.get('result',''))[:200]}")
+
+        usage = data.get("usage", {}) or {}
+        text = str(data.get("result", "")).strip()
+        if not text:
+            raise ProviderError("claude CLI returned no result text")
+        return ProviderResponse(
+            output_text=text,
+            provider=self.provider_name,
+            model=self.model or "claude",
+            provider_request_id=str(data.get("session_id", f"claude-{prompt_id}")),
+            input_tokens=int(usage.get("input_tokens", 0) or 0),
+            output_tokens=int(usage.get("output_tokens", 0) or 0),
+            cost_usd=float(data.get("total_cost_usd", 0.0) or 0.0),
+            duration_ms=int((time.monotonic() - started) * 1000),
+        )
+
+
 def make_provider(provider: str, *, model: str, timeout_seconds: int) -> BaseProvider:
     normalized = provider.strip().lower()
     if normalized == "mock":
         return MockProvider(model=model or "mock-research-model", timeout_seconds=timeout_seconds)
     if normalized == "openai":
         return OpenAIProvider(model=model or "gpt-4.1-mini", timeout_seconds=timeout_seconds)
+    if normalized in {"claude-cli", "claude"}:
+        return ClaudeCLIProvider(model=model or "claude", timeout_seconds=timeout_seconds)
     raise ProviderError(f"unsupported collection provider: {provider}")
 
 
