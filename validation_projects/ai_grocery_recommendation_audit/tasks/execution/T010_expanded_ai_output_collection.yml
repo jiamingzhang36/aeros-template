@@ -27,8 +27,16 @@ forbidden_actions:
 checks:
   - check_expanded_collection_design.py
   - check_expanded_collection_outputs.py
+  - check_provider_collection.py
   - check_provenance.py
-  - check_agent_run_report.py
+
+run:
+  cwd: .
+  command:
+    - python3
+    - -m
+    - aeros.cli
+    - collect
 
 retry_policy:
   max_retries: 1
@@ -39,6 +47,6 @@ escalate_if:
   - "checks still fail after max_retries"
 
 budget:
-  max_agent_calls: 2
+  max_agent_calls: 0
   max_dollars: 1.0
   timeout_seconds: 900

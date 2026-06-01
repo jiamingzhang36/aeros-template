@@ -21,6 +21,7 @@ import yaml
 
 from .runtime.adjudicate import adjudicate, feasibility, write_selection
 from .runtime.checks import run_checks
+from .runtime.collection import collect_prompt_grid, resolve_config
 from .runtime.contract import load_contract
 from .runtime.controller import run_iteration
 from .runtime.decision_packet import write_decision_packet
@@ -412,6 +413,32 @@ def _cmd_iterate(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_collect(args: argparse.Namespace) -> int:
+    root = _project_root()
+    config = resolve_config(
+        root,
+        provider=args.provider,
+        model=args.model,
+        max_cost_usd=args.max_cost_usd,
+        max_retries=args.max_retries,
+        timeout_seconds=args.timeout,
+        rate_limit_seconds=args.rate_limit_seconds,
+    )
+    try:
+        return collect_prompt_grid(
+            root,
+            grid=(root / args.grid),
+            out=(root / args.out),
+            report=(root / args.report),
+            config=config,
+            dry_run=args.dry_run,
+            max_rows=args.max_rows,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"FAIL: collection failed: {exc}")
+        return 1
+
+
 def _cmd_feasibility(args: argparse.Namespace) -> int:
     root = _project_root()
     f = feasibility(root)
@@ -539,6 +566,30 @@ def main(argv: list[str] | None = None) -> int:
     pipe.add_argument("--max-retries", type=int, default=None,
                       help="override each task's retry_policy.max_retries")
     pipe.set_defaults(func=_cmd_pipeline)
+
+    collect = sub.add_parser("collect", help="collect AI outputs from an approved prompt grid")
+    collect.add_argument("--grid", default="outputs/audit_runs/expanded_prompt_grid.csv",
+                         help="prompt grid CSV relative to project root")
+    collect.add_argument("--out", default="outputs/audit_runs/expanded_ai_outputs.jsonl",
+                         help="output JSONL path relative to project root")
+    collect.add_argument("--report", default="audits/expanded_collection_run_report.md",
+                         help="collection run report path relative to project root")
+    collect.add_argument("--provider", default=None, choices=["mock", "openai"],
+                         help="collection provider; default from project_manifest.yml")
+    collect.add_argument("--model", default=None, help="provider model; default from project_manifest.yml")
+    collect.add_argument("--max-cost-usd", type=float, default=None,
+                         help="collection cost cap; 0 means no positive cap")
+    collect.add_argument("--max-retries", type=int, default=None,
+                         help="per-row provider retry count")
+    collect.add_argument("--timeout", type=int, default=None,
+                         help="provider request timeout in seconds")
+    collect.add_argument("--rate-limit-seconds", type=float, default=None,
+                         help="sleep between provider calls")
+    collect.add_argument("--max-rows", type=int, default=None,
+                         help="optional row limit for smoke collection")
+    collect.add_argument("--dry-run", action="store_true",
+                         help="print collection plan without provider calls or writes")
+    collect.set_defaults(func=_cmd_collect)
 
     iterate = sub.add_parser("iterate", help="run the research controller until the next human gate")
     iterate.add_argument("--stage", default="discovery", choices=["discovery", "execution"],

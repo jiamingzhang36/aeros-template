@@ -32,6 +32,13 @@ gate_lifecycle:
   - G12 Claim Upgrade Review
 automation:
   agent_provider: manual
+  provider_connector:
+    provider: mock
+    model: mock-research-model
+    max_cost_usd: 0.0
+    max_retries: 1
+    timeout_seconds: 120
+    rate_limit_seconds: 0.0
   pipeline:
     cwd: .
     command:
@@ -112,6 +119,8 @@ gate_exit_criteria:
       check: check_expanded_collection_design.py
     - type: check_passes
       check: check_expanded_collection_outputs.py
+    - type: check_passes
+      check: check_provider_collection.py
     - type: check_passes
       check: check_expanded_result_validation.py
   G12:
@@ -210,6 +219,7 @@ checks:
   expanded_collection_outputs: checks/check_expanded_collection_outputs.py
   expanded_result_validation: checks/check_expanded_result_validation.py
   claim_upgrade_review: checks/check_claim_upgrade_review.py
+  provider_collection: checks/check_provider_collection.py
   output_reproducibility: checks/check_output_reproducibility.py
   project_status: checks/check_project_status.py
   provenance: checks/check_provenance.py
