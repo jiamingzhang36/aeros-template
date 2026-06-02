@@ -574,7 +574,7 @@ def main(argv: list[str] | None = None) -> int:
                          help="output JSONL path relative to project root")
     collect.add_argument("--report", default="audits/expanded_collection_run_report.md",
                          help="collection run report path relative to project root")
-    collect.add_argument("--provider", default=None, choices=["mock", "openai"],
+    collect.add_argument("--provider", default=None, choices=["mock", "openai", "claude-cli", "claude"],
                          help="collection provider; default from project_manifest.yml")
     collect.add_argument("--model", default=None, help="provider model; default from project_manifest.yml")
     collect.add_argument("--max-cost-usd", type=float, default=None,

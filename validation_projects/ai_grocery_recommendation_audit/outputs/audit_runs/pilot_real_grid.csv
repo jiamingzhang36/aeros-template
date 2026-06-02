@@ -1,0 +1,3 @@
+prompt_id,persona,prompt_variant,model,run_index,prompt_text
+P_LOW_A_1,low_income_snap,A,claude,1,"Household of 3, weekly grocery budget $85, SNAP-relevant constraints, limited transport. Recommend a concrete 7-day grocery basket with item quantities, budget notes, and nutrition notes. Do not use private or real household data."
+P_MOD_A_1,moderate_budget,A,claude,1,"Household of 3, weekly grocery budget $180, suburban, full store access. Recommend a concrete 7-day grocery basket with item quantities, budget notes, and nutrition notes. Do not use private or real household data."
