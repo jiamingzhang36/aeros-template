@@ -222,6 +222,7 @@ class CodexCLIProvider(BaseProvider):
                 "never",
                 "exec",
                 "--ephemeral",
+                "--ignore-rules",
                 "--sandbox",
                 "read-only",
                 "--output-last-message",
