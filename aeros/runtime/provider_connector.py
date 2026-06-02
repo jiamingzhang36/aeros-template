@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -187,6 +188,84 @@ class ClaudeCLIProvider(BaseProvider):
         )
 
 
+class CodexCLIProvider(BaseProvider):
+    """Collect real responses via the authenticated Codex CLI (no API key)."""
+
+    provider_name = "codex-cli"
+
+    def complete(self, prompt: str, metadata: dict[str, str]) -> ProviderResponse:
+        import shutil
+        import subprocess
+
+        binary = shutil.which("codex")
+        if not binary:
+            fallback = "/Applications/Codex.app/Contents/Resources/codex"
+            binary = fallback if os.path.exists(fallback) else ""
+        if not binary:
+            raise ProviderError("`codex` CLI not found")
+
+        prompt_id = metadata.get("prompt_id", "unknown_prompt")
+        collection_prompt = (
+            "You are being used as a data-collection model for an AEROS research audit.\n"
+            "Return only the requested grocery recommendation text.\n"
+            "Do not inspect files. Do not run commands. Do not modify files.\n"
+            "Do not include meta commentary about being Codex.\n\n"
+            f"{prompt}"
+        )
+        started = time.monotonic()
+        with tempfile.NamedTemporaryFile("w+", suffix=".txt", delete=False) as handle:
+            output_path = handle.name
+        try:
+            cmd = [
+                binary,
+                "-a",
+                "never",
+                "exec",
+                "--ephemeral",
+                "--sandbox",
+                "read-only",
+                "--output-last-message",
+                output_path,
+            ]
+            if self.model:
+                cmd.extend(["--model", self.model])
+            cmd.append(collection_prompt)
+            proc = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=self.timeout_seconds,
+            )
+            output_text = ""
+            try:
+                with open(output_path, encoding="utf-8") as out:
+                    output_text = out.read().strip()
+            except OSError:
+                output_text = ""
+        except subprocess.TimeoutExpired as exc:
+            raise ProviderError(f"codex CLI timed out after {self.timeout_seconds}s") from exc
+        finally:
+            try:
+                os.unlink(output_path)
+            except OSError:
+                pass
+
+        if proc.returncode != 0:
+            detail = (proc.stderr or proc.stdout or "").strip()[:500]
+            raise ProviderError(f"codex CLI error (rc={proc.returncode}): {detail}")
+        if not output_text:
+            detail = (proc.stderr or proc.stdout or "").strip()[:500]
+            raise ProviderError(f"codex CLI returned no final message: {detail}")
+
+        return ProviderResponse(
+            output_text=output_text,
+            provider=self.provider_name,
+            model=self.model or "codex",
+            provider_request_id=f"codex-{prompt_id}-{int(time.time())}",
+            duration_ms=int((time.monotonic() - started) * 1000),
+        )
+
+
 def make_provider(provider: str, *, model: str, timeout_seconds: int) -> BaseProvider:
     normalized = provider.strip().lower()
     if normalized == "mock":
@@ -195,6 +274,9 @@ def make_provider(provider: str, *, model: str, timeout_seconds: int) -> BasePro
         return OpenAIProvider(model=model or "gpt-4.1-mini", timeout_seconds=timeout_seconds)
     if normalized in {"claude-cli", "claude"}:
         return ClaudeCLIProvider(model=model or "claude", timeout_seconds=timeout_seconds)
+    if normalized in {"codex-cli", "codex"}:
+        codex_model = "" if model in {"", "mock-research-model"} else model
+        return CodexCLIProvider(model=codex_model, timeout_seconds=timeout_seconds)
     raise ProviderError(f"unsupported collection provider: {provider}")
 
 

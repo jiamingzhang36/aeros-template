@@ -1,13 +1,13 @@
 {
-  "artifact": "outputs/audit_runs/pilot_real_collection.jsonl",
-  "claim_boundary": "provider collection records are research observations only; they do not approve claim upgrades, paper language, or public release",
-  "cost_usd": 0.12995674999999998,
-  "created_at": "2026-06-01T14:37:18+00:00",
-  "input_grid": "outputs/audit_runs/pilot_real_grid.csv",
-  "model": "claude",
-  "output_path": "outputs/audit_runs/pilot_real_collection.jsonl",
-  "provider": "claude-cli",
-  "rows": 1,
-  "script_or_source": "aeros collect",
-  "sha256": "47414278dabd38294ae26e6ea2af678e2cdc3feb09a9a6057150dbeec83ba9b4"
+  "artifact": "outputs/audit_runs/expanded_ai_outputs.jsonl",
+  "claim_boundary": "historical validation collection only; no claim upgrade, paper language, or public release approval",
+  "cost_usd": 0.0,
+  "created_at": "2026-06-01T12:20:00+00:00",
+  "input_grid": "outputs/audit_runs/expanded_prompt_grid.csv",
+  "model": "current_codex_session_model",
+  "output_path": "outputs/audit_runs/expanded_ai_outputs.jsonl",
+  "provider": "manual_import",
+  "rows": 12,
+  "script_or_source": "manual_import migrated to provider connector schema",
+  "sha256": "e59b7dbbe6f2fc4b9ab6fdb928b79561a30ebbdcdc93d042f27a0f426ff55841"
 }
