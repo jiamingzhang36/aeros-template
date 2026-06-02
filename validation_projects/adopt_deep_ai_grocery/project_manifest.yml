@@ -1,0 +1,18 @@
+project:
+  name: AEROS project
+  status: draft
+research:
+  current_stage: discovery
+  topic: Audit AI-generated grocery recommendations as a form of dynamic information
+    customization in food choice. The project tr
+  one_sentence_question: Do AI-generated grocery recommendations produce baskets that
+    are stable, affordable, nutritionally reasonable, constraint-compliant, feasible,
+    and equitable across realistic household constraints, especially for low-income
+    and SNAP-relevant food choice environments?
+gate_lifecycle:
+  current_gate: G0 Project Intake
+automation:
+  pipeline:
+    cwd: .
+    command: []
+    key_outputs: []

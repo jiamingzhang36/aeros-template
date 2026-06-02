@@ -131,6 +131,9 @@ def format_simple_status(project_root: Path) -> str:
         f"candidate   : {candidate_gate} ({_milestone_label(candidate_milestone)})",
         f"tasks        : {len(tasks)} tracked"
     ]
+    adoption = state.get("adoption")
+    if isinstance(adoption, dict):
+        lines.append(f"intake       : adopted candidate={candidate_gate}; human approval required")
     if stale_count or failed_count:
         lines.append(f"attention    : {stale_count} stale, {failed_count} failed/escalated")
     else:

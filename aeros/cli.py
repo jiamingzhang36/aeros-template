@@ -20,6 +20,7 @@ from pathlib import Path
 import yaml
 
 from .runtime.adjudicate import adjudicate, feasibility, write_selection
+from .runtime.adoption import AdoptionArgs, run_adoption
 from .runtime.checks import run_checks
 from .runtime.collection import collect_prompt_grid, resolve_config
 from .runtime.contract import load_contract
@@ -60,49 +61,26 @@ def _cmd_init(args: argparse.Namespace) -> int:
 
 def _cmd_start(args: argparse.Namespace) -> int:
     root = _project_root()
-    idea = (args.idea or "").strip()
-    if not idea:
-        print("FAIL: --idea must not be empty")
-        return 1
+    return run_adoption(root, AdoptionArgs(
+        idea=args.idea or "",
+        source="",
+        target=args.target or "",
+        mode=args.mode,
+        dry_run=args.dry_run,
+        deep=not args.no_deep,
+    ))
 
-    idea_path = root / "discovery" / "idea_memo.md"
-    idea_path.parent.mkdir(parents=True, exist_ok=True)
-    idea_path.write_text(
-        "# Idea Memo\n\n"
-        "## Starting Idea\n\n"
-        f"{idea}\n\n"
-        "## Notes\n\n"
-        "TBD\n",
-        encoding="utf-8",
-    )
 
-    manifest_path = root / "project_manifest.yml"
-    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
-    if not isinstance(manifest, dict):
-        manifest = {}
-    research = manifest.setdefault("research", {})
-    if isinstance(research, dict):
-        research["topic"] = idea[:120]
-        research["one_sentence_question"] = idea
-        research.setdefault("current_stage", "discovery")
-    manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False, allow_unicode=True), encoding="utf-8")
-
-    state = load_state(root)
-    state["current_stage"] = "discovery"
-    state["current_gate"] = "G0"
-    state["gate_status"] = "open"
-    state["candidate_stage"] = "discovery"
-    state["candidate_gate"] = "G0"
-    state["tasks"] = {}
-    state["gate_history"] = []
-    state["candidate_gate_history"] = []
-    state["gate_decisions"] = []
-    save_state(root, state)
-
-    print(f"wrote {idea_path.relative_to(root)}")
-    print(f"updated {manifest_path.relative_to(root)} research fields")
-    print("gate remains unapproved; run `aeros iterate --dry-run` to preview the first loop")
-    return 0
+def _cmd_adopt(args: argparse.Namespace) -> int:
+    root = _project_root()
+    return run_adoption(root, AdoptionArgs(
+        idea=args.idea or "",
+        source=args.source or "",
+        target=args.target or "",
+        mode=args.mode,
+        dry_run=args.dry_run,
+        deep=not args.no_deep,
+    ))
 
 
 def _cmd_check(args: argparse.Namespace) -> int:
@@ -490,7 +468,22 @@ def main(argv: list[str] | None = None) -> int:
 
     start = sub.add_parser("start", help="start a research loop from an idea")
     start.add_argument("--idea", required=True, help="one-sentence idea or research question")
+    start.add_argument("--target", default="", help="target AEROS wrapper project; default validation_projects/<slug>")
+    start.add_argument("--mode", default="mirror", choices=["mirror", "readonly-audit", "inplace"],
+                       help="intake mode; start is a compatibility shortcut for adopt --idea")
+    start.add_argument("--dry-run", action="store_true", help="preview intake without writing files")
+    start.add_argument("--no-deep", action="store_true", help="disable Codex CLI advisory synthesis")
     start.set_defaults(func=_cmd_start)
+
+    adopt = sub.add_parser("adopt", help="universal research intake from an idea, file, or folder")
+    adopt.add_argument("--idea", default="", help="one-sentence idea or research question")
+    adopt.add_argument("--from", dest="source", default="", help="source memo/file/folder to adopt")
+    adopt.add_argument("--target", default="", help="target AEROS wrapper project; default validation_projects/<slug>")
+    adopt.add_argument("--mode", default="mirror", choices=["mirror", "readonly-audit", "inplace"],
+                       help="mirror creates a wrapper, readonly-audit writes nothing, inplace writes into source/current project")
+    adopt.add_argument("--dry-run", action="store_true", help="preview intake without writing files")
+    adopt.add_argument("--no-deep", action="store_true", help="disable Codex CLI advisory synthesis")
+    adopt.set_defaults(func=_cmd_adopt)
 
     run = sub.add_parser("run", help="run a single task contract through the agent loop")
     run.add_argument("contract", help="path to a task contract .yml")
