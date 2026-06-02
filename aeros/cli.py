@@ -28,6 +28,7 @@ from .runtime.decision_packet import write_decision_packet
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
 from .runtime.kernel import _record_task_fingerprints, _task_gates, discover_contracts
+from .runtime.milestones import format_roadmap, format_simple_status
 from .runtime.state import (
     approve_gate,
     block_gate,
@@ -176,6 +177,9 @@ def _cmd_recover(args: argparse.Namespace) -> int:
 
 def _cmd_status(args: argparse.Namespace) -> int:
     root = _project_root()
+    if args.simple:
+        print(format_simple_status(root))
+        return 0
     state = load_state(root)
     print(f"project root : {root}")
     print(f"current stage: {state.get('current_stage', '?')}")
@@ -439,6 +443,12 @@ def _cmd_collect(args: argparse.Namespace) -> int:
         return 1
 
 
+def _cmd_roadmap(args: argparse.Namespace) -> int:
+    root = _project_root()
+    print(format_roadmap(root))
+    return 0
+
+
 def _cmd_feasibility(args: argparse.Namespace) -> int:
     root = _project_root()
     f = feasibility(root)
@@ -506,7 +516,12 @@ def main(argv: list[str] | None = None) -> int:
     recover.set_defaults(func=_cmd_recover)
 
     st = sub.add_parser("status", help="show runtime state (gate, per-task status, budget)")
+    st.add_argument("--simple", action="store_true",
+                    help="show compressed 5-milestone dashboard instead of full task details")
     st.set_defaults(func=_cmd_status)
+
+    roadmap = sub.add_parser("roadmap", help="show compressed 5-milestone roadmap")
+    roadmap.set_defaults(func=_cmd_roadmap)
 
     state_parser = sub.add_parser("state", help="inspect or clean runtime state")
     state_sub = state_parser.add_subparsers(dest="state_command", required=True)
