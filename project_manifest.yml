@@ -28,6 +28,17 @@ gate_lifecycle:
   - G11 Expanded Collection
   - G12 Claim Upgrade Review
   - G13 Compliance / Release Gate
+  # Gate tiering (Bainbridge: automate the mechanical, reserve human judgment).
+  # Only these gates halt the autonomous loop for human ratification; every other
+  # gate auto-advances when its check-based exit criteria pass. These four are the
+  # judgments a check cannot adjudicate: identification design, claim typing,
+  # claim upgrades, and public release. Omit this key to require human ratification
+  # at every gate (conservative legacy behavior).
+  human_gates:
+  - G3
+  - G7
+  - G12
+  - G13
 automation:
   agent_provider: manual
   provider_connector:

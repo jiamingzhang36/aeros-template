@@ -121,6 +121,36 @@ def _gate_rank(gate: str) -> int:
     return int(match.group(1)) if match else -1
 
 
+def auto_advance_current_gate(state: dict[str, Any], *, stage: str, gate: str,
+                              task_id: str) -> None:
+    """Advance the formal current_gate through a MECHANICAL (non-human) gate
+    without a human stamp. Used by the autonomous loop's gate tiering: gates
+    whose exit criteria a check can adjudicate move on their own; human gates
+    still require approve_gate(). Records the move as 'auto_advanced' (never
+    'approved') so the audit trail distinguishes machine from human."""
+    if not gate or _gate_rank(gate) <= _gate_rank(str(state.get("current_gate", "G0"))):
+        return
+    state["current_stage"] = stage
+    state["current_gate"] = gate
+    state["gate_status"] = "auto_advanced"
+    if _gate_rank(gate) > _gate_rank(str(state.get("candidate_gate", "G0"))):
+        state["candidate_stage"] = stage
+        state["candidate_gate"] = gate
+    decision = {
+        "at": _now(),
+        "stage": stage,
+        "gate": gate,
+        "decision": "auto_advance",
+        "owner": "machine",
+        "note": "mechanical gate auto-advanced (no human stop)",
+    }
+    state.setdefault("gate_decisions", []).append(decision)
+    state.setdefault("gate_history", []).append(
+        {"at": decision["at"], "stage": stage, "gate": gate,
+         "task_id": task_id, "reason": "auto_gate_advanced"}
+    )
+
+
 def advance_gate(state: dict[str, Any], *, stage: str, gate: str,
                  task_id: str, reason: str) -> None:
     """Record the highest gate suggested by completed task progress.

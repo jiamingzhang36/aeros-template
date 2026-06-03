@@ -5,6 +5,8 @@ from __future__ import annotations
 import hashlib
 import json
 from datetime import datetime, timezone
+
+import yaml
 from functools import partial
 from pathlib import Path
 
@@ -172,6 +174,64 @@ def _stale_reason(
 AWAITING_GATE = 7  # pipeline halted at a gate boundary, waiting for human approval
 
 
+def _gate_config(project_root: Path) -> tuple[dict[int, str], set[int]]:
+    """Return (rank -> gate label, set of human-gate ranks) from the manifest.
+
+    If `gate_lifecycle.human_gates` is absent, treat every gate as human
+    (conservative legacy behavior). When present, only those gates halt the
+    loop; all others auto-advance when their tasks have been earned."""
+    manifest_path = project_root / "project_manifest.yml"
+    rank_to_label: dict[int, str] = {}
+    human_ranks: set[int] = set()
+    if not manifest_path.exists():
+        return rank_to_label, human_ranks
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    gl = manifest.get("gate_lifecycle", {}) or {}
+    for label in gl.get("gates", []) or []:
+        rank_to_label[state_mod._gate_rank(str(label))] = str(label)
+    human = gl.get("human_gates", None)
+    if human is None:
+        human_ranks = set(rank_to_label)
+    else:
+        human_ranks = {state_mod._gate_rank(str(h)) for h in human}
+    return rank_to_label, human_ranks
+
+
+def _reconcile_frontier(state: dict, project_root: Path, stage: str,
+                        tid: str, context: str) -> bool:
+    """Advance current_gate through earned MECHANICAL gates; halt at the first
+    earned HUMAN gate by writing an approval request. Returns True if halted.
+
+    The agent writes the request but never commits it, so it cannot grant its
+    own gate. `context` describes what comes next (for the request note)."""
+    rank_to_label, human_ranks = _gate_config(project_root)
+    current_rank = state_mod._gate_rank(str(state.get("current_gate", "G0")))
+    candidate_rank = state_mod._gate_rank(str(state.get("candidate_gate", "G0")))
+    r = current_rank + 1
+    while r <= candidate_rank:
+        gate_label = rank_to_label.get(r, f"G{r}")
+        if r in human_ranks:
+            artifact = identity.write_approval_request(
+                project_root, gate=gate_label, stage=stage, requested_by="agent",
+                note=f"Autonomous loop earned {gate_label} (human gate); {context}",
+            )
+            rel = artifact.relative_to(project_root)
+            slug = identity.gate_slug(gate_label)
+            print(f"[pipeline] AWAITING HUMAN GATE: earned {gate_label} (judgment gate).")
+            print(f"  request written: {rel}")
+            print("  To grant (as the human / approver identity):")
+            print(f"    git add {rel} && git commit -m \"approve {slug}\"")
+            print(f"    aeros gate approve \"{gate_label}\" --stage \"{stage}\"")
+            print("  Then re-run the pipeline to resume.")
+            return True
+        state_mod.auto_advance_current_gate(state, stage=stage, gate=gate_label, task_id=tid)
+        state_mod.save_state(project_root, state)
+        print(f"  ✓ auto-advanced to {gate_label} (mechanical gate, no human stop)")
+        current_rank = r
+        r += 1
+    return False
+
+
 def run_pipeline(
     project_root: Path,
     stage: str = "discovery",
@@ -235,27 +295,12 @@ def run_pipeline(
                 state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
                 skipped += 1
                 continue
-        # Gate-boundary halt (autonomous mode): finish one gate's tasks, then
-        # stop and request human ratification before working past it. The agent
-        # writes the request but never commits it, so it cannot grant its own gate.
+        # Gate-tiered reconciliation (autonomous mode): auto-advance through
+        # earned mechanical gates, halt only at an earned human gate. This stops
+        # the loop before it works PAST an un-ratified judgment gate.
         if not dry_run and identity.enforcement_enabled(project_root):
-            current_rank = state_mod._gate_rank(str(state.get("current_gate", "G0")))
-            task_rank = state_mod._gate_rank(c.gate or "")
-            if task_rank > current_rank + 1:
-                gate_to_ratify = str(state.get("candidate_gate") or state.get("current_gate") or "")
-                artifact = identity.write_approval_request(
-                    project_root, gate=gate_to_ratify, stage=stage, requested_by="agent",
-                    note=f"Autonomous loop earned {gate_to_ratify}; halting before {c.gate} task {tid}.",
-                )
-                rel = artifact.relative_to(project_root)
-                slug = identity.gate_slug(gate_to_ratify)
-                print(f"[pipeline] AWAITING HUMAN GATE: earned {gate_to_ratify}; "
-                      f"next task {tid} needs {c.gate}.")
-                print(f"  request written: {rel}")
-                print("  To grant (as the human / approver identity):")
-                print(f"    git add {rel} && git commit -m \"approve {slug}\"")
-                print(f"    aeros gate approve \"{gate_to_ratify}\" --stage \"{stage}\"")
-                print("  Then re-run the pipeline to resume.")
+            if _reconcile_frontier(state, project_root, stage, tid,
+                                   context=f"halting before {c.gate} task {tid}."):
                 return AWAITING_GATE
         print(f"  -> {tid} (gate {c.gate or '?'}, after: {deps})")
         if dry_run:
@@ -273,9 +318,15 @@ def run_pipeline(
         state_mod.save_state(project_root, state)
     if dry_run:
         print("[pipeline] (dry-run: no tasks executed)")
-    else:
-        state_mod.save_state(project_root, state)
-        print(f"[pipeline] all tasks passed. ({skipped} skipped as already-passed)")
+        return 0
+    # Final reconciliation: the last gate's own tasks may have earned a human
+    # gate that no later task forced us to ratify. Halt for it now.
+    if identity.enforcement_enabled(project_root):
+        if _reconcile_frontier(state, project_root, stage, "end-of-stage",
+                               context="all stage tasks complete; ratify to continue."):
+            return AWAITING_GATE
+    state_mod.save_state(project_root, state)
+    print(f"[pipeline] all tasks passed. ({skipped} skipped as already-passed)")
     return 0
 
 
