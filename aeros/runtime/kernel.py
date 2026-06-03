@@ -174,27 +174,51 @@ def _stale_reason(
 AWAITING_GATE = 7  # pipeline halted at a gate boundary, waiting for human approval
 
 
-def _gate_config(project_root: Path) -> tuple[dict[int, str], set[int]]:
-    """Return (rank -> gate label, set of human-gate ranks) from the manifest.
-
-    If `gate_lifecycle.human_gates` is absent, treat every gate as human
-    (conservative legacy behavior). When present, only those gates halt the
-    loop; all others auto-advance when their tasks have been earned."""
+def _gate_lifecycle(project_root: Path) -> dict:
     manifest_path = project_root / "project_manifest.yml"
-    rank_to_label: dict[int, str] = {}
-    human_ranks: set[int] = set()
     if not manifest_path.exists():
-        return rank_to_label, human_ranks
+        return {}
     manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
-    gl = manifest.get("gate_lifecycle", {}) or {}
+    return manifest.get("gate_lifecycle", {}) or {}
+
+
+def _active_profile(project_root: Path) -> tuple[str, dict, dict]:
+    """Return (profile_name, profile_config, gate_lifecycle)."""
+    gl = _gate_lifecycle(project_root)
+    name = str(gl.get("profile", "full"))
+    prof = (gl.get("profiles", {}) or {}).get(name, {}) or {}
+    return name, prof, gl
+
+
+def _gate_config(project_root: Path) -> tuple[dict[int, str], set[int]]:
+    """Return (rank -> gate label, set of human-gate ranks).
+
+    Human gates come from the active profile if it sets them, else from
+    `gate_lifecycle.human_gates`. If neither is set, every gate is human
+    (conservative legacy behavior)."""
+    name, prof, gl = _active_profile(project_root)
+    rank_to_label: dict[int, str] = {}
     for label in gl.get("gates", []) or []:
         rank_to_label[state_mod._gate_rank(str(label))] = str(label)
-    human = gl.get("human_gates", None)
+    human = prof.get("human_gates", gl.get("human_gates", None))
     if human is None:
         human_ranks = set(rank_to_label)
     else:
         human_ranks = {state_mod._gate_rank(str(h)) for h in human}
     return rank_to_label, human_ranks
+
+
+def _active_gate_ranks(project_root: Path) -> set[int] | None:
+    """Ranks of gates active under the current profile, or None for 'all'.
+
+    A 'lite' profile names a coherent subset; the pipeline still pulls in any
+    task that an active task depends on (dependency closure), so a slimmed
+    profile can never break the task DAG."""
+    name, prof, gl = _active_profile(project_root)
+    active = prof.get("active_gates", None)
+    if active in (None, "all", "*"):
+        return None
+    return {state_mod._gate_rank(str(g)) for g in active}
 
 
 def _reconcile_frontier(state: dict, project_root: Path, stage: str,
@@ -267,6 +291,17 @@ def run_pipeline(
             if state_mod._gate_rank(record[0].gate or "") <= target_rank
         }
         contracts = _with_dependency_closure(contracts, all_contracts)
+    active_ranks = _active_gate_ranks(project_root)
+    if active_ranks is not None:
+        before = len(contracts)
+        contracts = {
+            tid: rec for tid, rec in contracts.items()
+            if state_mod._gate_rank(rec[0].gate or "") in active_ranks
+        }
+        contracts = _with_dependency_closure(contracts, all_contracts)
+        prof_name = _active_profile(project_root)[0]
+        print(f"[pipeline] profile '{prof_name}': {len(contracts)} of {before} "
+              f"{stage} task(s) active (incl. dependencies)")
     order = topo_order(contracts)
     print(f"[pipeline] {stage}: {len(order)} task(s) in dependency order")
     skipped = 0

@@ -39,6 +39,23 @@ gate_lifecycle:
   - G7
   - G12
   - G13
+  # Profiles (start simple): pick the smallest path that fits the project.
+  # `lite` is a descriptive minimal ring; `full` is the complete G0-G13 ladder.
+  # A profile only selects which gates' tasks run; the pipeline still pulls in
+  # any task an active task depends on, so a slimmed profile cannot break the
+  # task DAG. Switch with `profile: lite` (or override per run).
+  profile: full
+  profiles:
+    full:
+      active_gates: all
+      human_gates: [G3, G7, G12, G13]
+    lite:
+      # Descriptive minimal ring: intake -> data -> design -> estimate ->
+      # validate -> claim audit -> paper. Skips standalone measurement (G2),
+      # robustness (G5), referee sim (G8), replication package (G9), and the
+      # expansion/compliance tail (G11-G13) unless a dependency requires them.
+      active_gates: [G0, G1, G3, G4, G6, G7, G10]
+      human_gates: [G3, G7]
 automation:
   agent_provider: manual
   provider_connector:
