@@ -1,0 +1,11 @@
+# Research anchor: 4 components, set ONCE at intake (G0) and then frozen.
+# Team Paper Lite "下锚": fix topic / claim_type / identification / data up front;
+# everything downstream must respect this. Set status: locked once decided; after
+# that it is a protected file (human approval required to change).
+anchor:
+  status: draft            # draft | locked
+  locked_at: ""
+  topic: ""                # the one-sentence research question
+  claim_type: ""           # descriptive | associational | causal | mechanism | external_validity | policy_translation | forecast
+  identification: ""       # the identification / measurement strategy (or "descriptive: none")
+  data: ""                 # the dataset(s) and unit of analysis the anchor commits to

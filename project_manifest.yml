@@ -100,6 +100,8 @@ gate_exit_criteria:
   G3:
     requires:
     - type: check_passes
+      check: check_anchor.py
+    - type: check_passes
       check: check_design_options.py
     - type: check_passes
       check: check_design_selection.py
@@ -176,6 +178,7 @@ gate_exit_criteria:
 layers:
   research_judgment:
     required_files:
+    - discovery/anchor.yml
     - discovery/idea_memo.md
     - discovery/01_literature_scope.md
     - discovery/idea_bank.csv
@@ -222,6 +225,7 @@ layers:
     - discovery/literature/AGENTS.md
     - execution/AGENTS.md
 protected_files:
+- discovery/anchor.yml
 - docs/protected_definitions.yml
 - docs/data_contract.yml
 - evidence/claim_registry.md
@@ -251,6 +255,7 @@ checks:
   git_guardrails: checks/check_git_guardrails.py
   data_inventory: checks/check_data_inventory.py
   data_backfill_queue: checks/check_data_backfill_queue.py
+  anchor: checks/check_anchor.py
   data_diagnostics: checks/check_data_diagnostics.py
   design_options: checks/check_design_options.py
   design_selection: checks/check_design_selection.py

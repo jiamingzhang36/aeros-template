@@ -91,6 +91,16 @@ gate_decisions: []
         "Date,Decision ID,Task ID,Agent Recommendation,Critic Verdict,"
         "Human Decision,Rationale,Owner,Follow-up\n"
     ),
+    "discovery/anchor.yml": """# Research anchor: 4 components, set ONCE at intake and then frozen (anti-drift).
+# Set status: locked once decided; after that it is a protected file.
+anchor:
+  status: draft            # draft | locked
+  locked_at: ""
+  topic: ""                # one-sentence research question
+  claim_type: ""           # descriptive | associational | causal | mechanism | external_validity | policy_translation | forecast
+  identification: ""       # identification / measurement strategy (or "descriptive: none")
+  data: ""                 # dataset(s) and unit of analysis the anchor commits to
+""",
     "docs/method_card.md": """---
 status: draft
 ---
