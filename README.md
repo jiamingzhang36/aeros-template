@@ -74,6 +74,14 @@ against them, advances gates, and stops for human judgment.
   tasks run; the runtime pulls in any task an active task depends on, so a
   slimmed profile cannot break the task DAG. Start with `lite`; add gates when
   the project demonstrably needs them.
+- **Independent critic (optional).** After a task passes its deterministic
+  checks, an independent verification pass (separate from the worker, ideally a
+  different model) can screen for empirical-research failure modes — data
+  leakage, metric misuse, significance-driven spec selection, overclaiming — and
+  surface concerns into the gate decision packet. Advisory by default; configure
+  under `automation.critic`. LLMs verify better than they generate but cannot
+  self-verify reliably, so the critic informs the human gate rather than
+  certifying correctness; the non-LLM backstop is `check_output_reproducibility`.
 - **Human-gate trust anchor.** At a human gate the agent writes a decision
   packet and an approval *request* but cannot grant it: a grant counts only when
   the approval artifact is committed by an `approver_identity`

@@ -208,6 +208,29 @@ def _evidence_overview(project_root: Path, state: dict[str, Any], target_gate: s
     return lines
 
 
+def _critic_overview(state: dict[str, Any]) -> list[str]:
+    """Surface independent-critic verdicts so the human gate sees flagged tasks."""
+    tasks = state.get("tasks", {}) or {}
+    flagged = []
+    for task_id, entry in tasks.items():
+        critic = (entry or {}).get("critic")
+        if isinstance(critic, dict) and critic.get("verdict") in {"concerns", "unverified"}:
+            flagged.append((task_id, critic))
+    if not flagged:
+        return []
+    lines = ["## Independent Critic Findings", "",
+             "An independent critic pass (separate from the worker) flagged these. "
+             "It is advisory — confirm or dismiss each before approving:", ""]
+    for task_id, critic in sorted(flagged):
+        modes = ", ".join(critic.get("concern_modes") or []) or "unverified"
+        block = " [BLOCKING]" if critic.get("blocking") else ""
+        report = critic.get("report", "")
+        lines.append(f"- {task_id}: {critic.get('verdict')}{block} — {modes}"
+                     + (f" (see {report})" if report else ""))
+    lines.append("")
+    return lines
+
+
 def _recommendation(ok: bool, target_gate: str, state: dict[str, Any]) -> str:
     already_approved = (
         state.get("gate_status") == "approved"
@@ -275,6 +298,8 @@ def build_decision_packet(project_root: Path, target_gate: str, *, stage: str = 
         lines.append("")
 
     lines.extend(_evidence_overview(project_root, state, target_gate))
+
+    lines.extend(_critic_overview(state))
 
     lines.extend([
         "## Key Risks for Human Review",

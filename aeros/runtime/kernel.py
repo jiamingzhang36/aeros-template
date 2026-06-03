@@ -10,6 +10,7 @@ import yaml
 from functools import partial
 from pathlib import Path
 
+from . import critic as critic_mod
 from . import identity
 from . import state as state_mod
 from .agent import build_prompt, run_agent
@@ -172,6 +173,55 @@ def _stale_reason(
 
 
 AWAITING_GATE = 7  # pipeline halted at a gate boundary, waiting for human approval
+
+
+def _critic_config(project_root: Path) -> dict:
+    """Read automation.critic config. Default: disabled (opt-in)."""
+    manifest_path = project_root / "project_manifest.yml"
+    if not manifest_path.exists():
+        return {"enabled": False}
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    cfg = (manifest.get("automation", {}) or {}).get("critic", {}) or {}
+    return {
+        "enabled": bool(cfg.get("enabled", False)),
+        "provider": str(cfg.get("provider", "mock")),
+        "model": str(cfg.get("model", "mock-critic")),
+        "blocking": bool(cfg.get("blocking", False)),
+        "timeout_seconds": int(cfg.get("timeout_seconds", 120)),
+    }
+
+
+def _run_critic_pass(project_root: Path, contract: "Contract", state: dict) -> bool:
+    """Independent verification pass after the worker passes deterministic checks.
+    Returns True if the run may proceed (advisory, or no blocking finding), False
+    if a blocking critic finding should escalate. Records a summary in state."""
+    cfg = _critic_config(project_root)
+    if not cfg["enabled"]:
+        return True
+    evidence_parts: list[str] = [f"Goal: {contract.goal}"]
+    for rel in (contract.allowed_outputs or []):
+        p = project_root / rel
+        if p.is_file():
+            evidence_parts.append(f"--- {rel} ---\n{p.read_text(encoding='utf-8', errors='ignore')[:4000]}")
+    verdict = critic_mod.run_critic(
+        task_id=contract.task_id, goal=contract.goal,
+        evidence="\n\n".join(evidence_parts),
+        provider=cfg["provider"], model=cfg["model"], timeout_seconds=cfg["timeout_seconds"],
+    )
+    report = critic_mod.write_critic_report(project_root, contract.task_id, verdict)
+    entry = state_mod.task_entry(state, contract.task_id)
+    entry["critic"] = {
+        "verdict": verdict.verdict,
+        "concern_modes": verdict.concern_modes,
+        "blocking": verdict.has_blocking,
+        "report": str(report.relative_to(project_root)),
+    }
+    print(f"[kernel]   critic ({verdict.provider}): {verdict.verdict}"
+          + (f" — concerns: {', '.join(verdict.concern_modes)}" if verdict.concern_modes else ""))
+    if cfg["blocking"] and verdict.has_blocking:
+        print(f"[kernel]   critic raised a BLOCKING concern; escalating {contract.task_id}.")
+        return False
+    return True
 
 
 def _gate_lifecycle(project_root: Path) -> dict:
@@ -577,6 +627,12 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
         ))
 
         if passed:
+            # Independent verification pass (separate from the worker) before the
+            # task is accepted. Advisory by default; can block on high-severity.
+            if not _run_critic_pass(project_root, contract, state):
+                feedback = "Independent critic raised a blocking integrity concern."
+                state_mod.save_state(project_root, state)
+                continue
             state_mod.set_status(state, contract.task_id, "passed")
             contracts = discover_contracts(project_root)
             _record_task_fingerprints(state, contract, project_root, contracts)

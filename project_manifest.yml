@@ -58,6 +58,20 @@ gate_lifecycle:
       human_gates: [G3, G7]
 automation:
   agent_provider: manual
+  # Independent critic: a verification pass separate from the worker, run after
+  # a task passes its deterministic checks. It screens for empirical-research
+  # failure modes (data leakage, metric misuse, significance-driven spec
+  # selection, overclaiming) and surfaces concerns into the gate decision packet.
+  # Advisory by default (does not block); set blocking: true to escalate on a
+  # high-severity finding. Use a DIFFERENT model from the worker if you can
+  # (LLMs verify better than they generate, but cannot self-verify reliably).
+  # The non-LLM backstop remains check_output_reproducibility.
+  critic:
+    enabled: false          # opt-in; set true once a real provider is configured
+    provider: claude-cli    # mock | openai | claude-cli | codex-cli
+    model: claude
+    blocking: false
+    timeout_seconds: 180
   provider_connector:
     provider: mock
     model: mock-research-model
