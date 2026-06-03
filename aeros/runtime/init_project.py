@@ -47,12 +47,35 @@ FILES = {
 research:
   current_stage: "discovery"
 gate_lifecycle:
-  current_gate: "G0 Project Intake"
+  current_gate: "G0"
+  # Start simple. 'lite' runs a descriptive minimal ring and stops for you at
+  # only two gates (design, claim audit). Switch to 'full' for the complete
+  # G0-G13 ladder. A profile only selects which gates' tasks run; the runtime
+  # pulls in any dependency, so a slim profile cannot break the task DAG.
+  profile: lite
+  profiles:
+    lite: {active_gates: [G0, G1, G3, G4, G6, G7, G10], human_gates: [G3, G7]}
+    full: {active_gates: all, human_gates: [G3, G7, G12, G13]}
 automation:
   pipeline:
     cwd: "."
     command: []
     key_outputs: []
+""",
+    "harness/permissions.yml": """# Minimal permission policy. See the root template for the full version.
+version: "0.1"
+defaults:
+  push_to_remote: "human_only"   # never auto-push without explicit human approval
+  raw_data_write: "deny"
+# Human-gate trust anchor. Off by default so a new project runs immediately.
+# To require a committed human grant at gates: set enforcement to git_committer
+# and put your git author name in approver_identity. The autonomous loop commits
+# under agent_identity and can never grant its own gate.
+human_approval:
+  enforcement: "off"             # -> "git_committer" to enable
+  approver_identity: []          # e.g. ["your-git-author-name"]
+  agent_identity: ["aeros-agent"]
+  approval_artifact_dir: "decisions/approvals"
 """,
     "aeros_state.yml": """current_stage: discovery
 current_gate: G0

@@ -91,6 +91,23 @@ aeros gate approve "<gate>" --stage <stage> --owner <name> --note <why>
 # re-run to resume
 ```
 
+### Minimal config (what you must set)
+
+`aeros init <dir>` writes a working minimal project: a `lite`-profile manifest
+and a `harness/permissions.yml` with the gate trust anchor **off**, so it runs
+immediately. You only need to touch two things, and only when you want them:
+
+- **Slimness:** `gate_lifecycle.profile` — keep `lite`, or set `full` for the
+  whole ladder. (Optional. Default `lite`.)
+- **Human-gate enforcement:** in `harness/permissions.yml`, set
+  `human_approval.enforcement: git_committer` and put your git author name in
+  `approver_identity`. This makes gate grants require a commit the autonomous
+  loop cannot produce. (Optional. Default off → legacy field-presence checks.)
+
+Everything else (gate lifecycle labels, exit criteria, automation classes) has
+working defaults; the root `project_manifest.yml` shows the full set when you
+need it.
+
 ## Directory Map
 
 ```text
