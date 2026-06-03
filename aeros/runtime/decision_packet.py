@@ -18,7 +18,7 @@ import csv
 
 from . import state as state_mod
 
-GATES = [f"G{i}" for i in range(10)]
+GATES = [f"G{i}" for i in range(14)]  # G0..G13
 
 
 def _gate_rank(gate: str) -> int:

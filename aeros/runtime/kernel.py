@@ -235,13 +235,27 @@ def _reconcile_frontier(state: dict, project_root: Path, stage: str,
     while r <= candidate_rank:
         gate_label = rank_to_label.get(r, f"G{r}")
         if r in human_ranks:
+            slug = identity.gate_slug(gate_label)
+            # Auto-generate the decision packet so the human's judgment is fast
+            # and informed (counter Bainbridge's deskilling): what you're
+            # approving, the evidence, the unmet criteria, the risks.
+            packet_rel = ""
+            try:
+                from .decision_packet import write_decision_packet
+                packet = write_decision_packet(project_root, slug, stage=stage)
+                packet_rel = str(packet.relative_to(project_root))
+            except Exception as exc:  # noqa: BLE001 - packet is advisory, never fatal
+                print(f"  (decision packet could not be generated: {exc})")
+            note = f"Autonomous loop earned {gate_label} (human gate); {context}"
+            if packet_rel:
+                note += f"\n\nDecision packet (what you are approving): {packet_rel}"
             artifact = identity.write_approval_request(
-                project_root, gate=gate_label, stage=stage, requested_by="agent",
-                note=f"Autonomous loop earned {gate_label} (human gate); {context}",
+                project_root, gate=gate_label, stage=stage, requested_by="agent", note=note,
             )
             rel = artifact.relative_to(project_root)
-            slug = identity.gate_slug(gate_label)
             print(f"[pipeline] AWAITING HUMAN GATE: earned {gate_label} (judgment gate).")
+            if packet_rel:
+                print(f"  decision packet: {packet_rel}  <- read this first")
             print(f"  request written: {rel}")
             print("  To grant (as the human / approver identity):")
             print(f"    git add {rel} && git commit -m \"approve {slug}\"")
