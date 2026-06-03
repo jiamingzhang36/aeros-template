@@ -277,44 +277,14 @@ def _cmd_gate_history(args: argparse.Namespace) -> int:
     return 0
 
 
-def _gate_slug(gate: str) -> str:
-    """Stable filename token for a gate label, e.g. 'G3 Research Design' -> 'G3'."""
-    token = (gate or "").strip().split()[0] if (gate or "").strip() else "gate"
-    return "".join(ch for ch in token if ch.isalnum() or ch in "-_") or "gate"
-
-
-def _approval_artifact_path(root: Path, gate: str) -> Path:
-    section = {}
-    perms = root / "harness" / "permissions.yml"
-    if perms.exists():
-        import yaml as _yaml
-        data = _yaml.safe_load(perms.read_text(encoding="utf-8")) or {}
-        section = data.get("human_approval", {}) or {}
-    rel_dir = str(section.get("approval_artifact_dir", "decisions/approvals"))
-    return root / rel_dir / f"{_gate_slug(gate)}.md"
-
-
 def _cmd_gate_request(args: argparse.Namespace) -> int:
     """Agent-writable approval REQUEST. Does not grant anything until an approver
     commits the artifact under an approved git identity."""
     root = _project_root()
-    artifact = _approval_artifact_path(root, args.gate)
-    artifact.parent.mkdir(parents=True, exist_ok=True)
-    body = (
-        f"# Gate approval request: {args.gate}\n\n"
-        f"- requested_at: {datetime.now(timezone.utc).isoformat(timespec='seconds')}\n"
-        f"- stage: {args.stage}\n"
-        f"- gate: {args.gate}\n"
-        f"- requested_by: {args.owner or 'agent'}\n\n"
-        f"## Why this gate is ready\n\n{args.note or '(fill in the evidence summary)'}\n\n"
-        "## Human grant\n\n"
-        "This request becomes a GRANT only when an approver commits this file under\n"
-        "an approved git identity (harness/permissions.yml human_approval). The agent\n"
-        "cannot grant its own gate. Review, then:\n\n"
-        f"    git add {artifact.relative_to(root)} && git commit -m \"approve {_gate_slug(args.gate)}\"\n"
-        f"    aeros gate approve \"{args.gate}\" --stage \"{args.stage}\"\n"
+    artifact = identity.write_approval_request(
+        root, gate=args.gate, stage=args.stage,
+        requested_by=args.owner or "agent", note=args.note or "",
     )
-    artifact.write_text(body, encoding="utf-8")
     print(f"wrote approval request: {artifact.relative_to(root)}")
     print("This is a REQUEST, not a grant. An approver must commit it (see the file).")
     return 0
@@ -361,7 +331,7 @@ def _cmd_gate_approve(args: argparse.Namespace) -> int:
     # physically cannot produce a passing artifact.
     approver_committer = ""
     if identity.enforcement_enabled(root):
-        artifact = _approval_artifact_path(root, args.gate)
+        artifact = identity.approval_artifact_path(root, args.gate)
         granted, reason = identity.approved_by_human(artifact, root)
         if not granted:
             if not args.force:

@@ -54,6 +54,47 @@ def enforcement_enabled(project_root: Path) -> bool:
     return str(_load_human_approval(project_root).get("enforcement", "")).strip() == "git_committer"
 
 
+def approval_artifact_dir(project_root: Path) -> str:
+    return str(_load_human_approval(project_root).get("approval_artifact_dir", "decisions/approvals"))
+
+
+def gate_slug(gate: str) -> str:
+    """Stable filename token for a gate label, e.g. 'G3 Research Design' -> 'G3'."""
+    token = (gate or "").strip().split()[0] if (gate or "").strip() else "gate"
+    return "".join(ch for ch in token if ch.isalnum() or ch in "-_") or "gate"
+
+
+def approval_artifact_path(project_root: Path, gate: str) -> Path:
+    return project_root / approval_artifact_dir(project_root) / f"{gate_slug(gate)}.md"
+
+
+def write_approval_request(project_root: Path, *, gate: str, stage: str,
+                           requested_by: str = "agent", note: str = "") -> Path:
+    """Write an agent-writable approval REQUEST. It grants nothing until an
+    approver commits it under an approved git identity."""
+    from datetime import datetime, timezone
+
+    artifact = approval_artifact_path(project_root, gate)
+    artifact.parent.mkdir(parents=True, exist_ok=True)
+    rel = artifact.relative_to(project_root)
+    body = (
+        f"# Gate approval request: {gate}\n\n"
+        f"- requested_at: {datetime.now(timezone.utc).isoformat(timespec='seconds')}\n"
+        f"- stage: {stage}\n"
+        f"- gate: {gate}\n"
+        f"- requested_by: {requested_by}\n\n"
+        f"## Why this gate is ready\n\n{note or '(fill in the evidence summary)'}\n\n"
+        "## Human grant\n\n"
+        "This request becomes a GRANT only when an approver commits this file under\n"
+        "an approved git identity (harness/permissions.yml human_approval). The agent\n"
+        "cannot grant its own gate. Review, then:\n\n"
+        f"    git add {rel} && git commit -m \"approve {gate_slug(gate)}\"\n"
+        f"    aeros gate approve \"{gate}\" --stage \"{stage}\"\n"
+    )
+    artifact.write_text(body, encoding="utf-8")
+    return artifact
+
+
 def _rel(path: Path, project_root: Path) -> str:
     try:
         return str(path.resolve().relative_to(project_root.resolve()))

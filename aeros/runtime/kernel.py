@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
 
+from . import identity
 from . import state as state_mod
 from .agent import build_prompt, run_agent
 from .checks import format_feedback, run_checks
@@ -168,6 +169,9 @@ def _stale_reason(
     return ""
 
 
+AWAITING_GATE = 7  # pipeline halted at a gate boundary, waiting for human approval
+
+
 def run_pipeline(
     project_root: Path,
     stage: str = "discovery",
@@ -231,6 +235,28 @@ def run_pipeline(
                 state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
                 skipped += 1
                 continue
+        # Gate-boundary halt (autonomous mode): finish one gate's tasks, then
+        # stop and request human ratification before working past it. The agent
+        # writes the request but never commits it, so it cannot grant its own gate.
+        if not dry_run and identity.enforcement_enabled(project_root):
+            current_rank = state_mod._gate_rank(str(state.get("current_gate", "G0")))
+            task_rank = state_mod._gate_rank(c.gate or "")
+            if task_rank > current_rank + 1:
+                gate_to_ratify = str(state.get("candidate_gate") or state.get("current_gate") or "")
+                artifact = identity.write_approval_request(
+                    project_root, gate=gate_to_ratify, stage=stage, requested_by="agent",
+                    note=f"Autonomous loop earned {gate_to_ratify}; halting before {c.gate} task {tid}.",
+                )
+                rel = artifact.relative_to(project_root)
+                slug = identity.gate_slug(gate_to_ratify)
+                print(f"[pipeline] AWAITING HUMAN GATE: earned {gate_to_ratify}; "
+                      f"next task {tid} needs {c.gate}.")
+                print(f"  request written: {rel}")
+                print("  To grant (as the human / approver identity):")
+                print(f"    git add {rel} && git commit -m \"approve {slug}\"")
+                print(f"    aeros gate approve \"{gate_to_ratify}\" --stage \"{stage}\"")
+                print("  Then re-run the pipeline to resume.")
+                return AWAITING_GATE
         print(f"  -> {tid} (gate {c.gate or '?'}, after: {deps})")
         if dry_run:
             continue
