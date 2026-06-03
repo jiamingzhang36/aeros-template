@@ -36,6 +36,22 @@ This is tamper-evident, not tamper-proof, for single-user setups; escalate to
 GPG-signed commits for tamper resistance. Set `human_approval.enforcement: off`
 to fall back to field-presence-only checks.
 
+## Plan / Apply (proposal deck)
+
+For a richer gate decision, split it into two physical phases (like
+`terraform plan` / `apply`):
+
+```
+aeros gate plan  "<gate>" --stage <stage>   # agent writes a proposal deck (text only, no execution)
+# review/edit decisions/plans/<gate>.md: keep/drop/edit cards; commit it as approver
+aeros gate apply "<gate>" --stage <stage>   # a committed, valid deck grants the gate
+```
+
+The proposal phase executes nothing and burns no tokens on the real work. Cards
+sourced from the anchor/intake are `locked` and may not be dropped; apply rejects
+a dropped locked card, a deck with no kept card, or a deck not committed by an
+approver identity.
+
 ## Human Approval Required
 
 - Change protected definitions.

@@ -290,6 +290,100 @@ def _cmd_gate_request(args: argparse.Namespace) -> int:
     return 0
 
 
+def _seed_plan_cards(root: Path, gate: str) -> list:
+    """Locked anchor cards (cannot be dropped) + agent proposal cards from the
+    pending tasks at this gate."""
+    from .runtime.plan_deck import Card
+    cards: list = []
+    anchor_path = root / "discovery" / "anchor.yml"
+    if anchor_path.exists():
+        data = yaml.safe_load(anchor_path.read_text(encoding="utf-8")) or {}
+        anchor = data.get("anchor", data) if isinstance(data, dict) else {}
+        for i, comp in enumerate(["topic", "claim_type", "identification", "data"], 1):
+            val = str(anchor.get(comp, "")).strip() or "(unset)"
+            cards.append(Card(id=f"A{i}", title=f"Anchor: {comp} = {val}", source="intake", locked=True))
+    slug = identity.gate_slug(gate)
+    try:
+        contracts = discover_contracts(root)
+        for tid, (contract, _path) in sorted(contracts.items()):
+            if identity.gate_slug(contract.gate or "") == slug:
+                cards.append(Card(id=tid, title=f"Run task {tid}: {contract.goal[:80]}", source="agent"))
+    except Exception:  # noqa: BLE001
+        pass
+    if not any(c.source == "agent" for c in cards):
+        from .runtime.plan_deck import Card as _C
+        cards.append(_C(id="P1", title=f"(edit) proposed action for {gate}", source="agent"))
+    return cards
+
+
+def _cmd_gate_plan(args: argparse.Namespace) -> int:
+    """PLAN phase: write a proposal deck (text only, no execution)."""
+    from .runtime.plan_deck import Deck, write_deck
+    root = _project_root()
+    deck = Deck(gate=args.gate, stage=args.stage, cards=_seed_plan_cards(root, args.gate))
+    path = write_deck(root, deck)
+    print(f"wrote plan deck: {path.relative_to(root)}")
+    print(f"  {len(deck.cards)} card(s); locked anchor cards cannot be dropped.")
+    print("Nothing executed. Edit the deck, then (as approver): git commit it and run:")
+    print(f"  aeros gate apply \"{args.gate}\" --stage \"{args.stage}\"")
+    return 0
+
+
+def _cmd_gate_apply(args: argparse.Namespace) -> int:
+    """APPLY phase: a committed, valid plan deck grants the gate and lets the loop proceed."""
+    from .runtime.plan_deck import deck_path, parse_deck, validate_applied, kept_cards
+    root = _project_root()
+    path = deck_path(root, args.gate)
+    if not path.exists():
+        print(f"REFUSED: no plan deck at {path.relative_to(root)}. Run `aeros gate plan` first.")
+        return 2
+
+    # 1. Deck must be committed by an approver (same trust anchor as approve).
+    if identity.enforcement_enabled(root):
+        granted, reason = identity.approved_by_human(path, root)
+        if not granted and not args.force:
+            print(f"REFUSED: plan deck is not human-granted ({reason}).")
+            print(f"  An approver must commit {path.relative_to(root)} under an approved git identity.")
+            return 3
+
+    # 2. Deck semantics: no dropped locked card, at least one kept card.
+    deck = parse_deck(path)
+    violations = validate_applied(deck)
+    if violations and not args.force:
+        print("REFUSED: plan deck is not valid to apply:")
+        for v in violations:
+            print(f"  - {v}")
+        return 2
+
+    # 3. Gate exit criteria still apply.
+    checks_dir = root / "checks"
+    if not (checks_dir / "check_gate_exit.py").exists():
+        checks_dir = Path(__file__).resolve().parents[1] / "checks"
+    sys.path.insert(0, str(checks_dir))
+    os.environ["AEROS_CHECKS_DIR"] = str(checks_dir)
+    try:
+        from check_gate_exit import evaluate_through_gate  # noqa: E402
+        ok, failures = evaluate_through_gate(args.gate, project_root=str(root))
+    except Exception as exc:  # noqa: BLE001
+        ok, failures = False, [f"could not evaluate gate criteria: {exc}"]
+    if not ok and not args.force:
+        print(f"REFUSED: {args.gate} exit criteria are NOT satisfied:")
+        for f in failures:
+            print(f"  - {f}")
+        return 2
+
+    kept = kept_cards(deck)
+    note = f"[plan/apply] applied {len(kept)} kept card(s): " + ", ".join(c.id for c in kept)
+    state = load_state(root)
+    decision = approve_gate(state, stage=args.stage, gate=args.gate,
+                            owner=args.owner or "approver", note=note)
+    save_state(root, state)
+    log_path = _append_decision_log(root, decision)
+    print(f"APPLIED {args.gate}: {len(kept)} kept card(s). Gate advanced.")
+    print(f"decision log: {log_path.relative_to(root)}")
+    return 0
+
+
 def _cmd_gate_approve(args: argparse.Namespace) -> int:
     root = _project_root()
 
@@ -599,6 +693,21 @@ def main(argv: list[str] | None = None) -> int:
     gate_approve.add_argument("--force", action="store_true",
                               help="approve even if gate exit criteria are unmet (override is logged)")
     gate_approve.set_defaults(func=_cmd_gate_approve)
+
+    gate_plan = gate_sub.add_parser(
+        "plan", help="PLAN: write a proposal deck (text only, no execution)")
+    gate_plan.add_argument("gate", help="gate to plan, e.g. G3")
+    gate_plan.add_argument("--stage", default="discovery", help="stage name")
+    gate_plan.set_defaults(func=_cmd_gate_plan)
+
+    gate_apply = gate_sub.add_parser(
+        "apply", help="APPLY: a committed, valid plan deck grants the gate")
+    gate_apply.add_argument("gate", help="gate to apply, e.g. G3")
+    gate_apply.add_argument("--stage", default="discovery", help="stage name")
+    gate_apply.add_argument("--owner", default="", help="approver")
+    gate_apply.add_argument("--force", action="store_true",
+                            help="apply even if deck/criteria checks fail (override is logged)")
+    gate_apply.set_defaults(func=_cmd_gate_apply)
 
     gate_request = gate_sub.add_parser(
         "request", help="write an approval REQUEST artifact (agent may do this; does not grant)")
