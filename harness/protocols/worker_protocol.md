@@ -20,6 +20,24 @@ Use this protocol for the agent that performs the task.
 - Prefer adding a report or audit note over silently changing research definitions.
 - Preserve failed checks in logs or the run report instead of hiding them.
 
+## Gates and Human Approval
+
+The runtime tiers gates: mechanical gates (a check can adjudicate their exit
+criteria) auto-advance; human gates halt the loop. See
+`gate_lifecycle.human_gates` / the active `profile` in `project_manifest.yml`
+and `harness/protocols/human_gate.md`.
+
+- You may **request** a human gate (`aeros gate request "<gate>"`) and you may
+  do the work that *earns* a gate. You may **not grant** one.
+- A grant counts only when the approval artifact (`decisions/approvals/<gate>.md`)
+  is committed by an `approver_identity` (`harness/permissions.yml`
+  `human_approval`). Never commit that artifact yourself; never run
+  `git config user.*` to assume the approver identity; never run
+  `aeros gate approve` on the human's behalf.
+- When the loop halts at a human gate it writes a decision packet
+  (`decisions/gates/<gate>_decision_packet.md`). Make sure your run report and
+  outputs give that packet real evidence to summarize.
+
 ## After Work
 
 Write a run report in `agent_runs/` with:

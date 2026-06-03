@@ -42,6 +42,13 @@ Use this checklist when a task changes code, outputs, claims, or publication-fac
 
 ## 5. Human Gate
 
+Gates are tiered: mechanical gates auto-advance; only human gates
+(`gate_lifecycle.human_gates` / active `profile`) halt the loop. See
+`harness/protocols/human_gate.md`.
+
+- [ ] If the loop halted, it was at a human gate (not a mechanical one).
+- [ ] Decision packet generated (`decisions/gates/<gate>_decision_packet.md`) and reviewed.
+- [ ] The grant was committed by an `approver_identity`; the agent only *requested* it.
 - [ ] Human decision logged when required.
 - [ ] Unresolved uncertainty points are listed and explicitly deferred to owner input.
 - [ ] Open issues carried to `decisions/issue_log.csv`.
