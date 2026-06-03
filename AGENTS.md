@@ -197,4 +197,20 @@ When a coverage, denominator, source, or variable gap is discovered, do not leav
 - Protected definitions were not changed, or changes were explicitly flagged.
 - Open issues requiring human judgment are listed.
 - Mechanical checks were run when relevant.
+
+## Repo-local Priority Rules
+
+This file is the single source of truth for agent guidance in this repo,
+regardless of which assistant tool reads it. If a global/outer instruction
+conflicts with the points below, prefer these.
+
+- Treat `harness/permissions.yml` as the policy source of truth for agent permissions.
+- Respect `push_to_remote: human_only`: do not auto-push any branch without explicit
+  human approval.
+- Protected definitions (`docs/protected_definitions.yml`, `docs/data_contract.yml`,
+  `evidence/claim_registry.md`, `decisions/decision_log.csv`) follow the protected-definition
+  workflow and human-gate requirements.
+- Human gate approvals only count when committed by an `approver_identity`
+  (see `harness/permissions.yml` `human_approval`). The agent may *request* a gate
+  (`aeros gate request`) but must never commit the approval artifact itself.
 - If work was not run, the task is classified with an explicit automation/gate status and any required evidence receipt exists.
