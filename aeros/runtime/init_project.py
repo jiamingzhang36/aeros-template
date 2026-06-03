@@ -22,6 +22,7 @@ DIRS = [
     "data/clean",
     "data/parquet",
     "data/snapshots",
+    "data/backfill",
     "decisions/escalations",
     "discovery/literature",
     "docs",
@@ -97,6 +98,27 @@ human_decision:
 Use this when a task cannot be fully automated but a human says the evidence was reviewed.
 AEROS checks the existence and required fields of the receipt; it does not replace the
 human judgment recorded here.
+""",
+    "harness/automation_policy.yml": """version: "0.1"
+automation_classes:
+  auto_rerunnable:
+    meaning: "Deterministic or local-cache-safe work that may rerun when stale."
+  receipt_audited:
+    meaning: "Human-reviewed evidence; AEROS verifies the receipt, not the judgment."
+  frozen_evidence:
+    meaning: "Evidence may be reused only with a recorded source snapshot and receipt."
+  approval_required:
+    meaning: "LLM/API/scraping/credential/source-date-sensitive work blocked until approval."
+gate_statuses:
+  - pending
+  - done_auto_verified
+  - done_human_verified_with_receipt
+  - done_frozen_evidence_verified
+  - skipped_unverified
+  - needs_receipt_audit
+  - blocked_requires_approval
+  - blocked_missing_credentials
+  - blocked_missing_source_snapshot
 """,
     "code/99_make_all.py": """#!/usr/bin/env python3
 print("AEROS project pipeline placeholder: configure automation.pipeline in project_manifest.yml")

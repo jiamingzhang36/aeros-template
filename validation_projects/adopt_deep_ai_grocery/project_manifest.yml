@@ -16,3 +16,9 @@ automation:
     cwd: .
     command: []
     key_outputs: []
+checks:
+  data_backfill_queue: checks/check_data_backfill_queue.py
+layers:
+  harness:
+    required_files:
+    - harness/automation_policy.yml

@@ -25,6 +25,7 @@ from .runtime.checks import run_checks
 from .runtime.collection import collect_prompt_grid, resolve_config
 from .runtime.contract import load_contract
 from .runtime.controller import run_iteration
+from .runtime.data_backfill import BackfillArgs, run_data_backfill
 from .runtime.decision_packet import write_decision_packet
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
@@ -421,6 +422,22 @@ def _cmd_collect(args: argparse.Namespace) -> int:
         return 1
 
 
+def _cmd_data_backfill(args: argparse.Namespace) -> int:
+    root = _project_root()
+    return run_data_backfill(root, BackfillArgs(
+        dry_run=args.dry_run,
+        run_local=args.run_local,
+        approve=args.approve,
+        receipt=args.receipt,
+        owner=args.owner or "",
+        source_snapshot=args.source_snapshot or "",
+        note=args.note or "",
+        coverage=args.coverage or "",
+        disagreement_log=args.disagreement_log or "",
+        human_decision=args.human_decision or "",
+    ))
+
+
 def _cmd_roadmap(args: argparse.Namespace) -> int:
     root = _project_root()
     print(format_roadmap(root))
@@ -599,6 +616,25 @@ def main(argv: list[str] | None = None) -> int:
     collect.add_argument("--dry-run", action="store_true",
                          help="print collection plan without provider calls or writes")
     collect.set_defaults(func=_cmd_collect)
+
+    data = sub.add_parser("data", help="data audit and backfill orchestration")
+    data_sub = data.add_subparsers(dest="data_command", required=True)
+    data_backfill = data_sub.add_parser("backfill", help="build and optionally run a data backfill queue")
+    data_backfill.add_argument("--dry-run", action="store_true",
+                               help="show queue plan without writing files or running commands")
+    data_backfill.add_argument("--run-local", action="store_true",
+                               help="run queue items that are auto_rerunnable and have explicit run_command")
+    data_backfill.add_argument("--approve", default="",
+                               help="approve a blocked queue item by task_id or data_id; does not run without run_command")
+    data_backfill.add_argument("--receipt", default="",
+                               help="write a human review receipt for a queue item by task_id or data_id")
+    data_backfill.add_argument("--owner", default="", help="human owner for approval or receipt")
+    data_backfill.add_argument("--source-snapshot", default="", help="source snapshot/date/path reviewed by human")
+    data_backfill.add_argument("--note", default="", help="approval or receipt note")
+    data_backfill.add_argument("--coverage", default="", help="coverage reviewed for receipt")
+    data_backfill.add_argument("--disagreement-log", default="", help="disagreement/ambiguity log for receipt")
+    data_backfill.add_argument("--human-decision", default="", help="human decision recorded in receipt")
+    data_backfill.set_defaults(func=_cmd_data_backfill)
 
     iterate = sub.add_parser("iterate", help="run the research controller until the next human gate")
     iterate.add_argument("--stage", default="discovery", choices=["discovery", "execution"],

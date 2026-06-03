@@ -1,0 +1,16 @@
+generated_at: '2026-06-03T02:34:16+00:00'
+policy: AEROS-DATA-AUTO-001
+items:
+- task_id: DATA-GAP-001
+  data_id: ''
+  dataset_name: data inventory missing or empty
+  gap_type: inventory_empty
+  priority: 1
+  automation_class: receipt_audited
+  gate_status: done_human_verified_with_receipt
+  receipt_path: evidence/receipts/DATA-GAP-001_human_review_receipt.md
+  run_command: []
+  reason: no data inventory rows exist
+  receipt:
+    path: evidence/receipts/DATA-GAP-001_human_review_receipt.md
+    written_at: '2026-06-03T02:34:16+00:00'

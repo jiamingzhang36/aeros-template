@@ -40,11 +40,14 @@ Execution work may only modify protected items through the documented approval p
 - Do not treat missing values as zero unless the data contract explicitly allows it.
 - Do not drop observations for convenience without logging the rule and rationale.
 - Do not use restricted data in outputs or reports unless access and sharing rules are documented.
+- If a coverage, denominator, source, or variable gap appears, route it through `aeros data backfill --dry-run` before deciding whether to rerun, request approval, or write a receipt.
+- Use `aeros data backfill --approve` for source-limited backfill approval and `aeros data backfill --receipt` for human-reviewed evidence; do not hand-edit queue status unless the CLI cannot express the decision.
 
 ## Code and Pipeline Rules
 
 - Work from task files in `tasks/execution/`.
 - Follow each task contract's `automation_class`, `evidence_receipt_required`, `receipt_path`, and `gate_status` before deciding whether to run, recover, or block it.
+- Treat `harness/automation_policy.yml` as the canonical policy for automation classes and gate statuses.
 - Prefer the project master workflow, currently `code/99_make_all.py` or `Makefile`.
 - Preserve logs in `outputs/logs/` when running substantial commands.
 - If code changes affect outputs, rerun relevant checks.

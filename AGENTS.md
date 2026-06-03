@@ -129,6 +129,8 @@ Every task contract must include a Mainline Alignment Gate section before execut
 
 ## Automation Class Rules
 
+The canonical automation policy is `harness/automation_policy.yml`.
+
 Task completion must use the task contract's automation class, not a generic done/skipped/blocked label.
 
 - `auto_rerunnable`: may be rerun automatically when dependencies or outputs are stale, subject to permissions and task checks.
@@ -149,6 +151,18 @@ Allowed task gate statuses are:
 - `blocked_missing_source_snapshot`
 
 Do not write or rely on the old generic status `skipped`. If a task cannot run, classify why using one of the explicit blocked or skipped statuses.
+
+## Data Backfill Rules
+
+When a coverage, denominator, source, or variable gap is discovered, do not leave it as an informal note.
+
+- Run or recommend `aeros data backfill --dry-run` to generate a formal backfill queue.
+- Local-cache-safe queue items may run only when classified `auto_rerunnable` and supplied with an explicit `run_command`.
+- Official-source, API, credentialed, scraping, or source-date-sensitive items must enter `approval_required` with a blocked status until human approval is recorded.
+- Approval of a blocked data queue item must use `aeros data backfill --approve ...`; approval alone does not run anything without an explicit `run_command`.
+- Human-reviewed data queue items must use `aeros data backfill --receipt ...` so the receipt and queue status stay synchronized.
+- Human-reviewed data evidence must use a receipt, not an informal "done" or "skipped" note.
+- After any backfill run, review `data/backfill/coverage_delta.md`, `data/backfill/approval_checklist.md`, and `audits/data_backfill_report.md` before changing claims.
 
 ## Harness Rules
 

@@ -172,6 +172,7 @@ layers:
     - harness/skill_map_core.yml
     - harness/skill_map_reference.md
     - harness/human_review_receipt_template.md
+    - harness/automation_policy.yml
   stage_agents:
     required_files:
     - AGENTS.md
@@ -207,6 +208,7 @@ checks:
   anchors_in_registry: checks/check_anchors_in_registry.py
   git_guardrails: checks/check_git_guardrails.py
   data_inventory: checks/check_data_inventory.py
+  data_backfill_queue: checks/check_data_backfill_queue.py
   data_diagnostics: checks/check_data_diagnostics.py
   design_options: checks/check_design_options.py
   design_selection: checks/check_design_selection.py

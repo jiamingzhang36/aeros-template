@@ -11,6 +11,7 @@ import yaml
 
 
 TASK_DIR = Path("tasks")
+POLICY = Path("harness/automation_policy.yml")
 ALLOWED_AUTOMATION_CLASSES = {
     "auto_rerunnable",
     "receipt_audited",
@@ -37,19 +38,34 @@ def _load(path: Path) -> dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
-def _receipt_has_required_fields(path: Path) -> list[str]:
+def _policy_sets() -> tuple[set[str], set[str], list[str]]:
+    data = _load(POLICY) if POLICY.exists() else {}
+    classes = data.get("automation_classes", {})
+    statuses = data.get("gate_statuses", [])
+    receipt_fields = data.get("receipt_required_fields", [])
+    allowed_classes = set(classes) if isinstance(classes, dict) and classes else ALLOWED_AUTOMATION_CLASSES
+    allowed_statuses = set(statuses) if isinstance(statuses, list) and statuses else ALLOWED_GATE_STATUSES
+    required_receipt = (
+        [str(item) + ":" for item in receipt_fields]
+        if isinstance(receipt_fields, list) and receipt_fields
+        else [
+            "reviewed_by:",
+            "reviewed_at:",
+            "source_snapshot:",
+            "coverage:",
+            "disagreement_log:",
+            "human_decision:",
+        ]
+    )
+    return allowed_classes, allowed_statuses, required_receipt
+
+
+def _receipt_has_required_fields(path: Path, required_markers: list[str]) -> list[str]:
     if not path.exists():
         return [f"receipt_path does not exist: {path}"]
     text = path.read_text(encoding="utf-8", errors="ignore")
     missing = []
-    for marker in (
-        "reviewed_by:",
-        "reviewed_at:",
-        "source_snapshot:",
-        "coverage:",
-        "disagreement_log:",
-        "human_decision:",
-    ):
+    for marker in required_markers:
         if marker not in text:
             missing.append(f"{path}: missing receipt marker {marker}")
     return missing
@@ -57,6 +73,7 @@ def _receipt_has_required_fields(path: Path) -> list[str]:
 
 def main() -> int:
     failures: list[str] = []
+    allowed_classes, allowed_statuses, required_receipt_markers = _policy_sets()
     contracts = sorted(TASK_DIR.rglob("*.yml"))
     for path in contracts:
         data = _load(path)
@@ -66,9 +83,9 @@ def main() -> int:
         receipt_required = bool(data.get("evidence_receipt_required", False))
         receipt_path = str(data.get("receipt_path", "") or "").strip()
 
-        if automation_class not in ALLOWED_AUTOMATION_CLASSES:
+        if automation_class not in allowed_classes:
             failures.append(f"{task_id}: invalid or missing automation_class")
-        if gate_status not in ALLOWED_GATE_STATUSES:
+        if gate_status not in allowed_statuses:
             failures.append(f"{task_id}: invalid or missing gate_status")
         if gate_status == "skipped":
             failures.append(f"{task_id}: use explicit skipped_unverified/blocked/done status, not skipped")
@@ -86,7 +103,7 @@ def main() -> int:
             if not receipt_path:
                 failures.append(f"{task_id}: done-with-receipt status requires receipt_path")
             else:
-                failures.extend(_receipt_has_required_fields(Path(receipt_path)))
+                failures.extend(_receipt_has_required_fields(Path(receipt_path), required_receipt_markers))
 
     if failures:
         print("FAIL: task automation policy problems detected:")
