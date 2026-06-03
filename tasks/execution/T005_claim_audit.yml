@@ -1,41 +1,40 @@
 task_id: T005_claim_audit
 stage: execution
 gate: G7
-depends_on: [T004_result_validation]
-goal: >
-  Audit every active claim against the method card, claim ceiling, evidence
-  registry, result index, and language constraints. Identify overclaims,
-  unsupported claims, and human approval needs.
+automation_class: receipt_audited
+evidence_receipt_required: true
+receipt_path: evidence/receipts/T005_claim_audit_human_review_receipt.md
+gate_status: needs_receipt_audit
+depends_on:
+- T004_result_validation
+goal: 'Audit every active claim against the method card, claim ceiling, evidence registry,
+  result index, and language constraints. Identify overclaims, unsupported claims,
+  and human approval needs.
 
+  '
 inputs:
-  - evidence/claim_registry.md
-  - evidence/result_index.csv
-  - docs/method_card.md
-  - docs/language_constraints.md
-  - discovery/design_selection.md
-
+- evidence/claim_registry.md
+- evidence/result_index.csv
+- docs/method_card.md
+- docs/language_constraints.md
+- discovery/design_selection.md
 allowed_outputs:
-  - audits/claim_audit_report.md
-  - agent_runs/
-
+- audits/claim_audit_report.md
+- agent_runs/
 forbidden_actions:
-  - "Do not strengthen claims."
-  - "Do not remove ambiguity flags without evidence."
-  - "Do not add evidence that has not been inspected."
-
+- Do not strengthen claims.
+- Do not remove ambiguity flags without evidence.
+- Do not add evidence that has not been inspected.
 checks:
-  - check_claim_registry.py
-  - check_claim_ceiling.py
-  - check_claim_method_consistency.py
-  - check_agent_run_report.py
-
+- check_claim_registry.py
+- check_claim_ceiling.py
+- check_claim_method_consistency.py
+- check_agent_run_report.py
 retry_policy:
   max_retries: 1
-
 escalate_if:
-  - "claim language needs human approval"
-  - "checks still fail after max_retries"
-
+- claim language needs human approval
+- checks still fail after max_retries
 budget:
   max_agent_calls: 2
   max_dollars: 1.0

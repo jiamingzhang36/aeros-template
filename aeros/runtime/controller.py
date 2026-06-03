@@ -12,6 +12,7 @@ from .adjudicate import adjudicate, write_selection
 from .decision_packet import write_decision_packet
 from .kernel import (
     _stale_reason,
+    _contract_block_reason,
     _task_gates,
     discover_contracts,
     run_pipeline,
@@ -136,6 +137,18 @@ def build_iterate_plan(
         status = str(entry.get("status", "pending"))
         stale = ""
         action = "run"
+        blocked_reason = _contract_block_reason(contract)
+        if blocked_reason:
+            action = "blocked"
+            stale = blocked_reason
+            steps.append(IterateStep(
+                task_id=task_id,
+                gate=contract.gate or "?",
+                status=status,
+                action=action,
+                stale_reason=stale,
+            ))
+            continue
         if status == "passed":
             stale = _stale_reason(probe_state, contract, project_root, all_contracts)
             action = "rerun" if stale else "skip"

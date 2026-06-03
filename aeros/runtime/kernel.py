@@ -69,6 +69,15 @@ def _task_gates(contracts: dict) -> dict[str, str]:
     return {tid: c.gate for tid, (c, _) in contracts.items()}
 
 
+def _contract_block_reason(contract: Contract) -> str:
+    if contract.automation_class == "approval_required" and contract.gate_status.startswith("blocked_"):
+        return (
+            f"{contract.automation_class}/{contract.gate_status}; "
+            "requires explicit human approval before automatic rerun"
+        )
+    return ""
+
+
 def _with_dependency_closure(selected: dict, all_contracts: dict) -> dict:
     out = dict(selected)
     changed = True
@@ -200,6 +209,13 @@ def run_pipeline(
     for tid in order:
         c, path = contracts[tid]
         deps = ", ".join(c.depends_on) or "—"
+        blocked_reason = _contract_block_reason(c)
+        if blocked_reason:
+            print(f"  ! {tid} blocked ({blocked_reason})")
+            if dry_run:
+                continue
+            print("[pipeline] stopped before blocked approval-required task")
+            return 2
         # Skip tasks already passed in a previous run (idempotent resume).
         task_status = state_mod.task_entry(state, tid).get("status", "pending")
         if task_status == "passed":

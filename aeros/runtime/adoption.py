@@ -390,7 +390,14 @@ def _bootstrap_target(template_root: Path, target: Path) -> None:
         src = template_root / rel
         if src.exists():
             shutil.copytree(src, target / rel, dirs_exist_ok=True)
-    for rel in ("project_manifest.yml", "AGENTS.md", "CLAUDE.md"):
+    for rel in (
+        "project_manifest.yml",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "discovery/AGENTS.md",
+        "discovery/literature/AGENTS.md",
+        "execution/AGENTS.md",
+    ):
         src = template_root / rel
         dst = target / rel
         if src.exists() and not dst.exists():

@@ -171,6 +171,7 @@ layers:
     - harness/practical_skill_menu.md
     - harness/skill_map_core.yml
     - harness/skill_map_reference.md
+    - harness/human_review_receipt_template.md
   stage_agents:
     required_files:
     - AGENTS.md
@@ -232,3 +233,4 @@ checks:
   agent_runs_tools: checks/check_agent_runs_tools.py
   pipeline_runs: checks/check_pipeline_runs.py
   replication_package: checks/check_replication_package.py
+  task_automation_policy: checks/check_task_automation_policy.py

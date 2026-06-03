@@ -1,45 +1,44 @@
 task_id: T004_main_execution
 stage: execution
 gate: G4
-depends_on: [T003b_pipeline_instantiation]
-goal: >
-  Run the approved main execution pipeline or a clearly labeled smoke execution,
-  producing registered outputs with provenance. This task is deterministic after
-  protocol approval: it should run code, not ask an agent to invent results.
+automation_class: auto_rerunnable
+evidence_receipt_required: false
+receipt_path: ''
+gate_status: pending
+depends_on:
+- T003b_pipeline_instantiation
+goal: 'Run the approved main execution pipeline or a clearly labeled smoke execution,
+  producing registered outputs with provenance. This task is deterministic after protocol
+  approval: it should run code, not ask an agent to invent results.
 
+  '
 inputs:
-  - execution/protocol/main_execution_protocol.md
-  - execution/pipeline_manifest.yml
-  - code/99_make_all.py
-
+- execution/protocol/main_execution_protocol.md
+- execution/pipeline_manifest.yml
+- code/99_make_all.py
 allowed_outputs:
-  - outputs/
-  - evidence/result_index.csv
-  - evidence/claim_registry.md
-
+- outputs/
+- evidence/result_index.csv
+- evidence/claim_registry.md
 run:
   command:
-    - "python3"
-    - "code/99_make_all.py"
-    - "--mode"
-    - "smoke"
-  cwd: "."
-
+  - python3
+  - code/99_make_all.py
+  - --mode
+  - smoke
+  cwd: .
 forbidden_actions:
-  - "Do not write anywhere under data/raw/."
-  - "Do not mark smoke outputs as final empirical evidence."
-  - "Do not mark claims supported unless result provenance and claim boundaries are complete."
-
+- Do not write anywhere under data/raw/.
+- Do not mark smoke outputs as final empirical evidence.
+- Do not mark claims supported unless result provenance and claim boundaries are complete.
 checks:
-  - check_paper_numbers.py
-  - check_provenance.py
-  - check_claim_registry.py
-  - check_claim_ceiling.py
-  - check_claim_method_consistency.py
-
+- check_paper_numbers.py
+- check_provenance.py
+- check_claim_registry.py
+- check_claim_ceiling.py
+- check_claim_method_consistency.py
 retry_policy:
   max_retries: 0
-
 budget:
   max_agent_calls: 0
   max_dollars: 0.0

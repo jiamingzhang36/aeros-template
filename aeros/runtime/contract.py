@@ -16,6 +16,10 @@ class Contract:
     task_id: str
     stage: str
     gate: str
+    automation_class: str
+    evidence_receipt_required: bool
+    receipt_path: str
+    gate_status: str
     goal: str
     inputs: list[str]
     allowed_outputs: list[str]
@@ -55,6 +59,10 @@ def load_contract(path: str | Path) -> Contract:
         task_id=str(data["task_id"]),
         stage=str(data["stage"]),
         gate=str(data.get("gate", "") or ""),
+        automation_class=str(data.get("automation_class", "auto_rerunnable") or "auto_rerunnable"),
+        evidence_receipt_required=bool(data.get("evidence_receipt_required", False)),
+        receipt_path=str(data.get("receipt_path", "") or ""),
+        gate_status=str(data.get("gate_status", "pending") or "pending"),
         goal=str(data.get("goal", "")).strip(),
         inputs=list(data.get("inputs", []) or []),
         allowed_outputs=list(data["allowed_outputs"]),

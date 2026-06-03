@@ -44,10 +44,13 @@ Execution work may only modify protected items through the documented approval p
 ## Code and Pipeline Rules
 
 - Work from task files in `tasks/execution/`.
+- Follow each task contract's `automation_class`, `evidence_receipt_required`, `receipt_path`, and `gate_status` before deciding whether to run, recover, or block it.
 - Prefer the project master workflow, currently `code/99_make_all.py` or `Makefile`.
 - Preserve logs in `outputs/logs/` when running substantial commands.
 - If code changes affect outputs, rerun relevant checks.
 - Do not overwrite main outputs unless the task allows it.
+- `approval_required` tasks, including LLM/API/source-refresh collection tasks, must not be run unless explicit human approval has cleared the blocked status.
+- `receipt_audited` and `frozen_evidence` tasks require a receipt at `receipt_path` before they can be considered verified.
 
 ## Robustness Rules
 
@@ -73,6 +76,9 @@ Run relevant checks after execution work:
 Every execution task must write an agent run report in `agent_runs/` with:
 
 - task ID
+- automation class
+- gate status
+- receipt path, if required
 - files read
 - files modified
 - commands run

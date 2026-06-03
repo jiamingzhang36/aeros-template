@@ -1,49 +1,48 @@
 task_id: T008_paper_package_draft
 stage: execution
 gate: G10
-depends_on: [T007_replication_package]
-goal: >
-  Create or audit the first paper/package draft after internal replication
-  readiness. The draft must connect research question, design, evidence,
-  claim boundary, limitations, and replication status without strengthening
-  claims beyond the approved evidence ceiling.
+automation_class: auto_rerunnable
+evidence_receipt_required: false
+receipt_path: ''
+gate_status: pending
+depends_on:
+- T007_replication_package
+goal: 'Create or audit the first paper/package draft after internal replication readiness.
+  The draft must connect research question, design, evidence, claim boundary, limitations,
+  and replication status without strengthening claims beyond the approved evidence
+  ceiling.
 
+  '
 inputs:
-  - discovery/idea_memo.md
-  - docs/method_card.md
-  - execution/protocol/main_execution_protocol.md
-  - evidence/result_index.csv
-  - evidence/claim_registry.md
-  - evidence/evidence_ledger.csv
-  - audits/replication_package_report.md
-  - outputs/tables/
-  - paper/
-
+- discovery/idea_memo.md
+- docs/method_card.md
+- execution/protocol/main_execution_protocol.md
+- evidence/result_index.csv
+- evidence/claim_registry.md
+- evidence/evidence_ledger.csv
+- audits/replication_package_report.md
+- outputs/tables/
+- paper/
 allowed_outputs:
-  - paper/draft.md
-  - audits/paper_package_report.md
-  - agent_runs/
-
+- paper/draft.md
+- audits/paper_package_report.md
+- agent_runs/
 forbidden_actions:
-  - "Do not strengthen claims beyond the claim registry."
-  - "Do not present pilot outputs as final empirical evidence."
-  - "Do not approve public replication release."
-  - "Do not modify protected definitions or raw data."
-
+- Do not strengthen claims beyond the claim registry.
+- Do not present pilot outputs as final empirical evidence.
+- Do not approve public replication release.
+- Do not modify protected definitions or raw data.
 checks:
-  - check_paper_package.py
-  - check_paper_numbers.py
-  - check_claim_registry.py
-  - check_agent_run_report.py
-
+- check_paper_package.py
+- check_paper_numbers.py
+- check_claim_registry.py
+- check_agent_run_report.py
 retry_policy:
   max_retries: 1
-
 escalate_if:
-  - "paper draft would require claim strengthening"
-  - "public replication release is requested"
-  - "checks still fail after max_retries"
-
+- paper draft would require claim strengthening
+- public replication release is requested
+- checks still fail after max_retries
 budget:
   max_agent_calls: 2
   max_dollars: 1.0

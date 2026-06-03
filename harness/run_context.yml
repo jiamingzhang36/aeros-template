@@ -21,7 +21,7 @@ scope:
 
 checks:
   required: []
-  skipped: []
+  skipped_unverified: []
   skip_reasons: {}
 
 completion:

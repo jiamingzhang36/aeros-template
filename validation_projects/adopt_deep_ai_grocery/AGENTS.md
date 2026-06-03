@@ -118,6 +118,7 @@ Every task contract must include a Mainline Alignment Gate section before execut
 
 - Work from task files in `tasks/discovery/` (discovery phase) or `tasks/execution/` (execution phase).
 - For execution-stage tasks, also read `execution/AGENTS.md`.
+- Before running or recovering any task, read the task contract fields `automation_class`, `evidence_receipt_required`, `receipt_path`, and `gate_status`.
 - Only modify files allowed by the task.
 - Write an agent run report after every task.
 - List all files read, files modified, commands run, and checks passed or failed.
@@ -125,6 +126,29 @@ Every task contract must include a Mainline Alignment Gate section before execut
 - If protected definitions appear inconsistent with the task request, stop and write the conflict in the run report.
 - High-risk tasks require a critic report before they are treated as complete.
 - Record explicitly any unresolved uncertainty and the owner questions raised in the run report before closing the task.
+
+## Automation Class Rules
+
+Task completion must use the task contract's automation class, not a generic done/skipped/blocked label.
+
+- `auto_rerunnable`: may be rerun automatically when dependencies or outputs are stale, subject to permissions and task checks.
+- `receipt_audited`: may not be treated as complete just because a human says it was reviewed; require a `human_review_receipt` at `receipt_path` and run the receipt/policy checks.
+- `frozen_evidence`: may use frozen evidence only when the source snapshot and receipt are recorded at `receipt_path`.
+- `approval_required`: must remain blocked until explicit human approval is recorded; do not run LLM extraction, API refresh, scraping, credentialed access, or source-date-sensitive collection by default.
+
+Allowed task gate statuses are:
+
+- `pending`
+- `done_auto_verified`
+- `done_human_verified_with_receipt`
+- `done_frozen_evidence_verified`
+- `skipped_unverified`
+- `needs_receipt_audit`
+- `blocked_requires_approval`
+- `blocked_missing_credentials`
+- `blocked_missing_source_snapshot`
+
+Do not write or rely on the old generic status `skipped`. If a task cannot run, classify why using one of the explicit blocked or skipped statuses.
 
 ## Harness Rules
 
@@ -158,4 +182,5 @@ Every task contract must include a Mainline Alignment Gate section before execut
 - The run report is complete.
 - Protected definitions were not changed, or changes were explicitly flagged.
 - Open issues requiring human judgment are listed.
-- Mechanical checks were run when relevant, or skipped with a reason.
+- Mechanical checks were run when relevant.
+- If work was not run, the task is classified with an explicit automation/gate status and any required evidence receipt exists.
