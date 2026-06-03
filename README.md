@@ -54,6 +54,43 @@ Start in `discovery/` unless the project already has a clear question, feasible 
 
    `decisions/` records accept, revise, reject, and defer decisions.
 
+## Runtime: How AEROS Drives Itself
+
+The layers above are documents. The `aeros` CLI is the engine that runs tasks
+against them, advances gates, and stops for human judgment.
+
+- **Gate lifecycle (`G0`–`G13`).** Every task contract declares the gate it
+  serves. The runtime runs tasks in dependency order and tracks two frontiers:
+  the `candidate_gate` (earned automatically as tasks pass) and the
+  `current_gate` (the ratified frontier).
+- **Gate tiering.** Mechanical gates (a check can adjudicate their exit
+  criteria) auto-advance the ratified frontier. **Human gates** halt the loop
+  for ratification — set in `gate_lifecycle.human_gates` (default `G3, G7, G12,
+  G13`). This is the core automation principle: automate the mechanical layer,
+  reserve the human for the few irreducible judgments.
+- **Profiles.** `gate_lifecycle.profile` selects how much of the ladder runs.
+  `lite` is a descriptive minimal ring (`G0,G1,G3,G4,G6,G7,G10`; human gates
+  `G3,G7`); `full` is the complete ladder. A profile only selects which gates'
+  tasks run; the runtime pulls in any task an active task depends on, so a
+  slimmed profile cannot break the task DAG. Start with `lite`; add gates when
+  the project demonstrably needs them.
+- **Human-gate trust anchor.** At a human gate the agent writes a decision
+  packet and an approval *request* but cannot grant it: a grant counts only when
+  the approval artifact is committed by an `approver_identity`
+  (`harness/permissions.yml` `human_approval`). See
+  `harness/protocols/human_gate.md`.
+
+Typical loop:
+
+```
+aeros status                      # where am I (current/candidate gate, budget)
+aeros run <task>      | aeros pipeline   # advance until a human gate halts
+# at a halt: read decisions/gates/<gate>_decision_packet.md, then (as human):
+git add decisions/approvals/<gate>.md && git commit -m "approve <gate>"
+aeros gate approve "<gate>" --stage <stage> --owner <name> --note <why>
+# re-run to resume
+```
+
 ## Directory Map
 
 ```text
