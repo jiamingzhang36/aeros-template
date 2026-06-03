@@ -14,6 +14,7 @@ import argparse
 import csv
 import os
 import sys
+from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
 
@@ -25,6 +26,7 @@ from .runtime.checks import run_checks
 from .runtime.collection import collect_prompt_grid, resolve_config
 from .runtime.contract import load_contract
 from .runtime.controller import run_iteration
+from .runtime import identity
 from .runtime.data_backfill import BackfillArgs, run_data_backfill
 from .runtime.decision_packet import write_decision_packet
 from .runtime.init_project import init_project
@@ -275,6 +277,49 @@ def _cmd_gate_history(args: argparse.Namespace) -> int:
     return 0
 
 
+def _gate_slug(gate: str) -> str:
+    """Stable filename token for a gate label, e.g. 'G3 Research Design' -> 'G3'."""
+    token = (gate or "").strip().split()[0] if (gate or "").strip() else "gate"
+    return "".join(ch for ch in token if ch.isalnum() or ch in "-_") or "gate"
+
+
+def _approval_artifact_path(root: Path, gate: str) -> Path:
+    section = {}
+    perms = root / "harness" / "permissions.yml"
+    if perms.exists():
+        import yaml as _yaml
+        data = _yaml.safe_load(perms.read_text(encoding="utf-8")) or {}
+        section = data.get("human_approval", {}) or {}
+    rel_dir = str(section.get("approval_artifact_dir", "decisions/approvals"))
+    return root / rel_dir / f"{_gate_slug(gate)}.md"
+
+
+def _cmd_gate_request(args: argparse.Namespace) -> int:
+    """Agent-writable approval REQUEST. Does not grant anything until an approver
+    commits the artifact under an approved git identity."""
+    root = _project_root()
+    artifact = _approval_artifact_path(root, args.gate)
+    artifact.parent.mkdir(parents=True, exist_ok=True)
+    body = (
+        f"# Gate approval request: {args.gate}\n\n"
+        f"- requested_at: {datetime.now(timezone.utc).isoformat(timespec='seconds')}\n"
+        f"- stage: {args.stage}\n"
+        f"- gate: {args.gate}\n"
+        f"- requested_by: {args.owner or 'agent'}\n\n"
+        f"## Why this gate is ready\n\n{args.note or '(fill in the evidence summary)'}\n\n"
+        "## Human grant\n\n"
+        "This request becomes a GRANT only when an approver commits this file under\n"
+        "an approved git identity (harness/permissions.yml human_approval). The agent\n"
+        "cannot grant its own gate. Review, then:\n\n"
+        f"    git add {artifact.relative_to(root)} && git commit -m \"approve {_gate_slug(args.gate)}\"\n"
+        f"    aeros gate approve \"{args.gate}\" --stage \"{args.stage}\"\n"
+    )
+    artifact.write_text(body, encoding="utf-8")
+    print(f"wrote approval request: {artifact.relative_to(root)}")
+    print("This is a REQUEST, not a grant. An approver must commit it (see the file).")
+    return 0
+
+
 def _cmd_gate_approve(args: argparse.Namespace) -> int:
     root = _project_root()
 
@@ -310,12 +355,35 @@ def _cmd_gate_approve(args: argparse.Namespace) -> int:
         for f in failures:
             print(f"  - {f}")
 
+    # Trust anchor: the agent can REQUEST approval but cannot GRANT it. A grant
+    # only counts when the approval artifact is committed by an approver_identity
+    # (see harness/permissions.yml). The agent, committing under agent_identity,
+    # physically cannot produce a passing artifact.
+    approver_committer = ""
+    if identity.enforcement_enabled(root):
+        artifact = _approval_artifact_path(root, args.gate)
+        granted, reason = identity.approved_by_human(artifact, root)
+        if not granted:
+            if not args.force:
+                print(f"REFUSED: {args.gate} is not human-granted ({reason}).")
+                print(f"  An approver must review and commit {artifact.relative_to(root)} "
+                      f"under an approved git identity.")
+                print(f"  Create the request with:  aeros gate request \"{args.gate}\"")
+                print("  Then (as the human):       git add <artifact> && git commit")
+                print("  Override with --force (logged) only if you accept the audit trail gap.")
+                return 3
+            note = f"[FORCED past human-grant anchor: {reason}] " + note
+            print(f"WARNING: forcing approval without a committed human grant: {reason}")
+        else:
+            approver_committer = reason.replace("approved by ", "")
+            print(f"human grant verified: {reason}")
+
     state = load_state(root)
     decision = approve_gate(
         state,
         stage=args.stage,
         gate=args.gate,
-        owner=args.owner or "",
+        owner=args.owner or approver_committer,
         note=note,
     )
     save_state(root, state)
@@ -561,6 +629,14 @@ def main(argv: list[str] | None = None) -> int:
     gate_approve.add_argument("--force", action="store_true",
                               help="approve even if gate exit criteria are unmet (override is logged)")
     gate_approve.set_defaults(func=_cmd_gate_approve)
+
+    gate_request = gate_sub.add_parser(
+        "request", help="write an approval REQUEST artifact (agent may do this; does not grant)")
+    gate_request.add_argument("gate", help="gate to request, e.g. G3")
+    gate_request.add_argument("--stage", default="discovery", help="stage name")
+    gate_request.add_argument("--owner", default="", help="requester")
+    gate_request.add_argument("--note", default="", help="evidence summary for the approver")
+    gate_request.set_defaults(func=_cmd_gate_request)
 
     gate_block = gate_sub.add_parser("block", help="record a human gate block")
     gate_block.add_argument("gate", help="gate to block, e.g. G6")

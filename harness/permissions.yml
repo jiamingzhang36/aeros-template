@@ -6,6 +6,21 @@
 
 version: "0.1"
 
+# Human adjudication trust anchor.
+#
+# Gates and evidence receipts only "count" when the artifact's last git commit
+# author is an approver_identity. The autonomous loop must commit under an
+# agent_identity and must NOT change git config (user.name / user.email).
+# This is tamper-evident for single-user setups (a human and the agent may
+# share a machine); escalate to GPG-signed commits for tamper resistance.
+human_approval:
+  enforcement: "git_committer"   # set to "off" to fall back to legacy field-presence only
+  approver_identity:
+    - "gagaggg36"                # human-held git author(s) allowed to grant approvals
+  agent_identity:
+    - "aeros-agent"              # the autonomous loop commits under this; never counts as approval
+  approval_artifact_dir: "decisions/approvals"
+
 defaults:
   work_mode: "branch_or_isolated_worktree"
   push_to_remote: "human_only"
