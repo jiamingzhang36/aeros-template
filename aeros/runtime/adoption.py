@@ -188,6 +188,8 @@ def _codex_synthesis(samples: list[dict[str, str]]) -> dict[str, Any]:
             timeout=180,
             capture_output=True,
             text=True,
+            # codex reads stdin; without EOF it hangs in unattended runs.
+            stdin=subprocess.DEVNULL,
         )
         text = out_path.read_text(encoding="utf-8", errors="ignore").strip()
         match = re.search(r"\{.*\}", text, flags=re.S)

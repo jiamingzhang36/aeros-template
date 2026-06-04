@@ -58,6 +58,8 @@ def _run_streaming(cmd: list[str], timeout_seconds: int) -> int:
         bufsize=1,
         env=env,
         start_new_session=True,
+        # Unattended: a pipeline script that reads stdin must not block the check.
+        stdin=subprocess.DEVNULL,
     )
 
     assert proc.stdout is not None

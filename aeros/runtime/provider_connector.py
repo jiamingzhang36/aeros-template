@@ -157,6 +157,8 @@ class ClaudeCLIProvider(BaseProvider):
             proc = subprocess.run(
                 [binary, "-p", prompt, "--output-format", "json"],
                 capture_output=True, text=True, timeout=self.timeout_seconds, env=env,
+                # claude -p reads stdin; without EOF it hangs in unattended runs.
+                stdin=subprocess.DEVNULL,
             )
         except subprocess.TimeoutExpired as exc:
             raise ProviderError(f"claude CLI timed out after {self.timeout_seconds}s") from exc
@@ -236,6 +238,8 @@ class CodexCLIProvider(BaseProvider):
                 capture_output=True,
                 text=True,
                 timeout=self.timeout_seconds,
+                # codex reads stdin; without EOF it hangs in unattended runs.
+                stdin=subprocess.DEVNULL,
             )
             output_text = ""
             try:

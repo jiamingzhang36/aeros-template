@@ -509,6 +509,8 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
             cwd=str(cwd),
             timeout=task_timeout_override or contract.timeout_seconds,
             check=False,
+            # Unattended runner: a probe script that reads stdin must not block.
+            stdin=subprocess.DEVNULL,
         )
         if result.returncode != 0:
             feedback = f"Deterministic command failed with exit code {result.returncode}"
