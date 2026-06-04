@@ -21,8 +21,19 @@ import yaml
 FUNNEL_DIR = Path("discovery/funnels")
 
 # Selection by significance alone is the canonical post-hoc bias; disallow it.
-SIGNIFICANCE_ONLY = {"significance", "p-value", "pvalue", "p<0.05", "p < 0.05",
-                     "most significant", "lowest p", "stars"}
+# Substring phrases (matched against the lowercased selection criterion).
+SIGNIFICANCE_PHRASES = (
+    "significance", "significant", "p-value", "pvalue", "p value",
+    "p<0.05", "p < 0.05", "p<.05", "most significant", "lowest p",
+    "smallest p", "by p", "stars", "t-stat", "t stat",
+)
+
+
+def _is_significance_only(criterion: str) -> bool:
+    c = criterion.strip().lower()
+    if not c:
+        return False
+    return any(phrase in c for phrase in SIGNIFICANCE_PHRASES)
 
 
 @dataclass
@@ -131,8 +142,9 @@ def _selection_problems(funnel: Funnel, champion_id: str, rationale: str) -> lis
         problems.append(f"champion {champion_id!r} is not among the candidates")
     if not funnel.selection_criterion.strip():
         problems.append("selection_criterion must be stated up front (before selecting)")
-    elif funnel.selection_criterion.strip().lower() in SIGNIFICANCE_ONLY:
-        problems.append("selection may not be by statistical significance alone")
+    elif _is_significance_only(funnel.selection_criterion):
+        problems.append("selection criterion appears to rest on statistical significance — "
+                        "state a substantive criterion (significance alone is post-hoc bias)")
     if not rationale.strip():
         problems.append("a selection rationale is required")
     return problems

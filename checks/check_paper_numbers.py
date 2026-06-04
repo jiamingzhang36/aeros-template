@@ -40,6 +40,18 @@ CHECK_NAME = "check_paper_numbers"
 NUMBER_RE = re.compile(r"(?<![\w.])([-+]?\d+\.\d+\s*%?|\d+\s*%)(?![\w])")
 PLACEHOLDER_MARKERS = ("placeholder", "todo", "to be written", "draft skeleton")
 
+# Cross-reference words: a number right after one of these is a label, not an
+# estimate (e.g. "Table 3.2", "Figure 2.5", "Section 4.1", "Version 2.0").
+REFERENCE_WORDS = {
+    "table", "tables", "figure", "figures", "fig", "panel", "panels",
+    "section", "sections", "sec", "subsection", "appendix", "appendices",
+    "equation", "equations", "eq", "eqn", "column", "columns", "col", "row",
+    "rows", "chapter", "version", "v", "step", "footnote", "note", "model",
+    "models", "specification", "specifications", "spec", "no", "number",
+    "page", "pp", "item", "line", "stage", "gate", "hypothesis",
+}
+_PREV_WORD_RE = re.compile(r"([A-Za-z]+)\.?\s*$")
+
 
 def _emit(as_json: bool, status: str, failures: list[str], note: str = "") -> int:
     if as_json:
@@ -165,6 +177,9 @@ def main(argv: list[str] | None = None) -> int:
         for line_no, line in enumerate(text.splitlines(), 1):
             for m in NUMBER_RE.finditer(line):
                 token = m.group(1).strip()
+                prev = _PREV_WORD_RE.search(line[:m.start()])
+                if prev and prev.group(1).lower() in REFERENCE_WORDS:
+                    continue  # cross-reference label (Table 3.2, Figure 2.5), not an estimate
                 scanned_numbers += 1
                 if not _matches(token, verified, whitelist):
                     snippet = line.strip()[:80]
