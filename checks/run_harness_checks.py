@@ -27,6 +27,7 @@ CHECKS = [
     "check_data_inventory.py",
     "check_data_backfill_queue.py",
     "check_anchor.py",
+    "check_funnel.py",
     "check_design_selection.py",
     "check_data_contract.py",
     "check_protected_definitions.py",

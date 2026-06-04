@@ -576,6 +576,27 @@ def _cmd_roadmap(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_funnel(args: argparse.Namespace) -> int:
+    from .runtime.funnel import new_funnel, select_champion
+    root = _project_root()
+    if args.funnel_command == "new":
+        path = new_funnel(root, args.round, args.candidates, criterion=args.criterion or "")
+        print(f"wrote funnel: {path.relative_to(root)} ({max(args.candidates, 2)} parallel candidate(s))")
+        print("Edit candidates + selection_criterion, then: aeros funnel select ...")
+        return 0
+    if args.funnel_command == "select":
+        path, problems = select_champion(root, args.round, args.champion, args.rationale or "")
+        if problems:
+            print("REFUSED: cannot select champion:")
+            for p in problems:
+                print(f"  - {p}")
+            return 2
+        print(f"champion {args.champion} selected in {path.relative_to(root)}; others pruned.")
+        return 0
+    print("unknown funnel command")
+    return 2
+
+
 def _cmd_manifest(args: argparse.Namespace) -> int:
     from .runtime.artifact_manifest import build_manifest, verify_manifest
     root = _project_root()
@@ -687,6 +708,20 @@ def main(argv: list[str] | None = None) -> int:
     manifest_p.add_argument("--verify", action="store_true",
                             help="verify current artifacts against the manifest (detect drift)")
     manifest_p.set_defaults(func=_cmd_manifest)
+
+    funnel = sub.add_parser("funnel",
+                            help="two-layer funnel: parallel candidates -> champion")
+    funnel_sub = funnel.add_subparsers(dest="funnel_command", required=True)
+    funnel_new = funnel_sub.add_parser("new", help="scaffold N parallel candidates for a round")
+    funnel_new.add_argument("round", help="round name, e.g. findings or design")
+    funnel_new.add_argument("--candidates", type=int, default=3, help="number of parallel candidates")
+    funnel_new.add_argument("--criterion", default="", help="selection criterion, stated up front")
+    funnel_new.set_defaults(func=_cmd_funnel)
+    funnel_sel = funnel_sub.add_parser("select", help="record the champion; prune the rest")
+    funnel_sel.add_argument("round", help="round name")
+    funnel_sel.add_argument("--champion", required=True, help="candidate id to crown")
+    funnel_sel.add_argument("--rationale", default="", help="why this champion (not significance alone)")
+    funnel_sel.set_defaults(func=_cmd_funnel)
 
     state_parser = sub.add_parser("state", help="inspect or clean runtime state")
     state_sub = state_parser.add_subparsers(dest="state_command", required=True)

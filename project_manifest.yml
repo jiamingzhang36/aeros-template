@@ -261,6 +261,7 @@ checks:
   data_diagnostics: checks/check_data_diagnostics.py
   design_options: checks/check_design_options.py
   design_selection: checks/check_design_selection.py
+  funnel: checks/check_funnel.py
   variable_construction: checks/check_variable_construction.py
   data_contract: checks/check_data_contract.py
   protected_definitions: checks/check_protected_definitions.py
