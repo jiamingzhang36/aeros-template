@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -28,18 +29,14 @@ CHECK_NAME = "check_anchor"
 
 REQUIRED = ["topic", "claim_type", "identification", "data"]
 
-# Claim-strength ladder (consistent with AGENTS.md claim taxonomy). A claim whose
-# type ranks above the anchor's claim_type is drift and must be blocked.
-RANK = {
-    "descriptive": 1,
-    "associational": 2,
-    "correlational": 2,
-    "causal": 3,
-    "mechanism": 4,
-    "external_validity": 5,
-    "policy_translation": 6,
-    "forecast": 7,
-}
+# The one robust distinction (not a 7-level ladder, which mis-ranks different
+# KINDS of claims as if they were strengths): does the claim assert more than an
+# association? "Beyond-association" claims (causal and everything that presupposes
+# causality) are drift when the anchor is only descriptive/associational.
+ASSOCIATION_OR_BELOW = {"descriptive", "associational", "correlational"}
+BEYOND_ASSOCIATION = {"causal", "mechanism", "external_validity",
+                      "policy_translation", "forecast"}
+KNOWN_TYPES = ASSOCIATION_OR_BELOW | BEYOND_ASSOCIATION
 
 
 def _norm(value: str) -> str:
@@ -58,18 +55,31 @@ def _emit(as_json: bool, status: str, failures: list[str], note: str = "") -> in
     return 0 if status == "pass" else 1
 
 
-def _claim_types() -> list[tuple[str, str]]:
-    """Return (claim_id, type) from the claim registry markdown table."""
+def _claim_types() -> tuple[list[tuple[str, str]], bool]:
+    """Return (rows of (claim_id, type), looks_populated).
+
+    looks_populated is True when the registry clearly contains claim content but
+    we parsed zero rows -- a format mismatch we must surface loudly instead of
+    silently passing (#2: a check that silently lies is worse than no check)."""
     if not CLAIMS.exists():
-        return []
+        return [], False
+    text = CLAIMS.read_text(encoding="utf-8")
     rows: list[tuple[str, str]] = []
-    for line in CLAIMS.read_text(encoding="utf-8").splitlines():
+    for line in text.splitlines():
         if not line.startswith("| C") or line.startswith("| Claim ID"):
             continue
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
         if len(cells) >= 3 and cells[0]:
             rows.append((cells[0], cells[2]))
-    return rows
+    # Fail-loud signal: real claim-id tokens (C001-style) are present but NONE
+    # parsed into the expected table shape. Requires actual claim ids, so an
+    # empty-template registry (header + legend only) does NOT trip this.
+    has_claim_ids = bool(
+        re.search(r"(?m)^\|\s*C\d", text)          # malformed table row
+        or re.search(r"(?m)^\s*[-*]?\s*C\d{3}\b", text)  # list/alt format claim id
+    )
+    looks_populated = (not rows) and has_claim_ids
+    return rows, looks_populated
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -92,28 +102,32 @@ def main(argv: list[str] | None = None) -> int:
         if not str(anchor.get(field, "")).strip():
             failures.append(f"locked anchor is missing component: {field}")
 
-    ceiling_type = _norm(anchor.get("claim_type", ""))
-    ceiling = RANK.get(ceiling_type)
-    if ceiling_type and ceiling is None:
+    anchor_type = _norm(anchor.get("claim_type", ""))
+    if anchor_type and anchor_type not in KNOWN_TYPES:
         failures.append(f"anchor.claim_type {anchor.get('claim_type')!r} is not a known claim type "
-                        f"({', '.join(sorted(set(RANK)))})")
+                        f"({', '.join(sorted(KNOWN_TYPES))})")
 
-    if ceiling is not None:
-        for claim_id, claim_type in _claim_types():
-            ctype = _norm(claim_type)
-            crank = RANK.get(ctype)
-            if crank is None:
-                continue  # unknown/blank claim type handled by other checks
-            if crank > ceiling:
+    rows, looks_populated = _claim_types()
+    if looks_populated:
+        failures.append(f"{CLAIMS} appears to contain claims but none could be parsed "
+                        "(format mismatch?) — refusing to pass silently")
+
+    # The one robust drift rule: if the anchor only commits to association or
+    # below, no claim may assert beyond association (causal and what presupposes it).
+    if anchor_type in ASSOCIATION_OR_BELOW:
+        for claim_id, claim_type in rows:
+            if _norm(claim_type) in BEYOND_ASSOCIATION:
                 failures.append(
-                    f"DRIFT: {claim_id} is '{claim_type}' but the anchor ceiling is "
-                    f"'{anchor.get('claim_type')}' — claims may not exceed the anchor set at intake"
+                    f"DRIFT: {claim_id} is '{claim_type}' but the anchor commits only to "
+                    f"'{anchor.get('claim_type')}' — a claim may not go beyond association "
+                    "without re-anchoring at intake"
                 )
 
     if failures:
         return _emit(as_json, "fail", failures)
     return _emit(as_json, "pass", [],
-                 note=f"anchor locked; 4 components set; no claim exceeds ceiling '{anchor.get('claim_type')}'")
+                 note=f"anchor locked; 4 components set; no claim drifts beyond anchor "
+                      f"'{anchor.get('claim_type')}' ({len(rows)} claim(s) checked)")
 
 
 if __name__ == "__main__":

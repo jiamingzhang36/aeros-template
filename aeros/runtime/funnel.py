@@ -12,6 +12,7 @@ A funnel round lives at discovery/funnels/<round>.yml.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -29,11 +30,26 @@ SIGNIFICANCE_PHRASES = (
 )
 
 
+# Connective/filler words that are not substantive selection content.
+_CONNECTIVES = {
+    "and", "or", "the", "by", "of", "with", "a", "an", "based", "on", "to",
+    "lowest", "highest", "smallest", "largest", "most", "least", "value",
+    "values", "using", "via", "then", "best", "select", "selection",
+    "criterion", "statistical", "is", "are", "that", "which", "for",
+}
+
+
 def _is_significance_only(criterion: str) -> bool:
+    """True only when significance is the SOLE basis. If a substantive criterion
+    is also present (e.g. 'theoretical fit AND significance'), it is allowed --
+    we block significance ALONE, not any mention of it (avoids over-blocking)."""
     c = criterion.strip().lower()
-    if not c:
+    if not c or not any(phrase in c for phrase in SIGNIFICANCE_PHRASES):
         return False
-    return any(phrase in c for phrase in SIGNIFICANCE_PHRASES)
+    for phrase in sorted(SIGNIFICANCE_PHRASES, key=len, reverse=True):
+        c = c.replace(phrase, " ")
+    remainder = [t for t in re.findall(r"[a-z]+", c) if t not in _CONNECTIVES]
+    return not remainder
 
 
 @dataclass

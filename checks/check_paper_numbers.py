@@ -128,17 +128,15 @@ def _matches(paper_num: str, verified: list[float], whitelist: set[str]) -> bool
     except ValueError:
         return True  # unparseable -> do not flag
     decimals = len(bare.split(".")[1]) if "." in bare else 0
-    candidates = {value}
-    if raw.endswith("%"):
-        candidates |= {value / 100.0, value * 100.0}
     eps = 0.5 * (10 ** (-decimals)) + 1e-9
     for v in verified:
-        for c in candidates:
-            if abs(round(v, decimals) - round(c, decimals)) <= eps:
-                return True
-            # also accept percentage<->fraction stored forms
-            if abs(round(v * 100.0, decimals) - round(c, decimals)) <= eps:
-                return True
+        # direct match (same representation)
+        if abs(round(v, decimals) - round(value, decimals)) <= eps:
+            return True
+        # a percentage in the paper may be stored as a fraction in the artifact
+        # (12.5%  <->  0.125): accept ONLY this one cross-form, not arbitrary x100.
+        if raw.endswith("%") and abs(round(v * 100.0, decimals) - round(value, decimals)) <= eps:
+            return True
     return False
 
 
