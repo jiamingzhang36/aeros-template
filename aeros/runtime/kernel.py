@@ -175,6 +175,24 @@ def _stale_reason(
 AWAITING_GATE = 7  # pipeline halted at a gate boundary, waiting for human approval
 
 
+def _agent_provenance(project_root: Path) -> tuple[str, str, float | None]:
+    """Best-effort provenance for the worker agent, read from the manifest.
+    Records what is actually known; never fabricates a model/temperature."""
+    manifest_path = project_root / "project_manifest.yml"
+    if not manifest_path.exists():
+        return "", "", None
+    manifest = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    auto = manifest.get("automation", {}) or {}
+    provider = str(auto.get("agent_provider", "") or "")
+    model = str(auto.get("agent_model", "") or "")
+    temp = auto.get("temperature", None)
+    try:
+        temp = float(temp) if temp is not None else None
+    except (TypeError, ValueError):
+        temp = None
+    return provider, model, temp
+
+
 def _critic_config(project_root: Path) -> dict:
     """Read automation.critic config. Default: disabled (opt-in)."""
     manifest_path = project_root / "project_manifest.yml"
@@ -553,10 +571,14 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
         state_mod.record_run_summary(state, contract.task_id,
                                      calls=run_calls, cost_usd=run_cost)
         state_mod.save_state(project_root, state)
+        prov_provider, prov_model, prov_temp = _agent_provenance(project_root)
+        tools_used = sorted({name for rec in attempts_log for name, _, _ in rec.checks})
         run = RunRecord(
             contract=contract, final_status=status, attempts=attempts_log,
             run_calls=run_calls, run_cost_usd=run_cost,
             run_input_tokens=run_in, run_output_tokens=run_out,
+            agent_provider=prov_provider, agent_model=prov_model,
+            temperature=prov_temp, tools_used=tools_used,
         )
         report_path = write_run_report(project_root, run)
         print(f"[kernel] run report -> {report_path.relative_to(project_root)} "

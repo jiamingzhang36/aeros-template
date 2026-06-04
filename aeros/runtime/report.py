@@ -33,6 +33,11 @@ class RunRecord:
     run_cost_usd: float = 0.0
     run_input_tokens: int = 0
     run_output_tokens: int = 0
+    # Provenance schema (STARD-AI / PROV-AGENT): record enough to reproduce and audit.
+    agent_provider: str = ""
+    agent_model: str = ""
+    temperature: float | None = None
+    tools_used: list[str] = field(default_factory=list)
 
 
 def _checks_table(run: RunRecord) -> str:
@@ -114,6 +119,8 @@ def write_run_report(project_root: Path, run: RunRecord) -> Path:
 - Agent calls (this run): {run.run_calls}
 - Cost (this run): ${run.run_cost_usd:.4f}
 - Tokens (this run): {run.run_input_tokens} in / {run.run_output_tokens} out
+- Provenance: provider={run.agent_provider or 'n/a'}, model={run.agent_model or 'n/a'}, temperature={run.temperature if run.temperature is not None else 'n/a'}
+- Tools used: {", ".join(run.tools_used) if run.tools_used else "n/a"}
 
 ## Objective
 

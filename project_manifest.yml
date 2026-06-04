@@ -149,6 +149,8 @@ gate_exit_criteria:
       marker: Project master script placeholder
     - type: result_index_all_have_provenance
       path: evidence/result_index.csv
+    - type: check_passes
+      check: check_artifact_manifest.py
   G10:
     requires:
     - type: check_passes
@@ -274,6 +276,7 @@ checks:
   provider_collection: checks/check_provider_collection.py
   compliance_gate: checks/check_compliance_gate.py
   output_reproducibility: checks/check_output_reproducibility.py
+  artifact_manifest: checks/check_artifact_manifest.py
   project_status: checks/check_project_status.py
   provenance: checks/check_provenance.py
   execution_protocol: checks/check_execution_protocol.py

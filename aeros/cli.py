@@ -576,6 +576,23 @@ def _cmd_roadmap(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_manifest(args: argparse.Namespace) -> int:
+    from .runtime.artifact_manifest import build_manifest, verify_manifest
+    root = _project_root()
+    if args.verify:
+        problems = verify_manifest(root)
+        if problems:
+            print("DRIFT: registered artifacts changed since the manifest:")
+            for p in problems:
+                print(f"  - {p}")
+            return 1
+        print("OK: all manifested artifacts match their recorded SHA256")
+        return 0
+    path, n = build_manifest(root)
+    print(f"wrote {path.relative_to(root)} ({n} artifact(s) hashed with sha256)")
+    return 0
+
+
 def _cmd_feasibility(args: argparse.Namespace) -> int:
     root = _project_root()
     f = feasibility(root)
@@ -664,6 +681,12 @@ def main(argv: list[str] | None = None) -> int:
 
     roadmap = sub.add_parser("roadmap", help="show compressed 5-milestone roadmap")
     roadmap.set_defaults(func=_cmd_roadmap)
+
+    manifest_p = sub.add_parser("manifest",
+                                help="snapshot/verify SHA256 of registered result artifacts")
+    manifest_p.add_argument("--verify", action="store_true",
+                            help="verify current artifacts against the manifest (detect drift)")
+    manifest_p.set_defaults(func=_cmd_manifest)
 
     state_parser = sub.add_parser("state", help="inspect or clean runtime state")
     state_sub = state_parser.add_subparsers(dest="state_command", required=True)

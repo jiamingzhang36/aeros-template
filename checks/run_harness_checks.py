@@ -35,6 +35,7 @@ CHECKS = [
     "check_claim_method_consistency.py",
     "check_paper_numbers.py",
     "check_output_reproducibility.py",
+    "check_artifact_manifest.py",
     "check_project_status.py",
     "check_provenance.py",
     "check_task_contract.py",
