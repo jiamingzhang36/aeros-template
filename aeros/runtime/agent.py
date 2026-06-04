@@ -100,6 +100,41 @@ def _agent_provider(project_root: Path) -> str:
     return "claude"
 
 
+def _agent_permission_flags(project_root: Path) -> list[str]:
+    """Permission mode for the headless `claude -p` worker.
+
+    In headless mode a tool that needs approval has no TTY to prompt on, so the
+    worker hangs until timeout. The worker therefore runs with an explicit
+    permission mode. Safety does NOT come from interactive prompts here -- it
+    comes from the project .claude/settings.json deny-hooks (e.g. the data/raw
+    write block) and the allowed_outputs enforcement. Configurable via
+    AEROS_AGENT_PERMISSION_MODE or automation.agent_permission_mode.
+
+    Values: acceptEdits (default; auto-accept file writes, other tools gated) |
+    bypass / dangerous (--dangerously-skip-permissions, for fully unattended runs
+    that also need bash) | default | plan.
+    """
+    mode = os.getenv("AEROS_AGENT_PERMISSION_MODE", "").strip().lower()
+    if not mode:
+        manifest = project_root / "project_manifest.yml"
+        if manifest.exists():
+            try:
+                data = yaml.safe_load(manifest.read_text(encoding="utf-8")) or {}
+            except yaml.YAMLError:
+                data = {}
+            automation = data.get("automation", {}) if isinstance(data, dict) else {}
+            if isinstance(automation, dict):
+                mode = str(automation.get("agent_permission_mode", "") or "").strip().lower()
+    if not mode:
+        mode = "acceptedits"
+    if mode in {"bypass", "dangerous", "dangerously-skip-permissions", "skip"}:
+        return ["--dangerously-skip-permissions"]
+    canonical = {"acceptedits": "acceptEdits", "default": "default", "plan": "plan"}.get(mode)
+    if canonical:
+        return ["--permission-mode", canonical]
+    return ["--permission-mode", "acceptEdits"]
+
+
 def _task_id_from_prompt(prompt: str) -> str:
     match = re.search(r"executing task\s+([A-Za-z0-9_.-]+)", prompt)
     return match.group(1) if match else "task"
@@ -346,6 +381,7 @@ def run_agent(prompt: str, project_root: Path, timeout: int = 480,
     if not binary:
         return AgentResult(False, "", "`claude` CLI not found on PATH.")
     cmd = [binary, "-p", prompt, "--output-format", "stream-json", "--verbose"]
+    cmd += _agent_permission_flags(project_root)
     if max_budget_usd is not None and max_budget_usd > 0:
         # Hard per-call dollar cap (claude --max-budget-usd). This is what makes
         # max_dollars an enforceable ceiling instead of a between-calls guardrail:
@@ -356,11 +392,21 @@ def run_agent(prompt: str, project_root: Path, timeout: int = 480,
     output_lines: list[str] = []
     final: dict | None = None
     rate_limited = False
+    _dbg = os.getenv("AEROS_DEBUG_AGENT", "").strip() not in {"", "0", "false"}
+    if _dbg:
+        print(f"[agent-debug] cmd: {' '.join(repr(x) if ' ' in x else x for x in cmd[:6])} "
+              f"... (+{len(cmd)-6} args)  total_len(prompt)={len(prompt)}", flush=True)
+        print(f"[agent-debug] full flags: {[a for a in cmd if a.startswith('--')]}", flush=True)
     try:
         proc = subprocess.Popen(
             cmd,
             cwd=str(project_root), text=True, stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT, env=_agent_env(), bufsize=1,
+            # `claude -p` reads stdin (to support `echo x | claude -p`). If the
+            # autonomous loop is launched with an open-but-empty stdin (no TTY,
+            # e.g. a background daemon or `python -c`), claude blocks forever
+            # waiting for input and never starts. Hand it EOF immediately.
+            stdin=subprocess.DEVNULL,
         )
         assert proc.stdout is not None
         while True:
@@ -377,6 +423,8 @@ def run_agent(prompt: str, project_root: Path, timeout: int = 480,
                 if line:
                     line = line.rstrip("\n")
                     output_lines.append(line)
+                    if _dbg:
+                        print(f"[agent-debug] raw[{len(output_lines)}] ({int(time.monotonic()-started)}s): {line[:120]}", flush=True)
                     try:
                         event = json.loads(line)
                     except (json.JSONDecodeError, ValueError):
