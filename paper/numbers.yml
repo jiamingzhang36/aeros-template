@@ -1,0 +1,9 @@
+# Verified number registry (number injection). OPTIONAL.
+# Reference values in the paper as {{name}} (e.g. "the effect is {{ate}}").
+# Every value here MUST trace to a registered result artifact (check_paper_numbers
+# enforces it); then `aeros paper render` substitutes them by construction, so
+# even integers (sample sizes, counts) are sourced rather than free-typed.
+numbers: {}
+  # ate:    {value: 0.34, result_id: R1, note: "average treatment effect"}
+  # ate_se: {value: 0.11, result_id: R1}
+  # n_obs:  {value: 350,  result_id: R0, note: "panel observations"}

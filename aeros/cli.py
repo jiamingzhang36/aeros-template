@@ -576,6 +576,32 @@ def _cmd_roadmap(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_paper_render(args: argparse.Namespace) -> int:
+    """Substitute {{name}} number tokens from paper/numbers.yml into a rendered copy."""
+    from .runtime.number_injection import load_numbers, render_paper
+    root = _project_root()
+    src = root / (args.paper or "paper/draft.md")
+    if not src.exists():
+        print(f"REFUSED: paper source not found: {src.relative_to(root)}")
+        return 2
+    try:
+        numbers = load_numbers(root)
+    except ValueError as exc:
+        print(f"REFUSED: {exc}")
+        return 2
+    rendered, unresolved = render_paper(src.read_text(encoding="utf-8"), numbers)
+    if unresolved:
+        print("REFUSED: unresolved number tokens (add them to paper/numbers.yml):")
+        for name in sorted(set(unresolved)):
+            print(f"  - {{{{{name}}}}}")
+        return 2
+    out = src.with_name(src.stem + ".rendered" + src.suffix)
+    out.write_text(rendered, encoding="utf-8")
+    print(f"rendered -> {out.relative_to(root)} ({len(numbers)} registered number(s))")
+    print("Run `aeros check ...` / the gate to confirm every registered value traces to an artifact.")
+    return 0
+
+
 def _cmd_funnel(args: argparse.Namespace) -> int:
     from .runtime.funnel import new_funnel, select_champion
     root = _project_root()
@@ -708,6 +734,13 @@ def main(argv: list[str] | None = None) -> int:
     manifest_p.add_argument("--verify", action="store_true",
                             help="verify current artifacts against the manifest (detect drift)")
     manifest_p.set_defaults(func=_cmd_manifest)
+
+    paper = sub.add_parser("paper", help="paper utilities (number injection)")
+    paper_sub = paper.add_subparsers(dest="paper_command", required=True)
+    paper_render = paper_sub.add_parser(
+        "render", help="substitute {{name}} number tokens from paper/numbers.yml")
+    paper_render.add_argument("--paper", default="", help="paper source (default paper/draft.md)")
+    paper_render.set_defaults(func=_cmd_paper_render)
 
     funnel = sub.add_parser("funnel",
                             help="two-layer funnel: parallel candidates -> champion")

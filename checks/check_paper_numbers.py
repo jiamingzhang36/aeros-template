@@ -30,6 +30,13 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+try:
+    from aeros.runtime.number_injection import load_numbers, tokens_in
+except Exception:  # pragma: no cover - injection layer optional
+    load_numbers = None  # type: ignore[assignment]
+    tokens_in = None      # type: ignore[assignment]
+
 RESULT_INDEX = Path("evidence/result_index.csv")
 PAPER_FILES = [Path("paper/draft.md")]
 PAPER_GLOBS = [("paper", "*.tex"), ("paper", "*.md")]
@@ -167,11 +174,38 @@ def main(argv: list[str] | None = None) -> int:
 
     whitelist = _load_whitelist()
     verified = _verified_values()
+
+    # 2a. Number-injection registry (paper/numbers.yml): every registered value
+    # must itself trace to an artifact, so {{name}} tokens are sourced by
+    # construction (including integers a free-text scan cannot safely flag).
+    registry: dict = {}
+    if load_numbers is not None:
+        try:
+            registry = load_numbers(Path.cwd())
+        except ValueError as exc:
+            return _emit(as_json, "fail", failures + [str(exc)])
+        for name, spec in registry.items():
+            val = spec.get("value")
+            if val is None:
+                failures.append(f"numbers.yml: '{name}' has no value")
+                continue
+            if not _matches(str(val), verified, whitelist):
+                failures.append(f"numbers.yml: '{name}'={val} does not trace to any registered "
+                                f"result artifact or whitelist")
+
     scanned_numbers = 0
     for paper in papers:
         text = paper.read_text(encoding="utf-8", errors="ignore")
-        if any(marker in text.lower() for marker in PLACEHOLDER_MARKERS) and not verified:
+        if any(marker in text.lower() for marker in PLACEHOLDER_MARKERS) and not verified and not registry:
             continue  # placeholder draft, nothing to verify
+        # Unresolved {{name}} tokens are fabrication-by-omission: a number that
+        # claims to be sourced but names nothing in the registry.
+        if tokens_in is not None:
+            for line_no, line in enumerate(text.splitlines(), 1):
+                for name in tokens_in(line):
+                    if name not in registry:
+                        failures.append(f"{paper}:{line_no}: unresolved number token "
+                                        f"{{{{{name}}}}} (not in paper/numbers.yml)")
         for line_no, line in enumerate(text.splitlines(), 1):
             for m in NUMBER_RE.finditer(line):
                 token = m.group(1).strip()

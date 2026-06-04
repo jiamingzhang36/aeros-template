@@ -96,6 +96,12 @@ Integrity mechanisms (non-LLM anchors):
 - **Anti-fabrication (`check_paper_numbers`).** Every estimate-like number in the
   paper must trace to a value in a registered result artifact (within rounding)
   or an explicit `paper/number_whitelist.txt`; otherwise it is flagged.
+- **Number injection (`paper/numbers.yml` + `aeros paper render`, optional).** The
+  strongest form of "numbers trace to results": reference values by name —
+  `{{ate}}`, `{{n_obs}}` — define them once in `paper/numbers.yml` (each verified
+  against an artifact), and render substitutes them. Injected numbers are sourced
+  by construction, including integers a free-text scan cannot safely flag.
+  Unresolved tokens and ungrounded registry values both fail the check.
 - **Artifact manifest (`aeros manifest`).** SHA256 snapshot of registered result
   artifacts; `check_artifact_manifest` fails on any later drift. Gives a
   tamper-evident chain: script → artifact → number in the paper.
