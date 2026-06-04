@@ -88,6 +88,24 @@ against them, advances gates, and stops for human judgment.
   (`harness/permissions.yml` `human_approval`). See
   `harness/protocols/human_gate.md`.
 
+Integrity mechanisms (non-LLM anchors):
+
+- **Anchor (`discovery/anchor.yml`).** Four components — topic, claim_type,
+  identification, data — fixed once at intake and frozen. `check_anchor` blocks
+  any downstream claim that exceeds the anchored claim_type (anti-drift).
+- **Anti-fabrication (`check_paper_numbers`).** Every estimate-like number in the
+  paper must trace to a value in a registered result artifact (within rounding)
+  or an explicit `paper/number_whitelist.txt`; otherwise it is flagged.
+- **Artifact manifest (`aeros manifest`).** SHA256 snapshot of registered result
+  artifacts; `check_artifact_manifest` fails on any later drift. Gives a
+  tamper-evident chain: script → artifact → number in the paper.
+- **Plan / apply (`aeros gate plan|apply`).** A gate decision splits into a
+  text-only proposal deck (keep/drop/edit cards; anchor cards are locked) and an
+  apply phase that runs only after the deck is committed by an approver.
+- **Two-layer funnel (`aeros funnel`).** Generate N parallel candidates, then
+  crown one champion under a criterion stated up front — never by significance
+  alone.
+
 Typical loop:
 
 ```
