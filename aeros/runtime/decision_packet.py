@@ -231,6 +231,44 @@ def _critic_overview(state: dict[str, Any]) -> list[str]:
     return lines
 
 
+# Judgment artifacts whose actual CONTENT a human should read at a gate — not
+# just whether a check passed. Surfacing excerpts here systematizes the "read the
+# substance" review (it is how a human catches hollow/placeholder content that a
+# presence-check waves through).
+_EXCERPT_ARTIFACTS = [
+    ("Research question / idea", "discovery/idea_memo.md", 25),
+    ("Anchor (4 components)", "discovery/anchor.yml", 14),
+    ("Design selection (adjudicated)", "discovery/design_selection.md", 22),
+    ("Method card", "docs/method_card.md", 45),
+    ("Variable construction", "discovery/variable_construction.md", 30),
+]
+
+
+def _artifact_excerpts(project_root: Path) -> list[str]:
+    blocks: list[str] = []
+    for label, rel, max_lines in _EXCERPT_ARTIFACTS:
+        p = project_root / rel
+        if not p.exists():
+            continue
+        raw = p.read_text(encoding="utf-8", errors="ignore").splitlines()
+        excerpt = raw[:max_lines]
+        truncated = len(raw) > max_lines
+        blocks.append(f"### {label} — `{rel}`")
+        blocks.append("")
+        blocks.append("```")
+        blocks.extend(excerpt)
+        if truncated:
+            blocks.append(f"... ({len(raw) - max_lines} more line(s); open the file)")
+        blocks.append("```")
+        blocks.append("")
+    if not blocks:
+        return []
+    return ["## Artifact Excerpts — read the substance, not just the PASS marks", "",
+            "A check confirms a section *exists*; it cannot confirm it *says something*. "
+            "Read these before approving — hollow, duplicated, or placeholder content here "
+            "is a reason to block even when every check is green.", ""] + blocks
+
+
 def _recommendation(ok: bool, target_gate: str, state: dict[str, Any]) -> str:
     already_approved = (
         state.get("gate_status") == "approved"
@@ -300,6 +338,8 @@ def build_decision_packet(project_root: Path, target_gate: str, *, stage: str = 
     lines.extend(_evidence_overview(project_root, state, target_gate))
 
     lines.extend(_critic_overview(state))
+
+    lines.extend(_artifact_excerpts(project_root))
 
     lines.extend([
         "## Key Risks for Human Review",
