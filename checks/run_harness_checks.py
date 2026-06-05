@@ -30,6 +30,7 @@ CHECKS = [
     "check_funnel.py",
     "check_design_selection.py",
     "check_no_degenerate_content.py",
+    "check_artifact_linkage.py",
     "check_data_contract.py",
     "check_protected_definitions.py",
     "check_claim_registry.py",

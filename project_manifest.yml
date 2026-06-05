@@ -107,6 +107,8 @@ gate_exit_criteria:
       check: check_design_selection.py
     - type: check_passes
       check: check_no_degenerate_content.py
+    - type: check_passes
+      check: check_artifact_linkage.py
     - type: markdown_status_equals
       path: docs/method_card.md
       value: filled
@@ -266,6 +268,7 @@ checks:
   funnel: checks/check_funnel.py
   variable_construction: checks/check_variable_construction.py
   no_degenerate_content: checks/check_no_degenerate_content.py
+  artifact_linkage: checks/check_artifact_linkage.py
   data_contract: checks/check_data_contract.py
   protected_definitions: checks/check_protected_definitions.py
   claim_registry: checks/check_claim_registry.py
