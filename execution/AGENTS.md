@@ -8,6 +8,8 @@ The goal is to execute, reproduce, validate, audit, and package an empirical res
 
 Execution-specific rules are layered on top of [AGENTS.md](../AGENTS.md) and [harness/common_rules.md](../harness/common_rules.md).
 
+If this project entered AEROS through `aeros adopt`, treat adoption artifacts as intake evidence and planning material, not as completed execution evidence. Formal execution status must come from task contracts, receipts, checks, run reports, and human gate decisions.
+
 ## Required Reading
 
 Before execution tasks, read:
@@ -54,6 +56,13 @@ Execution work may only modify protected items through the documented approval p
 - Do not overwrite main outputs unless the task allows it.
 - `approval_required` tasks, including LLM/API/source-refresh collection tasks, must not be run unless explicit human approval has cleared the blocked status.
 - `receipt_audited` and `frozen_evidence` tasks require a receipt at `receipt_path` before they can be considered verified.
+
+## Source and Validation Project Isolation
+
+- Do not write execution outputs, runtime state, or repaired data back into an adopted source folder unless the owner explicitly selected `inplace` mode.
+- Do not promote validation-project facts into the root template.
+- If validation reveals a template weakness, update the harness rule, check, or task template directly and keep the validation evidence inside `validation_projects/`.
+- If a source project says a manual review was already completed, convert that statement into a receipt audit task instead of treating it as automatic completion.
 
 ## Robustness Rules
 

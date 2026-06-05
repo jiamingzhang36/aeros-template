@@ -8,6 +8,8 @@ Shared universal rules are in [harness/common_rules.md](harness/common_rules.md)
 
 Discovery-specific requirements follow the same governance baseline in the root file and should be applied together.
 
+Use `aeros adopt` as the default intake path for new ideas, source memos, or partially completed projects. Adoption outputs are advisory drafts and inventories; they do not approve gates, certify claims, or replace source-grounded discovery work.
+
 ## Exploration Policy
 
 Be creative in exploration and strict in verification.
@@ -43,6 +45,8 @@ Do not treat inspiration papers as closest literature unless they are reclassifi
 ## Stage Rule
 
 Before promotion, keep treatment, exposure, sample, outcome, model, and claim language provisional.
+
+If discovery starts from an adopted memo or existing folder, keep adoption-derived claims in adoption drafts until they are verified through literature extraction cards, data feasibility evidence, receipts, or task checks.
 
 ## Critic Rule
 

@@ -42,6 +42,31 @@ The universal rules are in [harness/common_rules.md](harness/common_rules.md), a
 - Do not bypass `harness/permissions.yml`.
 - If evidence is ambiguous, mark it as ambiguous.
 
+## Universal Intake and Adoption Rules
+
+`aeros adopt` is the general entry point for research onboarding.
+
+Use it for all of the following cases:
+
+- a one-sentence idea
+- a memo, docx, markdown, csv, yml, json, or other source file
+- an existing research folder with partial progress
+- a validation or pressure-test project
+
+`aeros start --idea` is a compatibility shortcut for idea-only intake. Do not treat it as a separate workflow.
+
+Default adoption behavior is conservative:
+
+- Use mirror mode unless the owner explicitly requests `readonly-audit` or `inplace`.
+- Do not mutate the source project when using mirror or readonly-audit mode.
+- Do not copy validation project data, outputs, papers, agent runs, runtime state, or source-specific facts back into the root template.
+- Keep `current_gate: G0` and `gate_status: open` after adoption.
+- A raised `candidate_gate` is advisory progress, not approval.
+- Do not add gate approvals, claim upgrades, or supported claims during adoption.
+- AI-assisted extraction from source material may populate adoption drafts, evidence maps, gap plans, and adoption packets, but must not directly write formal claim support into `evidence/claim_registry.md`.
+
+After adoption, use the adoption packet and gap plan to decide the next task, gate packet, receipt audit, or data backfill step.
+
 ## Discovery Rules
 
 Exploration is allowed, but unverified exploration cannot become a formal conclusion.
@@ -152,6 +177,12 @@ Allowed task gate statuses are:
 
 Do not write or rely on the old generic status `skipped`. If a task cannot run, classify why using one of the explicit blocked or skipped statuses.
 
+If an existing project reports prior human work, do not mark the corresponding task complete from prose alone. Require the appropriate automation class:
+
+- use `receipt_audited` plus a human review receipt when a person reviewed evidence outside AEROS
+- use `frozen_evidence` plus a source snapshot receipt when evidence is fixed and should not be refreshed automatically
+- use `approval_required` when rerunning would involve API cost, model drift, credentials, scraping, source-date-sensitive refresh, or legal/terms risk
+
 ## Data Backfill Rules
 
 When a coverage, denominator, source, or variable gap is discovered, do not leave it as an informal note.
@@ -163,6 +194,8 @@ When a coverage, denominator, source, or variable gap is discovered, do not leav
 - Human-reviewed data queue items must use `aeros data backfill --receipt ...` so the receipt and queue status stay synchronized.
 - Human-reviewed data evidence must use a receipt, not an informal "done" or "skipped" note.
 - After any backfill run, review `data/backfill/coverage_delta.md`, `data/backfill/approval_checklist.md`, and `audits/data_backfill_report.md` before changing claims.
+
+Backfill is the bridge between governance automation and data repair automation. If a gap is safe to repair from local cache with an explicit command, queue it as runnable. If the gap depends on official portals, credentials, LLM extraction, API refresh, source-date-sensitive collection, or human judgment, queue it as blocked with an approval checklist or receipt requirement.
 
 ## Harness Rules
 
@@ -189,6 +222,7 @@ When a coverage, denominator, source, or variable gap is discovered, do not leav
 - Separate descriptive, associational, causal, mechanism, external-validity, policy-translation, and forecast claims.
 - If a claim relies on a robustness check, name the exact robustness check.
 - If a claim is not currently supportable, mark it as draft, ambiguous, or unsupported.
+- AEROS may recommend a claim ceiling or candidate claim upgrade, but only a human gate decision may approve publication-facing upgrades.
 
 ## Done Means
 
@@ -214,3 +248,4 @@ conflicts with the points below, prefer these.
   (see `harness/permissions.yml` `human_approval`). The agent may *request* a gate
   (`aeros gate request`) but must never commit the approval artifact itself.
 - If work was not run, the task is classified with an explicit automation/gate status and any required evidence receipt exists.
+- Treat validation projects as pressure tests, not template sources. Lessons may be generalized into harness rules, checks, or task templates, but project-specific data and conclusions must stay inside the validation project.

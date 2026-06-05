@@ -13,6 +13,8 @@ Core evidence and governance rules are in:
 
 Apply the full source-grounded rules in [discovery/literature/literature_rules.md](literature_rules.md), and keep them aligned with the shared governance rules above.
 
+Literature items surfaced by `aeros adopt` or AI-assisted synthesis are leads only. They must enter the registry, obtain the appropriate status, and receive extraction cards before they can support synthesis or gap claims.
+
 ## Literature Functions
 
 - `idea-inspiring`
