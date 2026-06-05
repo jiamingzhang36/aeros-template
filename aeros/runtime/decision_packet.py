@@ -253,13 +253,17 @@ def _artifact_excerpts(project_root: Path) -> list[str]:
         raw = p.read_text(encoding="utf-8", errors="ignore").splitlines()
         excerpt = raw[:max_lines]
         truncated = len(raw) > max_lines
+        # Use a fence longer than any backtick run in the excerpt, so artifacts
+        # that themselves contain ``` code/yaml fences don't break the packet.
+        longest_run = max((len(run) for run in re.findall(r"`+", "\n".join(excerpt))), default=0)
+        fence = "`" * max(3, longest_run + 1)
         blocks.append(f"### {label} — `{rel}`")
         blocks.append("")
-        blocks.append("```")
+        blocks.append(fence)
         blocks.extend(excerpt)
         if truncated:
             blocks.append(f"... ({len(raw) - max_lines} more line(s); open the file)")
-        blocks.append("```")
+        blocks.append(fence)
         blocks.append("")
     if not blocks:
         return []
