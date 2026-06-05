@@ -384,7 +384,7 @@ def _write_packet(path: Path, *, mode: str, source: str, candidate_gate: str,
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
-def _bootstrap_target(template_root: Path, target: Path) -> None:
+def _bootstrap_target(template_root: Path, target: Path, *, mode: str) -> None:
     init_project(target)
     if template_root.resolve() == target.resolve():
         return
@@ -392,8 +392,12 @@ def _bootstrap_target(template_root: Path, target: Path) -> None:
         src = template_root / rel
         if src.exists():
             shutil.copytree(src, target / rel, dirs_exist_ok=True)
+    manifest_src = template_root / "project_manifest.yml"
+    manifest_dst = target / "project_manifest.yml"
+    if mode == "mirror" and manifest_src.exists():
+        manifest_dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(manifest_src, manifest_dst)
     for rel in (
-        "project_manifest.yml",
         "AGENTS.md",
         "CLAUDE.md",
         "discovery/AGENTS.md",
@@ -445,7 +449,7 @@ def run_adoption(project_root: Path, args: AdoptionArgs) -> int:
         print("[adopt] dry-run/readonly: no files or state were written")
         return 0
 
-    _bootstrap_target(project_root, target)
+    _bootstrap_target(project_root, target, mode=mode)
     adoption_dir = target / "adoption"
     _write_yaml(adoption_dir / "source_manifest.yml", {
         "adopted_at": _now(),

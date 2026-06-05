@@ -1,4 +1,0 @@
----
-status: draft
----
-# Method Card
