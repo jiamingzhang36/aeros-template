@@ -85,7 +85,11 @@ def main(argv: list[str] | None = None) -> int:
         def _vocab(col: str, allowed: set[str]) -> None:
             v = row.get(col, "").strip().lower()
             if v and v not in allowed:
-                failures.append(f"{data_id}: invalid {col} {row.get(col, '').strip()!r}")
+                allowed_list = " | ".join(sorted(allowed))
+                failures.append(
+                    f"{data_id}: invalid {col} {row.get(col, '').strip()!r} "
+                    f"(allowed: {allowed_list})"
+                )
 
         _vocab("access_status", ACCESS_STATUS)
         _vocab("engineering_status", ENGINEERING_STATUS)

@@ -27,6 +27,17 @@ def run_check(project_root: Path, check_name: str) -> CheckResult:
             script = template_script
         else:
             return CheckResult(check_name, False, [f"check script not found: {script}"], "", "")
+    try:
+        if script.stat().st_size == 0:
+            return CheckResult(
+                check_name,
+                False,
+                [f"check script is empty/no-op: {script.relative_to(project_root) if project_root in script.parents else script}"],
+                "A check must emit a real PASS/FAIL signal; empty scripts are not valid checks.",
+                "",
+            )
+    except OSError as exc:
+        return CheckResult(check_name, False, [f"could not stat check script {script}: {exc}"], "", "")
 
     # First try structured JSON output.
     proc = subprocess.run(
@@ -52,6 +63,14 @@ def run_check(project_root: Path, check_name: str) -> CheckResult:
         cwd=str(project_root), text=True, capture_output=True,
     )
     combined = ((proc.stdout or "") + (proc.stderr or "")).strip()
+    if proc.returncode == 0 and not combined:
+        return CheckResult(
+            check_name,
+            False,
+            [f"check script produced no output: {script.relative_to(project_root) if project_root in script.parents else script}"],
+            "A successful check must print an explicit PASS message or structured JSON.",
+            combined,
+        )
     passed = proc.returncode == 0
     failures = [] if passed else [line for line in combined.splitlines() if line.strip()]
     return CheckResult(check_name, passed, failures, "", combined)

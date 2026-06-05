@@ -158,9 +158,23 @@ def _allowed_outputs_from_prompt(prompt: str) -> list[str]:
     return out
 
 
+def _allowed_output_match(rel: str, allowed_outputs: list[str]) -> bool:
+    """A write is allowed if it equals an allowed output exactly, OR falls under
+    an allowed output that names a directory (trailing '/'). Without the prefix
+    rule, contracts that allow a directory (e.g. 'agent_runs/') wrongly reject
+    every file inside it."""
+    for a in allowed_outputs:
+        a = a.strip().lstrip("/")
+        if rel == a:
+            return True
+        if a.endswith("/") and (rel.startswith(a) or rel == a.rstrip("/")):
+            return True
+    return False
+
+
 def _safe_output_path(project_root: Path, rel: str, allowed_outputs: list[str]) -> Path:
     rel = rel.strip().lstrip("/")
-    if rel not in allowed_outputs:
+    if not _allowed_output_match(rel, allowed_outputs):
         raise ValueError(f"provider attempted to write non-allowed output: {rel}")
     path = (project_root / rel).resolve()
     root = project_root.resolve()

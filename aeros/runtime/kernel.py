@@ -402,6 +402,25 @@ def run_pipeline(
         if task_status == "passed":
             stale_reason = _stale_reason(state, c, project_root, all_contracts)
             if stale_reason:
+                # Staleness is only a heuristic for "might need re-running". Re-running
+                # a non-deterministic agent regenerates slightly different output, which
+                # changes its output fingerprint and cascades staleness to every
+                # downstream task -> wasted agent quota on each iterate. So first
+                # re-validate the EXISTING outputs: if the task's own checks still pass,
+                # refresh the fingerprints and keep it passed (no agent call). Only
+                # re-run the agent when the existing outputs actually fail.
+                revalidated = False
+                if not dry_run and c.checks:
+                    passed_now, _results = run_checks(project_root, c.checks)
+                    revalidated = passed_now
+                if revalidated:
+                    print(f"  ✓ {tid} (stale: {stale_reason}; existing outputs still pass "
+                          f"checks — refreshing fingerprint, not re-running)")
+                    _record_task_fingerprints(state, c, project_root, all_contracts)
+                    state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
+                    state_mod.save_state(project_root, state)
+                    skipped += 1
+                    continue
                 print(f"  ! {tid} is stale ({stale_reason}) — re-running")
                 state_mod.set_status(state, tid, "stale")
                 state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))

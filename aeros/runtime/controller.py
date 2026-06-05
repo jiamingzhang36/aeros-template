@@ -12,6 +12,7 @@ from .adjudicate import adjudicate, write_selection
 from .decision_packet import write_decision_packet
 from .kernel import (
     _stale_reason,
+    _active_gate_ranks,
     _contract_block_reason,
     _task_gates,
     discover_contracts,
@@ -129,6 +130,14 @@ def build_iterate_plan(
         )
     else:
         runnable_contracts = contracts
+    active_ranks = _active_gate_ranks(project_root)
+    if active_ranks is not None:
+        runnable_contracts = {
+            task_id: record
+            for task_id, record in runnable_contracts.items()
+            if state_mod._gate_rank(record[0].gate or "") in active_ranks
+        }
+        runnable_contracts = _with_dependency_closure(runnable_contracts, all_contracts)
     probe_state = deepcopy(state)
     steps: list[IterateStep] = []
     for task_id in topo_order(runnable_contracts):

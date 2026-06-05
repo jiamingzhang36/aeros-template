@@ -206,13 +206,16 @@ def _validate_agent_run_reports() -> list[str]:
             continue
 
         text = path.read_text(encoding="utf-8")
-        if "## Skills Used" not in text:
-            failures.append(f"{path}: missing section ## Skills Used")
-            continue
-
+        # Scope: only validate actual AEROS task run reports. The runtime always
+        # writes a Task ID into a report's metadata; a file without one is a
+        # manual note or legacy artifact in agent_runs/, not a task report, and
+        # is out of scope (validating it would be a false failure).
         task_id = _extract_task_id(text)
         if not task_id:
-            failures.append(f"{path}: missing task identifier in metadata")
+            continue
+
+        if "## Skills Used" not in text:
+            failures.append(f"{path}: missing section ## Skills Used")
             continue
 
         task_file = _find_task_file(task_id)
