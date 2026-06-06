@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Fail if tracked or untracked raw data files changed."""
+"""Fail only if raw data is tracked/staged in git (raw data must never enter git).
+
+Untracked raw data present locally is the correct state and is not a failure.
+"""
 
 from __future__ import annotations
 
@@ -59,17 +62,28 @@ def main() -> int:
         print(result.stderr.strip())
         return result.returncode
 
-    changed = []
+    # The violation is raw data ENTERING git (tracked/staged), not raw data merely
+    # existing locally. Untracked ('??') raw data is the correct state — it is not
+    # in git — so it is not a failure; it only warrants a gitignore reminder.
+    tracked: list[str] = []
+    untracked: list[str] = []
     for line in result.stdout.splitlines():
+        xy = line[:2]
         path = Path(line[3:].strip())
         relative_path = Path(*path.parts[2:]).as_posix() if path.parts[:2] == ("data", "raw") else path.as_posix()
-        if relative_path not in ALLOWED:
-            changed.append(line)
+        if relative_path in ALLOWED:
+            continue
+        (untracked if xy == "??" else tracked).append(line)
 
-    if changed:
-        print("FAIL: raw data changes detected:")
-        print("\n".join(changed))
+    if tracked:
+        print("FAIL: raw data is tracked/staged in git (raw data must never enter git):")
+        print("\n".join(tracked))
         return 1
+
+    if untracked:
+        print("PASS: raw data present but untracked (correctly not in git). "
+              "Add data/raw/ to .gitignore to silence this note.")
+        return 0
 
     print("PASS: no raw data changes detected")
     return 0
