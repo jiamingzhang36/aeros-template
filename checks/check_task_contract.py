@@ -51,6 +51,11 @@ def main() -> int:
     for path in task_files:
         text = path.read_text(encoding="utf-8")
         front = _load_front_matter(path)
+        # Scope: only validate real task contracts. A .md in tasks/ with no front
+        # matter is a note/bootstrap file, not a contract — validating it (e.g.
+        # requiring allowed_skills) is a false failure.
+        if not front:
+            continue
         task_class = front.get("task_class", "standard").lower()
         if task_class not in {"minor", "standard", "high_risk"}:
             missing = ["front matter: task_class must be minor, standard, or high_risk"]

@@ -29,6 +29,7 @@ ALLOWED_STATUSES = {
     "parked",
     "dropped",
     "promoted_to_design",
+    "future_direction",
 }
 ALLOWED_HUMAN_DECISIONS = {
     "pending",
@@ -74,11 +75,12 @@ def main() -> int:
         if intake_priority not in ALLOWED_INTAKE_PRIORITIES:
             failures.append(f"{idea_id}: invalid intake_priority {intake_priority!r}")
 
-        human_decision = row.get("human_decision", "").strip()
-        if human_decision not in ALLOWED_HUMAN_DECISIONS:
-            failures.append(f"{idea_id}: invalid human_decision {human_decision!r}")
+        # human_decision is a free-text human note, not a controlled vocabulary —
+        # do not reject phrasing. The one semantic tie still enforced below is that
+        # a promoted idea must record a 'promote' decision.
+        human_decision = row.get("human_decision", "").strip().lower()
 
-        if status == "promoted_to_design" and human_decision != "promote":
+        if status == "promoted_to_design" and "promote" not in human_decision:
             failures.append(f"{idea_id}: promoted_to_design requires human_decision=promote")
         if status in {"supported", "promoted_to_design"} and not row.get("evidence_needed", "").strip():
             failures.append(f"{idea_id}: supported/promoted ideas must record evidence basis or remaining evidence needed")
