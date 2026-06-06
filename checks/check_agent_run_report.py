@@ -214,6 +214,14 @@ def _validate_agent_run_reports() -> list[str]:
         if not task_id:
             continue
 
+        # Only the runtime's own reports (task_id_YYYYMMDD_HHMMSS.md) are the
+        # authoritative, report.py-formatted reports. An agent's free-form
+        # self-report written into agent_runs/ is scratch, not the report —
+        # validating it would false-fail; skip non-runtime-named files.
+        import re as _re
+        if not _re.search(r"_\d{8}_\d{6}\.md$", path.name):
+            continue
+
         if "## Skills Used" not in text:
             failures.append(f"{path}: missing section ## Skills Used")
             continue
