@@ -33,17 +33,24 @@ def main() -> int:
     for path in GAP_FILES:
         if not path.exists():
             continue
-        for paper_id in sorted(set(PAPER_ID_RE.findall(path.read_text(encoding="utf-8")))):
+        cited = sorted(set(PAPER_ID_RE.findall(path.read_text(encoding="utf-8"))))
+        has_gap_anchor = False
+        for paper_id in cited:
             row = registry.get(paper_id)
             if row is None:
                 failures.append(f"{path}: cites unknown paper_id {paper_id}")
                 continue
-            if row.get("primary_function", "").strip() != "gap-verification":
-                failures.append(f"{path}: {paper_id} is not primary_function=gap-verification")
+            # Anti-fabrication core: every cited paper must be extraction-card-backed.
             if row.get("extraction_card", "").strip() != "yes":
                 failures.append(f"{path}: {paper_id} lacks extraction_card=yes")
             if row.get("evidence_basis", "").strip() != "extraction_card":
                 failures.append(f"{path}: {paper_id} lacks evidence_basis=extraction_card")
+            if row.get("primary_function", "").strip() == "gap-verification":
+                has_gap_anchor = True
+        # A gap memo legitimately also cites method/theory anchors; it does not need
+        # EVERY citation to be gap-verification, only at least one gap anchor.
+        if cited and not has_gap_anchor:
+            failures.append(f"{path}: must cite at least one primary_function=gap-verification paper")
 
     if failures:
         print("FAIL: gap grounding problems detected:")
