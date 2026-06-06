@@ -70,8 +70,11 @@ def main(argv: list[str] | None = None) -> int:
     failures: list[str] = []
     if str(fm.get("status", "")).strip().lower() != "filled":
         failures.append("front matter status must be filled")
-    if _placeholder(str(fm.get("claim_ceiling", ""))):
-        failures.append("front matter claim_ceiling must be non-placeholder")
+    # Accept either field name: the project convention is `earned_claim_ceiling`
+    # (used in design_selection.md); `claim_ceiling` is the older alias.
+    claim_ceiling = fm.get("claim_ceiling") or fm.get("earned_claim_ceiling") or ""
+    if _placeholder(str(claim_ceiling)):
+        failures.append("front matter claim_ceiling/earned_claim_ceiling must be non-placeholder")
     result_ids = fm.get("result_ids")
     if not isinstance(result_ids, list) or not result_ids:
         failures.append("front matter result_ids must be a non-empty list")
