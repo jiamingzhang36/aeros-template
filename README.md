@@ -112,6 +112,22 @@ Integrity mechanisms (non-LLM anchors):
   crown one champion under a criterion stated up front — never by significance
   alone.
 
+Anti-"conformance-without-substance" (a presence check confirms a section
+*exists*, not that it *says something* — so it can be gamed with hollow or
+duplicated text). Three layers raise the floor and put substance with the human:
+
+- **Anti-degeneracy (`check_no_degenerate_content`).** Deterministic guard: flags
+  duplicate substantive sections, and empty/placeholder sections in a file that
+  declares `status: filled`. Drafts stay exempt.
+- **Linkage (`check_artifact_linkage`).** The P0 principle generalized: an
+  artifact's `data_refs:` front-matter list must resolve to real
+  `data_inventory.csv` ids — reference something real, don't just fill a field.
+- **Substance review in the gate packet.** The decision packet excerpts the
+  actual content of the judgment artifacts so the human reads substance, not just
+  PASS marks. Hollow/duplicated/placeholder content is a reason to block even
+  when every check is green — the irreducible human check the machine layers
+  cannot replace.
+
 Typical loop:
 
 ```

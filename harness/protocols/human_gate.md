@@ -15,8 +15,10 @@ harder, not easier). The autonomous loop (`aeros run` / pipeline) therefore:
    G13` — design, claim audit, claim upgrade, release). The `lite` profile uses
    `G3, G7`.
 3. **Writes a decision packet** at the halt (`decisions/gates/<gate>_decision_packet.md`):
-   what you are approving, the evidence overview, unmet criteria, and risks.
-   Read it first.
+   what you are approving, the evidence overview, unmet criteria, risks, and
+   **excerpts of the judgment artifacts' actual content**. Read the substance —
+   a check confirms a section exists, not that it says something; hollow,
+   duplicated, or placeholder content is a reason to block even when checks pass.
 4. **Writes an approval request** (`decisions/approvals/<gate>.md`) but the agent
    **cannot grant it**.
 
