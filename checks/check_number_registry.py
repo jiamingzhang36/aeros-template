@@ -32,6 +32,8 @@ from aeros.runtime.number_injection import (  # noqa: E402
     load_numbers,
     load_whitelist,
     matches,
+    read_cell_value,
+    rounding_consistent,
     tokens_in,
     verified_values,
     verify_number,
@@ -93,7 +95,15 @@ def main(argv: list[str] | None = None) -> int:
                         f"{row.get('result_id','?')}: registered output path missing: {path_value}"
                     )
 
-    # 2. Registry entries grounded.
+    # 2. Paper token usage -- needed for ground-before-mutate (D2).
+    papers = _paper_paths()
+    used_tokens: set[str] = set()
+    for paper in papers:
+        text = paper.read_text(encoding="utf-8", errors="ignore")
+        for line in text.splitlines():
+            used_tokens.update(tokens_in(line))
+
+    # 3. Registry entries grounded.
     try:
         registry = load_numbers(root)
     except ValueError as exc:
@@ -109,16 +119,28 @@ def main(argv: list[str] | None = None) -> int:
         ok_disp, disp_detail = display_consistent(spec)
         if not ok_disp:
             failures.append(f"numbers.yml: '{name}': {disp_detail}")
+        # D1: declared rounding policy must hold (needs the raw cell value).
+        cell, _ = read_cell_value(root, spec)
+        ok_round, round_detail = rounding_consistent(spec, cell)
+        if not ok_round:
+            failures.append(f"numbers.yml: '{name}': {round_detail}")
         status, detail = verify_number(root, name, spec)
         if status == "ok":
             strong += 1
         elif status in {"mismatch", "error"}:
             failures.append(f"numbers.yml: '{name}': {detail}")
         elif status == "no_source":
-            # Fall back to the weak aggregate trace; warn to upgrade.
-            if verified is None:
-                verified = verified_values(root)
-            if matches(str(spec["value"]), verified, whitelist):
+            # D2 ground-before-mutate: a number actually injected into the paper
+            # MUST be cell-grounded. An ungrounded entry nothing references may
+            # linger (weak warning), but you cannot put {{it}} in the paper.
+            if name in used_tokens:
+                failures.append(
+                    f"numbers.yml: '{name}' is injected as a paper token but has no cell "
+                    f"source: block (ground-before-mutate) -- add source{{result_id, select, field}}"
+                )
+            elif matches(str(spec["value"]),
+                         verified if verified is not None else (verified := verified_values(root)),
+                         whitelist):
                 warnings.append(
                     f"'{name}'={spec['value']} traces only weakly (no cell source); "
                     f"add a source: block to make it coincidence-proof"
@@ -129,8 +151,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"not trace to any registered artifact or whitelist"
                 )
 
-    # 3. No unresolved {{tokens}} in the paper.
-    papers = _paper_paths()
+    # 4. No unresolved {{tokens}} in the paper.
     for paper in papers:
         text = paper.read_text(encoding="utf-8", errors="ignore")
         for line_no, line in enumerate(text.splitlines(), 1):

@@ -91,6 +91,45 @@ def render_paper(text: str, numbers: dict[str, dict]) -> tuple[str, list[str]]:
     return rendered, unresolved
 
 
+def _round_half_up(x: float, ndigits: int) -> float:
+    from decimal import Decimal, ROUND_HALF_UP
+    q = Decimal(10) ** -ndigits
+    return float(Decimal(repr(float(x))).quantize(q, rounding=ROUND_HALF_UP))
+
+
+def rounding_consistent(spec: dict, cell_value: float | None) -> tuple[bool, str]:
+    """Enforce the declared rounding policy (D1).
+
+    If `source.round` is declared, the entry's `value` must (a) carry exactly that
+    many decimal places and (b) equal the deterministic half-up rounding of the
+    source cell at that precision. This blocks the 2.257 -> "2.4" class of sloppy
+    or stale rounding, where a within-tolerance check would have let it slide.
+    Entries with no declared round are trivially consistent.
+    """
+    source = spec.get("source")
+    if not isinstance(source, dict) or source.get("round") is None:
+        return True, ""
+    try:
+        rdp = int(source.get("round"))
+    except (TypeError, ValueError):
+        return False, f"source.round must be an integer, got {source.get('round')!r}"
+    value = spec.get("value")
+    sval = str(value)
+    decimals = len(sval.split(".")[1]) if "." in sval else 0
+    if decimals != rdp:
+        return False, (f"value {value} has {decimals} decimal place(s) but declares "
+                       f"round={rdp}; make them match")
+    if cell_value is not None:
+        expected = _round_half_up(cell_value, rdp)
+        try:
+            if abs(expected - float(value)) > 1e-9:
+                return False, (f"value {value} is not the half-up rounding of the cell "
+                               f"({cell_value}) at {rdp} dp -> should be {expected}")
+        except (TypeError, ValueError):
+            return False, f"value {value!r} is not numeric"
+    return True, ""
+
+
 def display_consistent(spec: dict) -> tuple[bool, str]:
     """If an entry has a `display` string, its digits must equal `value`.
 
