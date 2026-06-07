@@ -602,6 +602,17 @@ def _cmd_paper_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_provenance(args: argparse.Namespace) -> int:
+    """Sync the provenance layer to the result index (registration <-> provenance)."""
+    from .runtime.provenance import sync_provenance
+    root = _project_root()
+    written, skipped = sync_provenance(root)
+    for s in skipped:
+        print(f"  skip: {s}")
+    print(f"provenance synced: {len(written)} record(s) written to outputs/.provenance/")
+    return 2 if skipped else 0
+
+
 def _cmd_funnel(args: argparse.Namespace) -> int:
     from .runtime.funnel import new_funnel, select_champion
     root = _project_root()
@@ -741,6 +752,13 @@ def main(argv: list[str] | None = None) -> int:
         "render", help="substitute {{name}} number tokens from paper/numbers.yml")
     paper_render.add_argument("--paper", default="", help="paper source (default paper/draft.md)")
     paper_render.set_defaults(func=_cmd_paper_render)
+
+    provenance_p = sub.add_parser(
+        "provenance", help="keep the provenance layer in sync with the result index")
+    provenance_sub = provenance_p.add_subparsers(dest="provenance_command", required=True)
+    provenance_sync = provenance_sub.add_parser(
+        "sync", help="write a provenance JSON per registered result (sha256 from disk)")
+    provenance_sync.set_defaults(func=_cmd_provenance)
 
     funnel = sub.add_parser("funnel",
                             help="two-layer funnel: parallel candidates -> champion")
