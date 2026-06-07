@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
-"""Check that the paper package draft is audit-ready without overclaiming."""
+"""Check that the paper package draft is audit-ready without overclaiming.
+
+This check derives its expectations from the project (the active claims in the
+claim registry, the registered manuscript) rather than hardcoding a specific
+demo project's claim IDs or domain vocabulary. Overclaim detection is
+negation-aware: a descriptive paper that explicitly says it does NOT identify a
+causal effect is being careful, not overclaiming, and must not be flagged.
+"""
 
 from __future__ import annotations
 
@@ -21,13 +28,28 @@ REQUIRED_SECTION_PATTERNS = {
     "replication": r"^##\s+.*(replication|reproducibility)",
 }
 
-FORBIDDEN_UNBOUNDED_CLAIMS = [
+# Generic overclaim guards for an empirical paper. Domain-specific terms are NOT
+# hardcoded here; they belong in a project's own language_constraints. Each match
+# is negation-checked before being flagged.
+OVERCLAIM_PATTERNS = [
     r"\bproves?\b",
-    r"\bcausal effect\b",
-    r"\ball (?:AI|grocery|recommendation)",
-    r"\breal consumers?\b",
-    r"\bdeployed AI systems?\b",
-    r"\bnutrition fairness\b",
+    r"\bcausal effects?\b",
+    r"\bcausally\b",
+]
+# A match preceded (within a short window) by one of these is a bounded
+# disclaimer ("does not identify a causal effect"), not an overclaim.
+NEGATORS = re.compile(
+    r"\b(not|no|never|without|cannot|can't|isn't|aren't|doesn't|does not|do not|"
+    r"rather than|neither|nor|preclude[sd]?|avoid(?:s|ed)?)\b",
+    flags=re.I,
+)
+
+# Evidence that the replication package preserves a "release is not yet approved"
+# boundary -- accept any of these, not one exact phrase.
+RELEASE_BOUNDARY_MARKERS = [
+    "not public", "not yet release-ready", "not approved", "not release-ready",
+    "release blocker", "human approval is required", "before final replication release",
+    "before release", "release-approval", "approval-required",
 ]
 
 
@@ -37,6 +59,33 @@ def _read(path: Path) -> str:
 
 def _nonempty_lines(text: str) -> int:
     return sum(1 for line in text.splitlines() if line.strip())
+
+
+def _active_claim_ids(claim_registry: str) -> list[str]:
+    """Claim IDs from registry table rows whose Status is not draft/retired."""
+    ids: list[str] = []
+    for line in claim_registry.splitlines():
+        if not line.strip().startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 4:
+            continue
+        cid, status = cells[0], cells[3].lower()
+        if re.fullmatch(r"C\d+", cid) and status not in {"draft", "retired", ""}:
+            ids.append(cid)
+    return ids
+
+
+def _overclaims(text: str) -> list[str]:
+    hits: list[str] = []
+    for pattern in OVERCLAIM_PATTERNS:
+        for m in re.finditer(pattern, text, flags=re.I):
+            window = text[max(0, m.start() - 40):m.start()]
+            if NEGATORS.search(window):
+                continue  # bounded disclaimer, not an overclaim
+            hits.append(pattern)
+            break
+    return hits
 
 
 def main() -> int:
@@ -60,23 +109,26 @@ def main() -> int:
         if not re.search(pattern, draft, flags=re.I | re.M):
             failures.append(f"{PAPER_DRAFT}: missing section for {label}")
 
-    draft_lower = draft.lower()
-    if "c002" not in draft_lower:
-        failures.append(f"{PAPER_DRAFT}: draft should reference the active claim ID C002")
-    if "current-codex-session" not in draft_lower and "current codex-session" not in draft_lower:
+    # The registry must declare at least one active claim, and the draft must
+    # reference one of those actual claim IDs (derived, not hardcoded).
+    active_ids = _active_claim_ids(claim_registry)
+    if claim_registry and not active_ids:
+        failures.append(f"{CLAIM_REGISTRY}: no active claim rows found")
+    elif active_ids and not any(re.search(rf"\b{cid}\b", draft) for cid in active_ids):
         failures.append(
-            f"{PAPER_DRAFT}: draft should state the current-Codex-session pilot boundary"
+            f"{PAPER_DRAFT}: draft should reference at least one active claim ID "
+            f"({', '.join(active_ids)})"
         )
-    if "not" not in draft_lower or "final" not in draft_lower:
+
+    if draft and ("not" not in draft.lower() or "final" not in draft.lower()):
         failures.append(f"{PAPER_DRAFT}: draft should explicitly avoid final-claim language")
 
-    for pattern in FORBIDDEN_UNBOUNDED_CLAIMS:
-        if re.search(pattern, draft, flags=re.I):
-            failures.append(f"{PAPER_DRAFT}: possible unbounded claim matched /{pattern}/")
+    for pattern in _overclaims(draft):
+        failures.append(f"{PAPER_DRAFT}: possible unbounded claim matched /{pattern}/")
 
-    if claim_registry and "C002" not in claim_registry:
-        failures.append(f"{CLAIM_REGISTRY}: active claim C002 not found")
-    if replication_report and "not public" not in replication_report.lower() and "not yet release-ready" not in replication_report.lower():
+    if replication_report and not any(
+        m in replication_report.lower() for m in RELEASE_BOUNDARY_MARKERS
+    ):
         failures.append(
             f"{REPLICATION_REPORT}: should preserve the boundary that public release is not approved"
         )
