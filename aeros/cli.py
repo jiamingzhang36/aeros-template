@@ -604,13 +604,23 @@ def _cmd_paper_render(args: argparse.Namespace) -> int:
 
 def _cmd_number_drift(args: argparse.Namespace) -> int:
     """Show (or accept) drift of injected numbers vs the lock file."""
-    from .runtime.number_drift import compute_drift, format_drift, write_lock
+    from .runtime.number_drift import (
+        compute_drift, format_drift, record_acceptance, write_lock,
+    )
     root = _project_root()
     drifts = compute_drift(root)
     moved = [d for d in drifts if d.moved]
     unresolved = [d for d in drifts if d.status == "unresolved"]
     print(format_drift(drifts, only_moved=not args.all))
     if args.update:
+        if not args.owner:
+            print("REFUSED: --update requires --owner -- a human must sign off on the "
+                  "new values (they may invalidate the surrounding prose).")
+            return 2
+        if moved:
+            log = record_acceptance(root, moved, args.owner, args.note or "")
+            print(f"recorded {len(moved)} acceptance(s) by {args.owner} -> "
+                  f"{log.relative_to(root)}")
         path = write_lock(root)
         print(f"lock updated -> {path.relative_to(root)} ({len(drifts)} cell(s))")
         return 0
@@ -775,7 +785,11 @@ def main(argv: list[str] | None = None) -> int:
     number_drift = number_sub.add_parser(
         "drift", help="report injected numbers whose source cell moved vs paper/numbers.lock.yml")
     number_drift.add_argument("--update", action="store_true",
-                              help="accept current values: rewrite the lock")
+                              help="accept current values: rewrite the lock (requires --owner)")
+    number_drift.add_argument("--owner", default="",
+                              help="human accepting the moved numbers (required with --update)")
+    number_drift.add_argument("--note", default="",
+                              help="why the moved numbers are acceptable")
     number_drift.add_argument("--all", action="store_true",
                               help="show unchanged entries too, not just moved")
     number_drift.set_defaults(func=_cmd_number_drift)

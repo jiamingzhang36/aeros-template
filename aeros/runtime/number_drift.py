@@ -14,7 +14,9 @@ The lock is advanced only by an explicit human action (`aeros number drift
 
 from __future__ import annotations
 
+import csv
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
@@ -22,6 +24,7 @@ import yaml
 from .number_injection import load_numbers, read_cell_value
 
 LOCK = Path("paper/numbers.lock.yml")
+ACCEPT_LOG = Path("decisions/number_acceptances.csv")
 
 
 @dataclass
@@ -97,6 +100,32 @@ def write_lock(project_root: Path, registry: dict | None = None) -> Path:
         + "".join(f"  {name}: {value!r}\n" for name, value in sorted(cells.items()))
     )
     path.write_text(body, encoding="utf-8")
+    return path
+
+
+def unaccepted(project_root: Path, registry: dict | None = None) -> list[Drift]:
+    """Drifts that a human must resolve before a gate can pass: moved or unresolved."""
+    return [d for d in compute_drift(project_root, registry)
+            if d.moved or d.status == "unresolved"]
+
+
+def record_acceptance(project_root: Path, drifts: list[Drift],
+                      owner: str, note: str = "") -> Path:
+    """Append an append-only audit row per accepted change (who/when/old->new)."""
+    path = project_root / ACCEPT_LOG
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fresh = not path.exists()
+    ts = datetime.now(tz=timezone.utc).isoformat()
+    with path.open("a", newline="", encoding="utf-8") as fh:
+        writer = csv.writer(fh)
+        if fresh:
+            writer.writerow(["accepted_at", "owner", "note", "name", "old", "new"])
+        for d in drifts:
+            if d.moved:
+                writer.writerow([
+                    ts, owner, note, d.name,
+                    "" if d.baseline is None else d.baseline, d.current,
+                ])
     return path
 
 
