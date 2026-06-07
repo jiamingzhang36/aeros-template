@@ -210,7 +210,7 @@ def _main_claim_row(claim_rows: list[dict[str, str]]) -> dict[str, str]:
 
 
 def _extract_result_ids(value: str) -> list[str]:
-    return re.findall(r"R\d{3}", value or "")
+    return re.findall(r"R(?:_[A-Z]+)*_?\d{2,}", value or "")
 
 
 def _load_claim_rows() -> list[dict[str, str]]:
@@ -245,7 +245,7 @@ def _load_provenance_ids() -> set[str]:
     return {
         file.stem
         for file in provenance_dir.glob("*.json")
-        if re.fullmatch(r"R\d{3}", file.stem)
+        if re.fullmatch(r"R(?:_[A-Z]+)*_?\d{2,}", file.stem)
     }
 
 

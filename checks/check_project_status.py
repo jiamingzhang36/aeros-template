@@ -167,7 +167,7 @@ def _paper_result_references() -> list[str]:
         if not path.is_file() or path.suffix.lower() not in {".md", ".tex", ".qmd", ".Rmd"}:
             continue
         text = path.read_text(encoding="utf-8")
-        refs.update(re.findall(r"\bR\d{3}\b", text))
+        refs.update(re.findall(r"\bR(?:_[A-Z]+)*_?\d{2,}\b", text))
     return sorted(refs)
 
 
