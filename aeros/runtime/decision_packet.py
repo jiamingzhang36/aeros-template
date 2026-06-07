@@ -163,7 +163,9 @@ def _evidence_overview(project_root: Path, state: dict[str, Any], target_gate: s
     if protocol_fm or boundary:
         lines.extend(["### Execution Protocol", ""])
         lines.append(f"- Status: {protocol_fm.get('status', 'unknown')}")
-        lines.append(f"- Claim ceiling: {protocol_fm.get('claim_ceiling', 'unknown')}")
+        ceiling = (protocol_fm.get('claim_ceiling')
+                   or protocol_fm.get('earned_claim_ceiling') or 'unknown')
+        lines.append(f"- Claim ceiling: {ceiling}")
         result_ids = protocol_fm.get("result_ids") or []
         lines.append(f"- Planned result IDs: {', '.join(result_ids) if result_ids else '(none)'}")
         if boundary:
