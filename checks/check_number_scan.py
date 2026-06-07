@@ -68,11 +68,12 @@ def main(argv: list[str] | None = None) -> int:
 
     warnings: list[str] = []
     scanned = 0
+    injected = 0
     for paper in papers:
         text = paper.read_text(encoding="utf-8", errors="ignore")
         if any(m in text.lower() for m in PLACEHOLDER_MARKERS) and not verified:
             continue
-        token_names = {n for line in text.splitlines() for n in tokens_in(line)}  # noqa: F841
+        injected += sum(len(tokens_in(line)) for line in text.splitlines())
         for line_no, line in enumerate(text.splitlines(), 1):
             for m in NUMBER_RE.finditer(line):
                 token = m.group(1).strip()
@@ -83,12 +84,19 @@ def main(argv: list[str] | None = None) -> int:
                 if not matches(token, verified, whitelist):
                     warnings.append(f"{paper}:{line_no}: '{token}' | {line.strip()[:70]}")
 
-    note = (f"{scanned} number(s) scanned, {len(warnings)} untraceable "
+    # Coverage: of all the estimate-like figures the paper *displays*, how many
+    # are injection-sourced ({{tokens}}) vs still raw hand-typed numbers.
+    displayed = injected + scanned
+    coverage = (injected / displayed * 100.0) if displayed else 0.0
+    note = (f"{scanned} raw number(s) scanned, {len(warnings)} untraceable; "
+            f"injection coverage {injected}/{displayed} = {coverage:.0f}% "
             f"(advisory only; gate on check_number_registry)")
     if as_json:
         print(json.dumps({
             "check": CHECK_NAME, "status": "pass",
             "failures": [], "warnings": warnings, "note": note,
+            "coverage": {"injected": injected, "displayed": displayed,
+                         "percent": round(coverage, 1)},
         }))
     else:
         print(f"PASS (advisory): {note}")

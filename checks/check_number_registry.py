@@ -28,6 +28,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from aeros.runtime.number_injection import (  # noqa: E402
+    display_consistent,
     load_numbers,
     load_whitelist,
     matches,
@@ -105,6 +106,9 @@ def main(argv: list[str] | None = None) -> int:
         if not isinstance(spec, dict) or spec.get("value") is None:
             failures.append(f"numbers.yml: '{name}' has no value")
             continue
+        ok_disp, disp_detail = display_consistent(spec)
+        if not ok_disp:
+            failures.append(f"numbers.yml: '{name}': {disp_detail}")
         status, detail = verify_number(root, name, spec)
         if status == "ok":
             strong += 1

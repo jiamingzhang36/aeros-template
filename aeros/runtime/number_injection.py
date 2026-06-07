@@ -80,10 +80,35 @@ def render_paper(text: str, numbers: dict[str, dict]) -> tuple[str, list[str]]:
         if spec is None or "value" not in spec:
             unresolved.append(name)
             return m.group(0)
+        # `display` is the typeset string (e.g. "21,748" or "12.5%"); `value` is
+        # the canonical numeric that gets verified. display_consistent() keeps
+        # them in lock-step so the comma form can never drift from the number.
+        if spec.get("display") not in (None, ""):
+            return str(spec["display"])
         return _format(spec["value"])
 
     rendered = TOKEN_RE.sub(_sub, text)
     return rendered, unresolved
+
+
+def display_consistent(spec: dict) -> tuple[bool, str]:
+    """If an entry has a `display` string, its digits must equal `value`.
+
+    Returns (ok, detail). Entries with no display are trivially consistent.
+    """
+    display = spec.get("display")
+    if display in (None, ""):
+        return True, ""
+    value = spec.get("value")
+    cleaned = str(display).replace(",", "").replace(" ", "").rstrip("%")
+    try:
+        dval = float(cleaned)
+        vval = float(value)
+    except (TypeError, ValueError):
+        return False, f"display '{display}' is not numerically comparable to value {value}"
+    if abs(dval - vval) > 1e-9:
+        return False, f"display '{display}' ({dval}) != value {value}"
+    return True, ""
 
 
 # --- Cell-level provenance (A2) -------------------------------------------
