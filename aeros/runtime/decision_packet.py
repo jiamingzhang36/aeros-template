@@ -273,6 +273,37 @@ def _artifact_excerpts(project_root: Path) -> list[str]:
             "is a reason to block even when every check is green.", ""] + blocks
 
 
+def _number_drift_overview(project_root: Path) -> list[str]:
+    """Surface injected numbers whose source cell moved since the accepted lock."""
+    try:
+        from .number_drift import compute_drift
+        drifts = compute_drift(project_root)
+    except Exception:  # noqa: BLE001 - packet must never be fatal
+        return []
+    moved = [d for d in drifts if d.moved]
+    unresolved = [d for d in drifts if d.status == "unresolved"]
+    if not moved and not unresolved:
+        return []
+    lines = [
+        "## Injected-Number Drift — a result moved since last accepted",
+        "",
+        "These paper numbers are sourced from result cells that changed (or no "
+        "longer resolve) versus `paper/numbers.lock.yml`. A moved coefficient can "
+        "invalidate the surrounding prose. Review, then accept with "
+        "`aeros number drift --update`.",
+        "",
+    ]
+    for d in moved:
+        if d.status == "changed":
+            lines.append(f"- CHANGED `{d.name}`: {d.baseline} → {d.current}")
+        else:
+            lines.append(f"- NEW `{d.name}`: {d.current} (not yet locked)")
+    for d in unresolved:
+        lines.append(f"- UNRESOLVED `{d.name}`: {d.detail}")
+    lines.append("")
+    return lines
+
+
 def _recommendation(ok: bool, target_gate: str, state: dict[str, Any]) -> str:
     already_approved = (
         state.get("gate_status") == "approved"
@@ -344,6 +375,8 @@ def build_decision_packet(project_root: Path, target_gate: str, *, stage: str = 
     lines.extend(_critic_overview(state))
 
     lines.extend(_artifact_excerpts(project_root))
+
+    lines.extend(_number_drift_overview(project_root))
 
     lines.extend([
         "## Key Risks for Human Review",

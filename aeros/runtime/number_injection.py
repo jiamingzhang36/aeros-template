@@ -144,6 +144,49 @@ def _select_row(rows: list[dict], select: dict) -> tuple[dict | None, str]:
     return matched[0], ""
 
 
+def read_cell_value(project_root: Path, spec: dict) -> tuple[float | None, str]:
+    """Resolve and return the transformed numeric value of an entry's cell.
+
+    (value, "") on success; (None, detail) if there is no cell source or it
+    cannot be resolved. The value is NOT rounded -- callers round to their own
+    precision. Single source of truth for both verify_number and drift.
+    """
+    source = spec.get("source")
+    if not isinstance(source, dict):
+        return None, "no cell-level source declared"
+    rid = str(source.get("result_id", "")).strip()
+    field = str(source.get("field", "")).strip()
+    select = source.get("select") or {}
+    tname = str(source.get("transform", "identity")).strip() or "identity"
+    if not rid or not field:
+        return None, "source needs both result_id and field"
+    if not isinstance(select, dict):
+        return None, "source.select must be a mapping"
+    if tname not in TRANSFORMS:
+        return None, f"unknown transform '{tname}' (allowed: {sorted(TRANSFORMS)})"
+    paths = _result_index_path_map(project_root)
+    if rid not in paths:
+        return None, f"result_id '{rid}' not registered in result_index.csv"
+    path = paths[rid]
+    if not path.exists():
+        return None, f"source file missing: {path}"
+    try:
+        with path.open(newline="", encoding="utf-8") as fh:
+            rows = list(csv.DictReader(fh))
+    except OSError as exc:
+        return None, f"cannot read {path}: {exc}"
+    row, why = _select_row(rows, select)
+    if row is None:
+        return None, f"{why} in {rid}"
+    if field not in row:
+        return None, f"field '{field}' is not a column in {rid}"
+    try:
+        raw = float(str(row[field]).strip())
+    except (ValueError, TypeError):
+        return None, f"cell {field} is not numeric: {row.get(field)!r}"
+    return TRANSFORMS[tname](raw), ""
+
+
 def verify_number(project_root: Path, name: str, spec: dict) -> tuple[str, str]:
     """Cell-level verification of one registry entry.
 
@@ -152,44 +195,15 @@ def verify_number(project_root: Path, name: str, spec: dict) -> tuple[str, str]:
     means the entry has no `source:` block and the caller should fall back to the
     weak aggregate trace; `error` means the source block is malformed/unresolvable.
     """
-    source = spec.get("source")
-    if not isinstance(source, dict):
+    if not isinstance(spec.get("source"), dict):
         return "no_source", "no cell-level source declared"
     value = spec.get("value")
     if value is None:
         return "error", "entry has no value"
-    rid = str(source.get("result_id", "")).strip()
-    field = str(source.get("field", "")).strip()
-    select = source.get("select") or {}
-    tname = str(source.get("transform", "identity")).strip() or "identity"
-    rdp = source.get("round")
-    if not rid or not field:
-        return "error", "source needs both result_id and field"
-    if not isinstance(select, dict):
-        return "error", "source.select must be a mapping"
-    if tname not in TRANSFORMS:
-        return "error", f"unknown transform '{tname}' (allowed: {sorted(TRANSFORMS)})"
-    paths = _result_index_path_map(project_root)
-    if rid not in paths:
-        return "error", f"result_id '{rid}' not registered in result_index.csv"
-    path = paths[rid]
-    if not path.exists():
-        return "error", f"source file missing: {path}"
-    try:
-        with path.open(newline="", encoding="utf-8") as fh:
-            rows = list(csv.DictReader(fh))
-    except OSError as exc:
-        return "error", f"cannot read {path}: {exc}"
-    row, why = _select_row(rows, select)
-    if row is None:
-        return "error", f"{why} in {rid}"
-    if field not in row:
-        return "error", f"field '{field}' is not a column in {rid}"
-    try:
-        raw = float(str(row[field]).strip())
-    except (ValueError, TypeError):
-        return "error", f"cell {field} is not numeric: {row.get(field)!r}"
-    transformed = TRANSFORMS[tname](raw)
+    transformed, detail = read_cell_value(project_root, spec)
+    if transformed is None:
+        return "error", detail
+    rdp = spec["source"].get("round")
     if rdp is None:
         sval = str(value)
         rdp = len(sval.split(".")[1]) if "." in sval else 0
@@ -198,11 +212,12 @@ def verify_number(project_root: Path, name: str, spec: dict) -> tuple[str, str]:
     except (ValueError, TypeError):
         return "error", f"source.round must be an integer, got {rdp!r}"
     eps = 0.5 * (10 ** (-rdp)) + 1e-9
+    rid = spec["source"].get("result_id")
     if abs(round(transformed, rdp) - round(float(value), rdp)) <= eps:
-        return "ok", f"{value} = {tname}({raw}) -> {round(transformed, rdp)} [{rid}]"
+        return "ok", f"{value} = {round(transformed, rdp)} [{rid}]"
     return "mismatch", (
-        f"value {value} != {tname}({raw})={round(transformed, rdp)} "
-        f"(field {field}, {rid})"
+        f"value {value} != {round(transformed, rdp)} "
+        f"(field {spec['source'].get('field')}, {rid})"
     )
 
 

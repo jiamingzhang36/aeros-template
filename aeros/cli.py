@@ -602,6 +602,23 @@ def _cmd_paper_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_number_drift(args: argparse.Namespace) -> int:
+    """Show (or accept) drift of injected numbers vs the lock file."""
+    from .runtime.number_drift import compute_drift, format_drift, write_lock
+    root = _project_root()
+    drifts = compute_drift(root)
+    moved = [d for d in drifts if d.moved]
+    unresolved = [d for d in drifts if d.status == "unresolved"]
+    print(format_drift(drifts, only_moved=not args.all))
+    if args.update:
+        path = write_lock(root)
+        print(f"lock updated -> {path.relative_to(root)} ({len(drifts)} cell(s))")
+        return 0
+    if unresolved:
+        return 2
+    return 1 if moved else 0
+
+
 def _cmd_provenance(args: argparse.Namespace) -> int:
     """Sync the provenance layer to the result index (registration <-> provenance)."""
     from .runtime.provenance import sync_provenance
@@ -752,6 +769,16 @@ def main(argv: list[str] | None = None) -> int:
         "render", help="substitute {{name}} number tokens from paper/numbers.yml")
     paper_render.add_argument("--paper", default="", help="paper source (default paper/draft.md)")
     paper_render.set_defaults(func=_cmd_paper_render)
+
+    number = sub.add_parser("number", help="injected-number tools (drift vs lock)")
+    number_sub = number.add_subparsers(dest="number_command", required=True)
+    number_drift = number_sub.add_parser(
+        "drift", help="report injected numbers whose source cell moved vs paper/numbers.lock.yml")
+    number_drift.add_argument("--update", action="store_true",
+                              help="accept current values: rewrite the lock")
+    number_drift.add_argument("--all", action="store_true",
+                              help="show unchanged entries too, not just moved")
+    number_drift.set_defaults(func=_cmd_number_drift)
 
     provenance_p = sub.add_parser(
         "provenance", help="keep the provenance layer in sync with the result index")
