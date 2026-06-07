@@ -101,6 +101,17 @@ def write_run_report(project_root: Path, run: RunRecord) -> Path:
         "approve / revise / pause / drop."
         if run.final_status == "escalated" else "- None"
     )
+    # Honest usage rendering: some providers (e.g. codex-cli) do not report token
+    # or cost usage back to the runtime. Showing "$0.0000 / 0 in / 0 out" for a run
+    # that actually did substantial work falsely reads as a no-op and erodes trust
+    # in the audit trail. Distinguish "not reported" from a real zero.
+    usage_reported = bool(run.run_input_tokens or run.run_output_tokens or run.run_cost_usd)
+    if any_agent_completed and not usage_reported:
+        cost_str = f"not reported by provider ({run.agent_provider or 'agent'})"
+        tokens_str = f"not reported by provider ({run.agent_provider or 'agent'})"
+    else:
+        cost_str = f"${run.run_cost_usd:.4f}"
+        tokens_str = f"{run.run_input_tokens} in / {run.run_output_tokens} out"
 
     body = f"""# Agent Run Report: {c.task_id}
 
@@ -117,8 +128,8 @@ def write_run_report(project_root: Path, run: RunRecord) -> Path:
 - Human gate required: {"yes" if run.final_status == "escalated" else "no"}
 - Attempts: {len(run.attempts)}
 - Agent calls (this run): {run.run_calls}
-- Cost (this run): ${run.run_cost_usd:.4f}
-- Tokens (this run): {run.run_input_tokens} in / {run.run_output_tokens} out
+- Cost (this run): {cost_str}
+- Tokens (this run): {tokens_str}
 - Provenance: provider={run.agent_provider or 'n/a'}, model={run.agent_model or 'n/a'}, temperature={run.temperature if run.temperature is not None else 'n/a'}
 - Tools used: {", ".join(run.tools_used) if run.tools_used else "n/a"}
 
