@@ -289,6 +289,24 @@ def _active_gate_ranks(project_root: Path) -> set[int] | None:
     return {state_mod._gate_rank(str(g)) for g in active}
 
 
+def _human_gate_halt_enabled(project_root: Path) -> bool:
+    """Whether the pipeline should STOP at a configured human gate.
+
+    Separates two concerns the system used to bundle together:
+      - *halting* the frontier at a judgment gate (workflow: do not pre-run work
+        past an un-ratified human gate), and
+      - the git-committer *trust anchor* (who may grant the approval).
+    The trust anchor stays gated on enforcement_enabled; halting also turns on
+    when the profile/lifecycle EXPLICITLY declares human_gates, so a project can
+    get "human decides at key nodes" without first setting up distinct agent and
+    approver git identities. Projects that want full autonomy set human_gates: [].
+    """
+    if identity.enforcement_enabled(project_root):
+        return True
+    _name, prof, gl = _active_profile(project_root)
+    return prof.get("human_gates") is not None or gl.get("human_gates") is not None
+
+
 def _reconcile_frontier(state: dict, project_root: Path, stage: str,
                         tid: str, context: str) -> bool:
     """Advance current_gate through earned MECHANICAL gates; halt at the first
@@ -434,7 +452,7 @@ def run_pipeline(
         # Gate-tiered reconciliation (autonomous mode): auto-advance through
         # earned mechanical gates, halt only at an earned human gate. This stops
         # the loop before it works PAST an un-ratified judgment gate.
-        if not dry_run and identity.enforcement_enabled(project_root):
+        if not dry_run and _human_gate_halt_enabled(project_root):
             if _reconcile_frontier(state, project_root, stage, tid,
                                    context=f"halting before {c.gate} task {tid}."):
                 return AWAITING_GATE
@@ -457,7 +475,7 @@ def run_pipeline(
         return 0
     # Final reconciliation: the last gate's own tasks may have earned a human
     # gate that no later task forced us to ratify. Halt for it now.
-    if identity.enforcement_enabled(project_root):
+    if _human_gate_halt_enabled(project_root):
         if _reconcile_frontier(state, project_root, stage, "end-of-stage",
                                context="all stage tasks complete; ratify to continue."):
             return AWAITING_GATE
