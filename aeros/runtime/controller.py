@@ -52,9 +52,19 @@ def _highest_gate(contracts: dict, default: str = "G0") -> str:
 
 
 def _execution_allowed(state: dict) -> bool:
+    # Execution is allowed once a human has approved the G3 (design/claim) gate.
+    # Check the gate HISTORY, not just the latest gate_status: once execution
+    # begins, the pipeline auto-advances mechanical gates and flips gate_status
+    # to "auto_advanced", which must not retroactively revoke the standing G3
+    # approval on a later run.
+    g3_rank = state_mod._gate_rank("G3")
+    for entry in state.get("gate_history", []) or []:
+        if (str(entry.get("reason", "")).strip() == "human_approved"
+                and state_mod._gate_rank(str(entry.get("gate", "G0"))) >= g3_rank):
+            return True
     return (
         state.get("gate_status") in {"approved", "blocked"}
-        and state_mod._gate_rank(str(state.get("current_gate", "G0"))) >= state_mod._gate_rank("G3")
+        and state_mod._gate_rank(str(state.get("current_gate", "G0"))) >= g3_rank
     )
 
 

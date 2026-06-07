@@ -368,9 +368,23 @@ def run_pipeline(
     """Run a stage's contracts in dependency order, stopping at the first
     escalation. Returns 0 if all passed (or dry-run), non-zero on stop."""
     state = state_mod.load_state(project_root)
-    approved_for_execution = (
+    # Execution may run once a human has approved the G3 (design/claim) gate.
+    # Check the gate HISTORY for that approval, not the latest gate_status:
+    # once execution starts, the pipeline auto-advances mechanical gates and
+    # flips gate_status to "auto_advanced", which must not retroactively revoke
+    # the standing G3 approval on the next run.
+    g3_rank = state_mod._gate_rank("G3")
+
+    def _human_approved_g3_plus() -> bool:
+        for entry in state.get("gate_history", []) or []:
+            if (str(entry.get("reason", "")).strip() == "human_approved"
+                    and state_mod._gate_rank(str(entry.get("gate", "G0"))) >= g3_rank):
+                return True
+        return False
+
+    approved_for_execution = _human_approved_g3_plus() or (
         state.get("gate_status") in {"approved", "blocked"}
-        and state_mod._gate_rank(str(state.get("current_gate", "G0"))) >= state_mod._gate_rank("G3")
+        and state_mod._gate_rank(str(state.get("current_gate", "G0"))) >= g3_rank
     )
     if stage == "execution" and not dry_run and not approved_for_execution:
         print(
