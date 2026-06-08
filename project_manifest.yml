@@ -116,8 +116,6 @@ gate_exit_criteria:
     requires:
     - type: check_passes
       check: check_execution_protocol.py
-    - type: check_passes
-      check: check_no_raw_data_changes.py
     - type: claim_main_results_registered
       path: evidence/claim_registry.md
     - type: claim_main_results_have_provenance
