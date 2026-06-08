@@ -160,7 +160,7 @@ gate_exit_criteria:
     - type: check_passes
       check: check_paper_package.py
     - type: check_passes
-      check: check_paper_numbers.py
+      check: check_number_registry.py
   G11:
     requires:
     - type: check_passes
