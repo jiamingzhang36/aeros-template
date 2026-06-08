@@ -53,11 +53,9 @@ class MockProvider(BaseProvider):
         variant = metadata.get("prompt_variant", "unknown_variant")
         prompt_id = metadata.get("prompt_id", "unknown_prompt")
         text = (
-            f"Mock grocery recommendation for {persona} under {variant}. "
-            "Basket: oats, eggs, rice, beans, frozen vegetables, fruit, bread, "
-            "and a low-cost protein. Budget note: choose store brands and plan "
-            "leftovers. Nutrition note: include fruit, vegetables, protein, and "
-            "whole grains. Feasibility note: meals should use simple preparation. "
+            f"Mock data-collection response for subject {persona} under variant "
+            f"{variant}. This is a deterministic placeholder produced by the mock "
+            "provider for pipeline testing; it carries no real model output. "
             f"Prompt ID: {prompt_id}."
         )
         return ProviderResponse(
@@ -209,7 +207,7 @@ class CodexCLIProvider(BaseProvider):
         prompt_id = metadata.get("prompt_id", "unknown_prompt")
         collection_prompt = (
             "You are being used as a data-collection model for an AEROS research audit.\n"
-            "Return only the requested grocery recommendation text.\n"
+            "Return only the requested output text for the prompt below.\n"
             "Do not inspect files. Do not run commands. Do not modify files.\n"
             "Do not include meta commentary about being Codex.\n\n"
             f"{prompt}"

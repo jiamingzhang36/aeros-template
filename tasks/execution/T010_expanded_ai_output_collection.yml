@@ -7,9 +7,15 @@ receipt_path: ''
 gate_status: blocked_requires_approval
 depends_on:
 - T009_expanded_collection_design
-goal: 'Collect or import expanded AI recommendation outputs according to the approved
-  expanded prompt grid. Preserve prompt text, model metadata, timestamps, output text,
-  and run identifiers. This task records outputs but does not validate paper claims.
+goal: 'Collect or import the expanded provider/model outputs (or other expanded
+  evidence) called for by the approved expanded-collection plan. Preserve the
+  prompt/query text, provider/model metadata, timestamps, output text, and run
+  identifiers. This task records outputs but does not validate paper claims.
+
+  OPTIONAL PHASE: G11-G13 (expanded collection, claim upgrade, compliance release)
+  apply only to projects that collect additional provider/model outputs. A project
+  with no expanded-collection phase should remove the G11-G13 task contracts, their
+  checks, and their gate criteria, and scope the lifecycle to its real final gate.
 
   '
 inputs:

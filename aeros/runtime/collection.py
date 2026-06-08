@@ -87,13 +87,15 @@ def _prompt_text(row: dict[str, str]) -> str:
     explicit = row.get("prompt_text", "").strip()
     if explicit:
         return explicit
-    persona = row.get("persona", "household")
+    persona = row.get("persona", "subject")
     variant = row.get("prompt_variant", "baseline")
+    # Domain-neutral fallback. A real collection grid should supply prompt_text
+    # per row; this generic default keeps the runtime project-agnostic instead of
+    # baking in a specific study's domain.
     return (
-        "Create a one-week grocery recommendation for the following synthetic "
-        f"persona: {persona}. Prompt variant: {variant}. Return specific, "
-        "purchasable grocery items, budget notes, nutrition notes, and feasibility notes. "
-        "Do not use private or real household data."
+        f"Respond to the collection prompt for synthetic subject: {persona}. "
+        f"Prompt variant: {variant}. Return the requested output exactly as the "
+        "approved collection plan specifies. Do not use private or real personal data."
     )
 
 
