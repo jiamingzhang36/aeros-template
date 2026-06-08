@@ -34,7 +34,8 @@ forbidden_actions:
 - Do not modify protected definitions or raw data.
 checks:
 - check_paper_package.py
-- check_paper_numbers.py
+- check_number_registry.py
+- check_number_scan.py
 - check_claim_registry.py
 - check_agent_run_report.py
 retry_policy:

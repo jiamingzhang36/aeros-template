@@ -93,7 +93,7 @@ Integrity mechanisms (non-LLM anchors):
 - **Anchor (`discovery/anchor.yml`).** Four components — topic, claim_type,
   identification, data — fixed once at intake and frozen. `check_anchor` blocks
   any downstream claim that exceeds the anchored claim_type (anti-drift).
-- **Anti-fabrication (`check_paper_numbers`).** Every estimate-like number in the
+- **Anti-fabrication (`check_number_registry`).** Every estimate-like number in the
   paper must trace to a value in a registered result artifact (within rounding)
   or an explicit `paper/number_whitelist.txt`; otherwise it is flagged.
 - **Number injection (`paper/numbers.yml` + `aeros paper render`, optional).** The

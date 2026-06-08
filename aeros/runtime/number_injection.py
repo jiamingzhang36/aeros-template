@@ -9,7 +9,7 @@ construction, including integers (sample sizes, counts) that a free-text scan
 cannot safely flag.
 
 This module is pure load/substitute. The grounding rule -- every registry value
-must trace to a registered result artifact -- is enforced by check_paper_numbers
+must trace to a registered result artifact -- is enforced by check_number_registry
 so there is a single source of truth for "verified".
 """
 

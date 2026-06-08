@@ -32,7 +32,8 @@ forbidden_actions:
 - Do not mark smoke outputs as final empirical evidence.
 - Do not mark claims supported unless result provenance and claim boundaries are complete.
 checks:
-- check_paper_numbers.py
+- check_number_registry.py
+- check_number_scan.py
 - check_provenance.py
 - check_claim_registry.py
 - check_claim_ceiling.py

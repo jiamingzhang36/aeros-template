@@ -63,7 +63,7 @@ A result validation report with:
 ## Checks to Run
 
 - `checks/check_protected_definitions.py`
-- `checks/check_paper_numbers.py`
+- `checks/check_number_registry.py`
 - `checks/check_claim_registry.py`
 - `checks/check_agent_run_report.py`
 

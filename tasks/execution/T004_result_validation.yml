@@ -25,7 +25,8 @@ forbidden_actions:
 - Do not change protected definitions.
 - Do not reinterpret policy translation as forecast.
 checks:
-- check_paper_numbers.py
+- check_number_registry.py
+- check_number_scan.py
 - check_output_reproducibility.py
 - check_provenance.py
 - check_agent_run_report.py

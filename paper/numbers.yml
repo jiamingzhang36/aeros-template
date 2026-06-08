@@ -1,6 +1,6 @@
 # Verified number registry (number injection). OPTIONAL.
 # Reference values in the paper as {{name}} (e.g. "the effect is {{ate}}").
-# Every value here MUST trace to a registered result artifact (check_paper_numbers
+# Every value here MUST trace to a registered result artifact (check_number_registry
 # enforces it); then `aeros paper render` substitutes them by construction, so
 # even integers (sample sizes, counts) are sourced rather than free-typed.
 numbers: {}

@@ -79,7 +79,7 @@ Run relevant checks after execution work:
 - `checks/check_protected_definitions.py`
 - `checks/check_pipeline_runs.py`
 - `checks/check_output_reproducibility.py`
-- `checks/check_paper_numbers.py`
+- `checks/check_number_registry.py`
 - `checks/check_claim_registry.py`
 - `checks/check_replication_package.py` when preparing release or replication materials
 
