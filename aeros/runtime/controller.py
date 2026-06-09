@@ -129,6 +129,15 @@ def build_iterate_plan(
                            mode=mode,
                            reason="execution requires human-approved G3")
 
+    if stage == "execution":
+        from .kernel import _data_readiness_ok
+        dok, failing = _data_readiness_ok(project_root)
+        if not dok:
+            return IteratePlan(stage=stage, target_gate="G1", steps=[], can_run=False,
+                               mode=mode,
+                               reason=("execution blocked: data-readiness gate G1 not met "
+                                       f"({', '.join(failing)}) — data not complete/ratified"))
+
     target_gate = (
         _next_gate_after(str(state.get("current_gate", "G0")), contracts)
         if to_next_gate else _highest_gate(contracts)
