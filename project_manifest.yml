@@ -93,6 +93,8 @@ gate_exit_criteria:
     requires:
     - type: check_passes
       check: check_data_diagnostics.py
+    - type: check_passes
+      check: check_data_complete.py
   G2:
     requires:
     - type: check_passes
