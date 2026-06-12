@@ -1,6 +1,7 @@
 task_id: D001a_framing
 stage: discovery
-depends_on: []
+depends_on:
+- D002_data_scouting
 gate: G0
 automation_class: auto_rerunnable
 evidence_receipt_required: false
@@ -52,10 +53,16 @@ goal: "REASONING step, not a search. Given the research idea, reason about which
 inputs:
 - discovery/idea_memo.md
 - discovery/01_literature_scope.md
+- discovery/data_inventory.csv
 - project_manifest.yml
 allowed_outputs:
 - discovery/literature/framing_deck.yml
 forbidden_actions:
+- 'Dataset-aware framing (DATA_AUDIT precedes QUESTIONING): the data audit
+    (D002_data_scouting -> discovery/data_inventory.csv) runs before this step. Do
+    not propose a framing whose required treatment/outcome data is absent from the
+    inventory without naming it explicitly as a data gap in the relevant card''s
+    caveat. Ground the question in data that has actually been audited as available.'
 - Do not write anywhere under data/raw/ (enforced by a hook).
 - Do not enumerate a full paper list or write paper_registry.csv; this step names
   frameworks + seminal anchors only.
