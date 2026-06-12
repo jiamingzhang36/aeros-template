@@ -130,13 +130,13 @@ def build_iterate_plan(
                            reason="execution requires human-approved G3")
 
     if stage == "execution":
-        from .kernel import _data_readiness_ok
-        dok, failing = _data_readiness_ok(project_root)
-        if not dok:
-            return IteratePlan(stage=stage, target_gate="G1", steps=[], can_run=False,
-                               mode=mode,
-                               reason=("execution blocked: data-readiness gate G1 not met "
-                                       f"({', '.join(failing)}) — data not complete/ratified"))
+        from .kernel import _foundation_ok
+        ok_foundation, unmet = _foundation_ok(project_root)
+        if not ok_foundation:
+            reason = ("execution blocked: discovery-foundation gate(s) G0-G3 not met — "
+                      + "; ".join(u.split(":", 1)[0] if ":" in u else u for u in unmet[:4]))
+            return IteratePlan(stage=stage, target_gate="G3", steps=[], can_run=False,
+                               mode=mode, reason=reason)
 
     target_gate = (
         _next_gate_after(str(state.get("current_gate", "G0")), contracts)

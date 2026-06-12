@@ -356,27 +356,23 @@ def _reconcile_frontier(state: dict, project_root: Path, stage: str,
     return False
 
 
-def _data_readiness_ok(project_root: Path) -> tuple[bool, list[str]]:
-    """Re-evaluate the data-readiness gate (G1) exit checks as a hard precondition.
+FOUNDATION_GATE = "G3"  # discovery's last gate; all execution gates rank above it
 
-    Gate-exit criteria are otherwise only rendered in the decision packet
-    (informational); data completeness must actually BLOCK execution, not merely
-    display a failure. Returns (ok, failing_check_names)."""
-    man = project_root / "project_manifest.yml"
-    if not man.exists():
-        return True, []
+
+def _foundation_ok(project_root: Path) -> tuple[bool, list[str]]:
+    """Re-evaluate the discovery-foundation gates (G0..G3) as a hard precondition
+    for execution. Generalizes data-readiness: gate-exit criteria are otherwise
+    only rendered in the decision packet (informational), so a foundation gate
+    that regresses (data not complete, anchor/design/variable-construction broken)
+    would not actually BLOCK downstream work. _evaluate_gate is cumulative, so
+    evaluating FOUNDATION_GATE checks the whole foundation in one call. Capped at
+    G3 (not the candidate) so the in-progress execution gate is never evaluated as
+    its own precondition (which would deadlock). Returns (ok, unmet_reasons)."""
     try:
-        crit = ((yaml.safe_load(man.read_text(encoding="utf-8")) or {})
-                .get("gate_exit_criteria", {}).get("G1", {}) or {})
-    except yaml.YAMLError:
+        from .decision_packet import _evaluate_gate
+        return _evaluate_gate(project_root, FOUNDATION_GATE)
+    except Exception:  # noqa: BLE001 - precondition must never crash the run
         return True, []
-    checks = [r.get("check") for r in (crit.get("requires") or [])
-              if r.get("type") == "check_passes" and r.get("check")]
-    if not checks:
-        return True, []
-    from .checks import run_checks
-    ok, results = run_checks(project_root, checks)
-    return ok, [r.name for r in results if not r.passed]
 
 
 def run_pipeline(
@@ -420,11 +416,12 @@ def run_pipeline(
     # (before, say, check_data_complete existed) lets execution proceed on data
     # that is no longer certified complete. Data not complete -> do not advance.
     if stage == "execution" and not dry_run:
-        dok, failing = _data_readiness_ok(project_root)
-        if not dok:
-            print("[pipeline] execution BLOCKED: data-readiness gate G1 not met "
-                  f"({', '.join(failing)}). Data is not complete/ratified — fix "
-                  "docs/data_contract.yml (status: collected|validated + data_ratified_by) first.")
+        ok_foundation, unmet = _foundation_ok(project_root)
+        if not ok_foundation:
+            print("[pipeline] execution BLOCKED: discovery-foundation gate(s) G0-G3 "
+                  "not met — resolve before running execution:")
+            for u in unmet[:6]:
+                print(f"  - {u}")
             return 2
     contracts = discover_contracts(project_root, stage)
     all_contracts = discover_contracts(project_root)
