@@ -381,6 +381,18 @@ def build_decision_packet(project_root: Path, target_gate: str, *, stage: str = 
     lines.extend(_number_drift_overview(project_root))
 
     lines.extend([
+        "## Five-Dimension Review (AutoResearch: novelty / validity / impact / reliability / provenance)",
+        "",
+        "The mechanical layer already certifies the last three: **validity** (checks "
+        "passed), **reliability** (staleness fingerprints / reproducibility), and "
+        "**provenance** (numbers trace to result cells; results to data). The two a "
+        "check CANNOT judge are yours to weigh here:",
+        "- **Novelty** — is the question/finding meaningfully new vs. prior work, or "
+        "a restatement? (No machine check can adjudicate this.)",
+        "- **Impact** — does the result address something that matters, or is it "
+        "technically clean but inconsequential?",
+        "Approve only if novelty and impact hold; the green checks cover the rest.",
+        "",
         "## Key Risks for Human Review",
         "",
         "- Check whether the evidence actually supports the proposed claim strength.",
