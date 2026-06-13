@@ -95,6 +95,30 @@ def _with_dependency_closure(selected: dict, all_contracts: dict) -> dict:
     return out
 
 
+# Sections of project_manifest.yml that govern GATE PASSAGE and harness wiring,
+# not task EXECUTION. Changing which checks a gate requires (gate_exit_criteria)
+# or the check name->path map (checks) must not invalidate task outputs: a task's
+# output depends only on its own substantive inputs, and the gate evaluator reads
+# gate_exit_criteria live at gate time. Excluding them from the per-task input
+# fingerprint stops an unrelated gate-criteria edit from marking every task stale.
+_MANIFEST_NONTASK_KEYS = ("gate_exit_criteria", "checks")
+
+
+def _manifest_fingerprint_bytes(path: Path) -> bytes:
+    """Canonical manifest bytes for task-staleness, with gate-evaluation-only
+    sections removed. Falls back to raw bytes if the manifest cannot be parsed
+    (never weaker than hashing the whole file)."""
+    try:
+        import yaml
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            trimmed = {k: v for k, v in data.items() if k not in _MANIFEST_NONTASK_KEYS}
+            return yaml.safe_dump(trimmed, sort_keys=True).encode("utf-8")
+    except Exception:
+        pass
+    return path.read_bytes()
+
+
 def _fingerprint_paths(project_root: Path, rel_paths: list[str]) -> str:
     digest = hashlib.sha256()
     for rel in sorted(str(item).rstrip("/") for item in rel_paths if item):
@@ -118,7 +142,10 @@ def _fingerprint_paths(project_root: Path, rel_paths: list[str]) -> str:
                 continue
             digest.update(rel_file.encode("utf-8"))
             digest.update(b"\0")
-            digest.update(hashlib.sha256(file_path.read_bytes()).digest())
+            payload = (_manifest_fingerprint_bytes(file_path)
+                       if rel_file == "project_manifest.yml"
+                       else file_path.read_bytes())
+            digest.update(hashlib.sha256(payload).digest())
     return digest.hexdigest()
 
 
