@@ -51,6 +51,14 @@ def _project_root() -> Path:
     return find_project_root(Path.cwd())
 
 
+def _display_rel(path: str | Path, root: Path) -> str:
+    p = Path(path)
+    try:
+        return p.resolve().relative_to(root.resolve()).as_posix()
+    except Exception:
+        return p.as_posix()
+
+
 def _cmd_run(args: argparse.Namespace) -> int:
     return run_task(args.contract, dry_run=args.dry_run,
                     max_retries_override=args.max_retries,
@@ -169,7 +177,7 @@ def _cmd_recover(args: argparse.Namespace) -> int:
     recompute_candidate_gate(state, _task_gates(all_contracts))
     record_run_summary(state, contract.task_id, calls=0, cost_usd=0.0)
     save_state(root, state)
-    print(f"recovered {contract.task_id} from {Path(path).relative_to(root)}")
+    print(f"recovered {contract.task_id} from {_display_rel(path, root)}")
     print(f"completion receipt: {receipt.path.relative_to(root)}")
     print(f"candidate: {state.get('candidate_stage', '?')} / {state.get('candidate_gate', '?')}")
     print("gate was not approved automatically")

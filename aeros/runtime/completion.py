@@ -63,6 +63,20 @@ def _check_rows(check_results: list[Any] | None) -> tuple[list[str], list[str], 
     return required, passed, failed
 
 
+def _check_key(name: str) -> str:
+    """Normalize check names for comparisons.
+
+    Contracts often name the script file (``check_foo.py``), while structured
+    check output reports the logical check id (``check_foo``).
+    """
+    value = str(name or "").strip()
+    return value[:-3] if value.endswith(".py") else value
+
+
+def _same_check_set(left: list[str], right: list[str]) -> bool:
+    return sorted(_check_key(item) for item in left) == sorted(_check_key(item) for item in right)
+
+
 def write_completion_receipt(
     project_root: Path,
     contract: Contract,
@@ -88,7 +102,7 @@ def write_completion_receipt(
     issues = list(open_issues or [])
     failures: list[str] = []
 
-    if sorted(required) != sorted(contract.checks):
+    if not _same_check_set(required, contract.checks):
         failures.append("receipt check list does not match task contract checks")
     if checks_failed:
         failures.append("one or more required checks failed")
@@ -164,9 +178,9 @@ def validate_completion_receipts(project_root: Path, contracts: dict[str, tuple[
             failures.append(f"{task_id}: completion receipt verdict is not pass")
         if payload.get("task_id") != task_id:
             failures.append(f"{task_id}: completion receipt task_id mismatch")
-        if sorted(payload.get("checks_required") or []) != sorted(contract.checks):
+        if not _same_check_set(list(payload.get("checks_required") or []), list(contract.checks)):
             failures.append(f"{task_id}: completion receipt checks do not match contract")
-        if sorted(payload.get("checks_run") or []) != sorted(contract.checks):
+        if not _same_check_set(list(payload.get("checks_run") or []), list(contract.checks)):
             failures.append(f"{task_id}: completion receipt does not record all required checks")
         if payload.get("checks_failed"):
             failures.append(f"{task_id}: completion receipt records failed checks")
