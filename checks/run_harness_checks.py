@@ -38,6 +38,7 @@ CHECKS = [
     "check_claim_ceiling.py",
     "check_claim_method_consistency.py",
     "check_referee_review_present.py",
+    "check_claim_numbers_bound.py",
     "check_number_registry.py",
     "check_number_scan.py",
     "check_bib_verification_present.py",
