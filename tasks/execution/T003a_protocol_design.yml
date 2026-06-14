@@ -5,6 +5,18 @@ automation_class: auto_rerunnable
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: pending
+allowed_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
+- econ-principles-check
+recommended_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
+- econ-principles-check
 depends_on:
 - T003_design_audit
 goal: 'Convert the approved G3 method card into an executable protocol for the first

@@ -7,6 +7,14 @@ automation_class: auto_rerunnable
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: pending
+allowed_skills:
+- lit-review-assistant
+- academic-research-suite
+- bib-manager
+recommended_skills:
+- lit-review-assistant
+- academic-research-suite
+- bib-manager
 goal: "Search for literature WITHIN the human-reasoned framing deck and register each\
   \ paper in discovery/literature/paper_registry.csv, stratified by function. This\
   \ is the \"apply\" step after the framing \"plan\": you do NOT invent the framing\

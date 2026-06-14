@@ -6,6 +6,16 @@ automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: evidence/receipts/D002_data_scouting_human_review_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- data-inventory
+- describe-data
+- data-codebook
+- policy-timeline
+recommended_skills:
+- data-inventory
+- describe-data
+- data-codebook
+- policy-timeline
 goal: 'Scout candidate data sources that could support the project''s research question
   and register each as one row in discovery/data_inventory.csv. This is a DISCOVERY
   task: locate sources and record their access path, engineering status, and the next

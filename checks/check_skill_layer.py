@@ -51,8 +51,9 @@ REQUIRED_FILES = {
     ],
 }
 SKILL_MAP = Path("harness/skill_map_core.yml")
-ALLOWED_TIERS = {"core"}
-MAX_CORE_SKILLS = 8
+ALLOWED_TIERS = {"core", "advisory", "reference"}
+MAX_CORE_SKILLS = 24
+MAX_TOTAL_SKILLS = 32
 
 
 def main() -> int:
@@ -73,17 +74,23 @@ def main() -> int:
         data = yaml.safe_load(SKILL_MAP.read_text(encoding="utf-8"))
         skills = data.get("skills", {})
         core_count = 0
+        total_count = 0
         for key, skill in skills.items():
+            total_count += 1
             tier = skill.get("tier")
             if tier not in ALLOWED_TIERS:
                 failures.append(f"{key}: invalid or missing tier {tier!r}")
             default_use = skill.get("default_use")
-            if default_use is not True:
-                failures.append(f"{key}: core skills in skill_map_core.yml must have default_use=true")
+            if not isinstance(default_use, bool):
+                failures.append(f"{key}: default_use must be true or false")
+            if not isinstance(skill.get("human_gate_required"), bool):
+                failures.append(f"{key}: human_gate_required must be true or false")
             if tier == "core":
                 core_count += 1
         if core_count > MAX_CORE_SKILLS:
             failures.append(f"too many core skills: {core_count} > {MAX_CORE_SKILLS}")
+        if total_count > MAX_TOTAL_SKILLS:
+            failures.append(f"too many mapped skills: {total_count} > {MAX_TOTAL_SKILLS}")
 
     if failures:
         print("FAIL: skill layer problems detected:")

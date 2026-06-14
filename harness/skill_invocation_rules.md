@@ -153,4 +153,9 @@ If no external skill was used, the receipt records an empty skill list. If a
 skill was used, the receipt must show that the skill is known to
 `harness/skill_map_core.yml` and allowed by the active task contract.
 
+Task contracts may declare `recommended_skills` for controller planning. Every
+recommended skill must exist in `harness/skill_map_core.yml` and must also
+appear in the task's `allowed_skills`. Recommendations are advisory only: they
+do not invoke the skill, approve a gate, or weaken checks.
+
 Do not treat a skill output as admissible if the skill invocation receipt fails.

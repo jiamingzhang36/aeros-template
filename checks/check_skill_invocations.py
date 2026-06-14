@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate AEROS skill invocation receipts."""
+"""Validate AEROS skill routing declarations and invocation receipts."""
 from __future__ import annotations
 
 import argparse

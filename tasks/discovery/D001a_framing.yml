@@ -7,6 +7,14 @@ automation_class: auto_rerunnable
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: pending
+allowed_skills:
+- research-ideation
+- academic-research-suite
+- econ-principles-check
+recommended_skills:
+- research-ideation
+- academic-research-suite
+- econ-principles-check
 goal: "REASONING step, not a search. Given the research idea, reason about which literature\
   \ FRAMEWORKS this idea draws on, organized by function bucket, and write them to\
   \ discovery/literature/framing_deck.yml as a deck of cards.\nA research idea rests\

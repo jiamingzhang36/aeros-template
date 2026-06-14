@@ -5,6 +5,14 @@ automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: evidence/receipts/T006_referee_panel_human_review_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- econ-write
+- academic-research-suite
+- pre-submission-audit
+recommended_skills:
+- econ-write
+- academic-research-suite
+- pre-submission-audit
 depends_on:
 - T005_claim_audit
 goal: 'Simulate methods, domain, policy, and skeptical-editor objections after the

@@ -60,3 +60,20 @@ Use AEROS for admissibility.
 If a skill makes the project sound better by weakening evidence standards, do not use that output as-is.
 
 For data feasibility, do not skip the skill pass. Use or explicitly consider `data-inventory` first, then add `data-quality-checker`, `data-codebook`, `describe-data`, or `data-merge-audit` when sample data, schema, or linkage keys are available. If the skill cannot run, record the blocker and the next probe instead of making a final feasibility call.
+
+## Economics data-mining and paper-stage skill clusters
+
+AEROS keeps these skills available through `harness/skill_map_core.yml`, but task
+contracts decide which skills are allowed and recommended. Data and audit skills
+may inspect and summarize evidence; method and writing skills may advise, draft,
+or flag risks; none may approve gates, strengthen claims, or bypass registries.
+
+- Data mining: `describe-data`, `data-codebook`, `data-quality-checker`,
+  `data-merge-audit`, `summary-stats-table`, `quick-stats`, `feature-engineering`,
+  `policy-timeline`.
+- Economics method and robustness: `causal-id-review`, `did-checklist`,
+  `robustness-suite`, `placebo-test`, `regression-table`, `econ-principles-check`.
+- Writing and paper package: `econ-write`, `paper-draft`, `results-narrator`,
+  `journal-adapt`, `response-letter`.
+- Final review and release: `code-review-econ`, `replication-check`,
+  `pre-submission-audit`, `bib-manager`, `zotero:Zotero`.

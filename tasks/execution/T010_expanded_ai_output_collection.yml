@@ -5,6 +5,12 @@ automation_class: approval_required
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: blocked_requires_approval
+allowed_skills:
+- data-inventory
+- data-quality-checker
+recommended_skills:
+- data-inventory
+- data-quality-checker
 depends_on:
 - T009_expanded_collection_design
 goal: 'Collect or import the expanded provider/model outputs (or other expanded

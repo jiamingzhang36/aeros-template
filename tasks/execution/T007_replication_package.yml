@@ -5,6 +5,14 @@ automation_class: auto_rerunnable
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: pending
+allowed_skills:
+- code-review-econ
+- replication-check
+- data-codebook
+recommended_skills:
+- code-review-econ
+- replication-check
+- data-codebook
 depends_on:
 - T006_referee_panel
 goal: 'Check whether the project can be packaged for replication. Audit environment,

@@ -5,6 +5,12 @@ automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: evidence/receipts/T001_discovery_audit_human_review_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- academic-research-suite
+- pre-submission-audit
+recommended_skills:
+- academic-research-suite
+- pre-submission-audit
 goal: 'Audit the discovery layer before execution. Check whether the idea, literature
   scope, data inventory, feasibility memo, selected design, method card, and claim
   registry are internally consistent. Write a concise discovery audit report with

@@ -9,6 +9,16 @@ automation_class: auto_rerunnable
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: pending
+allowed_skills:
+- data-inventory
+- data-codebook
+- data-quality-checker
+- feature-engineering
+recommended_skills:
+- data-inventory
+- data-codebook
+- data-quality-checker
+- feature-engineering
 goal: "G2 Measurement. For every key variable the candidate designs need, specify\
   \ how it is constructed from a real data source and whether it can actually be built.\
   \ This is the bridge between the data (G1) and the designs (G3): a design that needs\

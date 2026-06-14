@@ -5,6 +5,16 @@ automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: evidence/receipts/T011_expanded_result_validation_human_review_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- code-review-econ
+- data-quality-checker
+- summary-stats-table
+- regression-table
+recommended_skills:
+- code-review-econ
+- data-quality-checker
+- summary-stats-table
+- regression-table
 depends_on:
 - T010_expanded_ai_output_collection
 goal: 'Validate expanded collection outputs, register expanded result IDs, and decide

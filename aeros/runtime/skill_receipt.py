@@ -61,6 +61,7 @@ def write_skill_invocation_receipt(
     """
     skill_map = load_core_skill_map(project_root)
     allowed = set(str(s).strip() for s in (contract.raw.get("allowed_skills") or []) if str(s).strip())
+    recommended = sorted(str(s).strip() for s in (contract.raw.get("recommended_skills") or []) if str(s).strip())
     records: list[dict[str, Any]] = []
     for name in sorted({s for s in skills_used if s and s != "none" and s != "n/a"}):
         meta = skill_map.get(name, {})
@@ -82,6 +83,7 @@ def write_skill_invocation_receipt(
         "contract_path": _rel(project_root, contract.path),
         "run_report_path": _rel(project_root, run_report_path),
         "allowed_skills": sorted(allowed),
+        "recommended_skills": recommended,
         "skills_used": [r["skill_name"] for r in records],
         "invocations": records,
         "verdict": "fail" if any(not r["known_to_aeros"] or not r["allowed_by_contract"] for r in records) else "pass",
@@ -95,6 +97,9 @@ def write_skill_invocation_receipt(
 def validate_skill_invocations(project_root: Path, contracts: dict[str, tuple[Contract, Path]]) -> list[str]:
     failures: list[str] = []
     skill_map = load_core_skill_map(project_root)
+    from .skill_router import validate_skill_contracts
+
+    failures.extend(validate_skill_contracts(project_root, contracts))
     for task_id, (contract, _path) in sorted(contracts.items()):
         path = receipt_path(project_root, task_id)
         if not path.exists():

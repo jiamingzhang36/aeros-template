@@ -31,8 +31,9 @@ from .runtime.data_backfill import BackfillArgs, run_data_backfill
 from .runtime.decision_packet import write_decision_packet
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
-from .runtime.kernel import _record_task_fingerprints, _task_gates, discover_contracts
+from .runtime.kernel import _record_task_fingerprints, _task_gates, discover_contracts, topo_order
 from .runtime.milestones import format_roadmap, format_simple_status
+from .runtime.skill_router import format_skill_hint, skill_route
 from .runtime.state import (
     approve_gate,
     block_gate,
@@ -547,6 +548,24 @@ def _cmd_iterate(args: argparse.Namespace) -> int:
     )
 
 
+def _cmd_skills_plan(args: argparse.Namespace) -> int:
+    root = _project_root()
+    contracts = discover_contracts(root, None if args.stage == "all" else args.stage)
+    if not contracts:
+        print(f"No task contracts found for stage={args.stage}")
+        return 0
+    print(f"AEROS Skill Plan (stage={args.stage})")
+    print("--------------------------------")
+    for task_id in topo_order(contracts):
+        contract, _path = contracts[task_id]
+        route = skill_route(root, contract)
+        print(
+            f"- {task_id}: gate={contract.gate or '?'} "
+            f"stage={route['inferred_skill_stage'] or 'n/a'} {format_skill_hint(root, contract)}"
+        )
+    return 0
+
+
 def _cmd_collect(args: argparse.Namespace) -> int:
     root = _project_root()
     config = resolve_config(
@@ -830,6 +849,13 @@ def main(argv: list[str] | None = None) -> int:
 
     roadmap = sub.add_parser("roadmap", help="show compressed 5-milestone roadmap")
     roadmap.set_defaults(func=_cmd_roadmap)
+
+    skills = sub.add_parser("skills", help="inspect AEROS skill routing")
+    skills_sub = skills.add_subparsers(dest="skills_command", required=True)
+    skills_plan = skills_sub.add_parser("plan", help="show recommended/allowed skills by task")
+    skills_plan.add_argument("--stage", default="all", choices=["all", "discovery", "execution"],
+                             help="task stage to inspect (default: all)")
+    skills_plan.set_defaults(func=_cmd_skills_plan)
 
     manifest_p = sub.add_parser("manifest",
                                 help="snapshot/verify SHA256 of registered result artifacts")

@@ -19,6 +19,7 @@ from .kernel import (
     run_pipeline,
     topo_order,
 )
+from .skill_router import format_skill_hint, recommended_skills
 
 print = partial(print, flush=True)
 
@@ -30,6 +31,8 @@ class IterateStep:
     status: str
     action: str
     stale_reason: str = ""
+    recommended_skills: tuple[str, ...] = ()
+    skill_hint: str = ""
 
 
 @dataclass(frozen=True)
@@ -175,6 +178,8 @@ def build_iterate_plan(
                 status=status,
                 action=action,
                 stale_reason=stale,
+                recommended_skills=tuple(recommended_skills(project_root, contract)),
+                skill_hint=format_skill_hint(project_root, contract),
             ))
             continue
         if status == "passed":
@@ -188,6 +193,8 @@ def build_iterate_plan(
             status=status,
             action=action,
             stale_reason=stale,
+            recommended_skills=tuple(recommended_skills(project_root, contract)),
+            skill_hint=format_skill_hint(project_root, contract),
         ))
     return IteratePlan(stage=stage, target_gate=target_gate, steps=steps, can_run=True, mode=mode)
 
@@ -208,7 +215,8 @@ def format_iterate_plan(plan: IteratePlan) -> str:
     for step in plan.steps:
         stale = f" ({step.stale_reason})" if step.stale_reason else ""
         lines.append(
-            f"  - {step.task_id:32s} gate={step.gate:3s} status={step.status:10s} action={step.action}{stale}"
+            f"  - {step.task_id:32s} gate={step.gate:3s} status={step.status:10s} "
+            f"action={step.action}{stale} {step.skill_hint}"
         )
     lines.append(f"[iterate] will stop for human packet at {plan.target_gate}")
     return "\n".join(lines)

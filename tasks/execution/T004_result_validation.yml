@@ -5,6 +5,16 @@ automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: evidence/receipts/T004_result_validation_human_review_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- code-review-econ
+- regression-table
+- summary-stats-table
+- data-quality-checker
+recommended_skills:
+- code-review-econ
+- regression-table
+- summary-stats-table
+- data-quality-checker
 depends_on:
 - T004b_robustness_plan
 goal: 'Validate that registered results, output files, provenance records, tables,

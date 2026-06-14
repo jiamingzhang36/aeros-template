@@ -5,6 +5,16 @@ automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: evidence/receipts/T012_claim_upgrade_review_human_review_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- causal-id-review
+- econ-write
+- results-narrator
+- econ-principles-check
+recommended_skills:
+- causal-id-review
+- econ-write
+- results-narrator
+- econ-principles-check
 depends_on:
 - T011_expanded_result_validation
 goal: 'Review whether the expanded G11 evidence can justify proposing a bounded upgrade

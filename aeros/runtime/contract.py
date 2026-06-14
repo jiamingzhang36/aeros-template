@@ -25,6 +25,8 @@ class Contract:
     allowed_outputs: list[str]
     forbidden_actions: list[str]
     checks: list[str]
+    allowed_skills: list[str]
+    recommended_skills: list[str]
     output_contract: dict[str, Any]
     max_retries: int
     escalate_if: list[str]
@@ -68,6 +70,8 @@ def load_contract(path: str | Path) -> Contract:
         allowed_outputs=list(data["allowed_outputs"]),
         forbidden_actions=list(data.get("forbidden_actions", []) or []),
         checks=list(data["checks"]),
+        allowed_skills=list(data.get("allowed_skills", []) or []),
+        recommended_skills=list(data.get("recommended_skills", []) or []),
         output_contract=dict(data.get("output_contract", {}) or {}),
         max_retries=int(retry.get("max_retries", 1)),
         escalate_if=list(data.get("escalate_if", []) or []),

@@ -5,6 +5,18 @@ automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: evidence/receipts/T013_compliance_release_review_human_review_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- code-review-econ
+- replication-check
+- pre-submission-audit
+- bib-manager
+- zotero:Zotero
+recommended_skills:
+- code-review-econ
+- replication-check
+- pre-submission-audit
+- bib-manager
+- zotero:Zotero
 depends_on:
 - T012_claim_upgrade_review
 goal: 'Produce a compliance and release review before any public release, external

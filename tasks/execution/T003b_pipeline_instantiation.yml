@@ -5,6 +5,14 @@ automation_class: auto_rerunnable
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: pending
+allowed_skills:
+- code-review-econ
+- replication-check
+- data-merge-audit
+recommended_skills:
+- code-review-econ
+- replication-check
+- data-merge-audit
 depends_on:
 - T003a_protocol_design
 goal: 'Instantiate the project pipeline entry point for the approved execution protocol.

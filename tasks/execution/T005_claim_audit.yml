@@ -5,6 +5,16 @@ automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: evidence/receipts/T005_claim_audit_human_review_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- causal-id-review
+- econ-write
+- results-narrator
+- econ-principles-check
+recommended_skills:
+- causal-id-review
+- econ-write
+- results-narrator
+- econ-principles-check
 depends_on:
 - T004_result_validation
 goal: 'Audit every active claim against the method card, claim ceiling, evidence registry,

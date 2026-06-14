@@ -5,6 +5,18 @@ automation_class: auto_rerunnable
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: pending
+allowed_skills:
+- econ-write
+- paper-draft
+- results-narrator
+- bib-manager
+- zotero:Zotero
+recommended_skills:
+- econ-write
+- paper-draft
+- results-narrator
+- bib-manager
+- zotero:Zotero
 depends_on:
 - T007_replication_package
 goal: 'Create or audit the first paper/package draft after internal replication readiness.

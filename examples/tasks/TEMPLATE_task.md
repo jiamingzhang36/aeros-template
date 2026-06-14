@@ -1,6 +1,7 @@
 ---
 task_class: standard
 allowed_skills: []
+recommended_skills: []
 ---
 # Task Template
 

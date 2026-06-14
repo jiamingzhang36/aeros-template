@@ -5,6 +5,18 @@ automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: evidence/receipts/T003_design_audit_human_review_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
+- econ-principles-check
+recommended_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
+- econ-principles-check
 depends_on:
 - T001_discovery_audit
 - T002_data_feasibility

@@ -1,0 +1,138 @@
+"""Skill routing helpers for AEROS task planning and audit receipts.
+
+The router is advisory: it recommends skills and explains their trust tier,
+but it never invokes a skill, approves a gate, or weakens task checks.
+"""
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+from .contract import Contract
+from .skill_receipt import load_core_skill_map
+
+
+def _norm_list(value: Any) -> list[str]:
+    if not isinstance(value, list):
+        return []
+    out: list[str] = []
+    for item in value:
+        text = str(item).strip()
+        if text and text not in out:
+            out.append(text)
+    return out
+
+
+def infer_skill_stage(contract: Contract) -> str:
+    """Map a task contract to the closest skill-stage label.
+
+    This is intentionally heuristic and display-oriented. Formal authority
+    remains in the task contract, checks, receipts, and human gates.
+    """
+    blob = " ".join([
+        contract.task_id,
+        contract.stage,
+        contract.gate,
+        contract.goal,
+        " ".join(contract.checks),
+        " ".join(contract.allowed_outputs),
+    ]).lower()
+
+    if "data_inventory" in blob or "data_scout" in blob or "data source" in blob:
+        return "data_scouting"
+    if "design" in blob or "method_card" in blob or "identification" in blob:
+        return "design_formation"
+    if "claim" in blob or "ceiling" in blob or "language_constraints" in blob:
+        return "writing_revision" if "paper" in blob else "execution_analysis"
+    if "paper" in blob or "draft" in blob or "referee" in blob or "revision" in blob:
+        return "writing_revision"
+    if "replication" in blob or "code_review" in blob or "provenance" in blob:
+        return "engineering_maintenance"
+    if "literature" in blob or "citation" in blob or "paper_registry" in blob:
+        return "literature_discovery"
+    if contract.stage == "discovery":
+        return "discovery_ideation"
+    if contract.stage == "execution":
+        return "execution_analysis"
+    return ""
+
+
+def recommended_skills(project_root: Path, contract: Contract) -> list[str]:
+    explicit = _norm_list(contract.raw.get("recommended_skills"))
+    if explicit:
+        return explicit
+
+    skill_map = load_core_skill_map(project_root)
+    stage = infer_skill_stage(contract)
+    names: list[str] = []
+    for name, meta in sorted(skill_map.items()):
+        if not bool(meta.get("default_use", False)):
+            continue
+        if str(meta.get("aeros_stage", "")).strip() != stage:
+            continue
+        names.append(name)
+    return names
+
+
+def allowed_skills(contract: Contract) -> list[str]:
+    return _norm_list(contract.raw.get("allowed_skills"))
+
+
+def skill_route(project_root: Path, contract: Contract) -> dict[str, Any]:
+    skill_map = load_core_skill_map(project_root)
+    rec = recommended_skills(project_root, contract)
+    allowed = allowed_skills(contract)
+    records: list[dict[str, Any]] = []
+    for name in rec:
+        meta = skill_map.get(name, {})
+        records.append({
+            "skill_name": name,
+            "known_to_aeros": bool(meta),
+            "allowed_by_contract": name in allowed,
+            "tier": meta.get("tier", ""),
+            "source": meta.get("source", ""),
+            "aeros_stage": meta.get("aeros_stage", ""),
+            "use_status": meta.get("use_status", ""),
+            "human_gate_required": bool(meta.get("human_gate_required", False)),
+        })
+    routed_stages = sorted({
+        str(item.get("aeros_stage", "")).strip()
+        for item in records
+        if str(item.get("aeros_stage", "")).strip()
+    })
+    return {
+        "task_id": contract.task_id,
+        "inferred_skill_stage": "+".join(routed_stages) if routed_stages else infer_skill_stage(contract),
+        "recommended_skills": rec,
+        "allowed_skills": allowed,
+        "routes": records,
+    }
+
+
+def format_skill_hint(project_root: Path, contract: Contract) -> str:
+    records = skill_route(project_root, contract)["routes"]
+    if not records:
+        return "skills=none"
+    parts: list[str] = []
+    for item in records:
+        name = item["skill_name"]
+        tier = item.get("tier") or "unknown"
+        status = "allowed" if item.get("allowed_by_contract") else "not-allowed"
+        gate = ",human-gate" if item.get("human_gate_required") else ""
+        parts.append(f"{name}[{tier},{status}{gate}]")
+    return "skills=" + ",".join(parts)
+
+
+def validate_skill_contracts(project_root: Path, contracts: dict[str, tuple[Contract, Path]]) -> list[str]:
+    """Validate task-level skill declarations, independent of run receipts."""
+    failures: list[str] = []
+    skill_map = load_core_skill_map(project_root)
+    for task_id, (contract, _path) in sorted(contracts.items()):
+        allowed = set(allowed_skills(contract))
+        rec = set(recommended_skills(project_root, contract))
+        for name in sorted(allowed | rec):
+            if name not in skill_map:
+                failures.append(f"{task_id}: skill {name!r} is not in harness/skill_map_core.yml")
+        for name in sorted(rec - allowed):
+            failures.append(f"{task_id}: recommended skill {name!r} is not allowed by task contract")
+    return failures

@@ -5,6 +5,16 @@ automation_class: auto_rerunnable
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: pending
+allowed_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
+recommended_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
 depends_on:
 - T004_main_execution
 goal: 'Translate the selected design, method card, and first execution outputs into

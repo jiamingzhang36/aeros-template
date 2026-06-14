@@ -215,6 +215,7 @@ Backfill is the bridge between governance automation and data repair automation.
 - A skill may propose, search, draft, code, or visualize; it may not override extraction-card rules, data feasibility rules, protected definitions, claim registry boundaries, critic review, or human gates.
 - If a skill's instruction conflicts with AEROS, follow AEROS and record the conflict in the run report.
 - Any task that uses a skill must have a passing skill invocation receipt in `agent_runs/skill_invocations/`.
+- `recommended_skills` are advisory routing hints; `allowed_skills` are the hard authorization boundary. A recommended skill must also be allowed by the task.
 
 ## Claim Rules
 

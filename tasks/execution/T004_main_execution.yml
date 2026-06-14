@@ -5,6 +5,14 @@ automation_class: auto_rerunnable
 evidence_receipt_required: false
 receipt_path: ''
 gate_status: pending
+allowed_skills:
+- code-review-econ
+- regression-table
+- summary-stats-table
+recommended_skills:
+- code-review-econ
+- regression-table
+- summary-stats-table
 depends_on:
 - T003b_pipeline_instantiation
 goal: 'Run the approved main execution pipeline or a clearly labeled smoke execution,

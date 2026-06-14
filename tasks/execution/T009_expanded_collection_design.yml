@@ -5,6 +5,14 @@ automation_class: frozen_evidence
 evidence_receipt_required: true
 receipt_path: evidence/receipts/T009_expanded_collection_design_frozen_evidence_receipt.md
 gate_status: needs_receipt_audit
+allowed_skills:
+- data-inventory
+- data-quality-checker
+- policy-timeline
+recommended_skills:
+- data-inventory
+- data-quality-checker
+- policy-timeline
 depends_on:
 - T008_paper_package_draft
 goal: 'Design the expanded AI-output collection that can move the project beyond the
