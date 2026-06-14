@@ -15,8 +15,6 @@ recommended_skills:
 - causal-id-review
 - did-checklist
 - robustness-suite
-- placebo-test
-- econ-principles-check
 depends_on:
 - T001_discovery_audit
 - T002_data_feasibility

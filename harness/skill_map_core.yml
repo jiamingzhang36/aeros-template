@@ -514,7 +514,7 @@ skills:
     invocation: mcp_skill
     external_stage: writing
     aeros_stage: writing_revision
-    use_status: review_only
+    use_status: dormant_reference
     allowed_outputs:
     - paper/draft.md
     - audits/submission_fit_report.md
@@ -525,7 +525,7 @@ skills:
     - Adapt framing and structure without changing evidence status.
     - Human owner chooses journal and submission strategy.
     human_gate_required: true
-    tier: advisory
+    tier: reference
     default_use: false
   response_letter:
     name: response-letter
@@ -533,7 +533,7 @@ skills:
     invocation: mcp_skill
     external_stage: writing
     aeros_stage: writing_revision
-    use_status: review_only
+    use_status: dormant_reference
     allowed_outputs:
     - paper/response_letter.md
     - audits/revision_audit_report.md
@@ -544,7 +544,7 @@ skills:
     - Every promised revision must map to a changed artifact or issue-log entry.
     - Human owner approves response strategy.
     human_gate_required: true
-    tier: advisory
+    tier: reference
     default_use: false
   bib_manager:
     name: bib-manager

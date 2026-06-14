@@ -12,11 +12,9 @@ allowed_skills:
 - bib-manager
 - zotero:Zotero
 recommended_skills:
-- code-review-econ
 - replication-check
 - pre-submission-audit
 - bib-manager
-- zotero:Zotero
 depends_on:
 - T012_claim_upgrade_review
 goal: 'Produce a compliance and release review before any public release, external

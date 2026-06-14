@@ -12,8 +12,6 @@ allowed_skills:
 - data-merge-audit
 - summary-stats-table
 recommended_skills:
-- data-inventory
-- describe-data
 - data-quality-checker
 - data-merge-audit
 - summary-stats-table

@@ -19,8 +19,6 @@ recommended_skills:
 - causal-id-review
 - did-checklist
 - econ-principles-check
-- robustness-suite
-- placebo-test
 goal: "Produce a DECK of ranked candidate research designs in discovery/design_options.md,\
   \ NOT a single committed design. Empirical design is data-contingent: hold several\
   \ identification strategies as alternatives, each guarded by a checkable DATA-VIABILITY\

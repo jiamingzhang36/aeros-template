@@ -15,8 +15,6 @@ recommended_skills:
 - econ-write
 - paper-draft
 - results-narrator
-- bib-manager
-- zotero:Zotero
 depends_on:
 - T007_replication_package
 goal: 'Create or audit the first paper/package draft after internal replication readiness.

@@ -13,9 +13,7 @@ allowed_skills:
 - econ-principles-check
 recommended_skills:
 - causal-id-review
-- did-checklist
 - robustness-suite
-- placebo-test
 - econ-principles-check
 depends_on:
 - T003_design_audit
