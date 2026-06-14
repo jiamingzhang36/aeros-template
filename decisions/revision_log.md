@@ -20,3 +20,15 @@ Use this file to track template or project-level changes that alter workflow, ev
 | 2026-05-28 15:26 +0800 | REV002 | f45c5af | skill governance | skill menu / related docs | Tier research skills by default use | not recorded | Establishes core/optional/reference skill handling. |
 | TBD | REV001 | TBD | project setup | TBD | Initial setup | TBD | Fill this row when instantiating a project from the template. |
 | 2026-05-28 22:34 +0800 | REV013 | this commit | workflow & governance cleanup | `checks/check_literature_tools.py`, `checks/check_git_guardrails.py`, `checks/check_agent_runs_tools.py`, `checks/run_harness_checks.py`, `project_manifest.yml`, `tasks/TEMPLATE_task.md`, `tasks/discovery`, `tasks/execution`, `examples/tasks/TEMPLATE_task.md`, `examples/tasks/discovery`, `examples/tasks/execution`, `examples/tasks/README.md`, `AGENTS.md`, `discovery/AGENTS.md`, `discovery/literature/AGENTS.md`, `discovery/literature/literature_rules.md`, `execution/AGENTS.md`, `harness/common_rules.md`, `README.md` | not run (requested change only) | Consolidate checks into 3 aggregate entries, relocate templates under `examples/tasks/` with compatibility links, and de-duplicate repeated AGENTS rules to reduce maintenance drift. |
+
+## REV016 - 2026-06-14 00:00 +0800
+
+- commit: this commit
+- change_type: tooling / synchronization
+- summary: Promoted the AEROS desktop synchronization script into the versioned template tooling layer so synchronization behavior is tracked with the harness.
+- files:
+  - tools/sync_aeros_latest.zsh
+- checks:
+  - zsh syntax check for tools/sync_aeros_latest.zsh
+  - script retains targeted project_manifest wiring for improvement backlog checks
+- notes: The script remains conservative: it syncs framework files and injects required manifest wiring without overwriting project-specific manifests wholesale.
