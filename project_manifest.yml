@@ -291,6 +291,12 @@ checks:
   artifact_manifest: checks/check_artifact_manifest.py
   project_status: checks/check_project_status.py
   provenance: checks/check_provenance.py
+  bib_verification_present: checks/check_bib_verification_present.py
+  table_cell_sources: checks/check_table_cell_sources.py
+  data_availability_present: checks/check_data_availability_present.py
+  data_provenance: checks/check_data_provenance.py
+  data_fitness: checks/check_data_fitness.py
+  data_lock: checks/check_data_lock.py
   execution_protocol: checks/check_execution_protocol.py
   task_contract: checks/check_task_contract.py
   agent_run_report: checks/check_agent_run_report.py
