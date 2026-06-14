@@ -226,6 +226,7 @@ layers:
     - harness/protocols/human_gate.md
     - harness/protocols/full_run_checklist.md
     - harness/agent_roles.yml
+    - harness/improvement_backlog.yml
     - harness/skill_registry.md
     - harness/skill_invocation_rules.md
     - harness/practical_skill_menu.md
@@ -255,6 +256,7 @@ default_task_policy:
   preferred_spec_selection: must not be based on significance alone
 checks:
   correction_ledger: checks/check_correction_ledger.py
+  improvement_backlog: checks/check_improvement_backlog.py
   discovery_completeness: checks/check_discovery_completeness.py
   gate_exit: checks/check_gate_exit.py
   idea_bank: checks/check_idea_bank.py

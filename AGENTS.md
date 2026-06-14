@@ -206,6 +206,14 @@ Backfill is the bridge between governance automation and data repair automation.
 - Treat `harness/protocols/human_gate.md` as the approval policy for research judgment changes.
 - If a task affects protected definitions, claim strength, preferred specifications, or publication-facing outputs, mark `critic_required: true` and `human_gate_required: true`.
 
+## Update and Improvement Tracking
+
+- Every structural update, workflow change, bugfix, harness rule change, or template refactor must be recorded in `decisions/revision_log.md` with date, area, summary, files changed, validation, and commit when available.
+- Every known weakness, deferred improvement, repeated friction, or "could be better" observation must be recorded in `harness/improvement_backlog.yml`.
+- Backlog entries must include `created_at`, `updated_at`, `status`, `priority`, `area`, `issue`, `proposed_fix`, and `owner`.
+- Do not leave important improvement ideas only in chat.
+- When resolving a backlog item, update `status`, `resolved_at`, and `resolution_commit`.
+
 ## Skill Layer Rules
 
 - External economics skills may be used only under AEROS task, evidence, permission, and claim rules.

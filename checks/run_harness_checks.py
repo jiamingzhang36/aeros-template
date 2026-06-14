@@ -19,6 +19,7 @@ CHECKS = [
     "check_skill_layer.py",
     "check_skill_invocations.py",
     "check_correction_ledger.py",
+    "check_improvement_backlog.py",
     "check_discovery_completeness.py",
     "check_gate_exit.py",
     "check_idea_bank.py",

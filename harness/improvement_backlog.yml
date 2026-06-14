@@ -1,0 +1,33 @@
+version: "0.1"
+purpose: >
+  Track known AEROS weaknesses, deferred improvements, repeated friction, and
+  candidate refinements that should not be left only in chat.
+entries:
+  - id: AEROS-IMPROVE-001
+    created_at: "2026-06-14"
+    updated_at: "2026-06-14"
+    status: open
+    priority: medium
+    area: skill-router
+    source: user_observation
+    issue: "Skills are routed and receipt-gated, but not yet auto-invoked by task type."
+    proposed_fix: "Add a skill invocation planner and run-report skill extraction so runtime receipts can record actual skill use."
+    owner: human
+    target_gate: G0
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Keep as advisory until actual skill invocation can be mechanically audited."
+  - id: AEROS-IMPROVE-002
+    created_at: "2026-06-14"
+    updated_at: "2026-06-14"
+    status: open
+    priority: medium
+    area: validation
+    source: self_audit
+    issue: "AEROS has strong self-validation but still needs more third-party or blind external review of real project outputs."
+    proposed_fix: "Create an external evaluation packet workflow that samples adoption packets, decision packets, claim audits, and draft sections for human or peer review."
+    owner: human
+    target_gate: G8
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Do not treat more internal checks as a substitute for external judgment."
