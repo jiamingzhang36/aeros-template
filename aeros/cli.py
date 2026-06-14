@@ -144,6 +144,7 @@ def _cmd_recover(args: argparse.Namespace) -> int:
         return 1
 
     from .runtime.completion import write_completion_receipt
+    from .runtime.skill_receipt import write_skill_invocation_receipt
     state = load_state(root)
     all_contracts = discover_contracts(root)
     _record_task_fingerprints(state, contract, root, all_contracts)
@@ -153,6 +154,7 @@ def _cmd_recover(args: argparse.Namespace) -> int:
         contract,
         mode="manual_recover",
         check_results=results,
+        skill_receipt_path=write_skill_invocation_receipt(root, contract, skills_used=[], run_report_path=None),
         input_fingerprint=entry.get("input_fingerprint", ""),
         output_fingerprint=entry.get("output_fingerprint", ""),
         dependency_fingerprint=entry.get("dependency_fingerprint", ""),

@@ -214,6 +214,7 @@ Backfill is the bridge between governance automation and data repair automation.
 - Treat `harness/skill_map_core.yml` as the default map from external skill stages to AEROS stages, and `harness/skill_map_reference.md` as the non-core catalog.
 - A skill may propose, search, draft, code, or visualize; it may not override extraction-card rules, data feasibility rules, protected definitions, claim registry boundaries, critic review, or human gates.
 - If a skill's instruction conflicts with AEROS, follow AEROS and record the conflict in the run report.
+- Any task that uses a skill must have a passing skill invocation receipt in `agent_runs/skill_invocations/`.
 
 ## Claim Rules
 

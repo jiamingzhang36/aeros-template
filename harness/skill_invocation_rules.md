@@ -143,3 +143,14 @@ When a task uses an external skill, the run report must list:
 - AEROS constraints applied,
 - checks run,
 - unresolved human decisions.
+
+## Skill Invocation Receipt
+
+Every runtime task completion writes a skill invocation receipt in
+`agent_runs/skill_invocations/`.
+
+If no external skill was used, the receipt records an empty skill list. If a
+skill was used, the receipt must show that the skill is known to
+`harness/skill_map_core.yml` and allowed by the active task contract.
+
+Do not treat a skill output as admissible if the skill invocation receipt fails.

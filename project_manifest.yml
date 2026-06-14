@@ -212,6 +212,7 @@ layers:
     required_dirs:
     - tasks
     - agent_runs
+    - agent_runs/skill_invocations
     - agent_runs/completion_receipts
     - audits
   mechanical_verification:
@@ -259,6 +260,7 @@ checks:
   idea_bank: checks/check_idea_bank.py
   stage_agents: checks/check_stage_agents.py
   skill_layer: checks/check_skill_layer.py
+  skill_invocations: checks/check_skill_invocations.py
   feasibility_matrix: checks/check_feasibility_matrix.py
   literature_tools: checks/check_literature_tools.py
   framing_deck: checks/check_framing_deck.py

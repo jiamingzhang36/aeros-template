@@ -18,6 +18,7 @@ from .checks import format_feedback, run_checks
 from .completion import write_completion_receipt, validate_completion_receipts
 from .contract import Contract, load_contract
 from .report import AttemptRecord, RunRecord, write_run_report
+from .skill_receipt import write_skill_invocation_receipt
 
 print = partial(print, flush=True)
 
@@ -508,6 +509,9 @@ def run_pipeline(
                     _record_task_fingerprints(state, c, project_root, all_contracts)
                     receipt = write_completion_receipt(
                         project_root, c, mode="revalidation", check_results=_results,
+                        skill_receipt_path=write_skill_invocation_receipt(
+                            project_root, c, skills_used=[], run_report_path=None
+                        ),
                         input_fingerprint=state_mod.task_entry(state, tid).get("input_fingerprint", ""),
                         output_fingerprint=state_mod.task_entry(state, tid).get("output_fingerprint", ""),
                         dependency_fingerprint=state_mod.task_entry(state, tid).get("dependency_fingerprint", ""),
@@ -544,6 +548,9 @@ def run_pipeline(
                         _record_task_fingerprints(state, c, project_root, all_contracts)
                         receipt = write_completion_receipt(
                             project_root, c, mode="revalidation", check_results=results_now,
+                            skill_receipt_path=write_skill_invocation_receipt(
+                                project_root, c, skills_used=[], run_report_path=None
+                            ),
                             input_fingerprint=state_mod.task_entry(state, tid).get("input_fingerprint", ""),
                             output_fingerprint=state_mod.task_entry(state, tid).get("output_fingerprint", ""),
                             dependency_fingerprint=state_mod.task_entry(state, tid).get("dependency_fingerprint", ""),
@@ -681,8 +688,12 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
         contracts = discover_contracts(project_root)
         _record_task_fingerprints(state, contract, project_root, contracts)
         entry = state_mod.task_entry(state, contract.task_id)
+        skill_receipt = write_skill_invocation_receipt(
+            project_root, contract, skills_used=[], run_report_path=None
+        )
         receipt = write_completion_receipt(
             project_root, contract, mode="deterministic", check_results=results,
+            skill_receipt_path=skill_receipt,
             input_fingerprint=entry.get("input_fingerprint", ""),
             output_fingerprint=entry.get("output_fingerprint", ""),
             dependency_fingerprint=entry.get("dependency_fingerprint", ""),
@@ -749,6 +760,10 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
             agent_provider=prov_provider, agent_model=prov_model,
             temperature=prov_temp, tools_used=tools_used,
         )
+        skill_receipt = write_skill_invocation_receipt(
+            project_root, contract, skills_used=[], run_report_path=None
+        )
+        run.skill_receipt_path = skill_receipt.relative_to(project_root).as_posix()
         report_path = write_run_report(project_root, run)
         print(f"[kernel] run report -> {report_path.relative_to(project_root)} "
               f"(cost ${run_cost:.4f}, {run_calls} call(s))")
@@ -835,11 +850,18 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
                 temperature=_agent_provenance(project_root)[2],
                 tools_used=sorted({name for rec in attempts_log for name, _, _ in rec.checks}),
             )
+            skill_receipt = write_skill_invocation_receipt(
+                project_root, contract, skills_used=[], run_report_path=None
+            )
+            temp_run.skill_receipt_path = skill_receipt.relative_to(project_root).as_posix()
             report_path = write_run_report(project_root, temp_run)
+            skill_receipt = write_skill_invocation_receipt(
+                project_root, contract, skills_used=[], run_report_path=report_path
+            )
             entry = state_mod.task_entry(state, contract.task_id)
             receipt = write_completion_receipt(
                 project_root, contract, mode="agent_run", check_results=results,
-                run_report_path=report_path,
+                run_report_path=report_path, skill_receipt_path=skill_receipt,
                 input_fingerprint=entry.get("input_fingerprint", ""),
                 output_fingerprint=entry.get("output_fingerprint", ""),
                 dependency_fingerprint=entry.get("dependency_fingerprint", ""),

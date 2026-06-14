@@ -30,6 +30,12 @@ TBD
 
 - TBD
 
+## Skill Invocation Receipt
+
+Path: `agent_runs/skill_invocations/<task_id>_skill_invocations.yml`
+
+Status: TBD
+
 ## Files Read
 
 TBD

@@ -38,6 +38,7 @@ class RunRecord:
     agent_model: str = ""
     temperature: float | None = None
     tools_used: list[str] = field(default_factory=list)
+    skill_receipt_path: str = ""
 
 
 def _checks_table(run: RunRecord) -> str:
@@ -132,6 +133,7 @@ def write_run_report(project_root: Path, run: RunRecord) -> Path:
 - Tokens (this run): {tokens_str}
 - Provenance: provider={run.agent_provider or 'n/a'}, model={run.agent_model or 'n/a'}, temperature={run.temperature if run.temperature is not None else 'n/a'}
 - Tools used: {", ".join(run.tools_used) if run.tools_used else "n/a"}
+- Skill invocation receipt: {run.skill_receipt_path or 'n/a'}
 
 ## Objective
 
