@@ -15,6 +15,7 @@ from . import identity
 from . import state as state_mod
 from .agent import build_prompt, run_agent
 from .checks import format_feedback, run_checks
+from .completion import write_completion_receipt, validate_completion_receipts
 from .contract import Contract, load_contract
 from .report import AttemptRecord, RunRecord, write_run_report
 
@@ -504,9 +505,22 @@ def run_pipeline(
                     passed_now, _results = run_checks(project_root, c.checks)
                     revalidated = passed_now
                 if revalidated:
+                    _record_task_fingerprints(state, c, project_root, all_contracts)
+                    receipt = write_completion_receipt(
+                        project_root, c, mode="revalidation", check_results=_results,
+                        input_fingerprint=state_mod.task_entry(state, tid).get("input_fingerprint", ""),
+                        output_fingerprint=state_mod.task_entry(state, tid).get("output_fingerprint", ""),
+                        dependency_fingerprint=state_mod.task_entry(state, tid).get("dependency_fingerprint", ""),
+                    )
+                    if not receipt.passed:
+                        print(f"  ! {tid} completion receipt failed during revalidation:")
+                        for failure in receipt.failures:
+                            print(f"      - {failure}")
+                        state_mod.set_status(state, tid, "escalated")
+                        state_mod.save_state(project_root, state)
+                        return 2
                     print(f"  ✓ {tid} (stale: {stale_reason}; existing outputs still pass "
                           f"checks — refreshing fingerprint, not re-running)")
-                    _record_task_fingerprints(state, c, project_root, all_contracts)
                     state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
                     state_mod.save_state(project_root, state)
                     skipped += 1
@@ -517,10 +531,40 @@ def run_pipeline(
                 state_mod.save_state(project_root, state)
                 task_status = "stale"
             else:
-                print(f"  ✓ {tid} (already passed — skipping)")
-                state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
-                skipped += 1
-                continue
+                receipt_problems = validate_completion_receipts(
+                    project_root, {tid: (c, path)}, {"tasks": {tid: state_mod.task_entry(state, tid)}}
+                )
+                if receipt_problems:
+                    print(f"  ! {tid} is passed but completion receipt is invalid — revalidating")
+                    if not dry_run and c.checks:
+                        passed_now, results_now = run_checks(project_root, c.checks)
+                    else:
+                        passed_now, results_now = False, []
+                    if passed_now:
+                        _record_task_fingerprints(state, c, project_root, all_contracts)
+                        receipt = write_completion_receipt(
+                            project_root, c, mode="revalidation", check_results=results_now,
+                            input_fingerprint=state_mod.task_entry(state, tid).get("input_fingerprint", ""),
+                            output_fingerprint=state_mod.task_entry(state, tid).get("output_fingerprint", ""),
+                            dependency_fingerprint=state_mod.task_entry(state, tid).get("dependency_fingerprint", ""),
+                        )
+                        if receipt.passed:
+                            print(f"  ✓ {tid} completion receipt repaired by revalidation")
+                            state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
+                            state_mod.save_state(project_root, state)
+                            skipped += 1
+                            continue
+                    print(f"  ! {tid} completion receipt invalid; re-running")
+                    state_mod.set_status(state, tid, "stale")
+                    state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
+                    state_mod.save_state(project_root, state)
+                    task_status = "stale"
+                    # fall through to run task
+                else:
+                    print(f"  ✓ {tid} (already passed — skipping)")
+                    state_mod.recompute_candidate_gate(state, _task_gates(all_contracts))
+                    skipped += 1
+                    continue
         # Gate-tiered reconciliation (autonomous mode): auto-advance through
         # earned mechanical gates, halt only at an earned human gate. This stops
         # the loop before it works PAST an un-ratified judgment gate.
@@ -634,9 +678,23 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
     for r in results:
         print(f"[kernel]   check {r.name}: {'PASS' if r.passed else 'FAIL'}")
     if passed:
-        state_mod.set_status(state, contract.task_id, "passed")
         contracts = discover_contracts(project_root)
         _record_task_fingerprints(state, contract, project_root, contracts)
+        entry = state_mod.task_entry(state, contract.task_id)
+        receipt = write_completion_receipt(
+            project_root, contract, mode="deterministic", check_results=results,
+            input_fingerprint=entry.get("input_fingerprint", ""),
+            output_fingerprint=entry.get("output_fingerprint", ""),
+            dependency_fingerprint=entry.get("dependency_fingerprint", ""),
+        )
+        if not receipt.passed:
+            feedback = "Completion receipt failed: " + "; ".join(receipt.failures)
+            path = _escalate(project_root, contract, feedback)
+            state_mod.set_status(state, contract.task_id, "escalated")
+            state_mod.save_state(project_root, state)
+            print(f"[kernel] task {contract.task_id} ESCALATED -> {path}")
+            return 2
+        state_mod.set_status(state, contract.task_id, "passed")
         state_mod.recompute_candidate_gate(state, _task_gates(contracts))
         state_mod.record_run_summary(state, contract.task_id, calls=0, cost_usd=0.0)
         state_mod.save_state(project_root, state)
@@ -766,12 +824,38 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
                 feedback = "Independent critic raised a blocking integrity concern."
                 state_mod.save_state(project_root, state)
                 continue
-            state_mod.set_status(state, contract.task_id, "passed")
             contracts = discover_contracts(project_root)
             _record_task_fingerprints(state, contract, project_root, contracts)
+            temp_run = RunRecord(
+                contract=contract, final_status="passed", attempts=attempts_log,
+                run_calls=run_calls, run_cost_usd=run_cost,
+                run_input_tokens=run_in, run_output_tokens=run_out,
+                agent_provider=_agent_provenance(project_root)[0],
+                agent_model=_agent_provenance(project_root)[1],
+                temperature=_agent_provenance(project_root)[2],
+                tools_used=sorted({name for rec in attempts_log for name, _, _ in rec.checks}),
+            )
+            report_path = write_run_report(project_root, temp_run)
+            entry = state_mod.task_entry(state, contract.task_id)
+            receipt = write_completion_receipt(
+                project_root, contract, mode="agent_run", check_results=results,
+                run_report_path=report_path,
+                input_fingerprint=entry.get("input_fingerprint", ""),
+                output_fingerprint=entry.get("output_fingerprint", ""),
+                dependency_fingerprint=entry.get("dependency_fingerprint", ""),
+            )
+            if not receipt.passed:
+                feedback = "Completion receipt failed: " + "; ".join(receipt.failures)
+                continue
+            state_mod.set_status(state, contract.task_id, "passed")
             state_mod.recompute_candidate_gate(state, _task_gates(contracts))
             print(f"[kernel] task {contract.task_id} PASSED.")
-            _finish("passed")
+            state_mod.record_run_summary(state, contract.task_id,
+                                         calls=run_calls, cost_usd=run_cost)
+            state_mod.save_state(project_root, state)
+            print(f"[kernel] run report -> {report_path.relative_to(project_root)} "
+                  f"(cost ${run_cost:.4f}, {run_calls} call(s))")
+            print(f"[kernel] completion receipt -> {receipt.path.relative_to(project_root)}")
             return 0
 
         feedback = attempt_feedback

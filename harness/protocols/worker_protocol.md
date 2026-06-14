@@ -53,3 +53,11 @@ Write a run report in `agent_runs/` with:
 - human decisions needed
 
 Then run required checks, or explain why they could not run.
+
+## Completion Verification
+
+Do not claim a task is complete from natural-language self-assessment alone.
+
+Completion requires a passing runtime completion receipt in `agent_runs/completion_receipts/`.
+If the receipt is missing or failing, say the task was attempted, generated, or
+checked, but do not call it complete.

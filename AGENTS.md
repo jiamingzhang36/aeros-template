@@ -228,6 +228,7 @@ Backfill is the bridge between governance automation and data repair automation.
 
 - The requested output exists.
 - The run report is complete.
+- A completion receipt exists and passes for any task claimed complete.
 - Protected definitions were not changed, or changes were explicitly flagged.
 - Open issues requiring human judgment are listed.
 - Mechanical checks were run when relevant.
@@ -249,3 +250,4 @@ conflicts with the points below, prefer these.
   (`aeros gate request`) but must never commit the approval artifact itself.
 - If work was not run, the task is classified with an explicit automation/gate status and any required evidence receipt exists.
 - Treat validation projects as pressure tests, not template sources. Lessons may be generalized into harness rules, checks, or task templates, but project-specific data and conclusions must stay inside the validation project.
+- Do not state that a task is complete unless the runtime has written a passing completion receipt in `agent_runs/completion_receipts/`.

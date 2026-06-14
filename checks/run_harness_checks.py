@@ -55,6 +55,7 @@ CHECKS = [
     "check_task_contract.py",
     "check_task_automation_policy.py",
     "check_agent_runs_tools.py",
+    "check_completion_receipts.py",
     "check_pipeline_runs.py",
     "check_replication_package.py",
 ]

@@ -91,3 +91,9 @@ Choose one:
 - complete
 - partial
 - blocked
+
+## Completion Receipt
+
+Path: `agent_runs/completion_receipts/<task_id>_completion_receipt.yml`
+
+Status: TBD

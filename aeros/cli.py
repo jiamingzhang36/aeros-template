@@ -143,14 +143,31 @@ def _cmd_recover(args: argparse.Namespace) -> int:
         print(f"FAILED: {contract.task_id} was not recovered; fix artifacts and rerun recover --check")
         return 1
 
+    from .runtime.completion import write_completion_receipt
     state = load_state(root)
-    set_status(state, contract.task_id, "passed")
     all_contracts = discover_contracts(root)
     _record_task_fingerprints(state, contract, root, all_contracts)
+    entry = state["tasks"].setdefault(contract.task_id, {})
+    receipt = write_completion_receipt(
+        root,
+        contract,
+        mode="manual_recover",
+        check_results=results,
+        input_fingerprint=entry.get("input_fingerprint", ""),
+        output_fingerprint=entry.get("output_fingerprint", ""),
+        dependency_fingerprint=entry.get("dependency_fingerprint", ""),
+    )
+    if not receipt.passed:
+        print(f"FAILED: {contract.task_id} cannot be recovered; completion receipt failed")
+        for failure in receipt.failures:
+            print(f"      - {failure}")
+        return 2
+    set_status(state, contract.task_id, "passed")
     recompute_candidate_gate(state, _task_gates(all_contracts))
     record_run_summary(state, contract.task_id, calls=0, cost_usd=0.0)
     save_state(root, state)
     print(f"recovered {contract.task_id} from {Path(path).relative_to(root)}")
+    print(f"completion receipt: {receipt.path.relative_to(root)}")
     print(f"candidate: {state.get('candidate_stage', '?')} / {state.get('candidate_gate', '?')}")
     print("gate was not approved automatically")
     return 0

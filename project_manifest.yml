@@ -212,6 +212,7 @@ layers:
     required_dirs:
     - tasks
     - agent_runs
+    - agent_runs/completion_receipts
     - audits
   mechanical_verification:
     required_dirs:
@@ -307,6 +308,7 @@ checks:
   task_contract: checks/check_task_contract.py
   agent_run_report: checks/check_agent_run_report.py
   agent_runs_tools: checks/check_agent_runs_tools.py
+  completion_receipts: checks/check_completion_receipts.py
   pipeline_runs: checks/check_pipeline_runs.py
   replication_package: checks/check_replication_package.py
   task_automation_policy: checks/check_task_automation_policy.py

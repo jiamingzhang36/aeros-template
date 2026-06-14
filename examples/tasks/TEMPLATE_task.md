@@ -68,6 +68,7 @@ TBD
 - Expected output exists.
 - Required checks pass or failures are documented.
 - Agent run report is complete.
+- Completion receipt exists and passes.
 - Critic report is complete when required.
 - Human decision is logged when required.
 
