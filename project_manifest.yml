@@ -279,6 +279,7 @@ checks:
   claim_registry: checks/check_claim_registry.py
   claim_ceiling: checks/check_claim_ceiling.py
   claim_method_consistency: checks/check_claim_method_consistency.py
+  referee_review_present: checks/check_referee_review_present.py
   paper_numbers: checks/check_number_registry.py
   paper_package: checks/check_paper_package.py
   expanded_collection_design: checks/check_expanded_collection_design.py
