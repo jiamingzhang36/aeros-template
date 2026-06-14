@@ -678,6 +678,51 @@ def _cmd_manifest(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_graph(args: argparse.Namespace) -> int:
+    from .runtime.research_graph import (
+        build_graph,
+        format_coverage,
+        format_impact,
+        format_orphans,
+        format_support,
+        validate_graph,
+    )
+    root = _project_root()
+    if args.graph_command == "build":
+        path, graph, warnings = build_graph(root, write=not args.dry_run)
+        action = "would write" if args.dry_run else "wrote"
+        print(
+            f"{action} {path.relative_to(root)} "
+            f"({len(graph.get('nodes', []))} node(s), {len(graph.get('edges', []))} derived edge(s), "
+            f"{len(graph.get('human_assertions', []))} human assertion(s))"
+        )
+        problems = validate_graph(root) if not args.dry_run else []
+        for warning in warnings:
+            print(f"WARNING: {warning}")
+        if problems:
+            print("WARNING: graph was built, but relationship problems remain:")
+            for problem in problems:
+                print(f"  - {problem}")
+            print("Graph impact is observe-and-flag only; claim/gate status was not changed.")
+            return 1
+        return 0
+    if args.graph_command == "query":
+        if args.graph_query == "impact":
+            print(format_impact(root, args.target))
+            return 0
+        if args.graph_query == "support":
+            print(format_support(root, args.claim_id))
+            return 0
+        if args.graph_query == "coverage":
+            print(format_coverage(root))
+            return 0
+        if args.graph_query == "orphans":
+            print(format_orphans(root))
+            return 0
+    print("unknown graph command")
+    return 2
+
+
 def _cmd_feasibility(args: argparse.Namespace) -> int:
     root = _project_root()
     f = feasibility(root)
@@ -800,6 +845,29 @@ def main(argv: list[str] | None = None) -> int:
     provenance_sync = provenance_sub.add_parser(
         "sync", help="write a provenance JSON per registered result (sha256 from disk)")
     provenance_sync.set_defaults(func=_cmd_provenance)
+
+    graph = sub.add_parser("graph", help="build and query the derived research graph")
+    graph_sub = graph.add_subparsers(dest="graph_command", required=True)
+    graph_build = graph_sub.add_parser("build", help="rebuild evidence/research_graph.yml")
+    graph_build.add_argument("--dry-run", action="store_true",
+                             help="show the graph size without writing research_graph.yml")
+    graph_build.set_defaults(func=_cmd_graph)
+    graph_query = graph_sub.add_parser("query", help="query graph impact/support/coverage/orphans")
+    graph_query_sub = graph_query.add_subparsers(dest="graph_query", required=True)
+    graph_impact = graph_query_sub.add_parser(
+        "impact", help="show claims/sections that may need review after an artifact/result changes")
+    graph_impact.add_argument("target", help="artifact path, result/evidence/provenance id, or graph node id")
+    graph_impact.set_defaults(func=_cmd_graph)
+    graph_support = graph_query_sub.add_parser(
+        "support", help="show the evidence/result/artifact/provenance chain for a claim")
+    graph_support.add_argument("claim_id", help="claim id, e.g. C001")
+    graph_support.set_defaults(func=_cmd_graph)
+    graph_coverage = graph_query_sub.add_parser(
+        "coverage", help="show uncovered human-asserted research questions/subquestions")
+    graph_coverage.set_defaults(func=_cmd_graph)
+    graph_orphans = graph_query_sub.add_parser(
+        "orphans", help="show advisory orphan results/artifacts and unsupported active claims")
+    graph_orphans.set_defaults(func=_cmd_graph)
 
     funnel = sub.add_parser("funnel",
                             help="two-layer funnel: parallel candidates -> champion")

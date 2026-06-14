@@ -138,6 +138,8 @@ gate_exit_criteria:
       path: evidence/result_index.csv
   G7:
     requires:
+    - type: check_passes
+      check: check_research_graph.py
     - type: claim_no_draft
       path: evidence/claim_registry.md
     - type: claim_main_has_type
@@ -203,6 +205,7 @@ layers:
     - discovery/PROMOTE_TO_HARNESS.md
     - docs/method_card.md
     - evidence/claim_registry.md
+    - evidence/research_graph.yml
     - decisions/decision_log.md
     - decisions/revision_log.md
   agent_execution:
@@ -279,6 +282,7 @@ checks:
   claim_registry: checks/check_claim_registry.py
   claim_ceiling: checks/check_claim_ceiling.py
   claim_method_consistency: checks/check_claim_method_consistency.py
+  research_graph: checks/check_research_graph.py
   referee_review_present: checks/check_referee_review_present.py
   claim_numbers_bound: checks/check_claim_numbers_bound.py
   paper_numbers: checks/check_number_registry.py

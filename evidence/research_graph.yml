@@ -1,0 +1,11 @@
+version: 1
+generated_at: '2026-06-14T08:38:38.488267+00:00'
+derived_from:
+  claim_registry_sha256: 74ec09ebd30deecc46411b7fa15454907f774a09aa148820a5350a45f81260d4
+  evidence_ledger_sha256: e3316ecf3c69311d8c332ae6c8482e622074727c1d3126f107d176e7b04ebf58
+  result_index_sha256: 27aef6a7cc8c55a20b2df289357e8259a5bdc3b68e3ae7d765fa50ebf024eb6e
+  provenance_files: {}
+nodes: []
+edges: []
+human_assertions: []
+warnings: []
