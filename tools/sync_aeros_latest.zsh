@@ -6,6 +6,7 @@ TARGETS=(
   "/Users/jiamingzhang/Desktop/cultured_meat_policy_project/validation_projects/maha_snap_waiver"
   "/Users/jiamingzhang/Desktop/aeros-template-desktop"
   "/Users/jiamingzhang/Desktop/aeros-pilot-franchise-fraud"
+  "/Users/jiamingzhang/Desktop/land-grid-farm"
   "/Users/jiamingzhang/Desktop/LLM_SNAP"
 )
 for T in "${TARGETS[@]}"; do
@@ -36,6 +37,7 @@ targets = [
     Path("/Users/jiamingzhang/Desktop/cultured_meat_policy_project/validation_projects/maha_snap_waiver"),
     Path("/Users/jiamingzhang/Desktop/aeros-template-desktop"),
     Path("/Users/jiamingzhang/Desktop/aeros-pilot-franchise-fraud"),
+    Path("/Users/jiamingzhang/Desktop/land-grid-farm"),
     Path("/Users/jiamingzhang/Desktop/LLM_SNAP"),
 ]
 source_meta = {}
@@ -112,6 +114,7 @@ targets = [
     Path("/Users/jiamingzhang/Desktop/cultured_meat_policy_project/validation_projects/maha_snap_waiver"),
     Path("/Users/jiamingzhang/Desktop/aeros-template-desktop"),
     Path("/Users/jiamingzhang/Desktop/aeros-pilot-franchise-fraud"),
+    Path("/Users/jiamingzhang/Desktop/land-grid-farm"),
     Path("/Users/jiamingzhang/Desktop/LLM_SNAP"),
 ]
 
