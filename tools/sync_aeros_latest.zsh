@@ -6,6 +6,7 @@ TARGETS=(
   "/Users/jiamingzhang/Desktop/cultured_meat_policy_project/validation_projects/maha_snap_waiver"
   "/Users/jiamingzhang/Desktop/aeros-template-desktop"
   "/Users/jiamingzhang/Desktop/aeros-pilot-franchise-fraud"
+  "/Users/jiamingzhang/Desktop/LLM_SNAP"
 )
 for T in "${TARGETS[@]}"; do
   [ -f "$T/project_manifest.yml" ] || continue
@@ -35,6 +36,7 @@ targets = [
     Path("/Users/jiamingzhang/Desktop/cultured_meat_policy_project/validation_projects/maha_snap_waiver"),
     Path("/Users/jiamingzhang/Desktop/aeros-template-desktop"),
     Path("/Users/jiamingzhang/Desktop/aeros-pilot-franchise-fraud"),
+    Path("/Users/jiamingzhang/Desktop/LLM_SNAP"),
 ]
 source_meta = {}
 for path in sorted((src / "tasks").rglob("*.yml")):
@@ -110,6 +112,7 @@ targets = [
     Path("/Users/jiamingzhang/Desktop/cultured_meat_policy_project/validation_projects/maha_snap_waiver"),
     Path("/Users/jiamingzhang/Desktop/aeros-template-desktop"),
     Path("/Users/jiamingzhang/Desktop/aeros-pilot-franchise-fraud"),
+    Path("/Users/jiamingzhang/Desktop/LLM_SNAP"),
 ]
 
 def ensure_manifest_wiring(path: Path) -> bool:
