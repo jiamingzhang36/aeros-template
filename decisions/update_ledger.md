@@ -1,0 +1,102 @@
+# AEROS Update Ledger
+
+Purpose: track every meaningful AEROS template update against the project north star so drift is visible early.
+
+North star:
+
+```text
+AEROS should automate low-risk research progress, preserve artifact lineage, enforce claim boundaries, and keep human judgment at high-risk exits.
+```
+
+How to read this ledger:
+
+- `Alignment`: why the update moves AEROS toward the north star.
+- `Non-goal`: what the update explicitly does not claim to solve.
+- `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
+- `Next check`: what should be watched in the next real project run.
+
+## 2026-06-16
+
+### 2026-06-16 — Kernel / Research CI
+
+**Commit(s)**: `9ac6cfe`
+
+**Action**: Added the formal research CI kernel, data-first layer, action receipts, global state view, event replay scaffolding, and adversarial kernel tests.
+
+**Alignment**: Moves AEROS away from trusting agent self-reports and toward artifact/event/receipt-grounded progress.
+
+**Non-goal**: Does not prove research conclusions are true or automate all empirical judgment.
+
+**Drift risk**: Kernel could creep into a central scientific judge if future rules mix process legality with epistemic truth.
+
+**Next check**: Keep kernel enforcement mechanical; put judgment in compilers, reviewers, and human gates.
+
+### 2026-06-16 — Event Sourcing / Scope Discipline
+
+**Commit(s)**: `bc0791f`
+
+**Action**: Tightened event sourcing with hash-chain fields, replay checks, constitutional invariants, and scope calculus.
+
+**Alignment**: Makes progress append-only and makes scope inflation visible before claims leave the system.
+
+**Non-goal**: Does not yet fully derive every materialized view from events.
+
+**Drift risk**: Scope calculus could become too heavy if every exploratory note must be fully scoped.
+
+**Next check**: Keep scope enforcement strict at claim release, light during exploration.
+
+### 2026-06-16 — Paper CI Phase 0
+
+**Commit(s)**: `bc95c57`
+
+**Action**: Added result-born provenance via `aeros.paper_ci.result_registry`, adapter contract, result registry check, and result record template.
+
+**Alignment**: Moves paper CI boundary from manuscript scanning to estimation-call registration, so numbers receive birth certificates at creation.
+
+**Non-goal**: Does not certify estimates, identification, paper-code consistency, or claim support.
+
+**Drift risk**: Adapter contracts could splinter into bespoke plugins unless kept to one shared schema with tool-specific adapters.
+
+**Next check**: Instrument one real estimation path and verify registry fields come from fitted objects or wrapper-controlled metadata, not prose.
+
+### 2026-06-16 — Template Wiring / Paper CI Integration
+
+**Commit(s)**: `18df986`
+
+**Action**: Wired Paper CI and scope rules into AGENTS, templates, harness runner, manifest, architecture docs, revision log, and sync script.
+
+**Alignment**: Makes the new integrity rules visible to agents and runnable by the default harness.
+
+**Non-goal**: Does not run Phase 0 on a real SNAP or economics paper yet.
+
+**Drift risk**: More template wiring can feel like complexity unless real projects exercise it and retire unused paths.
+
+**Next check**: Use a real project fixture to see whether data-first and result registry reduce confusion rather than add paperwork.
+
+### 2026-06-16 — Validation Project Gate Approval
+
+**Commit(s)**: `9eeb698`
+
+**Action**: Recorded MAHA validation project G11 design approval in the AEROS template history.
+
+**Alignment**: Uses a real validation project to pressure-test human-gated progression rather than only adding template machinery.
+
+**Non-goal**: Does not add a new AEROS capability or prove the template generalizes to all projects.
+
+**Drift risk**: Validation-project commits can blur template evolution with project-specific decisions if not labeled clearly.
+
+**Next check**: Keep validation project approvals clearly separated from reusable template changes in future update entries.
+
+### 2026-06-16 — Update Ledger / Drift Tracking
+
+**Commit(s)**: `pending`
+
+**Action**: Added a human-readable update ledger, reusable entry template, and mechanical check requiring recent meaningful commits to be traceable.
+
+**Alignment**: Helps detect whether AEROS evolution is drifting away from data-first automation, lineage, claim boundaries, and high-risk human gates.
+
+**Non-goal**: Does not judge whether an update was good; it only makes the update rationale and drift risk visible.
+
+**Drift risk**: The ledger itself could become paperwork if entries are verbose or detached from real project pressure tests.
+
+**Next check**: Keep entries short and require each future capability update to name a real project validation path.

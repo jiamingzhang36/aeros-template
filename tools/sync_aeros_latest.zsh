@@ -21,8 +21,9 @@ for T in "${TARGETS[@]}"; do
   rsync -a "$SRC/checks/" "$T/checks/"
   rsync -a "$SRC/harness/" "$T/harness/"
   rsync -a "$SRC/examples/" "$T/examples/"
-  mkdir -p "$T/docs" "$T/templates" "$T/tests/adversarial"
+  mkdir -p "$T/docs" "$T/templates" "$T/tests/adversarial" "$T/decisions"
   [ -f "$SRC/docs/architecture_v0_5.md" ] && rsync -a "$SRC/docs/architecture_v0_5.md" "$T/docs/architecture_v0_5.md"
+  [ -f "$SRC/decisions/update_ledger.md" ] && rsync -a "$SRC/decisions/update_ledger.md" "$T/decisions/update_ledger.md"
   [ -d "$SRC/templates" ] && rsync -a "$SRC/templates/" "$T/templates/"
   [ -d "$SRC/tests/adversarial" ] && rsync -a "$SRC/tests/adversarial/" "$T/tests/adversarial/"
   mkdir -p "$T/agent_runs"
@@ -164,6 +165,8 @@ REQUIRED_FILES = [
     "templates/negative_result_ledger.csv",
     "templates/source_card.yml",
     "templates/result_registry_record.json",
+    "templates/update_ledger_entry.md",
+    "decisions/update_ledger.md",
     "docs/architecture_v0_5.md",
 ]
 

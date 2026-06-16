@@ -403,3 +403,19 @@ For empirical paper work, the preferred wrapper boundary is the estimation call.
 - Treat `claim_type_eligibility` as a compiler ceiling input, not as proof that a claim is true or approved.
 - Use `aeros paper-ci sync-result-index` to derive `evidence/result_index.csv` from `evidence/result_registry.csv` where possible.
 - Phase 0 guarantees result provenance and spec fidelity only; it does not guarantee correctness, identification validity, paper-code consistency, or claim support.
+
+
+## Update Ledger Rules
+
+Every meaningful AEROS template update must be traceable in `decisions/update_ledger.md`. This is the human-readable anti-drift ledger, separate from git history and `decisions/revision_log.md`.
+
+For each update, record:
+
+- commit hash or `pending` while uncommitted
+- action
+- north-star alignment
+- explicit non-goal
+- drift risk
+- next check on a real project
+
+Use `templates/update_ledger_entry.md` for new entries. If an update only changes logs or formatting, say so; do not describe it as research capability progress.

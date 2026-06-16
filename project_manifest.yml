@@ -212,6 +212,7 @@ layers:
     - evidence/research_graph.yml
     - decisions/decision_log.md
     - decisions/revision_log.md
+    - decisions/update_ledger.md
   agent_execution:
     required_dirs:
     - tasks
@@ -255,6 +256,7 @@ layers:
     - harness/scope_calculus.yml
     - harness/result_adapter_contract.yml
     - templates/result_registry_record.json
+    - templates/update_ledger_entry.md
     - harness/probe_failure_taxonomy.yml
     - aeros/state/global_state.yml
     - harness/skill_registry.md
@@ -298,6 +300,7 @@ checks:
   analysis_ledger: checks/check_analysis_ledger.py
   correction_ledger: checks/check_correction_ledger.py
   improvement_backlog: checks/check_improvement_backlog.py
+  update_ledger: checks/check_update_ledger.py
   discovery_completeness: checks/check_discovery_completeness.py
   gate_exit: checks/check_gate_exit.py
   idea_bank: checks/check_idea_bank.py
