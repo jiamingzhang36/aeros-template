@@ -183,6 +183,125 @@ If an existing project reports prior human work, do not mark the corresponding t
 - use `frozen_evidence` plus a source snapshot receipt when evidence is fixed and should not be refreshed automatically
 - use `approval_required` when rerunning would involve API cost, model drift, credentials, scraping, source-date-sensitive refresh, or legal/terms risk
 
+
+
+## Action Receipt and Progress Honesty Rules
+
+Every substantial run must classify what kind of progress it made before calling the work complete. This prevents harness hygiene from being reported as data or research progress.
+
+- Use `aeros action receipt ...` for non-trivial project work, especially in goal/continue mode.
+- Choose an `action_mode`: `data_progress`, `data_backfill`, `data_probe`, `data_validation`, `harness_triage`, `literature_progress`, `claim_audit`, `writing`, or `cleanup`.
+- Choose an honest progress label: `substantive_research_progress`, `mechanical_hygiene`, `blocked_queue_preparation`, or `documentation_repair`.
+- If `action_mode` starts with `data_`, at least one data impact field must be true.
+- Do not describe schema repair, markdown cleanup, log updates, or harness failure cleanup as substantive data progress unless data inventory, source verification, rows, coverage, backfill queue, or probe evidence actually changed.
+- If a run only reduces check failures, say it is harness triage unless it also changed evidence, data, claim ceiling, result registration, or graph support.
+
+## Data-First Execution Rules
+
+In an active or adopted research project, data state drives the next action. Do not let a task/gate/check sequence substitute for evidence about what data exists, what is missing, and what can safely be collected.
+
+- Run `aeros data scan` before claiming an active project is ready for analysis, claim audit, or paper drafting.
+- Use `aeros data gaps` and `aeros data backfill --dry-run` to turn data gaps into a formal queue before improvising fixes.
+- Local-cache-safe data repair may run only when a queue item is `auto_rerunnable` and has an explicit `run_command`.
+- Official-source, API, credentialed, scraping, source-date-sensitive, or LLM-extraction work must be blocked for approval or receipt until the human accepts the source snapshot and terms/credential implications.
+- A passed task must produce a substantive allowed output; logs alone are not completion.
+- If a task declares `recommended_skills` or `required_skill_classes`, the skill receipt must record either the invoked skill(s) or a waiver explaining why the skill was not used.
+
+
+
+
+
+
+
+
+
+## Event-Sourcing and Derived-Only Rules
+
+AEROS should progressively make asserted fields derived from append-only events and content-addressed artifacts.
+
+- Treat `events/event_log.jsonl` as the future append-only authority for kernel-mediated actions.
+- Event inputs and outputs should be content-addressed with path, sha256, bytes, and existence at event time.
+- Materialized views such as global state, analysis ledgers, research graph, and claim registry should migrate toward deterministic projections from events and artifact hashes.
+- Preanalysis plans for confirmatory claims must be committed as events before outcome access, specification runs, or result registration.
+- Do not rely on text fields such as `selection_reason` as the main defense against specification gaming; use event timing, full spec/run denominators, and multiverse/robustness distributions.
+- Use `harness/derived_vs_asserted_audit.yml` to track asserted fields that still need derived enforcement.
+
+## AEROS Responsibility Boundary
+
+AEROS must remain research infrastructure, not a centralized truth judge.
+
+- Execution layers may run work and log events freely; execution does not decide adequacy.
+- Integrity layers may hard-reject only process fraud or formal illegality: missing lineage, illegal evidence use, hidden spec runs, state skips, receipt/probe/gate laundering, or claim mismatch.
+- Epistemic compiler layers should output claim ceilings, allowed language, risk flags, obligations, exception debt, identification level, and uncertainty. They do not approve gates or declare truth.
+- Human gates make judgment calls and own accountability. They authorize decisions but do not create empirical evidence.
+- Prefer artifact graph + admissibility + claim compiler reasoning over a single global project state.
+- The key question is not "is this true?" but "what is allowed to be claimed given what is known and how it was produced?"
+
+## Artifact Graph and Evidence Admissibility Rules
+
+AEROS v0.5 treats claim support as a typed artifact graph problem, not a single project-state transition.
+
+- Use artifact nodes and evidence edges to ask what exactly supports a claim.
+- Lower-grade evidence must not be laundered into higher-grade support: action receipts, human gates, probes, and validation reports each have bounded admissible uses.
+- Non-descriptive claims require an estimand card before claim support can be considered admissible.
+- All specification runs need terminal status; failed, null, invalid, abandoned, or superseded runs must remain visible through the spec run index or negative result ledger.
+- Claim admissibility is the combination of evidence admissibility, artifact lineage, analysis path completeness, identification ceiling, exception debt, and open obligations.
+- Human gates authorize decisions; they do not create empirical evidence.
+
+## Analytical Provenance and Identification Rules
+
+AEROS must track analysis choices with the same discipline it applies to data provenance.
+
+- Use `analysis/preanalysis_plan.yml`, `analysis/spec_space.yml`, and `analysis/spec_run_index.csv` once a project starts running specifications.
+- Register every specification run, not only favorable or final results.
+- Confirmatory claims require a locked preanalysis plan or a typed analytic deviation; exploratory claims must carry lower claim ceilings and explicit qualifiers.
+- Do not choose estimators, controls, samples, windows, clustering, or subgroup reporting based only on significance without an analytic deviation receipt.
+- Claim support should reflect the specification curve or multiverse, not a single selected best path.
+- Causal or strong associational claims require an identification gate card covering estimand, identifying variation, inference, sensitivity, and rebuttals.
+- Treat selection bias, API sampling bias, distribution truncation, and other validity threats as claim qualifiers, not merely data-probe failures.
+
+## Formal Kernel Rules
+
+AEROS v0.4 introduces a formal kernel. New state semantics should be implemented in `aeros/kernel/`, not scattered across new YAML files or independent checks.
+
+- Treat `aeros/kernel/core.py` and `aeros/kernel/engine.py` as the single enforcement point for state transitions.
+- Events and receipts log what happened; they do not decide whether research state advanced.
+- Checks, dashboards, gate packets, and global-state views should call or mirror the kernel instead of inventing separate transition semantics.
+- Do not add a new rule layer when the rule can be expressed as a kernel invariant or transition.
+- A legal transition has the shape `T(state, action, evidence) -> new_state`; otherwise it must be rejected with a blocking invariant.
+
+## State Transition, Invariant, and Exception Scope Rules
+
+AEROS should become stricter by closing transitions, not by adding unlimited layers.
+
+- Treat `harness/invariants.yml` as the compact list of non-negotiable system truths.
+- Treat `harness/state_transition.yml` as the legal research-state ladder. Do not skip from probe planning to claims or paper without the required evidence-producing transitions.
+- Treat `harness/source_type_matrix.yml` as the probe standard for each source type; local CSV rules do not apply to APIs, PDFs, manual coding, or LLM extraction.
+- Receipt-backed exceptions must be scoped, expiring, human-reviewed, and limited to queue/probe/frozen-evidence actions.
+- Exceptions must never support empirical claims, raise claim ceilings, approve gates, skip provenance, or bypass human gates.
+- Use `templates/source_card.yml` for new data sources when the project needs source-level documentation beyond a data inventory row.
+
+## Global State and Provenance Boundary Rules
+
+AEROS maintains a derived global state index so local artifacts do not become disconnected partial truths. The global state is an index, not an authority.
+
+- Use `aeros state global` to rebuild `aeros/state/global_state.yml` after data probes, backfill queue updates, result registration, claim registry changes, or action receipt updates.
+- `aeros/state/global_state.yml` must remain derived from existing registries, receipts, probes, and provenance. Do not edit it to create facts.
+- Probe evidence establishes collection feasibility only. It cannot directly support final claims.
+- Action receipts classify progress. They cannot support empirical claims.
+- Human receipts can certify review/approval/coverage trails, but cannot invent measurements or results.
+- Claim-support evidence must cross the provenance boundary through validated results, result index entries, provenance records, evidence ledger links, and claim registry links.
+
+## Small Data Probe Rules
+
+For active research projects, data feasibility should be tested with a small probe before full collection or paper drafting.
+
+- Use `aeros data probe plan` after `aeros data scan`/`aeros data gaps` when candidate data sources exist.
+- A small probe should verify access, parseability, sample rows, observed fields, coverage hints, linkage keys, and failure modes.
+- `aeros data probe run --source DATA_ID --limit N` is only for local-file probes in v1. Official-source/API/credentialed/scraping/LLM-extraction probes require approval or receipt-backed source snapshots.
+- Do not run full collection into `data/raw/` before a passing small probe unless a human records an explicit receipt-backed exception.
+- Do not upgrade claims or draft paper conclusions from probe evidence alone; a probe establishes feasibility, not final support.
+
 ## Data Backfill Rules
 
 When a coverage, denominator, source, or variable gap is discovered, do not leave it as an informal note.

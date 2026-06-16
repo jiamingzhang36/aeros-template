@@ -1,0 +1,41 @@
+version: 1
+policy: AEROS-ANALYSIS-INTEGRITY-001
+principle: Provenance-valid results are not automatically analytically valid; specification search, post-hoc choices, and identification failures must be visible.
+required_artifacts:
+  preanalysis_plan: analysis/preanalysis_plan.yml
+  spec_space: analysis/spec_space.yml
+  spec_run_index: analysis/spec_run_index.csv
+  deviation_log: analysis/deviation_log.yml
+claim_modes:
+  confirmatory:
+    requires:
+      - locked_preanalysis_plan
+      - spec_run_index_covers_registered_results
+      - no_unapproved_analytic_deviation
+      - identification_gate_passed
+    ceiling_effect: eligible_for_supported_if_evidence_valid
+  exploratory:
+    requires:
+      - spec_run_index
+      - exploratory_qualifier
+    ceiling_effect: cannot_exceed_ambiguous_without_human_upgrade
+specification_search_signals:
+  registered_share_warn_below: 0.25
+  registered_share_fail_below: 0.05
+  unregistered_run_warn_above: 20
+analytic_deviation_types:
+  - estimator_change
+  - control_set_change
+  - sample_window_change
+  - outcome_definition_change
+  - clustering_or_inference_change
+  - exclusion_rule_change
+  - multiple_testing_or_selection_change
+  - posthoc_subgroup_choice
+identification_checks:
+  descriptive:
+    required: [estimand_defined, sample_defined, measurement_validity_reviewed]
+  associational:
+    required: [estimand_defined, controls_preplanned_or_waived, inference_method_declared, robustness_or_sensitivity_reported]
+  causal:
+    required: [estimand_defined, identifying_variation_documented, counterfactual_assumption_reviewed, pretrend_or_balance_tested, sensitivity_bounds_reported, inference_method_declared, power_or_precision_discussed]

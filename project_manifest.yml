@@ -4,6 +4,7 @@ project:
   template: aeros-template
   status: draft
   private_by_default: true
+  project_mode: template
 research:
   field_or_domain: ''
   topic: ''
@@ -199,6 +200,9 @@ layers:
     - discovery/literature/paper_registry.csv
     - discovery/literature/citation_audit.md
     - discovery/data_inventory.csv
+    - data/data_state.yml
+    - data/data_gap_plan.yml
+    - audits/data_probe_report.md
     - discovery/feasibility_matrix.md
     - discovery/feasibility_memo.md
     - discovery/design_sketch.md
@@ -214,6 +218,8 @@ layers:
     - agent_runs
     - agent_runs/skill_invocations
     - agent_runs/completion_receipts
+    - agent_runs/action_receipts
+    - data/probes
     - audits
   mechanical_verification:
     required_dirs:
@@ -227,6 +233,27 @@ layers:
     - harness/protocols/full_run_checklist.md
     - harness/agent_roles.yml
     - harness/improvement_backlog.yml
+    - harness/provenance_boundary.yml
+    - templates/source_card.yml
+    - harness/source_type_matrix.yml
+    - harness/state_transition.yml
+    - harness/invariants.yml
+    - harness/event_sourcing_policy.yml
+    - harness/derived_vs_asserted_audit.yml
+    - templates/identification_gate.yml
+    - templates/analytic_deviation.yml
+    - templates/claim_card.yml
+    - templates/spec_run_index.csv
+    - templates/spec_space.yml
+    - templates/preanalysis_plan.yml
+    - harness/claim_toulmin_schema.yml
+    - harness/analysis_integrity.yml
+    - templates/negative_result_ledger.csv
+    - templates/estimand_card.yml
+    - harness/admissibility_matrix.yml
+    - harness/evidence_type_lattice.yml
+    - harness/probe_failure_taxonomy.yml
+    - aeros/state/global_state.yml
     - harness/skill_registry.md
     - harness/skill_invocation_rules.md
     - harness/practical_skill_menu.md
@@ -255,6 +282,16 @@ default_task_policy:
   claim_strengthening: requires evidence and claim registry update
   preferred_spec_selection: must not be based on significance alone
 checks:
+  derived_vs_asserted_audit: checks/check_derived_vs_asserted_audit.py
+  preanalysis_happens_before: checks/check_preanalysis_happens_before.py
+  event_log_replay: checks/check_event_log_replay.py
+  negative_result_ledger: checks/check_negative_result_ledger.py
+  estimand_cards: checks/check_estimand_cards.py
+  artifact_admissibility: checks/check_artifact_admissibility.py
+  meta_monitor: checks/check_meta_monitor.py
+  identification_gate: checks/check_identification_gate.py
+  claim_toulmin_schema: checks/check_claim_toulmin_schema.py
+  analysis_ledger: checks/check_analysis_ledger.py
   correction_ledger: checks/check_correction_ledger.py
   improvement_backlog: checks/check_improvement_backlog.py
   discovery_completeness: checks/check_discovery_completeness.py
@@ -272,6 +309,9 @@ checks:
   anchors_in_registry: checks/check_anchors_in_registry.py
   git_guardrails: checks/check_git_guardrails.py
   data_inventory: checks/check_data_inventory.py
+  data_first_readiness: checks/check_data_first_readiness.py
+  data_probe: checks/check_data_probe.py
+  global_state: checks/check_global_state.py
   data_backfill_queue: checks/check_data_backfill_queue.py
   anchor: checks/check_anchor.py
   data_diagnostics: checks/check_data_diagnostics.py
@@ -302,6 +342,8 @@ checks:
   artifact_manifest: checks/check_artifact_manifest.py
   project_status: checks/check_project_status.py
   provenance: checks/check_provenance.py
+  provenance_boundary: checks/check_provenance_boundary.py
+  exception_scope: checks/check_exception_scope.py
   bib_verification_present: checks/check_bib_verification_present.py
   table_cell_sources: checks/check_table_cell_sources.py
   data_availability_present: checks/check_data_availability_present.py
@@ -312,7 +354,9 @@ checks:
   task_contract: checks/check_task_contract.py
   agent_run_report: checks/check_agent_run_report.py
   agent_runs_tools: checks/check_agent_runs_tools.py
+  action_receipts: checks/check_action_receipts.py
   completion_receipts: checks/check_completion_receipts.py
+  noop_runs: checks/check_noop_runs.py
   pipeline_runs: checks/check_pipeline_runs.py
   replication_package: checks/check_replication_package.py
   task_automation_policy: checks/check_task_automation_policy.py

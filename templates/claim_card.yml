@@ -1,0 +1,20 @@
+version: 1
+claim_id: C001
+claim_text: ''
+claim_type: descriptive
+mode: exploratory
+strength: ambiguous
+qualifier:
+  population: ''
+  time_period: ''
+  geography: ''
+  estimand: ''
+  assumptions: []
+  limitations: []
+warrant: ''
+backing: []
+supported_by: []
+contradicted_by: []
+rebuttal: []
+claim_ceiling: ambiguous
+notes: ''

@@ -1,0 +1,39 @@
+version: 1
+policy: AEROS-DERIVED-VS-ASSERTED-001
+principle: Asserted fields are attack surface; derived fields are enforceable.
+fields:
+  progress_label:
+    current_status: asserted
+    target_status: partly_derived
+    derive_from: [event_log, artifact_hash_delta, data_state_delta, action_receipt]
+    risk: progress laundering
+  spec_run_index:
+    current_status: asserted
+    target_status: kernel_mediated
+    derive_from: [run_spec events, result artifacts, event_log]
+    risk: hidden denominator / specification mining
+  qualifier:
+    current_status: asserted
+    target_status: partly_derived
+    derive_from: [admissibility_edges, identification_gate, contradiction edges, exception debt]
+    risk: vague qualifier laundering
+  rebuttal:
+    current_status: asserted
+    target_status: partly_derived
+    derive_from: [contradicts edges, robustness failures, identification diagnostics]
+    risk: missing rebuttal despite contrary evidence
+  contradicted_by:
+    current_status: asserted
+    target_status: derived
+    derive_from: [research_graph contradiction edges, negative result ledger, robustness_result]
+    risk: contradiction suppression
+  claim_ceiling:
+    current_status: asserted_or_mixed
+    target_status: derived
+    derive_from: [admissibility_matrix, evidence_type_lattice, identification_gate, spec robustness, exception debt]
+    risk: claim inflation
+  claim_type:
+    current_status: asserted
+    target_status: asserted_plus_language_crosscheck
+    derive_from: [claim text language scan, claim card, identification gate]
+    risk: causal language hidden under associational type

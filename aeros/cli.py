@@ -20,7 +20,9 @@ from pathlib import Path
 
 import yaml
 
+from .kernel.events import Event as KernelEvent, append_event as append_kernel_event, artifact_ref as kernel_artifact_ref
 from .runtime.adjudicate import adjudicate, feasibility, write_selection
+from .runtime.action_receipt import ActionReceiptArgs, write_action_receipt
 from .runtime.adoption import AdoptionArgs, run_adoption
 from .runtime.checks import run_checks
 from .runtime.collection import collect_prompt_grid, resolve_config
@@ -28,6 +30,9 @@ from .runtime.contract import load_contract
 from .runtime.controller import run_iteration
 from .runtime import identity
 from .runtime.data_backfill import BackfillArgs, run_data_backfill
+from .runtime.data_first import format_plan as format_data_first_plan, write_gaps as write_data_gaps, write_scan as write_data_scan
+from .runtime.data_probe import run_probe as run_data_probe, write_probe_plan, write_probe_report
+from .runtime.global_state import write_global_state
 from .runtime.decision_packet import write_decision_packet
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
@@ -63,6 +68,35 @@ def _cmd_run(args: argparse.Namespace) -> int:
     return run_task(args.contract, dry_run=args.dry_run,
                     max_retries_override=args.max_retries,
                     task_timeout_override=args.task_timeout)
+
+
+def _cmd_event_append(args: argparse.Namespace) -> int:
+    root = _project_root()
+    event = KernelEvent(
+        event_type=args.event_type,
+        action=args.action_name,
+        inputs=[kernel_artifact_ref(root, p) for p in (args.input or [])],
+        outputs=[kernel_artifact_ref(root, p) for p in (args.output or [])],
+        evidence=float(args.evidence),
+        metadata={"note": args.note or ""},
+    )
+    path = append_kernel_event(root, event)
+    print(f"appended event -> {path.relative_to(root)}")
+    return 0
+
+
+def _cmd_event_replay(args: argparse.Namespace) -> int:
+    from .kernel.event_replay import replay
+    root = _project_root()
+    state = replay(root)
+    print(f"events: {state.event_count}")
+    print(f"digest: {state.digest}")
+    if state.violations:
+        print("violations:")
+        for violation in state.violations:
+            print(f"  - {violation}")
+        return 1
+    return 0
 
 
 def _cmd_init(args: argparse.Namespace) -> int:
@@ -272,6 +306,17 @@ def _append_decision_log(root: Path, decision: dict[str, str]) -> Path:
             }
         )
     return path
+
+
+def _cmd_state_global(args: argparse.Namespace) -> int:
+    root = _project_root()
+    path, payload = write_global_state(root, dry_run=args.dry_run)
+    action = "would write" if args.dry_run else "wrote"
+    print(f"{action} global state: {path.relative_to(root)}")
+    print(f"datasets: {len(payload.get('datasets', {}))}")
+    print(f"claims: {payload.get('claims', {}).get('count', 0)}")
+    print(f"results: {payload.get('results', {}).get('rows', 0)}")
+    return 0
 
 
 def _cmd_gate_status(args: argparse.Namespace) -> int:
@@ -600,6 +645,66 @@ def _cmd_collect(args: argparse.Namespace) -> int:
         return 1
 
 
+def _cmd_action_receipt(args: argparse.Namespace) -> int:
+    root = _project_root()
+    data_impact = {
+        "inventory_changed": args.inventory_changed,
+        "source_verified": args.source_verified,
+        "data_rows_changed": args.data_rows_changed,
+        "coverage_changed": args.coverage_changed,
+        "backfill_queue_changed": args.backfill_queue_changed,
+        "probe_completed": args.probe_completed,
+    }
+    research_impact = {
+        "claim_ceiling_changed": args.claim_ceiling_changed,
+        "gate_candidate_changed": args.gate_candidate_changed,
+        "evidence_graph_changed": args.evidence_graph_changed,
+        "result_registered": args.result_registered,
+    }
+    path, _payload, failures = write_action_receipt(root, ActionReceiptArgs(
+        action_id=args.action_id,
+        action_mode=args.action_mode,
+        progress_label=args.progress_label,
+        summary=args.summary or "",
+        why_this_now=args.why_this_now or "",
+        evidence_paths=args.evidence_path or [],
+        data_impact=data_impact,
+        research_impact=research_impact,
+        would_progress_without_this_action=args.would_progress_without_this_action,
+        dependency_type=args.dependency_type or "",
+        dry_run=args.dry_run,
+    ))
+    print(("would write" if args.dry_run else "wrote") + f" action receipt: {path.relative_to(root)}")
+    if failures:
+        print("receipt is not valid:")
+        for failure in failures:
+            print(f"  - {failure}")
+        return 1
+    return 0
+
+
+def _cmd_data(args: argparse.Namespace) -> int:
+    root = _project_root()
+    if args.data_command == "scan":
+        return write_data_scan(root, dry_run=args.dry_run)
+    if args.data_command == "gaps":
+        return write_data_gaps(root, dry_run=args.dry_run)
+    if args.data_command == "plan":
+        print(format_data_first_plan(root))
+        return 0
+    if args.data_command == "probe":
+        if args.data_probe_command == "plan":
+            return write_probe_plan(root, dry_run=args.dry_run)
+        if args.data_probe_command == "run":
+            return run_data_probe(root, args.source, limit=args.limit, dry_run=args.dry_run)
+        if args.data_probe_command == "report":
+            return write_probe_report(root, dry_run=args.dry_run)
+    if args.data_command == "backfill":
+        return _cmd_data_backfill(args)
+    print("unknown data command")
+    return 2
+
+
 def _cmd_data_backfill(args: argparse.Namespace) -> int:
     root = _project_root()
     return run_data_backfill(root, BackfillArgs(
@@ -803,6 +908,20 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="aeros", description="AEROS runtime")
     sub = parser.add_subparsers(dest="command", required=True)
 
+
+    event = sub.add_parser("event", help="append/replay kernel event log")
+    event_sub = event.add_subparsers(dest="event_command", required=True)
+    event_append = event_sub.add_parser("append", help="append a content-addressed event")
+    event_append.add_argument("--event-type", required=True, help="event type, e.g. preanalysis_plan_committed")
+    event_append.add_argument("--action-name", required=True, help="action name associated with the event")
+    event_append.add_argument("--input", action="append", default=[], help="input artifact path; may be repeated")
+    event_append.add_argument("--output", action="append", default=[], help="output artifact path; may be repeated")
+    event_append.add_argument("--evidence", type=float, default=0.0, help="event evidence strength")
+    event_append.add_argument("--note", default="", help="event note")
+    event_append.set_defaults(func=_cmd_event_append)
+    event_replay = event_sub.add_parser("replay", help="replay event log and print digest")
+    event_replay.set_defaults(func=_cmd_event_replay)
+
     init = sub.add_parser("init", help="create a minimal AEROS project scaffold")
     init.add_argument("path", help="target project directory")
     init.add_argument("--force", action="store_true", help="overwrite scaffold files if present")
@@ -864,6 +983,23 @@ def main(argv: list[str] | None = None) -> int:
     skills_plan.add_argument("--stage", default="all", choices=["all", "discovery", "execution"],
                              help="task stage to inspect (default: all)")
     skills_plan.set_defaults(func=_cmd_skills_plan)
+
+
+    action = sub.add_parser("action", help="write/validate action progress receipts")
+    action_sub = action.add_subparsers(dest="action_command", required=True)
+    action_receipt = action_sub.add_parser("receipt", help="write an action receipt classifying this run")
+    action_receipt.add_argument("--action-id", required=True, help="stable action id, e.g. D002_probe_2026_06_16")
+    action_receipt.add_argument("--action-mode", required=True, choices=["data_progress", "data_backfill", "data_probe", "data_validation", "harness_triage", "literature_progress", "claim_audit", "writing", "cleanup"])
+    action_receipt.add_argument("--progress-label", required=True, choices=["substantive_research_progress", "mechanical_hygiene", "blocked_queue_preparation", "documentation_repair"])
+    action_receipt.add_argument("--why-this-now", required=True, help="why this was the next action")
+    action_receipt.add_argument("--summary", required=True, help="short honest summary of what changed")
+    action_receipt.add_argument("--evidence-path", action="append", default=[], help="artifact proving this action, relative to project root")
+    action_receipt.add_argument("--dependency-type", required=True, choices=["enabling", "validating", "cosmetic", "blocking_resolution"], help="counterfactual role of this action")
+    action_receipt.add_argument("--would-progress-without-this-action", action="store_true", help="mark true only if the project would have progressed anyway")
+    for flag in ["inventory-changed", "source-verified", "data-rows-changed", "coverage-changed", "backfill-queue-changed", "probe-completed", "claim-ceiling-changed", "gate-candidate-changed", "evidence-graph-changed", "result-registered"]:
+        action_receipt.add_argument("--" + flag, action="store_true")
+    action_receipt.add_argument("--dry-run", action="store_true", help="validate without writing")
+    action_receipt.set_defaults(func=_cmd_action_receipt)
 
     manifest_p = sub.add_parser("manifest",
                                 help="snapshot/verify SHA256 of registered result artifacts")
@@ -938,6 +1074,10 @@ def main(argv: list[str] | None = None) -> int:
 
     state_parser = sub.add_parser("state", help="inspect or clean runtime state")
     state_sub = state_parser.add_subparsers(dest="state_command", required=True)
+    state_global = state_sub.add_parser("global", help="build the derived global state index")
+    state_global.add_argument("--dry-run", action="store_true", help="show global state summary without writing")
+    state_global.set_defaults(func=_cmd_state_global)
+
     state_prune = state_sub.add_parser(
         "prune",
         help="remove task state entries whose contracts no longer exist",
@@ -1045,6 +1185,29 @@ def main(argv: list[str] | None = None) -> int:
 
     data = sub.add_parser("data", help="data audit and backfill orchestration")
     data_sub = data.add_subparsers(dest="data_command", required=True)
+    data_scan = data_sub.add_parser("scan", help="scan local data/code/output artifacts and write data/data_state.yml")
+    data_scan.add_argument("--dry-run", action="store_true", help="show scan summary without writing files")
+    data_scan.set_defaults(func=_cmd_data)
+    data_gaps = data_sub.add_parser("gaps", help="detect data readiness gaps and write data/data_gap_plan.yml")
+    data_gaps.add_argument("--dry-run", action="store_true", help="show gaps without writing files")
+    data_gaps.set_defaults(func=_cmd_data)
+    data_plan = data_sub.add_parser("plan", help="show data-first next actions without writing files")
+    data_plan.set_defaults(func=_cmd_data)
+
+    data_probe = data_sub.add_parser("probe", help="small-sample data probe before full collection")
+    data_probe_sub = data_probe.add_subparsers(dest="data_probe_command", required=True)
+    data_probe_plan = data_probe_sub.add_parser("plan", help="plan small probes from discovery/data_inventory.csv")
+    data_probe_plan.add_argument("--dry-run", action="store_true", help="show probe plan without writing")
+    data_probe_plan.set_defaults(func=_cmd_data)
+    data_probe_run = data_probe_sub.add_parser("run", help="run a local-file sample probe for one data source")
+    data_probe_run.add_argument("--source", required=True, help="data_id or dataset_name from discovery/data_inventory.csv")
+    data_probe_run.add_argument("--limit", type=int, default=25, help="sample row limit")
+    data_probe_run.add_argument("--dry-run", action="store_true", help="show what would run without writing")
+    data_probe_run.set_defaults(func=_cmd_data)
+    data_probe_report = data_probe_sub.add_parser("report", help="summarize completed probe metadata")
+    data_probe_report.add_argument("--dry-run", action="store_true", help="show report summary without writing")
+    data_probe_report.set_defaults(func=_cmd_data)
+
     data_backfill = data_sub.add_parser("backfill", help="build and optionally run a data backfill queue")
     data_backfill.add_argument("--dry-run", action="store_true",
                                help="show queue plan without writing files or running commands")
@@ -1060,7 +1223,7 @@ def main(argv: list[str] | None = None) -> int:
     data_backfill.add_argument("--coverage", default="", help="coverage reviewed for receipt")
     data_backfill.add_argument("--disagreement-log", default="", help="disagreement/ambiguity log for receipt")
     data_backfill.add_argument("--human-decision", default="", help="human decision recorded in receipt")
-    data_backfill.set_defaults(func=_cmd_data_backfill)
+    data_backfill.set_defaults(func=_cmd_data)
 
     iterate = sub.add_parser("iterate", help="run the research controller until the next human gate")
     iterate.add_argument("--stage", default="discovery", choices=["discovery", "execution"],

@@ -16,6 +16,8 @@ recommended_skills:
 - describe-data
 - data-codebook
 - policy-timeline
+required_skill_classes:
+- data_scouting
 goal: 'Scout candidate data sources that could support the project''s research question
   and register each as one row in discovery/data_inventory.csv. This is a DISCOVERY
   task: locate sources and record their access path, engineering status, and the next

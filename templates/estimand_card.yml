@@ -1,0 +1,16 @@
+version: 1
+estimand_id: EST-001
+status: draft
+unit: ''
+population: ''
+treatment_or_exposure: ''
+comparison: ''
+outcome: ''
+time_horizon: ''
+aggregation: ''
+target_parameter: ''
+interpretation: ''
+identifying_variation: ''
+exclusions: []
+claim_ids: []
+notes: ''

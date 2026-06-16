@@ -1,0 +1,51 @@
+version: 1
+policy: AEROS-INVARIANTS-001
+principle: AEROS is a constrained empirical research controller; progress must respect epistemic boundaries.
+invariants:
+  - id: global_state_is_derived_only
+    rule: global_state may not introduce facts absent from upstream artifacts
+    enforced_by:
+      - checks/check_global_state.py
+    severity: hard
+  - id: probe_before_backfill
+    rule: full collection requires a passing small probe or a scoped receipt-backed exception
+    enforced_by:
+      - checks/check_data_probe.py
+      - checks/check_exception_scope.py
+    severity: hard
+  - id: probe_cannot_support_final_claim
+    rule: probe artifacts may support feasibility claims only, not final empirical claims
+    enforced_by:
+      - checks/check_provenance_boundary.py
+      - checks/check_exception_scope.py
+    severity: hard
+  - id: receipt_cannot_support_empirical_claim
+    rule: action receipts and human review receipts document work/review, not empirical facts
+    enforced_by:
+      - checks/check_action_receipts.py
+      - checks/check_provenance_boundary.py
+    severity: hard
+  - id: claim_requires_validated_result
+    rule: empirical claim support must cross the provenance boundary through validated results, result index, provenance, evidence ledger, and claim registry
+    enforced_by:
+      - checks/check_claim_registry.py
+      - checks/check_research_graph.py
+      - checks/check_provenance.py
+    severity: hard
+  - id: gate_requires_decision_packet
+    rule: human approval requires a decision packet with evidence, blockers, candidate gate, and claim ceiling
+    enforced_by:
+      - checks/check_gate_exit.py
+    severity: hard
+  - id: failed_probe_is_evidence_but_not_result
+    rule: failed probes may support feasibility/blocker statements only and must not be registered as supporting results
+    enforced_by:
+      - checks/check_data_probe.py
+      - checks/check_exception_scope.py
+    severity: hard
+  - id: skills_require_invocation_or_waiver
+    rule: recommended or required skills must be invoked or explicitly waived in a skill/action receipt
+    enforced_by:
+      - checks/check_skill_invocations.py
+      - checks/check_noop_runs.py
+    severity: hard

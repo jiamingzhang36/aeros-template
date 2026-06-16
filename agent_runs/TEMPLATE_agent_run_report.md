@@ -103,3 +103,25 @@ Choose one:
 Path: `agent_runs/completion_receipts/<task_id>_completion_receipt.yml`
 
 Status: TBD
+
+## Action Receipt
+
+Every non-trivial run must either write `agent_runs/action_receipts/<action_id>.yml` with `aeros action receipt ...` or explain why no action receipt was needed.
+
+- action_mode:
+- honest_progress_label:
+- why_this_now:
+- data_impact:
+  - inventory_changed:
+  - source_verified:
+  - data_rows_changed:
+  - coverage_changed:
+  - backfill_queue_changed:
+  - probe_completed:
+- research_impact:
+  - claim_ceiling_changed:
+  - gate_candidate_changed:
+  - evidence_graph_changed:
+  - result_registered:
+- evidence_paths:
+

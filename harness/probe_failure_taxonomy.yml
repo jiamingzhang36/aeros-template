@@ -1,0 +1,41 @@
+version: 1
+policy: AEROS-DATA-PROBE-001
+principle: Small probes diagnose scale feasibility; they do not certify final evidence.
+failure_types:
+  schema_mismatch:
+    description: Observed fields do not match required or expected variables.
+    default_severity: high
+  missing_linkage_key:
+    description: Required merge/linkage identifiers are absent, ambiguous, or not stable.
+    default_severity: high
+  temporal_sparsity:
+    description: Time coverage is too sparse or discontinuous for the intended design.
+    default_severity: medium
+  geographic_sparsity:
+    description: Geographic coverage is too sparse or uneven for the intended design.
+    default_severity: medium
+  distribution_truncation:
+    description: Probe suggests censoring, top-coding, missing tails, or narrow support.
+    default_severity: medium
+  selection_bias:
+    description: Probe sample is likely selected relative to the target population.
+    default_severity: high
+  api_sampling_bias:
+    description: API or endpoint returns sampled/ranked/limited results not representative of the source universe.
+    default_severity: high
+  parsing_instability:
+    description: Parser depends on brittle layout, OCR, HTML, or undocumented source behavior.
+    default_severity: medium
+  terms_or_license_blocker:
+    description: Terms, license, IRB, privacy, or credential constraints block unrestricted collection or release.
+    default_severity: critical
+  source_snapshot_missing:
+    description: Source date/version/snapshot is not recorded well enough for reproducibility.
+    default_severity: high
+scorecard_dimensions:
+  completeness: observed non-empty sample and core fields
+  schema_validity: observed schema matches expected variables closely enough to continue
+  linkage_feasibility: identifiers exist and are stable enough for the proposed merge
+  coverage_fit: observed geography/time/unit coverage can plausibly support the design
+  bias_risk: probe has documented sampling/selection/API/source limitations
+  terms_release_fit: access, terms, privacy, and release constraints are documented

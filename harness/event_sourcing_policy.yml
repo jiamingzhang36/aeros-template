@@ -1,0 +1,13 @@
+version: 1
+policy: AEROS-EVENT-SOURCING-001
+principle: The event log is the future append-only authority; materialized views should become replayable projections.
+authoritative_log: events/event_log.jsonl
+requirements:
+  - id: content_addressed_artifacts
+    rule: event inputs and outputs should record path, sha256, bytes, and existence at event time
+  - id: deterministic_replay
+    rule: replaying the same event log must produce the same digest and derived facts
+  - id: preanalysis_happens_before_outcome_access
+    rule: preanalysis_plan_committed must happen before access_outcome, run_spec, or register_result events for confirmatory claims
+  - id: materialized_views_are_derived
+    rule: global_state, analysis ledgers, research graph, and claim registry should migrate toward event-derived projections

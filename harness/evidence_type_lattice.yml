@@ -1,0 +1,54 @@
+version: 1
+policy: AEROS-EVIDENCE-LATTICE-001
+principle: Lower-grade artifacts must not be laundered into higher-grade claim support.
+evidence_types:
+  E0_action_receipt:
+    rank: 0
+    artifact_type: action_receipt
+    allowed_use: [logs]
+    empirical_claim_support: never
+  E1_source_pointer:
+    rank: 1
+    artifact_type: source_pointer
+    allowed_use: [points_to]
+    empirical_claim_support: never
+  E2_raw_data_snapshot:
+    rank: 2
+    artifact_type: raw_data_snapshot
+    allowed_use: [derives]
+    empirical_claim_support: never_directly
+  E3_processed_data_snapshot:
+    rank: 3
+    artifact_type: processed_data_snapshot
+    allowed_use: [derives]
+    empirical_claim_support: never_directly
+  E4_probe_report:
+    rank: 4
+    artifact_type: probe_report
+    allowed_use: [supports_feasibility, qualifies]
+    empirical_claim_support: feasibility_only
+  E5_validation_report:
+    rank: 5
+    artifact_type: validation_report
+    allowed_use: [validates, qualifies]
+    empirical_claim_support: data_quality_only
+  E6_spec_run_result:
+    rank: 6
+    artifact_type: spec_run_result
+    allowed_use: [supports_descriptive, supports_associational, contradicts]
+    empirical_claim_support: descriptive_or_associational
+  E7_robustness_result:
+    rank: 7
+    artifact_type: robustness_result
+    allowed_use: [qualifies, contradicts]
+    empirical_claim_support: qualifier_only
+  E8_identification_diagnostic:
+    rank: 8
+    artifact_type: identification_diagnostic
+    allowed_use: [qualifies, supports_causal, contradicts]
+    empirical_claim_support: causal_ceiling_only
+  E9_human_gate_decision:
+    rank: 9
+    artifact_type: human_gate_decision
+    allowed_use: [authorizes]
+    empirical_claim_support: never

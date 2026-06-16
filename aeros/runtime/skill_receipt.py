@@ -53,6 +53,7 @@ def write_skill_invocation_receipt(
     *,
     skills_used: list[str],
     run_report_path: Path | str | None = None,
+    skill_waivers: list[dict[str, Any]] | None = None,
 ) -> Path:
     """Write an audit receipt for the skills declared by the runtime report.
 
@@ -62,6 +63,8 @@ def write_skill_invocation_receipt(
     skill_map = load_core_skill_map(project_root)
     allowed = set(str(s).strip() for s in (contract.raw.get("allowed_skills") or []) if str(s).strip())
     recommended = sorted(str(s).strip() for s in (contract.raw.get("recommended_skills") or []) if str(s).strip())
+    required_classes = sorted(str(s).strip() for s in (contract.raw.get("required_skill_classes") or []) if str(s).strip())
+    waivers = [w for w in (skill_waivers or contract.raw.get("skill_waivers") or []) if isinstance(w, dict)]
     records: list[dict[str, Any]] = []
     for name in sorted({s for s in skills_used if s and s != "none" and s != "n/a"}):
         meta = skill_map.get(name, {})
@@ -84,6 +87,8 @@ def write_skill_invocation_receipt(
         "run_report_path": _rel(project_root, run_report_path),
         "allowed_skills": sorted(allowed),
         "recommended_skills": recommended,
+        "required_skill_classes": required_classes,
+        "skill_waivers": waivers,
         "skills_used": [r["skill_name"] for r in records],
         "invocations": records,
         "verdict": "fail" if any(not r["known_to_aeros"] or not r["allowed_by_contract"] for r in records) else "pass",
@@ -110,6 +115,10 @@ def validate_skill_invocations(project_root: Path, contracts: dict[str, tuple[Co
             failures.append(f"{task_id}: skill invocation receipt unreadable ({exc})")
             continue
         allowed = set(str(s).strip() for s in (contract.raw.get("allowed_skills") or []) if str(s).strip())
+        recommended = set(str(s).strip() for s in (contract.raw.get("recommended_skills") or []) if str(s).strip())
+        required_classes = set(str(s).strip() for s in (contract.raw.get("required_skill_classes") or []) if str(s).strip())
+        waivers = payload.get("skill_waivers") or []
+        waiver_classes = {str(w.get("skill_class", "")).strip() for w in waivers if isinstance(w, dict)}
         if payload.get("task_id") != task_id:
             failures.append(f"{task_id}: skill invocation receipt task_id mismatch")
         for name in payload.get("skills_used") or []:
@@ -119,4 +128,12 @@ def validate_skill_invocations(project_root: Path, contracts: dict[str, tuple[Co
                 failures.append(f"{task_id}: skill {name!r} is not allowed by task contract")
         if payload.get("verdict") == "fail":
             failures.append(f"{task_id}: skill invocation receipt verdict is fail")
+        if required_classes:
+            used = set(payload.get("skills_used") or [])
+            used_stages = {str(skill_map.get(name, {}).get("aeros_stage", "")).strip() for name in used}
+            missing = sorted(cls for cls in required_classes if cls not in waiver_classes and cls not in used and cls not in used_stages)
+            for cls in missing:
+                failures.append(f"{task_id}: required skill class {cls!r} has neither invocation nor waiver")
+        if recommended and not payload.get("skills_used") and not waivers:
+            failures.append(f"{task_id}: recommended skills declared but no invocation or waiver recorded")
     return failures
