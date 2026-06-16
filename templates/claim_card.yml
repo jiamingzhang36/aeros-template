@@ -1,9 +1,19 @@
-version: 1
+version: 2
 claim_id: C001
 claim_text: ''
 claim_type: descriptive
 mode: exploratory
+track: discovery
 strength: ambiguous
+scope:
+  geography: ''
+  time_period: ''
+  population: ''
+  industry: ''
+  unit: ''
+  data_source: ''
+  measurement_level: ''
+  claim_type: descriptive
 qualifier:
   population: ''
   time_period: ''
@@ -17,4 +27,10 @@ supported_by: []
 contradicted_by: []
 rebuttal: []
 claim_ceiling: ambiguous
+compiler_output:
+  allowed_language: []
+  forbidden_language: []
+  scope_overreach: []
+  obligations: []
+human_gate_class: none
 notes: ''

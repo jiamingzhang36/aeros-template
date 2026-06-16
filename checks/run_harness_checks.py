@@ -57,6 +57,7 @@ CHECKS = [
     "check_table_cell_sources.py",
     "check_data_availability_present.py",
     "check_output_reproducibility.py",
+    "check_result_registry.py",
     "check_analysis_ledger.py",
     "check_preanalysis_happens_before.py",
     "check_negative_result_ledger.py",

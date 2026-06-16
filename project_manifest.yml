@@ -252,6 +252,9 @@ layers:
     - templates/estimand_card.yml
     - harness/admissibility_matrix.yml
     - harness/evidence_type_lattice.yml
+    - harness/scope_calculus.yml
+    - harness/result_adapter_contract.yml
+    - templates/result_registry_record.json
     - harness/probe_failure_taxonomy.yml
     - aeros/state/global_state.yml
     - harness/skill_registry.md
@@ -288,6 +291,7 @@ checks:
   negative_result_ledger: checks/check_negative_result_ledger.py
   estimand_cards: checks/check_estimand_cards.py
   artifact_admissibility: checks/check_artifact_admissibility.py
+  result_registry: checks/check_result_registry.py
   meta_monitor: checks/check_meta_monitor.py
   identification_gate: checks/check_identification_gate.py
   claim_toulmin_schema: checks/check_claim_toulmin_schema.py

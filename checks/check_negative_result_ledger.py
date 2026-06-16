@@ -8,7 +8,9 @@ from pathlib import Path
 
 SPEC_RUN_INDEX = Path('analysis/spec_run_index.csv')
 NEGATIVE = Path('analysis/negative_result_ledger.csv')
-TERMINAL = {'completed','failed_runtime','failed_validation','invalid_design','abandoned_with_reason','superseded'}
+TERMINAL = {'completed_positive','completed_null','completed_contradictory','failed_runtime','failed_data_validation','invalid_design','abandoned_with_reason','superseded'}
+NEGATIVE_REQUIRED = {'completed_null','completed_contradictory'}
+FAILURE_REQUIRED = {'failed_runtime','failed_data_validation','invalid_design','abandoned_with_reason'}
 
 
 def _rows(path: Path) -> list[dict[str,str]]:
@@ -28,12 +30,14 @@ def main() -> int:
     neg_keys = {(r.get('spec_id',''), r.get('run_id','')) for r in neg_rows}
     for row in spec_rows:
         key = (row.get('spec_id',''), row.get('run_id',''))
-        status = row.get('status','').strip()
+        status = (row.get('terminal_status') or row.get('status','')).strip()
         registered = row.get('registered_result','').strip().lower() in {'true','yes','1'} or bool(row.get('result_id','').strip())
         if status not in TERMINAL:
-            failures.append(f'{key}: status must be terminal {sorted(TERMINAL)}')
-        if not registered and status != 'completed' and key not in neg_keys:
-            failures.append(f'{key}: non-registered non-completed run must appear in negative_result_ledger')
+            failures.append(f'{key}: terminal_status/status must be terminal {sorted(TERMINAL)}')
+        if status in NEGATIVE_REQUIRED and key not in neg_keys:
+            failures.append(f'{key}: null/contradictory completed run must appear in negative_result_ledger')
+        if status in FAILURE_REQUIRED and not registered and key not in neg_keys:
+            failures.append(f'{key}: failed/abandoned unregistered run must appear in negative_result_ledger or failure ledger')
     for row in neg_rows:
         if row.get('terminal_status','').strip() not in TERMINAL:
             failures.append(f"negative ledger {row.get('spec_id','')}/{row.get('run_id','')}: invalid terminal_status")

@@ -209,3 +209,10 @@ Use this file to track template or project-level changes that alter workflow, ev
   - zsh syntax check for tools/sync_aeros_latest.zsh
   - script retains targeted project_manifest wiring for improvement backlog checks
 - notes: The script remains conservative: it syncs framework files and injects required manifest wiring without overwriting project-specific manifests wholesale.
+
+## 2026-06-16 - REV026 Paper CI Phase 0 result registry
+
+- Added `aeros.paper_ci.result_registry` as the estimation-call result registry layer.
+- Added `aeros paper-ci register-result`, `sync-result-index`, and `schema` CLI entry points.
+- Added `harness/result_adapter_contract.yml`, `templates/result_registry_record.json`, and `checks/check_result_registry.py`.
+- Clarified that result registry guarantees result-born provenance/spec extraction, not estimate correctness or claim approval.

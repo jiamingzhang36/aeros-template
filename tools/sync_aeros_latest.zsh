@@ -144,6 +144,8 @@ REQUIRED_FILES = [
     "harness/derived_vs_asserted_audit.yml",
     "harness/event_sourcing_policy.yml",
     "harness/evidence_type_lattice.yml",
+    "harness/scope_calculus.yml",
+    "harness/result_adapter_contract.yml",
     "harness/admissibility_matrix.yml",
     "harness/analysis_integrity.yml",
     "harness/claim_toulmin_schema.yml",
@@ -161,6 +163,7 @@ REQUIRED_FILES = [
     "templates/estimand_card.yml",
     "templates/negative_result_ledger.csv",
     "templates/source_card.yml",
+    "templates/result_registry_record.json",
     "docs/architecture_v0_5.md",
 ]
 

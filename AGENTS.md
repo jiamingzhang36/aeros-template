@@ -380,3 +380,26 @@ conflicts with the points below, prefer these.
 - If work was not run, the task is classified with an explicit automation/gate status and any required evidence receipt exists.
 - Treat validation projects as pressure tests, not template sources. Lessons may be generalized into harness rules, checks, or task templates, but project-specific data and conclusions must stay inside the validation project.
 - Do not state that a task is complete unless the runtime has written a passing completion receipt in `agent_runs/completion_receipts/`.
+
+
+## Kernel Anti-Creep and Scope Rules
+
+AEROS must avoid becoming an over-governed central research judge.
+
+- Kernel enforces legality; compilers calculate claim ceilings, scope containment, identification strength, analysis risk, and exception debt.
+- Event logs must be append-only, hash-chained, and replay-tested. Do not edit old events to make a later state look cleaner.
+- Every claim-facing artifact should carry a scope vector: geography, time period, population, industry, unit, data source, measurement level, and claim type.
+- Discovery-track exploration may run with lightweight logging and terminal status; it must not be laundered into confirmatory language.
+- Confirmatory claims require locked plan/spec/data/estimand artifacts or an explicit analytic deviation.
+- Human gates protect high-risk exits: claim release, causal language, major exception, unresolved evidence conflict, scope expansion, or override of a previous plan. Do not turn ordinary scans, probes, or exploratory runs into human-gate bottlenecks.
+
+
+## Paper CI Result Registry Rules
+
+For empirical paper work, the preferred wrapper boundary is the estimation call.
+
+- Register paper-facing numbers at birth with `aeros paper-ci register-result`, using adapter JSON produced by the estimation wrapper.
+- Extract `estimator`, `formula`, `fixed_effects`, `cluster`, and `sample_filters` from fitted objects or wrapper-controlled execution metadata, not from agent prose.
+- Treat `claim_type_eligibility` as a compiler ceiling input, not as proof that a claim is true or approved.
+- Use `aeros paper-ci sync-result-index` to derive `evidence/result_index.csv` from `evidence/result_registry.csv` where possible.
+- Phase 0 guarantees result provenance and spec fidelity only; it does not guarantee correctness, identification validity, paper-code consistency, or claim support.

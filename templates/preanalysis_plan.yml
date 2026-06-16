@@ -32,3 +32,7 @@ forbidden_posthoc_choices:
   - changing sample windows after seeing results without deviation receipt
   - registering only favorable estimates from a larger search
 notes: ''
+
+track_policy:
+  discovery_track: exploration is allowed with light event/spec logging but cannot support confirmatory claims
+  confirmatory_track: requires locked plan, locked spec space, locked data snapshot, and locked estimand
