@@ -74,11 +74,22 @@ def _cmd_run(args: argparse.Namespace) -> int:
 
 def _cmd_event_append(args: argparse.Namespace) -> int:
     root = _project_root()
+    inputs = [kernel_artifact_ref(root, p) for p in (args.input or [])]
+    outputs = [kernel_artifact_ref(root, p) for p in (args.output or [])]
+    # An event minted for an artifact that does not exist gets no hash and no
+    # integrity guarantee. Surface that instead of recording it silently.
+    missing = [ref["path"] for ref in (*inputs, *outputs) if not ref.get("exists")]
+    if missing:
+        for rel in missing:
+            print(f"WARNING: declared artifact does not exist (recorded with empty hash): {rel}", file=sys.stderr)
+        if getattr(args, "require_artifacts", False):
+            print("FAIL: --require-artifacts set and some artifacts are missing", file=sys.stderr)
+            return 1
     event = KernelEvent(
         event_type=args.event_type,
         action=args.action_name,
-        inputs=[kernel_artifact_ref(root, p) for p in (args.input or [])],
-        outputs=[kernel_artifact_ref(root, p) for p in (args.output or [])],
+        inputs=inputs,
+        outputs=outputs,
         evidence=float(args.evidence),
         metadata={"note": args.note or ""},
     )
@@ -950,6 +961,8 @@ def main(argv: list[str] | None = None) -> int:
     event_append.add_argument("--output", action="append", default=[], help="output artifact path; may be repeated")
     event_append.add_argument("--evidence", type=float, default=0.0, help="event evidence strength")
     event_append.add_argument("--note", default="", help="event note")
+    event_append.add_argument("--require-artifacts", action="store_true",
+                              help="fail if any declared input/output artifact does not exist")
     event_append.set_defaults(func=_cmd_event_append)
     event_replay = event_sub.add_parser("replay", help="replay event log and print digest")
     event_replay.set_defaults(func=_cmd_event_replay)

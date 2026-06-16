@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import shutil
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -230,8 +231,8 @@ def upsert_record(root: Path, record: ResultRecord, *, dry_run: bool = False) ->
     return path
 
 
-def register_payload_file(root: Path, payload_path: Path, *, dry_run: bool = False) -> tuple[Path, ResultRecord]:
-    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+def register_payload(root: Path, payload: dict[str, Any], *, dry_run: bool = False) -> tuple[Path, ResultRecord]:
+    """Register an in-memory payload dict (e.g. from an estimation adapter)."""
     if not isinstance(payload, dict):
         raise ValueError("result registry payload must be a JSON object")
     record = ResultRecord.from_payload(payload, root)
@@ -239,33 +240,67 @@ def register_payload_file(root: Path, payload_path: Path, *, dry_run: bool = Fal
     return path, record
 
 
-def sync_result_index(root: Path, *, dry_run: bool = False) -> tuple[Path, int]:
+def register_payload_file(root: Path, payload_path: Path, *, dry_run: bool = False) -> tuple[Path, ResultRecord]:
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    return register_payload(root, payload, dry_run=dry_run)
+
+
+def sync_result_index(root: Path, *, dry_run: bool = False, backup: bool = True) -> tuple[Path, int]:
+    """Derive result_index rows from the registry without destroying the index.
+
+    The index is frequently hand-curated (extra columns like description,
+    created_date, notes, and rows that predate the registry). This sync is
+    therefore a non-destructive merge:
+      - every existing column is preserved (the output schema is the union of the
+        index's own header and the derived RESULT_INDEX_FIELDS),
+      - existing rows are kept even if they have no registry row yet,
+      - for ids present in the registry, only the derived fields are refreshed;
+        hand-entered columns on the same row are left untouched,
+      - the previous index is copied to a timestamped .bak before overwrite.
+    """
     registry = read_registry(root)
     path = root / RESULT_INDEX
-    existing: list[dict[str, str]] = []
+    existing_rows: list[dict[str, str]] = []
+    existing_fields: list[str] = []
     if path.exists():
         with path.open(newline="", encoding="utf-8") as handle:
             reader = csv.DictReader(handle)
-            for row in reader:
-                existing.append({field: row.get(field, "") for field in RESULT_INDEX_FIELDS})
-    by_id = {row.get("result_id", ""): row for row in existing if row.get("result_id")}
+            existing_fields = list(reader.fieldnames or [])
+            existing_rows = [dict(row) for row in reader]
+    # Output schema = existing columns first (order preserved), then any derived
+    # field the index does not already carry. Never drop a column.
+    out_fields = list(existing_fields)
+    for field_name in RESULT_INDEX_FIELDS:
+        if field_name not in out_fields:
+            out_fields.append(field_name)
+    by_id: dict[str, dict[str, str]] = {
+        row.get("result_id", ""): row for row in existing_rows if row.get("result_id")
+    }
     for row in registry:
         result_id = row.get("result_id", "")
         if not result_id:
             continue
         code_ref = json.loads(row.get("code_ref_json") or "{}")
-        by_id[result_id] = {
-            "result_id": result_id,
-            "path": row.get("output_path", ""),
-            "script_or_source": str(code_ref.get("file") or row.get("adapter_name") or ""),
-            "linked_claims": by_id.get(result_id, {}).get("linked_claims", ""),
-        }
+        entry = by_id.get(result_id, {})
+        # Refresh only the registry-owned (derived) fields; preserve curated ones.
+        entry["result_id"] = result_id
+        entry["path"] = row.get("output_path", "") or entry.get("path", "")
+        entry["script_or_source"] = (
+            str(code_ref.get("file") or row.get("adapter_name") or "")
+            or entry.get("script_or_source", "")
+        )
+        entry.setdefault("linked_claims", "")
+        by_id[result_id] = entry
     rows = [by_id[key] for key in sorted(by_id)]
     if dry_run:
         return path, len(registry)
     path.parent.mkdir(parents=True, exist_ok=True)
+    if backup and path.exists():
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        shutil.copy2(path, path.with_name(f"{path.name}.bak.{stamp}"))
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=RESULT_INDEX_FIELDS)
+        writer = csv.DictWriter(handle, fieldnames=out_fields, extrasaction="ignore")
         writer.writeheader()
-        writer.writerows(rows)
+        for row in rows:
+            writer.writerow({field_name: row.get(field_name, "") for field_name in out_fields})
     return path, len(registry)
