@@ -40,3 +40,20 @@ Human Gate          -> makes judgment and owns accountability
 Events and receipts log what happened. They do not decide whether research state
 advanced or whether a claim is allowed. The kernel and claim compiler evaluate
 legality and admissibility; human gates make judgment calls.
+
+## Anti-creep rule
+
+The kernel enforces, compilers calculate. The kernel may reject an event, edge,
+or claim use that violates declared compiler output, but it must not become the
+place where identification strength, claim ceiling, or analysis risk is invented.
+
+## Constitutional invariants
+
+1. No event, no progress.
+2. No artifact, no completion.
+3. No hash lineage, no provenance.
+4. Receipt cannot serve as empirical evidence.
+5. Probe cannot serve as final validation.
+6. Exploratory cannot masquerade as confirmatory.
+7. Claim scope cannot exceed evidence scope.
+8. Claim language cannot exceed identification ceiling.

@@ -46,6 +46,12 @@ class Event:
     evidence: float
     timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat(timespec="seconds"))
     event_id: str = ""
+    parent_event_hash: str = ""
+    actor: str = "codex"
+    action_type: str = ""
+    schema_version: int = 2
+    input_hashes: list[str] = field(default_factory=list)
+    output_hashes: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def canonical_payload(self) -> dict[str, Any]:
@@ -54,24 +60,71 @@ class Event:
         return payload
 
     def with_event_id(self) -> "Event":
-        payload = json.dumps(self.canonical_payload(), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-        eid = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-        return Event(
+        input_hashes = self.input_hashes or sorted(
+            str(item.get("sha256", "")) for item in self.inputs if item.get("sha256")
+        )
+        output_hashes = self.output_hashes or sorted(
+            str(item.get("sha256", "")) for item in self.outputs if item.get("sha256")
+        )
+        normalized = Event(
             event_type=self.event_type,
             action=self.action,
             inputs=self.inputs,
             outputs=self.outputs,
             evidence=self.evidence,
             timestamp=self.timestamp,
-            event_id=eid,
+            event_id="",
+            parent_event_hash=self.parent_event_hash,
+            actor=self.actor or "unknown",
+            action_type=self.action_type or self.action,
+            schema_version=self.schema_version,
+            input_hashes=input_hashes,
+            output_hashes=output_hashes,
             metadata=self.metadata,
+        )
+        payload = json.dumps(normalized.canonical_payload(), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        eid = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        return Event(
+            event_type=normalized.event_type,
+            action=normalized.action,
+            inputs=normalized.inputs,
+            outputs=normalized.outputs,
+            evidence=normalized.evidence,
+            timestamp=normalized.timestamp,
+            event_id=eid,
+            parent_event_hash=normalized.parent_event_hash,
+            actor=normalized.actor,
+            action_type=normalized.action_type,
+            schema_version=normalized.schema_version,
+            input_hashes=normalized.input_hashes,
+            output_hashes=normalized.output_hashes,
+            metadata=normalized.metadata,
         )
 
 
 def append_event(project_root: Path, event: Event) -> Path:
     path = project_root / EVENT_LOG
     path.parent.mkdir(parents=True, exist_ok=True)
-    event = event.with_event_id()
+    previous = read_events(project_root)
+    parent_hash = previous[-1].event_id if previous else ""
+    if event.parent_event_hash and event.parent_event_hash != parent_hash:
+        raise ValueError("event parent_event_hash does not match current log tip")
+    event = Event(
+        event_type=event.event_type,
+        action=event.action,
+        inputs=event.inputs,
+        outputs=event.outputs,
+        evidence=event.evidence,
+        timestamp=event.timestamp,
+        event_id="",
+        parent_event_hash=parent_hash,
+        actor=event.actor,
+        action_type=event.action_type or event.action,
+        schema_version=event.schema_version,
+        input_hashes=event.input_hashes,
+        output_hashes=event.output_hashes,
+        metadata=event.metadata,
+    ).with_event_id()
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(asdict(event), ensure_ascii=False, sort_keys=True) + "\n")
     return path
@@ -92,5 +145,11 @@ def read_events(project_root: Path) -> list[Event]:
             for item in data.get(key) or []:
                 fixed.append(item if isinstance(item, dict) else {"path": str(item), "sha256": "", "bytes": 0, "exists": False})
             data[key] = fixed
+        data.setdefault("parent_event_hash", "")
+        data.setdefault("actor", "unknown")
+        data.setdefault("action_type", data.get("action", ""))
+        data.setdefault("schema_version", 1)
+        data.setdefault("input_hashes", sorted(str(item.get("sha256", "")) for item in data["inputs"] if item.get("sha256")))
+        data.setdefault("output_hashes", sorted(str(item.get("sha256", "")) for item in data["outputs"] if item.get("sha256")))
         out.append(Event(**data))
     return out

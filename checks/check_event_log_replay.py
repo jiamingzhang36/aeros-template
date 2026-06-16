@@ -22,6 +22,14 @@ def main() -> int:
     if state1.digest != state2.digest:
         failures.append('event replay is not deterministic')
     for event in events:
+        if not event.parent_event_hash and events.index(event) != 0:
+            failures.append(f'{event.event_id}: missing parent_event_hash on non-root event')
+        if event.schema_version >= 2 and (not event.actor or not event.action_type):
+            failures.append(f'{event.event_id}: schema v2 event missing actor/action_type')
+        if event.schema_version >= 2 and event.output_hashes != sorted(str(ref.get('sha256','')) for ref in event.outputs if ref.get('sha256')):
+            failures.append(f'{event.event_id}: output_hashes do not match output refs')
+        if event.schema_version >= 2 and event.input_hashes != sorted(str(ref.get('sha256','')) for ref in event.inputs if ref.get('sha256')):
+            failures.append(f'{event.event_id}: input_hashes do not match input refs')
         for key, refs in [('input', event.inputs), ('output', event.outputs)]:
             for ref in refs:
                 if not isinstance(ref, dict):

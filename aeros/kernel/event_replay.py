@@ -39,15 +39,28 @@ def replay(project_root: Path) -> ReplayState:
     violations: list[str] = []
     h = hashlib.sha256()
     seen_ids: set[str] = set()
-    for event in events:
+    previous_hash = ""
+    for idx, event in enumerate(events):
         payload = json.dumps(event.canonical_payload(), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         expected = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-        if event.event_id and event.event_id != expected:
+        if not event.event_id:
+            violations.append(f"missing event_id at row {idx + 1}")
+        elif event.event_id != expected:
             violations.append(f"event_id mismatch for {event.event_type}/{event.action} at {event.timestamp}")
         if event.event_id and event.event_id in seen_ids:
             violations.append(f"duplicate event_id: {event.event_id}")
+        if event.parent_event_hash != previous_hash:
+            violations.append(
+                f"hash-chain mismatch at row {idx + 1}: parent={event.parent_event_hash or '<root>'} expected={previous_hash or '<root>'}"
+            )
+        if event.schema_version >= 2:
+            if not event.actor:
+                violations.append(f"{event.event_id}: missing actor")
+            if not event.action_type:
+                violations.append(f"{event.event_id}: missing action_type")
         if event.event_id:
             seen_ids.add(event.event_id)
+            previous_hash = event.event_id
         h.update(json.dumps(event.canonical_payload(), ensure_ascii=False, sort_keys=True).encode("utf-8"))
         _update_fact(facts, event)
     return ReplayState(event_count=len(events), digest=h.hexdigest(), facts=facts, violations=violations)
