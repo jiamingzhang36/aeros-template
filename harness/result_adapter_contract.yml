@@ -1,0 +1,53 @@
+version: 1
+policy: AEROS-RESULT-ADAPTER-CONTRACT-001
+principle: Result numbers should be registered at the estimation call boundary, with specs extracted from fitted objects rather than agent prose.
+registry: evidence/result_registry.csv
+required_record_fields:
+  - result_id
+  - values_json
+  - spec_id
+  - estimator
+  - formula
+  - fixed_effects_json
+  - cluster_json
+  - sample_filters_json
+  - code_ref_json
+  - data_snapshot_hash
+  - run_event_id
+  - output_path
+  - output_artifact_hash
+  - claim_type_eligibility
+adapter_contract:
+  python_statsmodels:
+    status: contract_defined
+    extract:
+      estimator: fit/model class name
+      formula: model formula when available
+      fixed_effects: parsed from formula/design metadata when available
+      cluster: covariance/cluster kwargs when available
+      sample_filters: wrapper-provided mask/query metadata
+  python_linearmodels:
+    status: contract_defined
+    extract:
+      estimator: PanelOLS/IV model class
+      formula: formula attribute when available
+      fixed_effects: entity/time/other effects metadata
+      cluster: covariance config
+      sample_filters: wrapper-provided mask/query metadata
+  r_fixest:
+    status: contract_defined
+    extract:
+      estimator: feols/feglm/fepois/iv
+      formula: formula(fit)
+      fixed_effects: fixef variables
+      cluster: vcov/cluster metadata
+      sample_filters: wrapper-provided data mask/query metadata
+claim_type_eligibility:
+  default_ols_or_panel: associational
+  descriptive_table: descriptive
+  iv_did_event_study_rdd: quasi_experimental_suggestive
+  limited_causal: requires identification_gate artifact and human claim gate
+hard_boundary:
+  - adapters may register what was run
+  - adapters may not certify identification validity
+  - adapters may not approve claims or gates

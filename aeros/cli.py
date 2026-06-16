@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 import os
 import sys
 from datetime import datetime, timezone
@@ -33,6 +34,7 @@ from .runtime.data_backfill import BackfillArgs, run_data_backfill
 from .runtime.data_first import format_plan as format_data_first_plan, write_gaps as write_data_gaps, write_scan as write_data_scan
 from .runtime.data_probe import run_probe as run_data_probe, write_probe_plan, write_probe_report
 from .runtime.global_state import write_global_state
+from .paper_ci.result_registry import register_payload_file, sync_result_index
 from .runtime.decision_packet import write_decision_packet
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
@@ -97,6 +99,36 @@ def _cmd_event_replay(args: argparse.Namespace) -> int:
             print(f"  - {violation}")
         return 1
     return 0
+
+
+
+def _cmd_paper_ci(args: argparse.Namespace) -> int:
+    root = _project_root()
+    if args.paper_ci_command == "register-result":
+        try:
+            path, record = register_payload_file(root, Path(args.record), dry_run=args.dry_run)
+        except (OSError, ValueError, json.JSONDecodeError) as exc:
+            print(f"FAIL: {exc}")
+            return 1
+        action = "would register" if args.dry_run else "registered"
+        print(f"{action} result {record.result_id} -> {path.relative_to(root)}")
+        print(f"spec_id: {record.spec_id}")
+        print(f"eligibility: {record.claim_type_eligibility}")
+        return 0
+    if args.paper_ci_command == "sync-result-index":
+        path, count = sync_result_index(root, dry_run=args.dry_run)
+        action = "would sync" if args.dry_run else "synced"
+        print(f"{action} {count} result registry row(s) -> {path.relative_to(root)}")
+        return 0
+    if args.paper_ci_command == "schema":
+        print("Phase 0 result registry schema:")
+        print("  template: templates/result_registry_record.json")
+        print("  contract: harness/result_adapter_contract.yml")
+        print("  registry: evidence/result_registry.csv")
+        print("Adapters should introspect fit objects; manual prose is not ground truth.")
+        return 0
+    print("unknown paper-ci command")
+    return 2
 
 
 def _cmd_init(args: argparse.Namespace) -> int:
@@ -1013,6 +1045,24 @@ def main(argv: list[str] | None = None) -> int:
         "render", help="substitute {{name}} number tokens from paper/numbers.yml")
     paper_render.add_argument("--paper", default="", help="paper source (default paper/draft.md)")
     paper_render.set_defaults(func=_cmd_paper_render)
+
+    paper_ci = sub.add_parser("paper-ci", help="Paper CI utilities (result registry, tracing, consistency)")
+    paper_ci_sub = paper_ci.add_subparsers(dest="paper_ci_command", required=True)
+    paper_ci_register = paper_ci_sub.add_parser(
+        "register-result",
+        help="register a result-born estimation record from adapter JSON",
+    )
+    paper_ci_register.add_argument("--record", required=True, help="path to adapter JSON record")
+    paper_ci_register.add_argument("--dry-run", action="store_true", help="validate without writing registry")
+    paper_ci_register.set_defaults(func=_cmd_paper_ci)
+    paper_ci_sync = paper_ci_sub.add_parser(
+        "sync-result-index",
+        help="derive evidence/result_index.csv rows from evidence/result_registry.csv",
+    )
+    paper_ci_sync.add_argument("--dry-run", action="store_true", help="show target without writing result_index")
+    paper_ci_sync.set_defaults(func=_cmd_paper_ci)
+    paper_ci_schema = paper_ci_sub.add_parser("schema", help="show Phase 0 adapter/registry schema")
+    paper_ci_schema.set_defaults(func=_cmd_paper_ci)
 
     number = sub.add_parser("number", help="injected-number tools (drift vs lock)")
     number_sub = number.add_subparsers(dest="number_command", required=True)
