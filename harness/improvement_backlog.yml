@@ -31,3 +31,31 @@ entries:
     resolved_at: ""
     resolution_commit: ""
     notes: "Do not treat more internal checks as a substitute for external judgment."
+  - id: AEROS-IMPROVE-003
+    created_at: "2026-06-17"
+    updated_at: "2026-06-17"
+    status: open
+    priority: high
+    area: paper-ci
+    source: real_project_validation
+    issue: "paper-ci result registry is a parallel provenance track: registering a result and syncing result_index does NOT emit the provenance JSON / research-graph edges that check_provenance, check_research_graph, and check_gate_exit (G6/G9) require, so a registered result fails those checks."
+    proposed_fix: "On register/sync, also write the provenance record (or have register-result drive `aeros graph build`/provenance emission) so result-born numbers satisfy the existing provenance subsystem instead of contradicting it."
+    owner: human
+    target_gate: G6
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Found when the first real Phase 0 run on CMPD made provenance/gate checks fail on the registered result."
+  - id: AEROS-IMPROVE-004
+    created_at: "2026-06-17"
+    updated_at: "2026-06-17"
+    status: open
+    priority: medium
+    area: sync
+    source: real_project_validation
+    issue: "sync_aeros_latest.zsh pushes template-development checks (e.g. check_update_ledger) into downstream research projects, where they fail: check_update_ledger expects the project's own recent commits to appear in a template-evolution ledger that is not a per-project artifact."
+    proposed_fix: "Split checks into template-development vs project checks; have the sync (and run_harness_checks) only run project-applicable checks in downstream targets."
+    owner: human
+    target_gate: G0
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Surfaced when a manual partial rsync (anti-pattern) brought check_update_ledger into CMPD; the official sync tool would propagate it too."
