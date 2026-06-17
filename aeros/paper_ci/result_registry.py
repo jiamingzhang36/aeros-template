@@ -9,6 +9,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import json
+import re
 import shutil
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -68,15 +69,34 @@ def _loads_mapping(value: Any) -> dict[str, Any]:
 
 
 def infer_claim_type_eligibility(spec: dict[str, Any]) -> str:
-    """Conservative eligibility derived from extracted estimator/spec facts."""
+    """Conservative eligibility derived from extracted estimator/spec facts.
+
+    Markers are matched against whole tokens, not substrings: a design marker
+    like ``rd`` must be its own token, otherwise a variable named ``hardness``
+    would be misread as a regression-discontinuity design and an associational
+    OLS would be over-claimed as quasi-experimental.
+    """
     estimator = str(spec.get("estimator", "")).strip().lower()
     formula = str(spec.get("formula", "")).strip().lower()
     if not estimator and not formula:
         return "none"
-    causal_markers = {"iv", "2sls", "did", "difference-in-differences", "event-study", "rd", "rdd"}
-    if any(marker in estimator or marker in formula for marker in causal_markers):
+    estimator_tokens = set(re.findall(r"[a-z0-9]+", estimator))
+    formula_tokens = set(re.findall(r"[a-z0-9]+", formula))
+    causal_tokens = {"iv", "2sls", "did", "rd", "rdd"}
+    # Concatenated IV class names (IV2SLS, IVGMM) are single tokens, so also
+    # check controlled estimator substrings — but never substring-match the
+    # formula (that is what mislabeled "hardness" as an RD design).
+    causal_estimator_substrings = ("2sls", "ivgmm", "ivliml")
+    causal_phrases = ("difference-in-differences", "event-study", "event_study", "regression discontinuity")
+    is_causal = (
+        bool(estimator_tokens & causal_tokens)
+        or bool(formula_tokens & causal_tokens)
+        or any(sub in estimator for sub in causal_estimator_substrings)
+        or any(phrase in estimator or phrase in formula for phrase in causal_phrases)
+    )
+    if is_causal:
         return "quasi_experimental_suggestive"
-    if any(marker in estimator for marker in {"ols", "feols", "panelols", "glm", "logit", "probit", "statsmodels"}):
+    if any(marker in estimator for marker in ("ols", "feols", "panelols", "glm", "logit", "probit", "statsmodels")):
         return "associational"
     return "descriptive"
 

@@ -128,3 +128,17 @@ How to read this ledger:
 **Drift risk**: A rule no one runs is paperwork. This must be paired with actually running the sync after template changes — verified by projects not falling behind on framework code, not by the rule's existence.
 
 **Next check**: After the next template change, confirm CMPD and other targets were brought current via the sync tool (not by hand) and that their framework code matches this template.
+
+### 2026-06-17 — Fix eligibility over-claim found in live validation
+
+**Commit(s)**: `pending`
+
+**Action**: Fixed `infer_claim_type_eligibility` substring matching that labeled an associational OLS as `quasi_experimental_suggestive` because design marker "rd" was a substring of the variable name "hardness". Now formula markers match whole tokens; only controlled estimator class-name substrings (IV2SLS/IVGMM) are used. Found by the first real Phase 0 run on CMPD.
+
+**Alignment**: Restores the north star — claims must stay within evidence. The bug did the opposite: it silently inflated an associational result to quasi-experimental.
+
+**Non-goal**: Eligibility inference is still a conservative heuristic, not an identification verdict; the identification gate and human gate remain authoritative.
+
+**Drift risk**: Marker lists can rot; keep them small and prefer estimator class names over fuzzy formula parsing.
+
+**Next check**: Eligibility classifications on real project results should be spot-checked against the actual research design, not trusted blindly.
