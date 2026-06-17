@@ -325,6 +325,14 @@ Backfill is the bridge between governance automation and data repair automation.
 - Treat `harness/protocols/human_gate.md` as the approval policy for research judgment changes.
 - If a task affects protected definitions, claim strength, preferred specifications, or publication-facing outputs, mark `critic_required: true` and `human_gate_required: true`.
 
+## Framework Propagation Discipline
+
+- This template is the single source of truth for framework code (`aeros/`, `checks/`, `harness/`, `templates/`). Downstream projects vendor a copy.
+- Propagate framework changes to projects only with `tools/sync_aeros_latest.zsh`. Do not hand-copy or hand-rsync framework files into individual projects — partial manual syncs are the main source of "each project runs a different aeros" drift.
+- The sync is forward-only and non-destructive (`rsync` without `--delete`): it updates framework code and preserves project-owned files that live alongside it (e.g. a project's `aeros/project_contract.yml`, `task_registry.csv`). Do not relocate project-owned files out of `aeros/` to "fix" the name overlap — they are referenced widely and the sync already tolerates them.
+- Before running the sync, commit the target project's in-progress work so the rsync never overwrites uncommitted edits to shared files (`project_manifest.yml`, `checks/run_harness_checks.py`, `AGENTS.md`).
+- After a template change, run the sync rather than letting projects fall behind; a project on stale framework code is a silent correctness risk, not just untidiness.
+
 ## Update and Improvement Tracking
 
 - Every structural update, workflow change, bugfix, harness rule change, or template refactor must be recorded in `decisions/revision_log.md` with date, area, summary, files changed, validation, and commit when available.
