@@ -4,12 +4,16 @@ principle: Result numbers should be registered at the estimation call boundary, 
 maturity:
   phase: 0
   status: one adapter implemented (python_statsmodels); others contract-only
-  validated_on_real_project: false
+  validated_on_real_project: true
+  validated_on: >
+    CMPD 2026-06-17 — clustered OLS on analysis_ready_with_status.csv extracted
+    by the statsmodels adapter, registered and synced end to end (R_PHASE0_*).
+    The run found and fixed an eligibility over-claim bug (substring "rd" in
+    "hardness"); non-destructive sync preserved all 26 prior results.
   notes: >
     register-result + sync-result-index work end to end; sync is non-destructive
-    (preserves curated columns/rows and backs up before overwrite). Not yet run on
-    a live project pipeline — the live CMPD project still vendors an older aeros
-    without paper-ci, so install/sync is required before real-project use.
+    (preserves curated columns/rows and backs up before overwrite). Other adapters
+    (linearmodels, fixest) remain contract-only until similarly validated.
 registry: evidence/result_registry.csv
 required_record_fields:
   - result_id

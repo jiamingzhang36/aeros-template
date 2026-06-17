@@ -142,3 +142,17 @@ How to read this ledger:
 **Drift risk**: Marker lists can rot; keep them small and prefer estimator class names over fuzzy formula parsing.
 
 **Next check**: Eligibility classifications on real project results should be spot-checked against the actual research design, not trusted blindly.
+
+### 2026-06-17 — Paper CI Phase 0 validated on a real project
+
+**Commit(s)**: `pending`
+
+**Action**: Marked the result adapter contract `validated_on_real_project: true`. The first real Phase 0 run executed on CMPD: a clustered OLS extracted by the statsmodels adapter, registered and synced non-destructively, with the eligibility bug fixed in the same pass.
+
+**Alignment**: Closes the long-standing "not yet validated on a real project" gap that recurred across earlier ledger entries; the mechanism is now evidence-backed, not just wired.
+
+**Non-goal**: Validates the python_statsmodels path only. linearmodels and fixest adapters remain contract-only.
+
+**Drift risk**: One real run is not a guarantee of generality; other estimators and projects can still surface adapter gaps.
+
+**Next check**: Validate the linearmodels/fixest adapters on a real panel or IV project before marking them implemented.
