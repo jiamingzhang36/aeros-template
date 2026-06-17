@@ -34,7 +34,7 @@ entries:
   - id: AEROS-IMPROVE-003
     created_at: "2026-06-17"
     updated_at: "2026-06-17"
-    status: open
+    status: resolved
     priority: high
     area: paper-ci
     source: real_project_validation
@@ -48,7 +48,7 @@ entries:
   - id: AEROS-IMPROVE-004
     created_at: "2026-06-17"
     updated_at: "2026-06-17"
-    status: open
+    status: resolved
     priority: medium
     area: sync
     source: real_project_validation

@@ -184,3 +184,17 @@ How to read this ledger:
 **Drift risk**: The list could grow into a way to silence inconvenient checks. Each entry must be a check that can never pass in a normal project, not merely an unused one.
 
 **Next check**: After syncing to a project, confirm check_update_ledger reports SKIP (not FAIL) and the remaining failures are real project state.
+
+### 2026-06-17 — Correct backlog status for IMPROVE-003/004
+
+**Commit(s)**: `pending` (follows `03a1b2c`)
+
+**Action**: Set `status: resolved` on AEROS-IMPROVE-003 and 004, which had `resolved_at` filled but were still marked `open`.
+
+**Alignment**: Keeps the backlog truthful — resolved items must read as resolved.
+
+**Non-goal**: No behavior change; metadata correction only.
+
+**Drift risk**: None.
+
+**Next check**: Spot-check that resolved backlog items carry both status and resolved_at.
