@@ -89,7 +89,7 @@ How to read this ledger:
 
 ### 2026-06-16 — Update Ledger / Drift Tracking
 
-**Commit(s)**: `pending`
+**Commit(s)**: `1adbe31`
 
 **Action**: Added a human-readable update ledger, reusable entry template, and mechanical check requiring recent meaningful commits to be traceable.
 
@@ -103,7 +103,7 @@ How to read this ledger:
 
 ### 2026-06-16 — Paper CI Phase 0: implement adapter + de-risk sync
 
-**Commit(s)**: `pending`
+**Commit(s)**: `6628ecf`
 
 **Action**: Turned the result-registry from contract-only into working automation. Implemented the `python_statsmodels` adapter (`aeros/paper_ci/adapters.py`) that introspects a fitted object for estimator/formula/fixed-effects/cluster/values instead of hand-transcribed prose; made `sync-result-index` non-destructive (preserves curated columns and rows, backs up before overwrite) to remove a data-loss footgun; added a missing-artifact warning to `event append`; labeled paper-ci maturity honestly in the adapter contract.
 
@@ -117,7 +117,7 @@ How to read this ledger:
 
 ### 2026-06-16 — Framework propagation discipline
 
-**Commit(s)**: `pending`
+**Commit(s)**: `b9e5fbb`
 
 **Action**: Added a "Framework Propagation Discipline" section to AGENTS.md: propagate framework code to vendored project copies only via `tools/sync_aeros_latest.zsh` (forward-only, non-destructive), commit target WIP before syncing, and never hand-copy framework files or relocate project-owned files out of `aeros/`.
 
@@ -131,7 +131,7 @@ How to read this ledger:
 
 ### 2026-06-17 — Fix eligibility over-claim found in live validation
 
-**Commit(s)**: `pending`
+**Commit(s)**: `6405df5`
 
 **Action**: Fixed `infer_claim_type_eligibility` substring matching that labeled an associational OLS as `quasi_experimental_suggestive` because design marker "rd" was a substring of the variable name "hardness". Now formula markers match whole tokens; only controlled estimator class-name substrings (IV2SLS/IVGMM) are used. Found by the first real Phase 0 run on CMPD.
 
@@ -145,7 +145,7 @@ How to read this ledger:
 
 ### 2026-06-17 — Paper CI Phase 0 validated on a real project
 
-**Commit(s)**: `pending`
+**Commit(s)**: `de2cd98`
 
 **Action**: Marked the result adapter contract `validated_on_real_project: true`. The first real Phase 0 run executed on CMPD: a clustered OLS extracted by the statsmodels adapter, registered and synced non-destructively, with the eligibility bug fixed in the same pass.
 
@@ -159,7 +159,7 @@ How to read this ledger:
 
 ### 2026-06-17 — Paper CI emits provenance on sync (resolves IMPROVE-003)
 
-**Commit(s)**: `pending` (follows `2e24e9e` which logged the gap)
+**Commit(s)**: `b9f3c25` (gap logged in `2e24e9e`)
 
 **Action**: `paper-ci sync-result-index` now also runs `sync_provenance`, writing `outputs/.provenance/<id>.json` for each registered result whose artifact exists (opt out with `--no-provenance`). Resolves AEROS-IMPROVE-003: a registered result no longer trips check_provenance / check_gate_exit (G6/G9) for a missing provenance JSON.
 
@@ -173,7 +173,7 @@ How to read this ledger:
 
 ### 2026-06-17 — Scope template-only checks out of downstream projects (resolves IMPROVE-004)
 
-**Commit(s)**: `pending` (follows `b9f3c25`)
+**Commit(s)**: `03a1b2c` (follows `b9f3c25`)
 
 **Action**: Added `harness/check_scope.yml` (`template_only_checks`) and made `run_harness_checks.py` skip those checks unless run inside the template (detected via `tools/sync_aeros_latest.zsh`). Scopes out `check_update_ledger` so a vendored project no longer fails a template-evolution check it can never satisfy.
 
@@ -187,7 +187,7 @@ How to read this ledger:
 
 ### 2026-06-17 — Correct backlog status for IMPROVE-003/004
 
-**Commit(s)**: `pending` (follows `03a1b2c`)
+**Commit(s)**: `8ed35a9` (follows `03a1b2c`)
 
 **Action**: Set `status: resolved` on AEROS-IMPROVE-003 and 004, which had `resolved_at` filled but were still marked `open`.
 
@@ -201,7 +201,7 @@ How to read this ledger:
 
 ### 2026-06-17 — Make the review verification gate a hard check
 
-**Commit(s)**: `pending` (follows `8ed35a9`)
+**Commit(s)**: `a0908f5` (follows `8ed35a9`)
 
 **Action**: Added `checks/check_review_verification.py` and wired it into the
 harness. It fails any review report under `audits/skill_runs/` where a HIGH/MED

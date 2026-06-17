@@ -38,6 +38,13 @@ def main() -> int:
         if phrase not in text:
             failures.append(f"update ledger missing required phrase: {phrase}")
 
+    pending_count = text.count("**Commit(s)**: `pending`")
+    if pending_count:
+        failures.append(
+            f"pending commit marker remains in update ledger ({pending_count}); "
+            "replace with commit hash before claiming tracking is current"
+        )
+
     try:
         commits = _git(["log", "--format=%h", "-5"]).splitlines()
     except Exception:
