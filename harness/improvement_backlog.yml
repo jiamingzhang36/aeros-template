@@ -42,9 +42,9 @@ entries:
     proposed_fix: "On register/sync, also write the provenance record (or have register-result drive `aeros graph build`/provenance emission) so result-born numbers satisfy the existing provenance subsystem instead of contradicting it."
     owner: human
     target_gate: G6
-    resolved_at: ""
-    resolution_commit: ""
-    notes: "Found when the first real Phase 0 run on CMPD made provenance/gate checks fail on the registered result."
+    resolved_at: "2026-06-17"
+    resolution_commit: "pending"
+    notes: "Found when the first real Phase 0 run on CMPD made provenance/gate checks fail on the registered result. Resolved: `paper-ci sync-result-index` now also runs sync_provenance, so check_provenance / check_gate_exit pass for a registered result whose artifact exists. The research_graph derived edges still require a separate `aeros graph build`."
   - id: AEROS-IMPROVE-004
     created_at: "2026-06-17"
     updated_at: "2026-06-17"

@@ -130,6 +130,14 @@ def _cmd_paper_ci(args: argparse.Namespace) -> int:
         path, count = sync_result_index(root, dry_run=args.dry_run)
         action = "would sync" if args.dry_run else "synced"
         print(f"{action} {count} result registry row(s) -> {path.relative_to(root)}")
+        # Keep the provenance layer in lockstep so a registered result does not
+        # trip check_provenance / check_gate_exit for a missing provenance JSON.
+        if not args.dry_run and not args.no_provenance:
+            from .runtime.provenance import sync_provenance
+            written, skipped = sync_provenance(root)
+            print(f"provenance synced: {len(written)} record(s) -> outputs/.provenance/")
+            for message in skipped:
+                print(f"  provenance skipped: {message}")
         return 0
     if args.paper_ci_command == "schema":
         print("Phase 0 result registry schema:")
@@ -1073,6 +1081,7 @@ def main(argv: list[str] | None = None) -> int:
         help="derive evidence/result_index.csv rows from evidence/result_registry.csv",
     )
     paper_ci_sync.add_argument("--dry-run", action="store_true", help="show target without writing result_index")
+    paper_ci_sync.add_argument("--no-provenance", action="store_true", help="do not also sync outputs/.provenance JSON")
     paper_ci_sync.set_defaults(func=_cmd_paper_ci)
     paper_ci_schema = paper_ci_sub.add_parser("schema", help="show Phase 0 adapter/registry schema")
     paper_ci_schema.set_defaults(func=_cmd_paper_ci)

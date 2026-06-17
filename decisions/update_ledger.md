@@ -156,3 +156,17 @@ How to read this ledger:
 **Drift risk**: One real run is not a guarantee of generality; other estimators and projects can still surface adapter gaps.
 
 **Next check**: Validate the linearmodels/fixest adapters on a real panel or IV project before marking them implemented.
+
+### 2026-06-17 — Paper CI emits provenance on sync (resolves IMPROVE-003)
+
+**Commit(s)**: `pending` (follows `2e24e9e` which logged the gap)
+
+**Action**: `paper-ci sync-result-index` now also runs `sync_provenance`, writing `outputs/.provenance/<id>.json` for each registered result whose artifact exists (opt out with `--no-provenance`). Resolves AEROS-IMPROVE-003: a registered result no longer trips check_provenance / check_gate_exit (G6/G9) for a missing provenance JSON.
+
+**Alignment**: Closes the parallel-track gap so result-born numbers feed the existing provenance subsystem instead of contradicting it — registration and provenance now move together.
+
+**Non-goal**: Does not build research-graph derived edges (still a separate `aeros graph build`), and does not write provenance for results whose artifact is absent.
+
+**Drift risk**: Two systems writing provenance could diverge; sync_provenance recomputes sha256 from real bytes and only writes for existing artifacts, so it stays grounded.
+
+**Next check**: After a real register+sync, confirm check_provenance and check_gate_exit pass without a manual `aeros provenance` step.
