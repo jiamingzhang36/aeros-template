@@ -56,6 +56,6 @@ entries:
     proposed_fix: "Split checks into template-development vs project checks; have the sync (and run_harness_checks) only run project-applicable checks in downstream targets."
     owner: human
     target_gate: G0
-    resolved_at: ""
-    resolution_commit: ""
-    notes: "Surfaced when a manual partial rsync (anti-pattern) brought check_update_ledger into CMPD; the official sync tool would propagate it too."
+    resolved_at: "2026-06-17"
+    resolution_commit: "pending"
+    notes: "Surfaced when a manual partial rsync (anti-pattern) brought check_update_ledger into CMPD; the official sync tool would propagate it too. Resolved: harness/check_scope.yml lists template_only_checks and run_harness_checks.py skips them unless run inside the template (detected via tools/sync_aeros_latest.zsh). Currently scopes out check_update_ledger only."

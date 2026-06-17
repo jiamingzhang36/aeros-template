@@ -82,6 +82,35 @@ CHECKS = [
 ]
 
 
+def _is_template_repo() -> bool:
+    """True only inside the AEROS template itself.
+
+    tools/sync_aeros_latest.zsh lives only in the template and is never synced
+    into downstream projects, so its presence is a reliable template marker.
+    """
+    return Path("tools/sync_aeros_latest.zsh").is_file()
+
+
+def _template_only_checks() -> set[str]:
+    """Checks that validate the template's own development process (see
+    harness/check_scope.yml). Skipped when run inside a downstream project."""
+    scope = Path("harness/check_scope.yml")
+    if not scope.exists():
+        return set()
+    names: set[str] = set()
+    in_list = False
+    for raw in scope.read_text(encoding="utf-8").splitlines():
+        line = raw.split("#", 1)[0].rstrip()
+        if not line.strip():
+            continue
+        if line.strip().endswith(":") and not line.startswith((" ", "-", "\t")):
+            in_list = line.strip() == "template_only_checks:"
+            continue
+        if in_list and line.lstrip().startswith("- "):
+            names.add(line.lstrip()[2:].strip().strip("\"'"))
+    return names
+
+
 def _terminate_process(proc: subprocess.Popen[str]) -> None:
     """Stop a timed-out check and its children when the platform supports it."""
     if proc.poll() is not None:
@@ -255,7 +284,15 @@ def main() -> int:
     failures = 0
     results: list[dict] = []
 
+    skip_checks: set[str] = set()
+    if not _is_template_repo():
+        skip_checks = _template_only_checks()
+
     for check in CHECKS:
+        if check in skip_checks:
+            print(f"==> checks/{check} SKIP (template-only; not run in a downstream project)", flush=True)
+            results.append({"name": f"checks/{check}", "status": "skipped", "exit_code": 0})
+            continue
         path = check_dir / check
         print(f"==> {path} (timeout: {'off' if timeout_seconds == 0 else str(timeout_seconds) + 's'})", flush=True)
         result = _run_check(path, draft_warning_mode, timeout_seconds)

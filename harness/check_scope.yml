@@ -1,0 +1,14 @@
+# Scope of harness checks.
+#
+# Some checks validate the AEROS *template's own development process* rather than
+# a downstream research project. When the template is vendored into a project,
+# those checks would fail for reasons that have nothing to do with the research
+# (e.g. they expect the project's git commits to appear in a template-evolution
+# ledger). run_harness_checks.py skips the checks listed here UNLESS it is being
+# run inside the template repo itself (detected via tools/sync_aeros_latest.zsh,
+# which exists only in the template and is never synced into projects).
+#
+# Keep this list small and well-justified. A check belongs here only if it can
+# never pass in a normal downstream project, not merely if it is often unused.
+template_only_checks:
+  - check_update_ledger.py

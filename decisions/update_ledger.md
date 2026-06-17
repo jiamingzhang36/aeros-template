@@ -170,3 +170,17 @@ How to read this ledger:
 **Drift risk**: Two systems writing provenance could diverge; sync_provenance recomputes sha256 from real bytes and only writes for existing artifacts, so it stays grounded.
 
 **Next check**: After a real register+sync, confirm check_provenance and check_gate_exit pass without a manual `aeros provenance` step.
+
+### 2026-06-17 — Scope template-only checks out of downstream projects (resolves IMPROVE-004)
+
+**Commit(s)**: `pending` (follows `b9f3c25`)
+
+**Action**: Added `harness/check_scope.yml` (`template_only_checks`) and made `run_harness_checks.py` skip those checks unless run inside the template (detected via `tools/sync_aeros_latest.zsh`). Scopes out `check_update_ledger` so a vendored project no longer fails a template-evolution check it can never satisfy.
+
+**Alignment**: Stops the harness from manufacturing failures in real projects, which was eroding trust in the check suite — a direct anti-drift fix.
+
+**Non-goal**: Does not reclassify other checks; the list is deliberately minimal (one entry) and must stay justified.
+
+**Drift risk**: The list could grow into a way to silence inconvenient checks. Each entry must be a check that can never pass in a normal project, not merely an unused one.
+
+**Next check**: After syncing to a project, confirm check_update_ledger reports SKIP (not FAIL) and the remaining failures are real project state.
