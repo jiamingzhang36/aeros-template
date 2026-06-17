@@ -198,3 +198,28 @@ How to read this ledger:
 **Drift risk**: None.
 
 **Next check**: Spot-check that resolved backlog items carry both status and resolved_at.
+
+### 2026-06-17 — Make the review verification gate a hard check
+
+**Commit(s)**: `pending` (follows `8ed35a9`)
+
+**Action**: Added `checks/check_review_verification.py` and wired it into the
+harness. It fails any review report under `audits/skill_runs/` where a HIGH/MED
+finding that mentions a data-dependent concept (missingness, convergence,
+separation, collinearity, overlap, merge match) lacks a verification marker
+(`(checked)`, a number, `UNVERIFIED`, or `NOT RUN`). Turns the soft SKILL.md gate
+into a mechanical one.
+
+**Alignment**: Directly enforces "no data-dependent severity without a number" —
+the discipline whose absence let an associational OLS be graded HIGH from code
+alone. On first run it caught two real ungrounded findings in this session's own
+reviews (a moot merge MED, a falsified imputation MED), both then verified/fixed.
+
+**Non-goal**: It enforces a labeling format, not the correctness of the number;
+it is keyword-based and will miss novel phrasings. It is a gate, not a guarantee.
+
+**Drift risk**: Keyword leakage (false negatives) and possible false positives on
+unusual prose. Keep the keyword list tied to the gate's data-dependent classes.
+
+**Next check**: Spot-check that flagged findings are genuinely data-dependent and
+that the gate is not being satisfied by hollow `(checked)` tags without numbers.
