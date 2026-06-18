@@ -256,7 +256,7 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 
 ### 2026-06-18 - Literature full-text execution boundary
 
-**Commit(s)**: `uncommitted`
+**Commit(s)**: `e312bc1`
 
 **Action**: Split literature bookkeeping from substantive literature review execution. Added `check_literature_fulltext_execution.py`, `harness/literature_fulltext_policy.yml`, full-text extraction card fields, function-specific synthesis placeholders, and LIT-FULL/LIT-SYNTH/LIT-PAPER task contracts.
 
