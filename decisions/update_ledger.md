@@ -31,6 +31,20 @@ How to read this ledger:
 
 **Next check**: After the next template sync, confirm a downstream project can run `aeros data probe run --source <local-directory-source>` and pass `check_data_probe.py`.
 
+### 2026-06-18 - Revalidation skill waiver receipts
+
+**Commit(s)**: `pending`
+
+**Action**: Updated `aeros.runtime.kernel` so check-only revalidation of stale passed tasks writes explicit skill waivers when the task contract declares recommended or required skills. The waiver scope is limited to fingerprint refresh: existing outputs passed task checks, no external skill invocation occurred, and no skill-derived evidence is claimed.
+
+**Alignment**: Fixes a real downstream G10 rerun where AEROS correctly avoided wasteful worker reruns but then produced empty skill invocation receipts. This preserves automation honesty while still allowing low-risk stale-task revalidation.
+
+**Non-goal**: Does not turn recommended skills into optional decorations for real worker runs, and does not treat a waiver as evidence from the waived skill.
+
+**Drift risk**: Automatic waivers could hide under-reviewed work if applied outside check-only revalidation. Keep the waiver scope narrow and visible in receipts.
+
+**Next check**: On the CMPD project, rerun stale execution tasks and confirm `check_skill_invocations.py`, `check_noop_runs.py`, and the full harness pass after check-only revalidation.
+
 ## 2026-06-16
 
 ### 2026-06-16 — Kernel / Research CI

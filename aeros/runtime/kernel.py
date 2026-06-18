@@ -84,6 +84,33 @@ def _contract_block_reason(contract: Contract) -> str:
     return ""
 
 
+def _revalidation_skill_waivers(contract: Contract, stale_reason: str = "") -> list[dict]:
+    """Record why recommended skills were not invoked during check-only refresh."""
+    names = sorted({
+        str(s).strip()
+        for s in [
+            *(contract.raw.get("recommended_skills") or []),
+            *(contract.raw.get("required_skill_classes") or []),
+        ]
+        if str(s).strip()
+    })
+    reason = (
+        "Task was not re-run by an external worker because existing allowed "
+        "outputs passed the task's required checks during AEROS revalidation. "
+        "No skill-derived evidence is being claimed for this refresh."
+    )
+    if stale_reason:
+        reason += f" Staleness trigger: {stale_reason}."
+    return [
+        {
+            "skill_class": name,
+            "waiver_reason": reason,
+            "waiver_scope": "fingerprint_refresh_only",
+        }
+        for name in names
+    ]
+
+
 def _with_dependency_closure(selected: dict, all_contracts: dict) -> dict:
     out = dict(selected)
     changed = True
@@ -510,7 +537,8 @@ def run_pipeline(
                     receipt = write_completion_receipt(
                         project_root, c, mode="revalidation", check_results=_results,
                         skill_receipt_path=write_skill_invocation_receipt(
-                            project_root, c, skills_used=[], run_report_path=None
+                            project_root, c, skills_used=[], run_report_path=None,
+                            skill_waivers=_revalidation_skill_waivers(c, stale_reason),
                         ),
                         input_fingerprint=state_mod.task_entry(state, tid).get("input_fingerprint", ""),
                         output_fingerprint=state_mod.task_entry(state, tid).get("output_fingerprint", ""),
@@ -549,7 +577,8 @@ def run_pipeline(
                         receipt = write_completion_receipt(
                             project_root, c, mode="revalidation", check_results=results_now,
                             skill_receipt_path=write_skill_invocation_receipt(
-                                project_root, c, skills_used=[], run_report_path=None
+                                project_root, c, skills_used=[], run_report_path=None,
+                                skill_waivers=_revalidation_skill_waivers(c, "completion receipt repair"),
                             ),
                             input_fingerprint=state_mod.task_entry(state, tid).get("input_fingerprint", ""),
                             output_fingerprint=state_mod.task_entry(state, tid).get("output_fingerprint", ""),
