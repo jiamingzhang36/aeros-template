@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-18 - Directory local data probes
 
-**Commit(s)**: `a98faa7`
+**Commit(s)**: `2db9949`
 
 **Action**: Updated `aeros.runtime.data_probe` so a local inventory path may be a directory, not only a single CSV/TSV/JSONL file. Directory probes now sample up to 25 supported files, write a sample manifest, union observed fields, and record linkage-key hints. The planner marks local paths runnable only when supported files exist.
 
