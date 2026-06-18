@@ -18,3 +18,7 @@
 16. Mark `screening_decision=include` only after the source has an extraction card with a content summary, inclusion reason, direct evidence notes, and opened source.
 17. Use `maybe` for unverified candidates, `exclude` for checked non-evidence, and `defer` for plausible but out-of-scope or lower-priority sources.
 
+18. Source-bound or metadata-only cards are bookkeeping artifacts. They may repair registry/card consistency but may not support synthesis, gap claims, paper literature positioning, or claim registry entries.
+19. A card supports substantive synthesis only when `Full Text Status` includes `full_text_obtained`, `Extraction Depth` is `full_text_extraction`, registry `evidence_basis` is `full_text` or `extraction_card`, and Direct Evidence Notes contain at least one page/section-bound non-placeholder row.
+20. Every function-specific synthesis must cite only verified full-text extraction cards and must state what each cited paper can and cannot support.
+21. Dashboard backlog repair is not literature review completion. Report it as bookkeeping or guardrail repair unless LIT-FULL/LIT-SYNTH/LIT-PAPER artifacts were produced.

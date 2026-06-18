@@ -1,0 +1,53 @@
+task_id: LIT-SYNTH-001_function_specific_synthesis
+stage: discovery
+depends_on:
+- LIT-FULL-001_gap_verification
+- LIT-FULL-002_method_identification
+- LIT-FULL-003_theory_mechanism
+- LIT-FULL-004_data_measurement
+- LIT-FULL-005_background_institutional
+gate: G0
+automation_class: approval_required
+evidence_receipt_required: true
+receipt_path: agent_runs/action_receipts/LIT-SYNTH-001.yml
+gate_status: blocked_requires_approval
+allowed_skills:
+- academic-research-suite
+- bib-manager
+recommended_skills:
+- academic-research-suite
+- bib-manager
+goal: >
+  Write function-specific synthesis from verified full-text extraction cards only.
+  Separate gap-verification, method-identification, theory-mechanism,
+  data-measurement, and background-institutional claims. Each synthesis claim
+  must cite paper_id(s), name what the evidence can support, and state what it
+  cannot support.
+inputs:
+- discovery/literature/paper_registry.csv
+- discovery/literature/extraction_cards/
+- discovery/literature/synthesis/
+- harness/literature_fulltext_policy.yml
+allowed_outputs:
+- discovery/literature/synthesis/gap_verification_synthesis.md
+- discovery/literature/synthesis/method_identification_synthesis.md
+- discovery/literature/synthesis/theory_mechanism_synthesis.md
+- discovery/literature/synthesis/data_measurement_synthesis.md
+- discovery/literature/synthesis/background_institutional_synthesis.md
+- agent_runs/
+forbidden_actions:
+- Do not cite abstract-only or source-bound cards.
+- Do not update paper literature positioning.
+- Do not strengthen claim registry entries.
+checks:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+retry_policy:
+  max_retries: 1
+escalate_if:
+- full text cannot be obtained for all priority papers in the function queue
+- check_literature_fulltext_execution.py fails after one repair pass
+budget:
+  max_agent_calls: 4
+  max_dollars: 8.0
+  timeout_seconds: 1800

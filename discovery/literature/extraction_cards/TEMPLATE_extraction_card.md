@@ -12,6 +12,16 @@ Choose one:
 - abstract_only
 - unavailable
 
+## Extraction Depth
+
+Choose one:
+
+- source_bound_stub
+- targeted_section_extraction
+- full_text_extraction
+
+Rule: only `full_text_extraction` may support synthesis or paper literature positioning. `source_bound_stub` is bookkeeping only.
+
 ## Literature Function
 
 Choose primary function:
@@ -103,6 +113,18 @@ TBD
 ## What The Paper Does Not Claim
 
 TBD
+
+## What This Paper Can Support
+
+List the exact project claim types this paper can support after full-text reading. Be conservative.
+
+- TBD
+
+## What This Paper Cannot Support
+
+List claims this paper cannot support, including over-broad gap, method, data, mechanism, or causal claims.
+
+- TBD
 
 ## Relevance To This Project
 

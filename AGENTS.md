@@ -139,6 +139,18 @@ Every task contract must include a Mainline Alignment Gate section before execut
 - Create extraction cards before synthesis.
 - Every substantive literature synthesis claim must cite a `paper_id` with an extraction card.
 
+
+## Literature Execution Boundary Rules
+
+AEROS separates literature bookkeeping from substantive literature review execution.
+
+- `paper_registry.csv` consistency, source-bound cards, and dashboard missing-card cleanup are bookkeeping or guardrail repair. Do not report them as completed literature review.
+- Source-bound, metadata-only, title-only, abstract-only, or stub extraction cards cannot support synthesis, paper literature positioning, gap claims, method claims, data claims, mechanism claims, or claim registry entries.
+- A paper may support substantive synthesis only after full-text execution: full text opened, opened source/date recorded, `Extraction Depth` is `full_text_extraction`, and Direct Evidence Notes contain page/section-bound evidence.
+- Execute substantive review by literature function: gap-verification, method-identification, theory-mechanism, data-measurement, and background-institutional.
+- Use LIT-FULL tasks for full-text extraction, LIT-SYNTH for function-specific synthesis, and LIT-PAPER for paper literature positioning.
+- Every literature run report must state whether it was bookkeeping repair or substantive literature execution.
+
 ## Execution Rules
 
 - Work from task files in `tasks/discovery/` (discovery phase) or `tasks/execution/` (execution phase).

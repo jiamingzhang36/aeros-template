@@ -37,6 +37,10 @@ for T in "${TARGETS[@]}"; do
   mkdir -p "$T/discovery/literature" "$T/execution" "$T/tasks"
   [ -f "$SRC/discovery/AGENTS.md" ] && rsync -a "$SRC/discovery/AGENTS.md" "$T/discovery/AGENTS.md"
   [ -f "$SRC/discovery/literature/AGENTS.md" ] && rsync -a "$SRC/discovery/literature/AGENTS.md" "$T/discovery/literature/AGENTS.md"
+  mkdir -p "$T/discovery/literature/extraction_cards" "$T/discovery/literature/synthesis"
+  [ -f "$SRC/discovery/literature/extraction_cards/TEMPLATE_extraction_card.md" ] && rsync -a "$SRC/discovery/literature/extraction_cards/TEMPLATE_extraction_card.md" "$T/discovery/literature/extraction_cards/TEMPLATE_extraction_card.md"
+  [ -f "$SRC/discovery/literature/literature_rules.md" ] && rsync -a "$SRC/discovery/literature/literature_rules.md" "$T/discovery/literature/literature_rules.md"
+  [ -f "$SRC/discovery/literature/function_taxonomy.md" ] && rsync -a "$SRC/discovery/literature/function_taxonomy.md" "$T/discovery/literature/function_taxonomy.md"
   [ -f "$SRC/execution/AGENTS.md" ] && rsync -a "$SRC/execution/AGENTS.md" "$T/execution/AGENTS.md"
   [ -f "$SRC/tasks/TEMPLATE_task.md" ] && rsync -a "$SRC/tasks/TEMPLATE_task.md" "$T/tasks/TEMPLATE_task.md"
 done
@@ -147,6 +151,7 @@ REQUIRED_FILES = [
     "harness/evidence_type_lattice.yml",
     "harness/scope_calculus.yml",
     "harness/result_adapter_contract.yml",
+    "harness/literature_fulltext_policy.yml",
     "harness/admissibility_matrix.yml",
     "harness/analysis_integrity.yml",
     "harness/claim_toulmin_schema.yml",
@@ -172,6 +177,7 @@ REQUIRED_FILES = [
 
 CHECKS = {
     "improvement_backlog": "checks/check_improvement_backlog.py",
+    "literature_fulltext_execution": "checks/check_literature_fulltext_execution.py",
     "derived_vs_asserted_audit": "checks/check_derived_vs_asserted_audit.py",
     "event_log_replay": "checks/check_event_log_replay.py",
     "preanalysis_happens_before": "checks/check_preanalysis_happens_before.py",

@@ -253,3 +253,17 @@ unusual prose. Keep the keyword list tied to the gate's data-dependent classes.
 
 **Next check**: Spot-check that flagged findings are genuinely data-dependent and
 that the gate is not being satisfied by hollow `(checked)` tags without numbers.
+
+### 2026-06-18 - Literature full-text execution boundary
+
+**Commit(s)**: `uncommitted`
+
+**Action**: Split literature bookkeeping from substantive literature review execution. Added `check_literature_fulltext_execution.py`, `harness/literature_fulltext_policy.yml`, full-text extraction card fields, function-specific synthesis placeholders, and LIT-FULL/LIT-SYNTH/LIT-PAPER task contracts.
+
+**Alignment**: Prevents dashboard/card repair from being reported as completed literature review. Keeps AEROS honest: source-bound cards can fix the ledger, but only full-text extraction can support synthesis or paper positioning.
+
+**Non-goal**: Does not perform a real full-text literature review for any project and does not certify that existing source-bound cards are substantive evidence.
+
+**Drift risk**: The new LIT-FULL tasks could become paperwork if agents fill templates without opening sources. The hard check therefore requires opened source/date, extraction depth, direct evidence notes, and support/cannot-support boundaries.
+
+**Next check**: Run one real project literature queue through LIT-FULL-001 and confirm source-bound cards fail if cited in synthesis, while verified full-text cards pass.
