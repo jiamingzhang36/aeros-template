@@ -20,6 +20,8 @@ PROBE_ROOT = Path("data/probes")
 PROBE_PLAN = Path("data/probes/probe_plan.yml")
 PROBE_REPORT = Path("audits/data_probe_report.md")
 FAILURE_TAXONOMY = Path("harness/probe_failure_taxonomy.yml")
+SUPPORTED_SAMPLE_SUFFIXES = {".csv", ".tsv", ".jsonl"}
+MAX_DIRECTORY_SAMPLE_FILES = 25
 
 
 @dataclass(frozen=True)
@@ -83,6 +85,30 @@ def _local_path(project_root: Path, row: dict[str, str]) -> Path | None:
     return None
 
 
+def _supported_local_files(path: Path) -> list[Path]:
+    if path.is_file():
+        return [path] if path.suffix.lower() in SUPPORTED_SAMPLE_SUFFIXES else []
+    if not path.is_dir():
+        return []
+    return [
+        item
+        for item in sorted(path.rglob("*"))
+        if item.is_file()
+        and item.suffix.lower() in SUPPORTED_SAMPLE_SUFFIXES
+        and not any(part.startswith(".") for part in item.parts)
+    ]
+
+
+def _likely_linkage_fields(fields: list[str]) -> list[str]:
+    hints = ("id", "state", "year", "bill", "doc", "legislator", "session", "chamber", "district")
+    out = []
+    for field in fields:
+        lower = field.lower()
+        if any(hint in lower for hint in hints):
+            out.append(field)
+    return out
+
+
 def write_probe_plan(project_root: Path, dry_run: bool = False) -> int:
     rows = read_inventory(project_root)
     items: list[dict[str, Any]] = []
@@ -92,8 +118,12 @@ def write_probe_plan(project_root: Path, dry_run: bool = False) -> int:
         local = _local_path(project_root, row)
         if local:
             probe_class = "local_sample_probe"
-            status = "runnable"
-            command = ["python3", "-m", "aeros.cli", "data", "probe", "run", "--source", data_id, "--limit", "25"]
+            if _supported_local_files(local):
+                status = "runnable"
+                command = ["python3", "-m", "aeros.cli", "data", "probe", "run", "--source", data_id, "--limit", "25"]
+            else:
+                status = "needs_supported_file_path"
+                command = []
         elif link.startswith(("http://", "https://")):
             probe_class = "official_source_snapshot_probe"
             status = "requires_approval_or_manual_snapshot"
@@ -173,6 +203,121 @@ def _sample_jsonl(path: Path, out: Path, limit: int) -> tuple[int, list[str]]:
     return count, sorted(fields)
 
 
+def _run_directory_probe(project_root: Path, data_id: str, row: dict[str, str], path: Path, probe_dir: Path, limit: int) -> int:
+    candidates = _supported_local_files(path)
+    if not candidates:
+        print("REFUSED: local directory probe found no csv/tsv/jsonl files")
+        return 2
+    selected = candidates[:MAX_DIRECTORY_SAMPLE_FILES]
+    per_file_limit = max(1, min(limit, 25))
+    samples_dir = probe_dir / "samples"
+    manifest_path = probe_dir / "sample_manifest.csv"
+    manifest_rows: list[dict[str, Any]] = []
+    field_union: set[str] = set()
+    sample_rows_total = 0
+    failures: list[str] = []
+    for source_file in selected:
+        ext = source_file.suffix.lower()
+        sample_suffix = ".jsonl" if ext == ".jsonl" else ".csv"
+        sample_path = samples_dir / f"{_slug(_rel(project_root, source_file))}{sample_suffix}"
+        try:
+            if ext == ".jsonl":
+                sample_rows, fields = _sample_jsonl(source_file, sample_path, per_file_limit)
+            elif ext in {".csv", ".tsv"}:
+                if ext == ".tsv":
+                    with source_file.open(newline="", encoding="utf-8", errors="replace") as handle:
+                        reader = csv.DictReader(handle, delimiter="	")
+                        rows_out = []
+                        for idx, item in enumerate(reader):
+                            if idx >= per_file_limit:
+                                break
+                            rows_out.append(item)
+                        fields = list(reader.fieldnames or [])
+                    sample_path.parent.mkdir(parents=True, exist_ok=True)
+                    with sample_path.open("w", newline="", encoding="utf-8") as handle:
+                        writer = csv.DictWriter(handle, fieldnames=fields)
+                        writer.writeheader()
+                        writer.writerows(rows_out)
+                    sample_rows = len(rows_out)
+                else:
+                    sample_rows, fields = _sample_csv(source_file, sample_path, per_file_limit)
+            else:
+                continue
+            field_union.update(fields)
+            sample_rows_total += sample_rows
+            manifest_rows.append({
+                "source_file": _rel(project_root, source_file),
+                "sample_path": _rel(project_root, sample_path),
+                "suffix": ext,
+                "bytes": source_file.stat().st_size,
+                "sample_rows": sample_rows,
+                "fields_observed": ";".join(fields),
+                "parse_status": "passed",
+                "failure": "",
+            })
+        except Exception as exc:  # noqa: BLE001
+            failure = f"{_rel(project_root, source_file)}: {exc}"
+            failures.append(failure)
+            manifest_rows.append({
+                "source_file": _rel(project_root, source_file),
+                "sample_path": "",
+                "suffix": ext,
+                "bytes": source_file.stat().st_size if source_file.exists() else "",
+                "sample_rows": 0,
+                "fields_observed": "",
+                "parse_status": "failed",
+                "failure": str(exc),
+            })
+    manifest_path.parent.mkdir(parents=True, exist_ok=True)
+    with manifest_path.open("w", newline="", encoding="utf-8") as handle:
+        fieldnames = ["source_file", "sample_path", "suffix", "bytes", "sample_rows", "fields_observed", "parse_status", "failure"]
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(manifest_rows)
+    fields = sorted(field_union)
+    taxonomy = _load_taxonomy(project_root)
+    scorecard = {
+        "completeness": sample_rows_total > 0,
+        "schema_validity": bool(fields),
+        "linkage_feasibility": bool(_likely_linkage_fields(fields)),
+        "coverage_fit": bool(row.get("geography", "") or row.get("period", "")),
+        "bias_risk_documented": False,
+        "terms_release_fit_documented": False,
+    }
+    failure_types = [] if sample_rows_total > 0 and fields else ["schema_mismatch"]
+    if failures:
+        failure_types.append("partial_parse_failure")
+    metadata = {
+        "version": 1,
+        "policy": "AEROS-DATA-PROBE-001",
+        "data_id": data_id,
+        "dataset_name": row.get("dataset_name", ""),
+        "source_path": _rel(project_root, path),
+        "source_snapshot": f"local directory mtime={path.stat().st_mtime}; supported_files={len(candidates)}",
+        "generated_at": _now(),
+        "limit": limit,
+        "sample_rows": sample_rows_total,
+        "fields_observed": fields,
+        "coverage_hint": row.get("geography", "") + " | " + row.get("period", ""),
+        "parse_status": "passed" if sample_rows_total > 0 else "failed",
+        "linkage_keys_observed": ", ".join(_likely_linkage_fields(fields)),
+        "failure_modes": failures,
+        "failure_types": failure_types,
+        "failure_taxonomy_version": taxonomy.get("version", ""),
+        "scorecard": scorecard,
+        "sample_path": _rel(project_root, manifest_path),
+        "sampled_files": len(selected),
+        "supported_file_count": len(candidates),
+        "probe_verdict": "passed" if sample_rows_total > 0 else "failed",
+    }
+    meta_path = probe_dir / "probe_metadata.yml"
+    meta_path.write_text(yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    print(f"[data-probe] sampled files: {len(selected)}/{len(candidates)}")
+    print(f"[data-probe] wrote {_rel(project_root, manifest_path)}")
+    print(f"[data-probe] wrote {_rel(project_root, meta_path)}")
+    return 0 if sample_rows_total > 0 else 1
+
+
 def run_probe(project_root: Path, source: str, limit: int = 25, dry_run: bool = False) -> int:
     rows = read_inventory(project_root)
     row = _find_source(rows, source)
@@ -193,6 +338,8 @@ def run_probe(project_root: Path, source: str, limit: int = 25, dry_run: bool = 
     if dry_run:
         print("[data-probe] dry-run: no files written")
         return 0
+    if path.is_dir():
+        return _run_directory_probe(project_root, data_id, row, path, probe_dir, limit)
     try:
         if ext in {".csv", ".tsv"}:
             if ext == ".tsv":
@@ -225,7 +372,7 @@ def run_probe(project_root: Path, source: str, limit: int = 25, dry_run: bool = 
     scorecard = {
         "completeness": sample_rows > 0,
         "schema_validity": bool(fields),
-        "linkage_feasibility": False,
+        "linkage_feasibility": bool(_likely_linkage_fields(fields)),
         "coverage_fit": bool(row.get("geography", "") or row.get("period", "")),
         "bias_risk_documented": False,
         "terms_release_fit_documented": False,
@@ -244,7 +391,7 @@ def run_probe(project_root: Path, source: str, limit: int = 25, dry_run: bool = 
         "fields_observed": fields,
         "coverage_hint": row.get("geography", "") + " | " + row.get("period", ""),
         "parse_status": "passed",
-        "linkage_keys_observed": "",
+        "linkage_keys_observed": ", ".join(_likely_linkage_fields(fields)),
         "failure_modes": [],
         "failure_types": failure_types,
         "failure_taxonomy_version": taxonomy.get("version", ""),

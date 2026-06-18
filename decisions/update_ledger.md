@@ -15,6 +15,22 @@ How to read this ledger:
 - `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
 - `Next check`: what should be watched in the next real project run.
 
+## 2026-06-18
+
+### 2026-06-18 - Directory local data probes
+
+**Commit(s)**: `a98faa7`
+
+**Action**: Updated `aeros.runtime.data_probe` so a local inventory path may be a directory, not only a single CSV/TSV/JSONL file. Directory probes now sample up to 25 supported files, write a sample manifest, union observed fields, and record linkage-key hints. The planner marks local paths runnable only when supported files exist.
+
+**Alignment**: Fixes a real downstream run where `data probe plan` generated a runnable local probe for CMPD final CSVs but `data probe run` refused the directory. This keeps low-risk local-cache-safe data probing automated instead of forcing manual intervention.
+
+**Non-goal**: Does not approve official-source/API/scraping probes and does not make probe evidence admissible for final claims.
+
+**Drift risk**: Directory probes can produce many sample artifacts if left unbounded; the runner caps sampled files and keeps the output as feasibility evidence only.
+
+**Next check**: After the next template sync, confirm a downstream project can run `aeros data probe run --source <local-directory-source>` and pass `check_data_probe.py`.
+
 ## 2026-06-16
 
 ### 2026-06-16 — Kernel / Research CI
