@@ -33,7 +33,7 @@ How to read this ledger:
 
 ### 2026-06-18 - Revalidation skill waiver receipts
 
-**Commit(s)**: `pending`
+**Commit(s)**: `3e82d5e`
 
 **Action**: Updated `aeros.runtime.kernel` so check-only revalidation of stale passed tasks writes explicit skill waivers when the task contract declares recommended or required skills. The waiver scope is limited to fingerprint refresh: existing outputs passed task checks, no external skill invocation occurred, and no skill-derived evidence is claimed.
 
