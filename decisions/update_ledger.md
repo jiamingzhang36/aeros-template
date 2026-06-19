@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-19 - Lightweight completion attestation
 
-**Commit(s)**: `uncommitted`
+**Commit(s)**: `203f9c0`
 
 **Action**: Upgraded task completion from a generic receipt into a version-2 minimal attestation. New receipts record active lane, declared outcome, substantive allowed outputs, file hashes when applicable, check commands, exit codes, and explicit boundaries for what completion does not prove. Added a compact completion attestation policy/template and wired it into AGENTS, run-report guidance, project manifest, sync, and init scaffolding.
 
