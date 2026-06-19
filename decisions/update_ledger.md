@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-19 - Work lane router for separated research surfaces
 
-**Commit(s)**: `pending`
+**Commit(s)**: `18c2e34`
 
 **Action**: Added the AEROS work-lane router. Introduced `aeros.runtime.work_lane`, `harness/work_lane_policy.yml`, and `checks/check_work_lanes.py`; added `--lane` to `aeros iterate`; surfaced lane labels in iterate plans; wired lane validation into the default harness, project manifest, init scaffold, sync script, AGENTS rules, and run-report template.
 
