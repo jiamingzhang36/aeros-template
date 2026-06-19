@@ -15,6 +15,22 @@ How to read this ledger:
 - `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
 - `Next check`: what should be watched in the next real project run.
 
+## 2026-06-19
+
+### 2026-06-19 - Goal-mode data progress honesty gate
+
+**Commit(s)**: `pending`
+
+**Action**: Added a goal/continue-mode data-progress guard. Data-oriented action receipts that claim `substantive_research_progress` now require a real data/source/probe artifact, not only task files, scripts, run reports, receipts, README/Makefile edits, checks, or ledger entries. Added `harness/goal_mode_policy.yml`, `checks/check_goal_mode_data_progress.py`, a `source_discovery_attempt` progress label, run-report prompts, manifest/harness wiring, and sync/init-project propagation.
+
+**Alignment**: Addresses the live failure mode where an agent searched for official data, found no usable source, then generated Txxx scaffolding and reports that looked like progress. This preserves AEROS's north star: automate low-risk progress, but do not let process artifacts masquerade as data acquisition.
+
+**Non-goal**: Does not guarantee that a retrieved data source is scientifically adequate, official, legal to use, or complete. It only enforces the narrower process claim: if the run says data progressed, a concrete data/source/probe artifact must exist; otherwise the run must be reported as blocked or source discovery.
+
+**Drift risk**: The check could become over-strict if future projects have legitimate data evidence outside the allowed path set. Keep the path allowlist small but update it when a real project introduces a new durable source-snapshot location.
+
+**Next check**: In the next project run, ask for data collection in goal/continue mode and confirm the agent either writes a raw/source/probe artifact or stops with `source_discovery_attempt`/`blocked_queue_preparation`, without creating Txxx scaffolding as a substitute for data.
+
 ## 2026-06-18
 
 ### 2026-06-18 - Directory local data probes

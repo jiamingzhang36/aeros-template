@@ -1043,7 +1043,7 @@ def main(argv: list[str] | None = None) -> int:
     action_receipt = action_sub.add_parser("receipt", help="write an action receipt classifying this run")
     action_receipt.add_argument("--action-id", required=True, help="stable action id, e.g. D002_probe_2026_06_16")
     action_receipt.add_argument("--action-mode", required=True, choices=["data_progress", "data_backfill", "data_probe", "data_validation", "harness_triage", "literature_progress", "claim_audit", "writing", "cleanup"])
-    action_receipt.add_argument("--progress-label", required=True, choices=["substantive_research_progress", "mechanical_hygiene", "blocked_queue_preparation", "documentation_repair"])
+    action_receipt.add_argument("--progress-label", required=True, choices=["substantive_research_progress", "mechanical_hygiene", "blocked_queue_preparation", "source_discovery_attempt", "documentation_repair"])
     action_receipt.add_argument("--why-this-now", required=True, help="why this was the next action")
     action_receipt.add_argument("--summary", required=True, help="short honest summary of what changed")
     action_receipt.add_argument("--evidence-path", action="append", default=[], help="artifact proving this action, relative to project root")

@@ -29,6 +29,7 @@ PROGRESS_LABELS = {
     "substantive_research_progress",
     "mechanical_hygiene",
     "blocked_queue_preparation",
+    "source_discovery_attempt",
     "documentation_repair",
 }
 DEPENDENCY_TYPES = {"enabling", "validating", "cosmetic", "blocking_resolution"}
@@ -40,12 +41,49 @@ DATA_KEYS = [
     "backfill_queue_changed",
     "probe_completed",
 ]
+SUBSTANTIVE_DATA_KEYS = [
+    "inventory_changed",
+    "source_verified",
+    "data_rows_changed",
+    "coverage_changed",
+    "probe_completed",
+]
 RESEARCH_KEYS = [
     "claim_ceiling_changed",
     "gate_candidate_changed",
     "evidence_graph_changed",
     "result_registered",
 ]
+DATA_EVIDENCE_PATHS = {
+    "discovery/data_inventory.csv",
+    "data/data_state.yml",
+    "data/data_gap_plan.yml",
+    "audits/data_probe_report.md",
+}
+DATA_EVIDENCE_PREFIXES = (
+    "data/raw/",
+    "data/intermediate/",
+    "data/parquet/",
+    "data/clean/",
+    "data/snapshots/",
+    "data/probes/",
+    "data/source_snapshots/",
+    "evidence/source_snapshots/",
+    "outputs/source_snapshots/",
+    "outputs/data/",
+    "outputs/tables/",
+)
+NON_DATA_PAPERWORK_PREFIXES = (
+    "agent_runs/",
+    "decisions/",
+    "tasks/",
+    "checks/",
+    "harness/",
+    "docs/",
+    "templates/",
+    "code/checks/",
+)
+NON_DATA_PAPERWORK_PATHS = {"README.md", "Makefile"}
 
 
 @dataclass(frozen=True)
@@ -75,6 +113,41 @@ def _slug(value: str) -> str:
 
 def receipt_path(project_root: Path, action_id: str) -> Path:
     return project_root / ACTION_DIR / f"{_slug(action_id)}.yml"
+
+
+def _normalize_rel(raw: str) -> str:
+    return str(raw).strip().replace("\\", "/").lstrip("./")
+
+
+def _is_non_placeholder_artifact(path: Path) -> bool:
+    if not path.exists() or path.is_dir():
+        return False
+    if path.name in {".gitkeep", ".keep"}:
+        return False
+    if path.name.lower() in {"readme.md", "template.md", "template.yml", "template.yaml"}:
+        return False
+    try:
+        return path.stat().st_size > 0
+    except OSError:
+        return False
+
+
+def _is_data_evidence_path(project_root: Path, raw: str) -> bool:
+    rel = _normalize_rel(raw)
+    if not rel:
+        return False
+    if rel in NON_DATA_PAPERWORK_PATHS:
+        return False
+    if rel in DATA_EVIDENCE_PATHS or rel.startswith(DATA_EVIDENCE_PREFIXES):
+        return _is_non_placeholder_artifact(project_root / rel)
+    return False
+
+
+def _is_paperwork_only_path(raw: str) -> bool:
+    rel = _normalize_rel(raw)
+    if not rel:
+        return False
+    return rel in NON_DATA_PAPERWORK_PATHS or rel.startswith(NON_DATA_PAPERWORK_PREFIXES)
 
 
 def build_payload(args: ActionReceiptArgs) -> dict[str, Any]:
@@ -129,9 +202,31 @@ def validate_payload(payload: dict[str, Any], project_root: Path | None = None) 
         if key not in research:
             failures.append(f"{action_id}: research_impact missing {key}")
     data_true = any(bool(data.get(key)) for key in DATA_KEYS)
+    substantive_data_true = any(bool(data.get(key)) for key in SUBSTANTIVE_DATA_KEYS)
     research_true = any(bool(research.get(key)) for key in RESEARCH_KEYS)
     if mode.startswith("data_") and not data_true:
         failures.append(f"{action_id}: data action_mode requires at least one true data_impact field")
+    if mode.startswith("data_") and label == "substantive_research_progress":
+        if not substantive_data_true:
+            failures.append(
+                f"{action_id}: substantive data progress requires source/data/probe impact, "
+                "not only queue or paperwork changes"
+            )
+        if project_root is not None:
+            data_evidence = [raw for raw in evidence if _is_data_evidence_path(project_root, str(raw))]
+            if not data_evidence:
+                failures.append(
+                    f"{action_id}: substantive data progress requires an evidence_path pointing to a real "
+                    "data/source/probe artifact"
+                )
+            if evidence and all(_is_paperwork_only_path(str(raw)) for raw in evidence):
+                failures.append(
+                    f"{action_id}: paperwork-only evidence_paths cannot justify substantive data progress"
+                )
+    if label == "source_discovery_attempt" and (research_true or substantive_data_true):
+        failures.append(
+            f"{action_id}: source_discovery_attempt should not claim substantive data/research impact"
+        )
     if label == "substantive_research_progress" and not (data_true or research_true):
         failures.append(f"{action_id}: substantive progress requires data or research impact")
     if label in {"mechanical_hygiene", "documentation_repair"} and (data_true or research_true):

@@ -125,3 +125,21 @@ Every non-trivial run must either write `agent_runs/action_receipts/<action_id>.
   - result_registered:
 - evidence_paths:
 
+## Goal-Mode Data Progress Check
+
+Complete this section when the user asked to collect, backfill, validate, refresh, or verify data/source material.
+
+- Was this a data-oriented run?
+  - [ ] No
+  - [ ] Yes
+- If yes, did the run acquire or verify at least one real data/source/probe artifact?
+  - [ ] Yes, artifact path(s):
+  - [ ] No, this is an honest blocker/source-discovery attempt
+- Data/source/probe artifact path(s), if any:
+  - TBD
+- If no artifact was acquired, choose one:
+  - [ ] `source_discovery_attempt`
+  - [ ] `blocked_queue_preparation`
+  - [ ] other:
+- Paperwork-only changes that do not count as data acquisition:
+  - task files, run reports, receipts, README/Makefile edits, checks, logs, ledgers

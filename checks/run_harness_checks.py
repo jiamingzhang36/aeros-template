@@ -76,6 +76,7 @@ CHECKS = [
     "check_task_automation_policy.py",
     "check_agent_runs_tools.py",
     "check_action_receipts.py",
+    "check_goal_mode_data_progress.py",
     "check_completion_receipts.py",
     "check_noop_runs.py",
     "check_pipeline_runs.py",

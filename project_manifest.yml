@@ -256,6 +256,7 @@ layers:
     - harness/scope_calculus.yml
     - harness/result_adapter_contract.yml
     - harness/literature_fulltext_policy.yml
+    - harness/goal_mode_policy.yml
     - templates/result_registry_record.json
     - templates/update_ledger_entry.md
     - harness/probe_failure_taxonomy.yml
@@ -364,6 +365,7 @@ checks:
   agent_run_report: checks/check_agent_run_report.py
   agent_runs_tools: checks/check_agent_runs_tools.py
   action_receipts: checks/check_action_receipts.py
+  goal_mode_data_progress: checks/check_goal_mode_data_progress.py
   completion_receipts: checks/check_completion_receipts.py
   noop_runs: checks/check_noop_runs.py
   pipeline_runs: checks/check_pipeline_runs.py

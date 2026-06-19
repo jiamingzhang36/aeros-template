@@ -203,10 +203,13 @@ Every substantial run must classify what kind of progress it made before calling
 
 - Use `aeros action receipt ...` for non-trivial project work, especially in goal/continue mode.
 - Choose an `action_mode`: `data_progress`, `data_backfill`, `data_probe`, `data_validation`, `harness_triage`, `literature_progress`, `claim_audit`, `writing`, or `cleanup`.
-- Choose an honest progress label: `substantive_research_progress`, `mechanical_hygiene`, `blocked_queue_preparation`, or `documentation_repair`.
+- Choose an honest progress label: `substantive_research_progress`, `mechanical_hygiene`, `blocked_queue_preparation`, `source_discovery_attempt`, or `documentation_repair`.
 - If `action_mode` starts with `data_`, at least one data impact field must be true.
+- If `action_mode` starts with `data_` and `honest_progress_label` is `substantive_research_progress`, the receipt must cite a real data/source/probe artifact, not only task files, logs, scripts, README changes, or ledger entries.
 - Do not describe schema repair, markdown cleanup, log updates, or harness failure cleanup as substantive data progress unless data inventory, source verification, rows, coverage, backfill queue, or probe evidence actually changed.
 - If a run only reduces check failures, say it is harness triage unless it also changed evidence, data, claim ceiling, result registration, or graph support.
+- If a source search finds no usable source artifact, classify it as `source_discovery_attempt` or `blocked_queue_preparation`. Do not call the data task complete.
+- Creating `Txxx` task files, Makefile targets, README notes, checks, receipts, or update-ledger entries is not data acquisition.
 
 ## Data-First Execution Rules
 
@@ -214,6 +217,7 @@ In an active or adopted research project, data state drives the next action. Do 
 
 - Run `aeros data scan` before claiming an active project is ready for analysis, claim audit, or paper drafting.
 - Use `aeros data gaps` and `aeros data backfill --dry-run` to turn data gaps into a formal queue before improvising fixes.
+- In goal/continue mode, a data-oriented request must follow `harness/goal_mode_policy.yml`: attempt safe data acquisition first, then either produce a data/source/probe artifact or stop with an honest blocker/source-discovery receipt.
 - Local-cache-safe data repair may run only when a queue item is `auto_rerunnable` and has an explicit `run_command`.
 - Official-source, API, credentialed, scraping, source-date-sensitive, or LLM-extraction work must be blocked for approval or receipt until the human accepts the source snapshot and terms/credential implications.
 - A passed task must produce a substantive allowed output; logs alone are not completion.

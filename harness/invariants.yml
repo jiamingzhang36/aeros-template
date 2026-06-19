@@ -10,6 +10,10 @@ invariants:
     rule: a completed task must produce a substantive allowed artifact, not logs alone
     enforced_by: [checks/check_completion_receipts.py, checks/check_noop_runs.py]
     severity: hard
+  - id: no_data_progress_without_data_artifact
+    rule: data-oriented goal/continue runs may not claim substantive data progress unless a real data, source snapshot, inventory, or probe artifact exists
+    enforced_by: [checks/check_action_receipts.py, checks/check_goal_mode_data_progress.py]
+    severity: hard
   - id: no_hash_lineage_no_provenance
     rule: provenance requires content-addressed inputs/outputs and append-only event hash chaining
     enforced_by: [checks/check_event_log_replay.py, checks/check_provenance.py, checks/check_research_graph.py]

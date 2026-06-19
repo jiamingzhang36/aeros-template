@@ -1,0 +1,54 @@
+version: "0.1"
+policy: AEROS-GOAL-MODE-DATA-PROGRESS-001
+principle: >
+  Goal/continue mode may automate execution, but it must not turn paperwork,
+  task scaffolding, terminal-status files, or receipt writing into claimed data
+  progress. A data-oriented run either acquires/verifies a real data/source/probe
+  artifact or reports an honest blocker/source-discovery attempt.
+
+data_progress_requires_one_of:
+  - discovery/data_inventory.csv
+  - data/data_state.yml
+  - data/data_gap_plan.yml
+  - audits/data_probe_report.md
+  - data/raw/
+  - data/intermediate/
+  - data/parquet/
+  - data/clean/
+  - data/snapshots/
+  - data/probes/
+  - data/source_snapshots/
+  - evidence/source_snapshots/
+  - outputs/source_snapshots/
+  - outputs/data/
+  - outputs/tables/
+
+paperwork_only_paths_do_not_count_as_data_progress:
+  - agent_runs/
+  - decisions/
+  - tasks/
+  - checks/
+  - harness/
+  - docs/
+  - templates/
+  - code/checks/
+  - README.md
+  - Makefile
+
+allowed_no_data_outcomes:
+  - honest_progress_label: blocked_queue_preparation
+    meaning: "A concrete blocker/approval queue was prepared; no data acquisition is claimed."
+  - honest_progress_label: source_discovery_attempt
+    meaning: "Sources were searched or triaged, but no source artifact was acquired or verified."
+  - honest_progress_label: mechanical_hygiene
+    meaning: "The harness/check/reporting surface was repaired; no research/data progress is claimed."
+
+forbidden_patterns:
+  - data action_mode plus substantive_research_progress with only backfill_queue_changed
+  - complete run report for data acquisition with only task/report/ledger/code scaffolding changed
+  - claiming official-source validation when no official source artifact, snapshot, or probe report exists
+  - creating new Txxx task scaffolding as a substitute for attempting safe data acquisition
+
+enforced_by:
+  - checks/check_action_receipts.py
+  - checks/check_goal_mode_data_progress.py

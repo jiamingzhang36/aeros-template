@@ -22,6 +22,8 @@ DIRS = [
     "data/clean",
     "data/parquet",
     "data/snapshots",
+    "data/probes",
+    "data/source_snapshots",
     "data/backfill",
     "decisions/escalations",
     "discovery/literature",
@@ -31,6 +33,7 @@ DIRS = [
     "execution",
     "harness/protocols",
     "outputs/logs",
+    "outputs/source_snapshots",
     "outputs/tables",
     "outputs/figures",
     "outputs/model_outputs",
@@ -152,6 +155,48 @@ gate_statuses:
   - blocked_requires_approval
   - blocked_missing_credentials
   - blocked_missing_source_snapshot
+""",
+    "harness/goal_mode_policy.yml": """version: "0.1"
+policy: AEROS-GOAL-MODE-DATA-PROGRESS-001
+principle: >
+  Goal/continue mode may automate execution, but it must not turn paperwork,
+  task scaffolding, terminal-status files, or receipt writing into claimed data
+  progress. A data-oriented run either acquires/verifies a real data/source/probe
+  artifact or reports an honest blocker/source-discovery attempt.
+data_progress_requires_one_of:
+  - discovery/data_inventory.csv
+  - data/data_state.yml
+  - data/data_gap_plan.yml
+  - audits/data_probe_report.md
+  - data/raw/
+  - data/intermediate/
+  - data/parquet/
+  - data/clean/
+  - data/snapshots/
+  - data/probes/
+  - data/source_snapshots/
+  - evidence/source_snapshots/
+  - outputs/source_snapshots/
+  - outputs/data/
+  - outputs/tables/
+paperwork_only_paths_do_not_count_as_data_progress:
+  - agent_runs/
+  - decisions/
+  - tasks/
+  - checks/
+  - harness/
+  - docs/
+  - templates/
+  - code/checks/
+  - README.md
+  - Makefile
+allowed_no_data_outcomes:
+  - blocked_queue_preparation
+  - source_discovery_attempt
+  - mechanical_hygiene
+enforced_by:
+  - checks/check_action_receipts.py
+  - checks/check_goal_mode_data_progress.py
 """,
     "code/99_make_all.py": """#!/usr/bin/env python3
 print("AEROS project pipeline placeholder: configure automation.pipeline in project_manifest.yml")
