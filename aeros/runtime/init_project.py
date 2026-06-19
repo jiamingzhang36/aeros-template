@@ -198,6 +198,34 @@ enforced_by:
   - checks/check_action_receipts.py
   - checks/check_goal_mode_data_progress.py
 """,
+    "harness/work_lane_policy.yml": """version: "0.1"
+policy: AEROS-WORK-LANE-ROUTER-001
+principle: >
+  AEROS work must run in an explicit lane. If a lane is blocked, stop and report
+  the blocker instead of silently switching to another lane.
+lanes:
+  - data
+  - literature
+  - analysis
+  - claim
+  - writing
+  - compliance
+  - harness
+switch_gate:
+  rule: "No lane switch inside a run unless the human explicitly asks for it."
+completion_definitions:
+  data: {complete_only_if: ["data/source/probe artifact or honest blocker"]}
+  literature: {complete_only_if: ["full-text extraction or function-specific synthesis"]}
+  analysis: {complete_only_if: ["protocol, pipeline, result, robustness, or validation artifact"]}
+  claim: {complete_only_if: ["claim audit, ceiling, registry boundary, or language constraint"]}
+  writing: {complete_only_if: ["bounded prose tied to registered claims and numbers"]}
+  compliance: {complete_only_if: ["terms/license/IRB/release artifact"]}
+  harness: {complete_only_if: ["framework/check/policy/template change reported as harness progress"]}
+forbidden_cross_lane_substitutions:
+  - data lane blocked -> literature cleanup
+  - data lane blocked -> task scaffolding
+  - harness lane cleanup -> substantive research progress
+""",
     "code/99_make_all.py": """#!/usr/bin/env python3
 print("AEROS project pipeline placeholder: configure automation.pipeline in project_manifest.yml")
 """,

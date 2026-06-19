@@ -649,6 +649,7 @@ def _cmd_iterate(args: argparse.Namespace) -> int:
         to_next_gate=args.to_next_gate,
         task_timeout_override=args.task_timeout,
         max_retries_override=args.max_retries,
+        lane=args.lane,
     )
 
 
@@ -1300,6 +1301,9 @@ def main(argv: list[str] | None = None) -> int:
     iterate = sub.add_parser("iterate", help="run the research controller until the next human gate")
     iterate.add_argument("--stage", default="discovery", choices=["discovery", "execution"],
                          help="stage to iterate (default: discovery)")
+    iterate.add_argument("--lane", default="",
+                         choices=["", "data", "literature", "analysis", "claim", "writing", "compliance", "harness"],
+                         help="restrict iterate to one work lane; prevents cross-lane drift")
     iterate.add_argument("--dry-run", action="store_true",
                          help="show the controller plan; do not run tasks or write packets")
     iterate.add_argument("--to-next-gate", action="store_true",

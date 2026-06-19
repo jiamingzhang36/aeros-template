@@ -20,6 +20,7 @@ from .kernel import (
     topo_order,
 )
 from .skill_router import format_skill_hint, recommended_skills
+from .work_lane import infer_work_lane, lane_matches, normalize_lane
 
 print = partial(print, flush=True)
 
@@ -28,6 +29,7 @@ print = partial(print, flush=True)
 class IterateStep:
     task_id: str
     gate: str
+    lane: str
     status: str
     action: str
     stale_reason: str = ""
@@ -38,6 +40,7 @@ class IterateStep:
 @dataclass(frozen=True)
 class IteratePlan:
     stage: str
+    lane: str
     target_gate: str
     steps: list[IterateStep]
     can_run: bool
@@ -117,18 +120,23 @@ def build_iterate_plan(
     stage: str = "discovery",
     *,
     to_next_gate: bool = False,
+    lane: str = "",
 ) -> IteratePlan:
     state = state_mod.load_state(project_root)
     contracts = discover_contracts(project_root, stage)
     all_contracts = discover_contracts(project_root)
     mode = "next-gate" if to_next_gate else "stage-gate"
+    active_lane = normalize_lane(lane)
+    if lane and not active_lane:
+        return IteratePlan(stage=stage, lane=str(lane), target_gate="G0", steps=[], can_run=False,
+                           mode=mode, reason=f"invalid work lane {lane!r}")
     if not contracts:
-        return IteratePlan(stage=stage, target_gate="G0", steps=[], can_run=False,
+        return IteratePlan(stage=stage, lane=active_lane, target_gate="G0", steps=[], can_run=False,
                            mode=mode,
                            reason=f"no task contracts for stage {stage!r}")
 
     if stage == "execution" and not _execution_allowed(state):
-        return IteratePlan(stage=stage, target_gate="G3", steps=[], can_run=False,
+        return IteratePlan(stage=stage, lane=active_lane, target_gate="G3", steps=[], can_run=False,
                            mode=mode,
                            reason="execution requires human-approved G3")
 
@@ -138,7 +146,7 @@ def build_iterate_plan(
         if not ok_foundation:
             reason = ("execution blocked: discovery-foundation gate(s) G0-G3 not met — "
                       + "; ".join(u.split(":", 1)[0] if ":" in u else u for u in unmet[:4]))
-            return IteratePlan(stage=stage, target_gate="G3", steps=[], can_run=False,
+            return IteratePlan(stage=stage, lane=active_lane, target_gate="G3", steps=[], can_run=False,
                                mode=mode, reason=reason)
 
     target_gate = (
@@ -160,6 +168,14 @@ def build_iterate_plan(
             if state_mod._gate_rank(record[0].gate or "") in active_ranks
         }
         runnable_contracts = _with_dependency_closure(runnable_contracts, all_contracts)
+    if active_lane:
+        runnable_contracts = {
+            task_id: record
+            for task_id, record in runnable_contracts.items()
+            if lane_matches(record[0], active_lane)
+        }
+        if runnable_contracts:
+            target_gate = _highest_gate(runnable_contracts, default=str(state.get("current_gate", "G0")))
     probe_state = deepcopy(state)
     steps: list[IterateStep] = []
     for task_id in topo_order(runnable_contracts):
@@ -175,6 +191,7 @@ def build_iterate_plan(
             steps.append(IterateStep(
                 task_id=task_id,
                 gate=contract.gate or "?",
+                lane=infer_work_lane(contract),
                 status=status,
                 action=action,
                 stale_reason=stale,
@@ -190,18 +207,20 @@ def build_iterate_plan(
         steps.append(IterateStep(
             task_id=task_id,
             gate=contract.gate or "?",
+            lane=infer_work_lane(contract),
             status=status,
             action=action,
             stale_reason=stale,
             recommended_skills=tuple(recommended_skills(project_root, contract)),
             skill_hint=format_skill_hint(project_root, contract),
         ))
-    return IteratePlan(stage=stage, target_gate=target_gate, steps=steps, can_run=True, mode=mode)
+    return IteratePlan(stage=stage, lane=active_lane, target_gate=target_gate, steps=steps, can_run=True, mode=mode)
 
 
 def format_iterate_plan(plan: IteratePlan) -> str:
     lines = [
         f"[iterate] stage: {plan.stage}",
+        f"[iterate] lane: {plan.lane or 'all'}",
         f"[iterate] mode: {plan.mode}",
         f"[iterate] target gate: {plan.target_gate}",
     ]
@@ -215,7 +234,7 @@ def format_iterate_plan(plan: IteratePlan) -> str:
     for step in plan.steps:
         stale = f" ({step.stale_reason})" if step.stale_reason else ""
         lines.append(
-            f"  - {step.task_id:32s} gate={step.gate:3s} status={step.status:10s} "
+            f"  - {step.task_id:32s} lane={step.lane:10s} gate={step.gate:3s} status={step.status:10s} "
             f"action={step.action}{stale} {step.skill_hint}"
         )
     lines.append(f"[iterate] will stop for human packet at {plan.target_gate}")
@@ -230,8 +249,9 @@ def run_iteration(
     to_next_gate: bool = False,
     task_timeout_override: int | None = None,
     max_retries_override: int | None = None,
+    lane: str = "",
 ) -> int:
-    plan = build_iterate_plan(project_root, stage, to_next_gate=to_next_gate)
+    plan = build_iterate_plan(project_root, stage, to_next_gate=to_next_gate, lane=lane)
     print(format_iterate_plan(plan))
     if not plan.can_run:
         if dry_run:
@@ -249,6 +269,7 @@ def run_iteration(
         stop_gate=plan.target_gate if to_next_gate else None,
         task_timeout_override=task_timeout_override,
         max_retries_override=max_retries_override,
+        lane=plan.lane,
     )
     if rc != 0:
         packet = write_decision_packet(project_root, plan.target_gate, stage=stage)

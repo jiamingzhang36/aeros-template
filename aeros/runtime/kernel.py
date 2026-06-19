@@ -19,6 +19,7 @@ from .completion import write_completion_receipt, validate_completion_receipts
 from .contract import Contract, load_contract
 from .report import AttemptRecord, RunRecord, write_run_report
 from .skill_receipt import write_skill_invocation_receipt
+from .work_lane import lane_matches, normalize_lane
 
 print = partial(print, flush=True)
 
@@ -439,6 +440,7 @@ def run_pipeline(
     stop_gate: str | None = None,
     task_timeout_override: int | None = None,
     max_retries_override: int | None = None,
+    lane: str = "",
 ) -> int:
     """Run a stage's contracts in dependency order, stopping at the first
     escalation. Returns 0 if all passed (or dry-run), non-zero on stop."""
@@ -484,6 +486,10 @@ def run_pipeline(
     if not contracts:
         print(f"[pipeline] no contracts for stage {stage!r}")
         return 1
+    active_lane = normalize_lane(lane)
+    if lane and not active_lane:
+        print(f"[pipeline] invalid work lane {lane!r}")
+        return 2
     if stop_gate:
         target_rank = state_mod._gate_rank(stop_gate)
         contracts = {
@@ -503,6 +509,14 @@ def run_pipeline(
         prof_name = _active_profile(project_root)[0]
         print(f"[pipeline] profile '{prof_name}': {len(contracts)} of {before} "
               f"{stage} task(s) active (incl. dependencies)")
+    if active_lane:
+        before = len(contracts)
+        contracts = {
+            tid: rec for tid, rec in contracts.items()
+            if lane_matches(rec[0], active_lane)
+        }
+        print(f"[pipeline] lane '{active_lane}': {len(contracts)} of {before} "
+              f"{stage} task(s) selected")
     order = topo_order(contracts)
     print(f"[pipeline] {stage}: {len(order)} task(s) in dependency order")
     skipped = 0

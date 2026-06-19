@@ -1,5 +1,6 @@
 ---
 task_class: standard
+work_lane: data   # data | literature | analysis | claim | writing | compliance | harness
 allowed_skills: []
 recommended_skills: []
 ---

@@ -20,6 +20,7 @@ class Contract:
     evidence_receipt_required: bool
     receipt_path: str
     gate_status: str
+    work_lane: str
     goal: str
     inputs: list[str]
     allowed_outputs: list[str]
@@ -66,6 +67,7 @@ def load_contract(path: str | Path) -> Contract:
         evidence_receipt_required=bool(data.get("evidence_receipt_required", False)),
         receipt_path=str(data.get("receipt_path", "") or ""),
         gate_status=str(data.get("gate_status", "pending") or "pending"),
+        work_lane=str(data.get("work_lane", "") or ""),
         goal=str(data.get("goal", "")).strip(),
         inputs=list(data.get("inputs", []) or []),
         allowed_outputs=list(data["allowed_outputs"]),

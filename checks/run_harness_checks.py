@@ -74,6 +74,7 @@ CHECKS = [
     "check_data_lock.py",
     "check_task_contract.py",
     "check_task_automation_policy.py",
+    "check_work_lanes.py",
     "check_agent_runs_tools.py",
     "check_action_receipts.py",
     "check_goal_mode_data_progress.py",

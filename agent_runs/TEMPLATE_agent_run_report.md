@@ -22,6 +22,10 @@ Critic required:
 
 Human gate required:
 
+Active work lane:
+
+Lane switch requested?
+
 ## Objective
 
 TBD

@@ -17,6 +17,20 @@ How to read this ledger:
 
 ## 2026-06-19
 
+### 2026-06-19 - Work lane router for separated research surfaces
+
+**Commit(s)**: `pending`
+
+**Action**: Added the AEROS work-lane router. Introduced `aeros.runtime.work_lane`, `harness/work_lane_policy.yml`, and `checks/check_work_lanes.py`; added `--lane` to `aeros iterate`; surfaced lane labels in iterate plans; wired lane validation into the default harness, project manifest, init scaffold, sync script, AGENTS rules, and run-report template.
+
+**Alignment**: Directly addresses a live usability/automation failure: data, literature, analysis, claim, writing, compliance, and harness work were all available inside one "continue" loop, allowing agents to drift from blocked data work into easier paperwork or literature cleanup. The lane router keeps automation focused on the active work surface.
+
+**Non-goal**: Does not judge the quality of data, literature, analysis, or writing. It only prevents cross-lane substitution and makes lane switches explicit.
+
+**Drift risk**: Lane inference is conservative and may misclassify future bespoke tasks. Prefer explicit `work_lane` in new task contracts when the inferred lane is unclear.
+
+**Next check**: In a real project, run `aeros iterate --lane data --dry-run` and confirm it plans only data/source/probe work; if blocked, the agent should stop with a data blocker instead of switching to literature, writing, or harness cleanup.
+
 ### 2026-06-19 - Side-effect-free harness smoke checks
 
 **Commit(s)**: `04f3925`, `ebaecaa`

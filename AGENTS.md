@@ -211,6 +211,38 @@ Every substantial run must classify what kind of progress it made before calling
 - If a source search finds no usable source artifact, classify it as `source_discovery_attempt` or `blocked_queue_preparation`. Do not call the data task complete.
 - Creating `Txxx` task files, Makefile targets, README notes, checks, receipts, or update-ledger entries is not data acquisition.
 
+## Work Lane Rules
+
+AEROS separates work into explicit lanes so an agent cannot replace a blocked data task with easier literature, writing, claim, or harness work.
+
+Valid lanes:
+
+- `data`
+- `literature`
+- `analysis`
+- `claim`
+- `writing`
+- `compliance`
+- `harness`
+
+Before non-trivial work, identify the active lane. Prefer commands like:
+
+```bash
+python3 -m aeros.cli iterate --lane data --dry-run
+python3 -m aeros.cli iterate --lane literature --dry-run
+```
+
+Lane rules:
+
+- Stay in the active lane for the whole run unless the human explicitly asks to switch lanes.
+- If the active lane is blocked, stop with a blocker/source-discovery/action receipt. Do not silently move to another lane.
+- Data lane completion requires a data/source/probe artifact or an honest blocker; task scaffolding and receipts alone do not count.
+- Literature lane completion requires full-text extraction or function-specific synthesis; registry cleanup alone is bookkeeping.
+- Analysis lane completion requires runnable protocol/pipeline/result/validation artifacts; it does not upgrade claims.
+- Claim lane completion constrains or audits claim language; it does not collect data or rewrite the paper as final prose.
+- Writing lane completion edits bounded prose tied to registered claims and numbers; it does not strengthen claims.
+- Harness lane completion repairs automation/checks/templates; it must be reported as harness progress, not research progress.
+
 ## Data-First Execution Rules
 
 In an active or adopted research project, data state drives the next action. Do not let a task/gate/check sequence substitute for evidence about what data exists, what is missing, and what can safely be collected.
