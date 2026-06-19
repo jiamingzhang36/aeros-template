@@ -1,0 +1,33 @@
+package_id: "AEA-PACKAGE-001"
+status: draft
+standard_alignment:
+  external_standard: "AEA Data Editor"
+  reviewed_against_policy_url: "https://aeadataeditor.github.io/"
+  reviewed_at: ""
+data_availability:
+  statement_path: "data/README_data.md"
+  public_data: []
+  restricted_data: []
+  synthetic_or_demo_data: []
+code_entrypoint:
+  command: "make all"
+  master_script: "code/99_make_all.py"
+environment:
+  requirements_file: "requirements.txt"
+  environment_file: "environment.yml"
+  container_file: ""
+result_registry:
+  registry_path: "evidence/result_registry.csv"
+  result_index_path: "evidence/result_index.csv"
+provenance:
+  event_log: "events/event_log.jsonl"
+  provenance_dir: "outputs/.provenance"
+licenses:
+  data_license_notes: ""
+  code_license_notes: ""
+  redistribution_risks: []
+reproducibility:
+  last_reproduced_at: ""
+  reproduced_by: ""
+  command_log: ""
+  known_limitations: []

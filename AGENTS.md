@@ -418,6 +418,17 @@ Backfill is the bridge between governance automation and data repair automation.
 - Treat `harness/skill_map_core.yml` as the default map from external skill stages to AEROS stages, and `harness/skill_map_reference.md` as the non-core catalog.
 - A skill may propose, search, draft, code, or visualize; it may not override extraction-card rules, data feasibility rules, protected definitions, claim registry boundaries, critic review, or human gates.
 - If a skill's instruction conflicts with AEROS, follow AEROS and record the conflict in the run report.
+
+## External Economics Tool Rules
+
+Treat `harness/external_tool_registry.yml` as the registry for external economics references, adapters, and advisory agents.
+
+- Register new economics tools as `reference_index`, `adapter_candidate`, `external_standard`, `reference_pattern`, or `advisory_reviewer` before using them in an AEROS workflow.
+- External tools may generate candidates, notes, citations, endpoint metadata, or review memos. They may not approve gates, certify identification, certify claims, or bypass source-bound evidence.
+- OpenAlex, CitEc/RePEc, pyBiblioNet, and PreprintResolver are literature discovery adapters. Their output is candidate metadata until full-text extraction and citation audit rules are satisfied.
+- AEA Data Editor guidance is an external replication standard. Alignment helps package quality, but it does not certify journal acceptance or waive data-license, privacy, IRB, or redistribution constraints.
+- Econstellar-style endpoint reproducibility may be recorded in the result registry through local commands, public endpoints, and endpoint status. Endpoint availability does not prove the estimate, identification, or claim.
+- Econometrics-Agent, Causal-Copilot, and CausalAgent are advisory reviewers only. Route their output through AEROS result, identification, claim, and human-gate checks before it affects the paper.
 - Any task that uses a skill must have a passing skill invocation receipt in `agent_runs/skill_invocations/`.
 - `recommended_skills` are advisory routing hints; `allowed_skills` are the hard authorization boundary. A recommended skill must also be allowed by the task.
 

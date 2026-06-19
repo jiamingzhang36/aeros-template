@@ -30,6 +30,22 @@ required_record_fields:
   - output_path
   - output_artifact_hash
   - claim_type_eligibility
+optional_reproducibility_fields:
+  - reproducible_command_json
+  - public_endpoint
+  - endpoint_reproducibility_status
+endpoint_reproducibility:
+  inspiration: Econstellar-style reproducible endpoint or command lineage
+  allowed_statuses:
+    - not_applicable
+    - not_available
+    - local_command_recorded
+    - public_endpoint_recorded
+    - verified_public_endpoint
+  rules:
+    - public endpoint statuses require an http(s) public_endpoint
+    - local_command_recorded requires reproducible_command_json
+    - endpoint metadata strengthens reproducibility auditability but does not certify estimate correctness
 adapter_contract:
   python_statsmodels:
     status: implemented

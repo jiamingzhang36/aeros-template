@@ -257,9 +257,13 @@ layers:
     - harness/scope_calculus.yml
     - harness/result_adapter_contract.yml
     - harness/literature_fulltext_policy.yml
+    - harness/external_tool_registry.yml
+    - harness/econ_literature_discovery_policy.yml
+    - harness/aea_replication_policy.yml
     - harness/goal_mode_policy.yml
     - harness/work_lane_policy.yml
     - templates/result_registry_record.json
+    - templates/aea_data_package_manifest.yml
     - templates/evidence_delta_record.json
     - templates/update_ledger_entry.md
     - harness/probe_failure_taxonomy.yml
@@ -300,6 +304,8 @@ checks:
   estimand_cards: checks/check_estimand_cards.py
   artifact_admissibility: checks/check_artifact_admissibility.py
   result_registry: checks/check_result_registry.py
+  external_tool_registry: checks/check_external_tool_registry.py
+  aea_replication_alignment: checks/check_aea_replication_alignment.py
   meta_monitor: checks/check_meta_monitor.py
   identification_gate: checks/check_identification_gate.py
   claim_toulmin_schema: checks/check_claim_toulmin_schema.py

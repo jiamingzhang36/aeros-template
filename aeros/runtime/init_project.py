@@ -245,6 +245,63 @@ forbidden_cross_lane_substitutions:
   - data lane blocked -> task scaffolding
   - harness lane cleanup -> substantive research progress
 """,
+    "harness/external_tool_registry.yml": """version: "0.1"
+policy: AEROS-EXTERNAL-ECON-TOOLS-001
+principle: "External tools are advisory/reference/adapter candidates, not AEROS truth sources."
+default_status: advisory
+tools:
+  awesome_ai_for_economists: {lane: harness, role: reference_index, maturity: reference, url: "https://github.com/hanlulong/awesome-ai-for-economists", use_for: ["tool discovery"], evidence_output: ["external_tool_notes"], must_not_do: ["approve gates", "certify claims"]}
+  openalex: {lane: literature, role: adapter_candidate, maturity: stable_api, url: "https://docs.openalex.org/", use_for: ["metadata discovery"], evidence_output: ["discovery/literature/search_log.csv"], must_not_do: ["approve gates", "certify gap claims"]}
+  citec_repec: {lane: literature, role: adapter_candidate, maturity: stable_reference, url: "https://citec.repec.org/", use_for: ["econ citation graph discovery"], evidence_output: ["discovery/literature/citation_graph_edges.csv"], must_not_do: ["approve gates", "certify gap claims"]}
+  pybiblionet: {lane: literature, role: adapter_candidate, maturity: emerging_tool, url: "https://arxiv.org/abs/2601.16990", use_for: ["citation-network exploration"], evidence_output: ["discovery/literature/literature_network_notes.md"], must_not_do: ["approve gates", "replace full-text extraction"]}
+  preprintresolver: {lane: literature, role: adapter_candidate, maturity: advisory_resolver, url: "https://arxiv.org/abs/2309.01373", use_for: ["working-paper version resolution"], evidence_output: ["discovery/literature/preprint_resolution_log.csv"], must_not_do: ["approve gates", "bulk-resolve without review"]}
+  aea_data_editor: {lane: compliance, role: external_standard, maturity: external_policy, url: "https://aeadataeditor.github.io/", use_for: ["replication package alignment"], evidence_output: ["replication/aea_data_package_manifest.yml"], must_not_do: ["certify AEA acceptance", "approve gates"]}
+  opensourceeconomics: {lane: analysis, role: reference_index, maturity: reference, url: "https://github.com/OpenSourceEconomics", use_for: ["project-structure references"], evidence_output: ["external_tool_notes"], must_not_do: ["approve replication package", "certify claims"]}
+  econstellar: {lane: analysis, role: reference_pattern, maturity: emerging_reference, url: "https://arxiv.org/abs/2606.05705", use_for: ["endpoint reproducibility pattern"], evidence_output: ["evidence/result_registry.csv"], must_not_do: ["approve gates", "certify claims"]}
+  econometrics_agent: {lane: analysis, role: advisory_reviewer, maturity: emerging_tool, url: "https://github.com/FromCSUZhou/Econometrics-Agent", use_for: ["econometric workflow suggestions"], evidence_output: ["audits/advisory/econometrics_agent_notes.md"], must_not_do: ["approve gates", "certify identification", "certify claims"]}
+  causal_copilot: {lane: claim, role: advisory_reviewer, maturity: emerging_tool, url: "https://arxiv.org/abs/2504.13263", use_for: ["causal-risk brainstorming"], evidence_output: ["audits/advisory/causal_copilot_notes.md"], must_not_do: ["approve gates", "certify identification", "upgrade claim status"]}
+  causalagent: {lane: claim, role: advisory_reviewer, maturity: emerging_tool, url: "https://arxiv.org/abs/2602.11527", use_for: ["assumption-risk brainstorming"], evidence_output: ["audits/advisory/causalagent_notes.md"], must_not_do: ["approve gates", "certify identification", "upgrade claim status"]}
+""",
+    "harness/econ_literature_discovery_policy.yml": """version: "0.1"
+policy: AEROS-ECON-LIT-DISCOVERY-001
+principle: "Econ literature adapters produce candidates only; synthesis still requires full-text extraction cards."
+adapters:
+  openalex: {role: metadata_and_citation_candidate_source, default_output: ["discovery/literature/search_log.csv"], cannot_support: ["gap_claims"]}
+  citec_repec: {role: economics_citation_graph_candidate_source, default_output: ["discovery/literature/citation_graph_edges.csv"], cannot_support: ["gap_claims"]}
+  pybiblionet: {role: openalex_network_analysis_candidate_tool, default_output: ["discovery/literature/literature_network_notes.md"], cannot_support: ["synthesis_without_full_text_cards"]}
+  preprintresolver: {role: working_paper_to_published_version_resolver, default_output: ["discovery/literature/preprint_resolution_log.csv"], manual_review_required: true, cannot_support: ["bulk_identity_overwrite", "gap_claims", "synthesis_without_full_text_cards"]}
+required_artifacts_if_used:
+  - discovery/literature/search_log.csv
+  - discovery/literature/paper_registry.csv
+  - discovery/literature/citation_audit.md
+optional_artifacts_if_used:
+  - discovery/literature/citation_graph_edges.csv
+  - discovery/literature/preprint_resolution_log.csv
+  - discovery/literature/literature_network_notes.md
+hard_boundaries:
+  - Metadata and citation graph discovery are not literature review completion.
+  - Full-text extraction cards remain the minimum unit for synthesis support.
+""",
+    "harness/aea_replication_policy.yml": """version: "0.1"
+policy: AEROS-AEA-REPLICATION-ALIGNMENT-001
+external_standard: {name: AEA Data Editor replication package guidance, url: "https://aeadataeditor.github.io/"}
+principle: "Align replication packages with AEA-style expectations without certifying acceptance."
+required_manifest_fields: [package_id, status, standard_alignment, data_availability, code_entrypoint, environment, result_registry, provenance, licenses, reproducibility]
+required_package_artifacts: [README_replication.md, README_data.md, Makefile, requirements.txt, environment.yml, code/99_make_all.py, evidence/result_index.csv, evidence/result_registry.csv]
+allowed_statuses: [draft, internal_review, ready_for_human_review, submitted, blocked]
+non_goals: [certify_AEA_acceptance, waive_data_license_or_confidentiality_constraints, replace_human_policy_review]
+""",
+    "templates/aea_data_package_manifest.yml": """package_id: "AEA-PACKAGE-001"
+status: draft
+standard_alignment: {external_standard: "AEA Data Editor", reviewed_against_policy_url: "https://aeadataeditor.github.io/", reviewed_at: ""}
+data_availability: {statement_path: "data/README_data.md", public_data: [], restricted_data: [], synthetic_or_demo_data: []}
+code_entrypoint: {command: "make all", master_script: "code/99_make_all.py"}
+environment: {requirements_file: "requirements.txt", environment_file: "environment.yml", container_file: ""}
+result_registry: {registry_path: "evidence/result_registry.csv", result_index_path: "evidence/result_index.csv"}
+provenance: {event_log: "events/event_log.jsonl", provenance_dir: "outputs/.provenance"}
+licenses: {data_license_notes: "", code_license_notes: "", redistribution_risks: []}
+reproducibility: {last_reproduced_at: "", reproduced_by: "", command_log: "", known_limitations: []}
+""",
     "code/99_make_all.py": """#!/usr/bin/env python3
 print("AEROS project pipeline placeholder: configure automation.pipeline in project_manifest.yml")
 """,

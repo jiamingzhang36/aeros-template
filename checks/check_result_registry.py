@@ -19,6 +19,12 @@ from aeros.paper_ci.result_registry import (  # noqa: E402
     read_registry,
 )
 
+OPTIONAL_REGISTRY_FIELDS = {
+    "reproducible_command_json",
+    "public_endpoint",
+    "endpoint_reproducibility_status",
+}
+
 
 def main() -> int:
     root = Path.cwd()
@@ -32,7 +38,8 @@ def main() -> int:
     seen: set[str] = set()
 
     if rows:
-        missing_header = sorted(set(REGISTRY_FIELDS) - set(rows[0].keys()))
+        required_fields = set(REGISTRY_FIELDS) - OPTIONAL_REGISTRY_FIELDS
+        missing_header = sorted(required_fields - set(rows[0].keys()))
         if missing_header:
             failures.append(f"result_registry.csv missing column(s): {missing_header}")
 
@@ -56,6 +63,11 @@ def main() -> int:
                 json.loads(row.get(json_field) or "{}")
             except json.JSONDecodeError as exc:
                 failures.append(f"{result_id}: invalid {json_field}: {exc}")
+        if row.get("reproducible_command_json"):
+            try:
+                json.loads(row.get("reproducible_command_json") or "{}")
+            except json.JSONDecodeError as exc:
+                failures.append(f"{result_id}: invalid reproducible_command_json: {exc}")
 
         try:
             record = record_from_row(row)

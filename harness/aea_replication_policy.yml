@@ -1,0 +1,39 @@
+version: "0.1"
+policy: AEROS-AEA-REPLICATION-ALIGNMENT-001
+external_standard:
+  name: AEA Data Editor replication package guidance
+  url: "https://aeadataeditor.github.io/"
+principle: >
+  AEROS replication and Paper CI should align package structure and provenance
+  with AEA-style data editor expectations, while remaining honest that only the
+  journal/data editor can accept a package.
+required_manifest_fields:
+  - package_id
+  - status
+  - standard_alignment
+  - data_availability
+  - code_entrypoint
+  - environment
+  - result_registry
+  - provenance
+  - licenses
+  - reproducibility
+required_package_artifacts:
+  - README_replication.md
+  - README_data.md
+  - Makefile
+  - requirements.txt
+  - environment.yml
+  - code/99_make_all.py
+  - evidence/result_index.csv
+  - evidence/result_registry.csv
+allowed_statuses:
+  - draft
+  - internal_review
+  - ready_for_human_review
+  - submitted
+  - blocked
+non_goals:
+  - certify_AEA_acceptance
+  - waive_data_license_or_confidentiality_constraints
+  - replace_human_policy_review

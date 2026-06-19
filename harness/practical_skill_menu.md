@@ -77,3 +77,17 @@ or flag risks; none may approve gates, strengthen claims, or bypass registries.
   `journal-adapt`, `response-letter`.
 - Final review and release: `code-review-econ`, `replication-check`,
   `pre-submission-audit`, `bib-manager`, `zotero:Zotero`.
+
+## Economics external references and adapters
+
+These are tracked in `harness/external_tool_registry.yml`. They are useful, but
+not default operational skills.
+
+- Literature discovery candidates: OpenAlex, CitEc/RePEc, pyBiblioNet, PreprintResolver.
+- Replication standard: AEA Data Editor guidance.
+- Reproducible-number pattern: Econstellar-style endpoint or command metadata.
+- Advisory agents: Econometrics-Agent, Causal-Copilot, CausalAgent.
+
+Treat all four groups as candidate generators or advisory reviewers. They must
+not approve gates, certify identification, strengthen claims, or replace AEROS
+evidence/registry/provenance checks.

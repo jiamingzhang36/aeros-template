@@ -23,6 +23,13 @@
   "run_event_id": "",
   "output_path": "",
   "output_artifact_hash": "",
+  "reproducible_command": {
+    "cwd": ".",
+    "command": [],
+    "notes": "Optional Econstellar-style local reproduction command for this result."
+  },
+  "public_endpoint": "",
+  "endpoint_reproducibility_status": "not_applicable",
   "claim_type_eligibility": "",
   "adapter_name": "manual-adapter",
   "adapter_version": "0",

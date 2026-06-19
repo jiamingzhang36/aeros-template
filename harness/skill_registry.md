@@ -63,6 +63,17 @@ It maps common tasks to useful skill types:
 
 The menu is advisory. `harness/skill_map_core.yml` is the machine-readable core map, and `harness/skill_map_reference.md` stores the optional/reference catalog.
 
+## External Economics Advisory Tools
+
+The following external tools are registered in `harness/external_tool_registry.yml` as advisory/reference capabilities, not hard gates:
+
+- `Econometrics-Agent`: may suggest econometric workflow risks or specification review notes, but may not certify identification, approve a gate, or replace reproducible code/results.
+- `Causal-Copilot`: may suggest causal-identification risks, alternative explanations, or claim-ceiling concerns, but may not upgrade a claim or approve G3/G7/G12.
+- `CausalAgent`: may suggest graph/assumption/robustness concerns, but may not certify causality, certify identification, or replace human judgment.
+- `Econstellar`: is a design reference for reproducible endpoints and result lineage; AEROS records endpoint/command metadata in the result registry without treating endpoint availability as scientific truth.
+
+Use these tools only through advisory notes or future adapter candidates. Their output must be cited as advisory material and routed through the relevant AEROS evidence, result, claim, or gate checks before it affects the paper.
+
 ## Skill Use Status
 
 Each skill should be classified as:

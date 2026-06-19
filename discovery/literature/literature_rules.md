@@ -22,3 +22,14 @@
 19. A card supports substantive synthesis only when `Full Text Status` includes `full_text_obtained`, `Extraction Depth` is `full_text_extraction`, registry `evidence_basis` is `full_text` or `extraction_card`, and Direct Evidence Notes contain at least one page/section-bound non-placeholder row.
 20. Every function-specific synthesis must cite only verified full-text extraction cards and must state what each cited paper can and cannot support.
 21. Dashboard backlog repair is not literature review completion. Report it as bookkeeping or guardrail repair unless LIT-FULL/LIT-SYNTH/LIT-PAPER artifacts were produced.
+
+## Economics Discovery Adapter Boundaries
+
+OpenAlex, CitEc/RePEc, pyBiblioNet, and PreprintResolver are allowed as economics literature discovery adapters, not as evidence certifiers.
+
+- OpenAlex may generate metadata, author/source disambiguation, and citation-neighborhood candidates.
+- CitEc/RePEc may generate economics-specific citation graph candidates.
+- pyBiblioNet may help explore OpenAlex-based bibliometric networks.
+- PreprintResolver may propose working-paper/preprint to published-version matches, but identity resolution must be reviewed before overwriting registry identity or final bibliography entries.
+- Adapter outputs must be logged as discovery artifacts such as `search_log.csv`, `citation_graph_edges.csv`, `citation_audit.md`, or `preprint_resolution_log.csv`.
+- Adapter outputs cannot support gap claims, method claims, findings claims, or paper literature positioning until full-text extraction cards exist.

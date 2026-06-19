@@ -33,6 +33,9 @@ REGISTRY_FIELDS = [
     "run_event_id",
     "output_path",
     "output_artifact_hash",
+    "reproducible_command_json",
+    "public_endpoint",
+    "endpoint_reproducibility_status",
     "claim_type_eligibility",
     "adapter_name",
     "adapter_version",
@@ -50,6 +53,14 @@ ELIGIBILITY_ORDER = [
     "quasi_experimental_suggestive",
     "limited_causal",
 ]
+
+ENDPOINT_REPRODUCIBILITY_STATUSES = {
+    "not_applicable",
+    "not_available",
+    "local_command_recorded",
+    "public_endpoint_recorded",
+    "verified_public_endpoint",
+}
 
 
 def _sha256_file(path: Path) -> str:
@@ -112,6 +123,9 @@ class ResultRecord:
     run_event_id: str
     output_path: str = ""
     output_artifact_hash: str = ""
+    reproducible_command: dict[str, Any] | list[Any] | str = field(default_factory=dict)
+    public_endpoint: str = ""
+    endpoint_reproducibility_status: str = "not_applicable"
     claim_type_eligibility: str = ""
     adapter_name: str = "manual-adapter"
     adapter_version: str = "0"
@@ -138,6 +152,15 @@ class ResultRecord:
             run_event_id=str(payload.get("run_event_id", "")).strip(),
             output_path=output_path,
             output_artifact_hash=output_hash,
+            reproducible_command=(
+                payload.get("reproducible_command")
+                or payload.get("reproducible_command_json")
+                or {}
+            ),
+            public_endpoint=str(payload.get("public_endpoint", "")).strip(),
+            endpoint_reproducibility_status=str(
+                payload.get("endpoint_reproducibility_status") or "not_applicable"
+            ).strip(),
             claim_type_eligibility=eligibility,
             adapter_name=str(payload.get("adapter_name", "manual-adapter")).strip() or "manual-adapter",
             adapter_version=str(payload.get("adapter_version", "0")).strip() or "0",
@@ -164,6 +187,18 @@ class ResultRecord:
             failures.append(f"{self.result_id or '?'}: missing run_event_id")
         if self.claim_type_eligibility not in ELIGIBILITY_ORDER:
             failures.append(f"{self.result_id or '?'}: invalid claim_type_eligibility {self.claim_type_eligibility!r}")
+        if self.endpoint_reproducibility_status not in ENDPOINT_REPRODUCIBILITY_STATUSES:
+            failures.append(
+                f"{self.result_id or '?'}: invalid endpoint_reproducibility_status "
+                f"{self.endpoint_reproducibility_status!r}"
+            )
+        if self.endpoint_reproducibility_status in {"public_endpoint_recorded", "verified_public_endpoint"}:
+            if not self.public_endpoint.startswith(("http://", "https://")):
+                failures.append(
+                    f"{self.result_id or '?'}: public endpoint status requires http(s) public_endpoint"
+                )
+        if self.endpoint_reproducibility_status == "local_command_recorded" and not self.reproducible_command:
+            failures.append(f"{self.result_id or '?'}: local_command_recorded requires reproducible_command")
         if self.output_path and self.output_artifact_hash:
             full = Path(self.output_path)
             if not full.is_absolute() and root is not None:
@@ -190,6 +225,9 @@ class ResultRecord:
             "run_event_id": self.run_event_id,
             "output_path": self.output_path,
             "output_artifact_hash": self.output_artifact_hash,
+            "reproducible_command_json": _json(self.reproducible_command),
+            "public_endpoint": self.public_endpoint,
+            "endpoint_reproducibility_status": self.endpoint_reproducibility_status,
             "claim_type_eligibility": self.claim_type_eligibility,
             "adapter_name": self.adapter_name,
             "adapter_version": self.adapter_version,
@@ -216,6 +254,9 @@ def record_from_row(row: dict[str, str]) -> ResultRecord:
         run_event_id=row.get("run_event_id", ""),
         output_path=row.get("output_path", ""),
         output_artifact_hash=row.get("output_artifact_hash", ""),
+        reproducible_command=json.loads(row.get("reproducible_command_json") or "{}"),
+        public_endpoint=row.get("public_endpoint", ""),
+        endpoint_reproducibility_status=row.get("endpoint_reproducibility_status", "") or "not_applicable",
         claim_type_eligibility=row.get("claim_type_eligibility", ""),
         adapter_name=row.get("adapter_name", ""),
         adapter_version=row.get("adapter_version", ""),

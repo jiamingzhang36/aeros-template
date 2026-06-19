@@ -27,6 +27,7 @@ CHECKS = [
     "check_idea_bank.py",
     "check_feasibility_matrix.py",
     "check_literature_tools.py",
+    "check_external_tool_registry.py",
     "check_git_guardrails.py",
     "check_data_inventory.py",
     "check_data_first_readiness.py",
@@ -83,6 +84,7 @@ CHECKS = [
     "check_noop_runs.py",
     "check_pipeline_runs.py",
     "check_replication_package.py",
+    "check_aea_replication_alignment.py",
 ]
 
 

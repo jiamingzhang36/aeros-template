@@ -17,6 +17,20 @@ How to read this ledger:
 
 ## 2026-06-19
 
+### 2026-06-19 - External economics tool registry and replication alignment
+
+**Commit(s)**: `pending`
+
+**Action**: Added an external economics tool registry and advisory boundaries for OpenAlex, CitEc/RePEc, pyBiblioNet, PreprintResolver, AEA Data Editor guidance, OpenSourceEconomics, Econstellar, Econometrics-Agent, Causal-Copilot, and CausalAgent. Added econ literature discovery adapter policy, AEA replication alignment policy/template/check, external-tool registry check, and optional Econstellar-style reproducibility metadata in the result registry.
+
+**Alignment**: Lets AEROS borrow strong economics-specific infrastructure without turning external tools into truth sources. Literature adapters generate candidates, AEA guidance aligns replication packaging, endpoint metadata improves result reproducibility, and causal/econometrics agents remain advisory.
+
+**Non-goal**: Does not implement live API adapters, certify AEA acceptance, certify identification, upgrade claims, or replace full-text extraction, result provenance, human gates, or AEROS checks.
+
+**Drift risk**: The registry could become an ever-growing tool catalog. Keep tools registered only when they map to a lane, output artifact, and explicit forbidden uses.
+
+**Next check**: In the next economics project, use OpenAlex/CitEc/PreprintResolver only to produce candidate literature artifacts, and use AEA alignment only as a package checklist before human release review.
+
 ### 2026-06-19 - Unified evidence delta ledger
 
 **Commit(s)**: `8559333`
