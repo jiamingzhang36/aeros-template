@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-19 - Goal-mode data progress honesty gate
 
-**Commit(s)**: `pending`
+**Commit(s)**: `c9953b1`
 
 **Action**: Added a goal/continue-mode data-progress guard. Data-oriented action receipts that claim `substantive_research_progress` now require a real data/source/probe artifact, not only task files, scripts, run reports, receipts, README/Makefile edits, checks, or ledger entries. Added `harness/goal_mode_policy.yml`, `checks/check_goal_mode_data_progress.py`, a `source_discovery_attempt` progress label, run-report prompts, manifest/harness wiring, and sync/init-project propagation.
 
