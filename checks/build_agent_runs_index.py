@@ -112,6 +112,9 @@ def build_rows() -> list[dict[str, str]]:
 
 
 def write_index(rows: list[dict[str, str]]) -> None:
+    if not rows and INDEX_PATH.exists():
+        print(f"unchanged 0 row(s) -> {INDEX_PATH}")
+        return
     buffer = io.StringIO()
     writer = csv.DictWriter(buffer, fieldnames=RUN_METADATA_FIELDS)
     writer.writeheader()

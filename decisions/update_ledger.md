@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-19 - Side-effect-free harness smoke checks
 
-**Commit(s)**: `04f3925`
+**Commit(s)**: `04f3925`, `pending`
 
 **Action**: Made two harness smoke checks avoid unnecessary writes: `build_agent_runs_index.py` now leaves `agent_runs/INDEX.csv` untouched when rendered content is unchanged, and `check_pipeline_runs.py` compiles the master script in memory instead of invoking `py_compile` and writing `__pycache__`.
 
