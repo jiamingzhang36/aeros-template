@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-19 - Unified evidence delta ledger
 
-**Commit(s)**: `pending`
+**Commit(s)**: `8559333`
 
 **Action**: Added the thin evidence-delta ledger: one shared `evidence/delta_log.jsonl` across all lanes, `aeros delta append/list`, `templates/evidence_delta_record.json`, and `checks/check_evidence_delta_log.py`. Wired it into AGENTS, the run-report template, default harness, project manifest, init scaffold, sync script, and derived-vs-asserted audit.
 
