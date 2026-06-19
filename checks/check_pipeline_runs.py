@@ -96,19 +96,12 @@ def _smoke_check() -> int:
     if not MASTER_SCRIPT.exists():
         print(f"FAIL: missing master script {MASTER_SCRIPT}")
         return 1
-    compile_result = subprocess.run(
-        [sys.executable, "-m", "py_compile", str(MASTER_SCRIPT)],
-        check=False,
-        text=True,
-        capture_output=True,
-    )
-    if compile_result.stdout.strip():
-        print(compile_result.stdout.strip())
-    if compile_result.stderr.strip():
-        print(compile_result.stderr.strip())
-    if compile_result.returncode != 0:
-        print(f"FAIL: pipeline master script failed syntax check ({compile_result.returncode})")
-        return compile_result.returncode
+    try:
+        compile(MASTER_SCRIPT.read_text(encoding="utf-8"), str(MASTER_SCRIPT), "exec")
+    except SyntaxError as exc:
+        print(f"{exc.filename}:{exc.lineno}: {exc.msg}")
+        print("FAIL: pipeline master script failed syntax check (1)")
+        return 1
 
     manifest = yaml.safe_load(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else {}
     pipeline = ((manifest or {}).get("automation", {}) or {}).get("pipeline", {}) or {}

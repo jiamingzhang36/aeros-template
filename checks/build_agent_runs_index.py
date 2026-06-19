@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import csv
+import io
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -111,11 +112,16 @@ def build_rows() -> list[dict[str, str]]:
 
 
 def write_index(rows: list[dict[str, str]]) -> None:
+    buffer = io.StringIO()
+    writer = csv.DictWriter(buffer, fieldnames=RUN_METADATA_FIELDS)
+    writer.writeheader()
+    writer.writerows(rows)
+    content = buffer.getvalue()
+    if INDEX_PATH.exists() and INDEX_PATH.read_text(encoding="utf-8") == content:
+        print(f"unchanged {len(rows)} row(s) -> {INDEX_PATH}")
+        return
     INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with INDEX_PATH.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=RUN_METADATA_FIELDS)
-        writer.writeheader()
-        writer.writerows(rows)
+    INDEX_PATH.write_text(content, encoding="utf-8")
     print(f"wrote {len(rows)} row(s) -> {INDEX_PATH}")
 
 

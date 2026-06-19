@@ -17,6 +17,20 @@ How to read this ledger:
 
 ## 2026-06-19
 
+### 2026-06-19 - Side-effect-free harness smoke checks
+
+**Commit(s)**: `pending`
+
+**Action**: Made two harness smoke checks avoid unnecessary writes: `build_agent_runs_index.py` now leaves `agent_runs/INDEX.csv` untouched when rendered content is unchanged, and `check_pipeline_runs.py` compiles the master script in memory instead of invoking `py_compile` and writing `__pycache__`.
+
+**Alignment**: Reduces empty churn in checks themselves. Verification should observe project state and fail honestly; it should not manufacture file changes or pycache artifacts just to prove nothing changed.
+
+**Non-goal**: Does not change the meaning of agent-run index validation or pipeline smoke validation; it only removes incidental writes during validation.
+
+**Drift risk**: In-memory syntax compilation could miss packaging-time issues that `py_compile` would surface, but this check's contract is only syntax smoke, not bytecode-cache health.
+
+**Next check**: Full harness should pass in a restricted workspace without needing to write `agent_runs/INDEX.csv` or `code/__pycache__`.
+
 ### 2026-06-19 - Goal-mode data progress honesty gate
 
 **Commit(s)**: `c9953b1`
