@@ -5,7 +5,7 @@ fields:
   progress_label:
     current_status: asserted
     target_status: partly_derived
-    derive_from: [event_log, artifact_hash_delta, data_state_delta, action_receipt]
+    derive_from: [event_log, evidence_delta_log, artifact_hash_delta, data_state_delta, action_receipt]
     risk: progress laundering
   spec_run_index:
     current_status: asserted

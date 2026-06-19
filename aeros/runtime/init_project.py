@@ -40,6 +40,7 @@ DIRS = [
     "paper",
     "tasks/discovery",
     "tasks/execution",
+    "templates",
 ]
 
 
@@ -117,6 +118,24 @@ status: draft
   status: draft
 """,
     "evidence/claim_registry.md": """# Claim Registry
+""",
+    "templates/evidence_delta_record.json": """{
+  "version": 1,
+  "policy": "AEROS-EVIDENCE-DELTA-001",
+  "delta_id": "DATA-DELTA-001",
+  "created_at": "2026-06-19T00:00:00+00:00",
+  "lane": "data",
+  "task_id": "D005_data_probe",
+  "run_ref": "agent_runs/example.md",
+  "summary": "One short sentence describing the evidence increment.",
+  "artifacts_added": ["data/probes/example_probe.json"],
+  "artifacts_updated": [],
+  "coverage_delta": {"units": "+10"},
+  "judgment_implications": ["Feasibility improved but claim support remains insufficient."],
+  "remaining_gaps": ["Official source snapshot still missing."],
+  "next_best_increment": "Probe linkage quality for the newly added source.",
+  "sufficiency_for_current_purpose": "inventory_started"
+}
 """,
     "harness/human_review_receipt_template.md": """---
 receipt_type: human_review_receipt

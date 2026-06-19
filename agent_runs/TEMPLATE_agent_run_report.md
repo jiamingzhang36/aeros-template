@@ -30,6 +30,20 @@ Lane switch requested?
 
 TBD
 
+## Evidence Delta
+
+Every non-trivial lane run must either append to `evidence/delta_log.jsonl` with `aeros delta append ...` or explain why no evidence delta occurred.
+
+- Delta appended?
+  - [ ] Yes
+  - [ ] No, reason:
+- Delta ID:
+- Lane:
+- Artifacts added/updated:
+- Remaining gaps:
+- Next best increment:
+- Sufficiency for current purpose:
+
 ## Skills Used
 
 - TBD

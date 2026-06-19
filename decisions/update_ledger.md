@@ -17,6 +17,20 @@ How to read this ledger:
 
 ## 2026-06-19
 
+### 2026-06-19 - Unified evidence delta ledger
+
+**Commit(s)**: `pending`
+
+**Action**: Added the thin evidence-delta ledger: one shared `evidence/delta_log.jsonl` across all lanes, `aeros delta append/list`, `templates/evidence_delta_record.json`, and `checks/check_evidence_delta_log.py`. Wired it into AGENTS, the run-report template, default harness, project manifest, init scaffold, sync script, and derived-vs-asserted audit.
+
+**Alignment**: Captures the insight that literature and data grow incrementally rather than becoming "done" in one pass. Each lane run can now record what evidence changed, what coverage moved, what gaps remain, and the next best increment, without spawning per-lane ledgers.
+
+**Non-goal**: Does not approve gates, support claims by itself, or replace provenance, the research graph, result registry, or action receipts. It is a progress trace, not empirical evidence.
+
+**Drift risk**: Delta logging could become paperwork if agents append vague records without artifacts or next increments. The check requires concrete fields and artifact references for non-blocked/non-insufficient deltas.
+
+**Next check**: In the next real data or literature lane run, append one delta and confirm it helps explain the increment without creating separate data/literature ledger files.
+
 ### 2026-06-19 - Work lane router for separated research surfaces
 
 **Commit(s)**: `18c2e34`

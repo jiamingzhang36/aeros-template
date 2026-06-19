@@ -36,6 +36,7 @@ from .runtime.data_probe import run_probe as run_data_probe, write_probe_plan, w
 from .runtime.global_state import write_global_state
 from .paper_ci.result_registry import register_payload_file, sync_result_index
 from .runtime.decision_packet import write_decision_packet
+from .runtime.evidence_delta import EvidenceDeltaArgs, append_delta, read_delta_records
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
 from .runtime.kernel import _record_task_fingerprints, _task_gates, discover_contracts, topo_order
@@ -110,6 +111,70 @@ def _cmd_event_replay(args: argparse.Namespace) -> int:
             print(f"  - {violation}")
         return 1
     return 0
+
+
+def _parse_key_value_items(items: list[str] | None) -> dict[str, str]:
+    out: dict[str, str] = {}
+    for raw in items or []:
+        item = str(raw)
+        if "=" not in item:
+            out[item] = ""
+            continue
+        key, value = item.split("=", 1)
+        out[key.strip()] = value.strip()
+    return out
+
+
+def _cmd_delta(args: argparse.Namespace) -> int:
+    root = _project_root()
+    if args.delta_command == "append":
+        path, record, failures = append_delta(
+            root,
+            EvidenceDeltaArgs(
+                lane=args.lane,
+                summary=args.summary,
+                artifacts_added=args.artifact_added or [],
+                artifacts_updated=args.artifact_updated or [],
+                coverage_delta=_parse_key_value_items(args.coverage_delta),
+                judgment_implications=args.judgment_implication or [],
+                remaining_gaps=args.remaining_gap or [],
+                next_best_increment=args.next_best_increment,
+                sufficiency=args.sufficiency,
+                task_id=args.task_id or "",
+                run_ref=args.run_ref or "",
+                dry_run=args.dry_run,
+            ),
+        )
+        verb = "would append" if args.dry_run else "appended"
+        if failures:
+            print("delta is not valid:")
+            for failure in failures:
+                print(f"  - {failure}")
+            return 1
+        print(f"{verb} {record['delta_id']} -> {path.relative_to(root)}")
+        return 0
+    if args.delta_command == "list":
+        records, failures = read_delta_records(root)
+        if failures:
+            print("delta log is not valid:")
+            for failure in failures:
+                print(f"  - {failure}")
+            return 1
+        if args.lane:
+            records = [r for r in records if r.get("lane") == args.lane]
+        limit = max(int(args.limit or 20), 0)
+        rows = records[-limit:] if limit else records
+        if not rows:
+            print("no evidence deltas")
+            return 0
+        for record in rows:
+            print(
+                f"{record.get('delta_id')} lane={record.get('lane')} "
+                f"sufficiency={record.get('sufficiency_for_current_purpose')} "
+                f"summary={record.get('summary')}"
+            )
+        return 0
+    raise ValueError(f"unknown delta command: {args.delta_command}")
 
 
 
@@ -1054,6 +1119,39 @@ def main(argv: list[str] | None = None) -> int:
         action_receipt.add_argument("--" + flag, action="store_true")
     action_receipt.add_argument("--dry-run", action="store_true", help="validate without writing")
     action_receipt.set_defaults(func=_cmd_action_receipt)
+
+    delta = sub.add_parser("delta", help="append/list incremental evidence deltas")
+    delta_sub = delta.add_subparsers(dest="delta_command", required=True)
+    delta_append = delta_sub.add_parser("append", help="append one lane evidence delta")
+    delta_append.add_argument("--lane", required=True,
+                              choices=["data", "literature", "analysis", "claim", "writing", "compliance", "harness"],
+                              help="work lane this delta belongs to")
+    delta_append.add_argument("--summary", required=True, help="short description of what evidence changed")
+    delta_append.add_argument("--artifact-added", action="append", default=[],
+                              help="artifact path added by this delta")
+    delta_append.add_argument("--artifact-updated", action="append", default=[],
+                              help="artifact path updated by this delta")
+    delta_append.add_argument("--coverage-delta", action="append", default=[],
+                              help="coverage delta as key=value; repeatable")
+    delta_append.add_argument("--judgment-implication", action="append", default=[],
+                              help="implication for design/claim/paper judgment; repeatable")
+    delta_append.add_argument("--remaining-gap", action="append", default=[],
+                              help="remaining gap after this delta; repeatable")
+    delta_append.add_argument("--next-best-increment", required=True,
+                              help="next best evidence increment for this lane")
+    delta_append.add_argument("--sufficiency", required=True,
+                              choices=["insufficient", "inventory_started", "minimum_viable", "expanding", "locked_for_current_analysis", "reopened", "blocked"],
+                              help="current sufficiency for this lane/purpose")
+    delta_append.add_argument("--task-id", default="", help="task id that produced this delta")
+    delta_append.add_argument("--run-ref", default="", help="run report, receipt, or external reference")
+    delta_append.add_argument("--dry-run", action="store_true", help="validate without writing")
+    delta_append.set_defaults(func=_cmd_delta)
+    delta_list = delta_sub.add_parser("list", help="list recent evidence deltas")
+    delta_list.add_argument("--lane", default="",
+                            choices=["", "data", "literature", "analysis", "claim", "writing", "compliance", "harness"],
+                            help="filter by lane")
+    delta_list.add_argument("--limit", type=int, default=20, help="number of recent records to show")
+    delta_list.set_defaults(func=_cmd_delta)
 
     manifest_p = sub.add_parser("manifest",
                                 help="snapshot/verify SHA256 of registered result artifacts")

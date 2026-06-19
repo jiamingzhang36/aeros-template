@@ -243,6 +243,27 @@ Lane rules:
 - Writing lane completion edits bounded prose tied to registered claims and numbers; it does not strengthen claims.
 - Harness lane completion repairs automation/checks/templates; it must be reported as harness progress, not research progress.
 
+## Evidence Delta Rules
+
+Literature, data, analysis, claims, and writing accumulate incrementally. Do not report a lane as simply "done" when the real contribution is a smaller evidence increment.
+
+- Use one shared delta ledger: `evidence/delta_log.jsonl`.
+- Do not create separate `data_delta_log`, `literature_delta_log`, or per-lane duplicate ledgers unless the human explicitly asks.
+- After a non-trivial lane run, append a delta with `aeros delta append ...` or state clearly in the run report why there was no evidence delta.
+- Each delta records: lane, artifacts added/updated, coverage delta, judgment implications, remaining gaps, next best increment, and sufficiency for the current purpose.
+- A delta is not a gate approval, not claim support by itself, and not a substitute for provenance or the research graph.
+- Prefer delta language over completion language:
+
+```text
+added evidence / changed coverage / remaining gap / next increment
+```
+
+rather than:
+
+```text
+literature done / data done / paper done
+```
+
 ## Data-First Execution Rules
 
 In an active or adopted research project, data state drives the next action. Do not let a task/gate/check sequence substitute for evidence about what data exists, what is missing, and what can safely be collected.

@@ -209,6 +209,7 @@ layers:
     - discovery/PROMOTE_TO_HARNESS.md
     - docs/method_card.md
     - evidence/claim_registry.md
+    - evidence/delta_log.jsonl
     - evidence/research_graph.yml
     - decisions/decision_log.md
     - decisions/revision_log.md
@@ -259,6 +260,7 @@ layers:
     - harness/goal_mode_policy.yml
     - harness/work_lane_policy.yml
     - templates/result_registry_record.json
+    - templates/evidence_delta_record.json
     - templates/update_ledger_entry.md
     - harness/probe_failure_taxonomy.yml
     - aeros/state/global_state.yml
@@ -293,6 +295,7 @@ checks:
   derived_vs_asserted_audit: checks/check_derived_vs_asserted_audit.py
   preanalysis_happens_before: checks/check_preanalysis_happens_before.py
   event_log_replay: checks/check_event_log_replay.py
+  evidence_delta_log: checks/check_evidence_delta_log.py
   negative_result_ledger: checks/check_negative_result_ledger.py
   estimand_cards: checks/check_estimand_cards.py
   artifact_admissibility: checks/check_artifact_admissibility.py
