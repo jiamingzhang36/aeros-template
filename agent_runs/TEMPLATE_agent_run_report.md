@@ -64,7 +64,9 @@ TBD
 
 ## Commands Run
 
-TBD
+| Command | Exit Code | Purpose | Output / log path |
+|---|---:|---|---|
+| TBD | TBD | TBD | TBD |
 
 ## Outputs Changed
 
@@ -72,9 +74,9 @@ TBD
 
 ## Checks Run
 
-| Check | Result | Notes |
-|---|---|---|
-| TBD | TBD | TBD |
+| Check | Command | Exit Code | Result | Notes |
+|---|---|---:|---|---|
+| TBD | TBD | TBD | TBD | TBD |
 
 ## Protected Definitions
 
@@ -115,12 +117,28 @@ Choose one:
 - complete
 - partial
 - blocked
+- hygiene
+
+## Completion Attestation Boundary
+
+Completion attestation is mechanical. State what this run does not prove.
+
+- Does not prove scientific validity:
+- Does not prove identification quality:
+- Does not prove claim support:
+- Does not prove human gate approval:
 
 ## Completion Receipt
 
 Path: `agent_runs/completion_receipts/<task_id>_completion_receipt.yml`
 
 Status: TBD
+
+Receipt version:
+
+Substantive output artifact(s):
+
+Check command/exit-code evidence:
 
 ## Action Receipt
 

@@ -70,7 +70,8 @@ TBD
 - Expected output exists.
 - Required checks pass or failures are documented.
 - Agent run report is complete.
-- Completion receipt exists and passes.
+- Version-2 completion receipt exists and passes.
+- Completion receipt records substantive allowed outputs, output hashes for files, check commands, exit codes, and `does_not_prove` boundaries.
 - Critic report is complete when required.
 - Human decision is logged when required.
 

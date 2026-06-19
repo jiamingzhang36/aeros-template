@@ -137,6 +137,25 @@ status: draft
   "sufficiency_for_current_purpose": "inventory_started"
 }
 """,
+    "templates/completion_attestation.yml": """version: 2
+task_id: T000
+generated_at: ""
+completion_mode: agent_run
+declared_outcome: complete
+work_lane: data
+allowed_outputs_expected: []
+actual_outputs: []
+checks_required: []
+check_attestations: []
+evidence_delta_ref: ""
+substantive_progress: false
+does_not_prove:
+  - scientific validity
+  - identification quality
+  - claim support
+  - human gate approval
+completion_verdict: fail
+""",
     "harness/human_review_receipt_template.md": """---
 receipt_type: human_review_receipt
 status: draft
@@ -244,6 +263,22 @@ forbidden_cross_lane_substitutions:
   - data lane blocked -> literature cleanup
   - data lane blocked -> task scaffolding
   - harness lane cleanup -> substantive research progress
+""",
+    "harness/completion_attestation_policy.yml": """version: "0.1"
+policy: AEROS-COMPLETION-ATTESTATION-001
+principle: "Completion is a small mechanical attestation, not a research verdict."
+minimal_attestation_fields: [task_id, declared_outcome, work_lane, allowed_outputs_expected, actual_outputs, check_attestations, substantive_progress, does_not_prove]
+allowed_declared_outcomes: [complete, partial, blocked, hygiene]
+passed_task_rule:
+  declared_outcome: complete
+  requires:
+    - at least one substantive allowed output outside agent_runs/
+    - file outputs include sha256
+    - every required check has command and exit_code
+    - completion_verdict is pass
+does_not_prove_defaults: [scientific validity, identification quality, claim support, human gate approval]
+non_goals: [decide whether a result is true, approve gates, upgrade claims, replace evidence delta logs or provenance manifests]
+enforced_by: [checks/check_completion_receipts.py, checks/check_noop_runs.py]
 """,
     "harness/external_tool_registry.yml": """version: "0.1"
 policy: AEROS-EXTERNAL-ECON-TOOLS-001

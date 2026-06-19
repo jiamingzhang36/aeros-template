@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -39,6 +40,39 @@ def _exists(root: Path, rel: str) -> bool:
     return bool(rel) and (root / rel).exists()
 
 
+def _sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def _artifact_record(root: Path, rel: str) -> dict[str, Any]:
+    path = root / rel
+    record: dict[str, Any] = {
+        "path": rel,
+        "exists": path.exists(),
+        "type": "missing",
+        "sha256": "",
+        "bytes": 0,
+    }
+    if path.is_file():
+        record.update({
+            "type": "file",
+            "sha256": _sha256_file(path),
+            "bytes": path.stat().st_size,
+        })
+    elif path.is_dir():
+        # Keep directory evidence lightweight: existence + direct child count.
+        # Detailed directory lineage belongs in artifact/provenance manifests.
+        record.update({
+            "type": "directory",
+            "entries": len(list(path.iterdir())),
+        })
+    return record
+
+
 def _receipt_path(project_root: Path, task_id: str) -> Path:
     return project_root / RECEIPT_DIR / f"{task_id}_completion_receipt.yml"
 
@@ -61,6 +95,22 @@ def _check_rows(check_results: list[Any] | None) -> tuple[list[str], list[str], 
         required.append(name)
         (passed if ok else failed).append(name)
     return required, passed, failed
+
+
+def _check_attestations(check_results: list[Any] | None) -> list[dict[str, Any]]:
+    attestations: list[dict[str, Any]] = []
+    for item in check_results or []:
+        name = str(getattr(item, "name", "") or "")
+        if not name:
+            continue
+        attestations.append({
+            "name": name,
+            "passed": bool(getattr(item, "passed", False)),
+            "command": list(getattr(item, "command", []) or []),
+            "exit_code": int(getattr(item, "exit_code", 0 if getattr(item, "passed", False) else 1)),
+            "elapsed_seconds": float(getattr(item, "elapsed_seconds", 0.0) or 0.0),
+        })
+    return attestations
 
 
 def _check_key(name: str) -> str:
@@ -96,6 +146,11 @@ def write_completion_receipt(
     expected = [str(p) for p in contract.allowed_outputs]
     found = [p for p in expected if _exists(project_root, p)]
     missing_outputs = [p for p in expected if not _exists(project_root, p) and p != "agent_runs"]
+    output_records = [_artifact_record(project_root, p) for p in expected]
+    substantive_outputs = [
+        row for row in output_records
+        if row.get("exists") and not str(row.get("path", "")).rstrip("/").startswith("agent_runs")
+    ]
     report_rel = _rel(project_root, run_report_path) or latest_run_report(project_root, contract.task_id)
     receipt_required = contract.evidence_receipt_required
     evidence_receipt_exists = _exists(project_root, contract.receipt_path) if receipt_required else False
@@ -106,6 +161,8 @@ def write_completion_receipt(
         failures.append("receipt check list does not match task contract checks")
     if checks_failed:
         failures.append("one or more required checks failed")
+    if not substantive_outputs:
+        failures.append("no substantive allowed output artifact exists")
     if mode == "agent_run" and not report_rel:
         failures.append("agent run completion requires a run report")
     if receipt_required and not evidence_receipt_exists:
@@ -119,11 +176,13 @@ def write_completion_receipt(
 
     verdict = "fail" if failures else "pass"
     payload = {
-        "version": 1,
+        "version": 2,
         "task_id": contract.task_id,
         "generated_at": _now(),
         "completion_mode": mode,
         "claimed_status": "passed",
+        "declared_outcome": "complete",
+        "work_lane": contract.work_lane,
         "contract_path": _rel(project_root, contract.path) if contract.path else "",
         "automation_class": contract.automation_class,
         "gate_status": contract.gate_status,
@@ -132,17 +191,27 @@ def write_completion_receipt(
         "allowed_outputs_expected": expected,
         "allowed_outputs_found": found,
         "allowed_outputs_missing": missing_outputs,
+        "actual_outputs": output_records,
         "checks_required": list(contract.checks),
         "checks_run": required,
         "checks_passed": checks_passed,
         "checks_failed": checks_failed,
+        "check_attestations": _check_attestations(check_results),
         "evidence_receipt_required": receipt_required,
         "evidence_receipt_path": contract.receipt_path,
         "evidence_receipt_exists": evidence_receipt_exists,
+        "evidence_delta_ref": "",
+        "substantive_progress": bool(substantive_outputs),
         "protected_definition_change_declared": False,
         "claim_change_declared": False,
         "human_decision_needed": bool(human_decision_needed),
         "open_issues": issues,
+        "does_not_prove": [
+            "scientific validity",
+            "identification quality",
+            "claim support",
+            "human gate approval",
+        ],
         "input_fingerprint": input_fingerprint,
         "output_fingerprint": output_fingerprint,
         "dependency_fingerprint": dependency_fingerprint,
@@ -178,12 +247,38 @@ def validate_completion_receipts(project_root: Path, contracts: dict[str, tuple[
             failures.append(f"{task_id}: completion receipt verdict is not pass")
         if payload.get("task_id") != task_id:
             failures.append(f"{task_id}: completion receipt task_id mismatch")
+        if int(payload.get("version") or 1) < 2:
+            failures.append(f"{task_id}: completion receipt is legacy version <2; rerun recover --check or revalidate")
+        if payload.get("declared_outcome") != "complete":
+            failures.append(f"{task_id}: completion receipt declared_outcome is not complete")
+        if payload.get("work_lane") != contract.work_lane:
+            failures.append(f"{task_id}: completion receipt work_lane does not match contract")
         if not _same_check_set(list(payload.get("checks_required") or []), list(contract.checks)):
             failures.append(f"{task_id}: completion receipt checks do not match contract")
         if not _same_check_set(list(payload.get("checks_run") or []), list(contract.checks)):
             failures.append(f"{task_id}: completion receipt does not record all required checks")
         if payload.get("checks_failed"):
             failures.append(f"{task_id}: completion receipt records failed checks")
+        actual_outputs = list(payload.get("actual_outputs") or [])
+        substantive_outputs = [
+            row for row in actual_outputs
+            if row.get("exists") and not str(row.get("path", "")).rstrip("/").startswith("agent_runs")
+        ]
+        if not substantive_outputs:
+            failures.append(f"{task_id}: completion receipt has no substantive output artifact")
+        for row in substantive_outputs:
+            if row.get("type") == "file" and not row.get("sha256"):
+                failures.append(f"{task_id}: file output lacks sha256: {row.get('path')}")
+        check_attestations = list(payload.get("check_attestations") or [])
+        if len(check_attestations) != len(contract.checks):
+            failures.append(f"{task_id}: completion receipt lacks check attestations")
+        for row in check_attestations:
+            if not row.get("command"):
+                failures.append(f"{task_id}: check attestation missing command for {row.get('name')}")
+            if row.get("exit_code") not in (0,):
+                failures.append(f"{task_id}: check attestation records nonzero exit for {row.get('name')}")
+        if not payload.get("does_not_prove"):
+            failures.append(f"{task_id}: completion receipt missing does_not_prove boundary")
         if contract.evidence_receipt_required and not payload.get("evidence_receipt_exists"):
             failures.append(f"{task_id}: required evidence receipt missing in completion receipt")
         if contract.automation_class == "approval_required" and contract.gate_status.startswith("blocked_"):

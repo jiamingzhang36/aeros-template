@@ -260,11 +260,13 @@ layers:
     - harness/external_tool_registry.yml
     - harness/econ_literature_discovery_policy.yml
     - harness/aea_replication_policy.yml
+    - harness/completion_attestation_policy.yml
     - harness/goal_mode_policy.yml
     - harness/work_lane_policy.yml
     - templates/result_registry_record.json
     - templates/aea_data_package_manifest.yml
     - templates/evidence_delta_record.json
+    - templates/completion_attestation.yml
     - templates/update_ledger_entry.md
     - harness/probe_failure_taxonomy.yml
     - aeros/state/global_state.yml

@@ -17,6 +17,20 @@ How to read this ledger:
 
 ## 2026-06-19
 
+### 2026-06-19 - Lightweight completion attestation
+
+**Commit(s)**: `uncommitted`
+
+**Action**: Upgraded task completion from a generic receipt into a version-2 minimal attestation. New receipts record active lane, declared outcome, substantive allowed outputs, file hashes when applicable, check commands, exit codes, and explicit boundaries for what completion does not prove. Added a compact completion attestation policy/template and wired it into AGENTS, run-report guidance, project manifest, sync, and init scaffolding.
+
+**Alignment**: Prevents agents from claiming "complete" from a filled run report or vague check summary, while keeping the rule small and mechanical. Completion proves process evidence, not scientific truth.
+
+**Non-goal**: Does not decide whether results are true, identification is strong, claims are supported, or gates are approved.
+
+**Drift risk**: Completion receipts could become paperwork if fields expand beyond mechanical evidence. Keep this layer limited to outputs, hashes, commands, exit codes, and boundaries.
+
+**Next check**: On the next real task recovery, confirm a passed task writes a version-2 receipt and that legacy or output-free completions fail cleanly.
+
 ### 2026-06-19 - External economics tool registry and replication alignment
 
 **Commit(s)**: `99937bd`

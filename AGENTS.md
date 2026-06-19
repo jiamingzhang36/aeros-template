@@ -274,6 +274,8 @@ In an active or adopted research project, data state drives the next action. Do 
 - Local-cache-safe data repair may run only when a queue item is `auto_rerunnable` and has an explicit `run_command`.
 - Official-source, API, credentialed, scraping, source-date-sensitive, or LLM-extraction work must be blocked for approval or receipt until the human accepts the source snapshot and terms/credential implications.
 - A passed task must produce a substantive allowed output; logs alone are not completion.
+- A task is not complete merely because the run report is filled. A passed task requires a version-2 completion attestation with actual outputs, file hashes when applicable, check commands, exit codes, and an explicit `does_not_prove` boundary.
+- Completion attestation is mechanical only. It proves that declared task outputs and checks exist; it does not prove scientific validity, identification quality, claim support, or human gate approval.
 - If a task declares `recommended_skills` or `required_skill_classes`, the skill receipt must record either the invoked skill(s) or a waiver explaining why the skill was not used.
 
 
@@ -445,7 +447,8 @@ Treat `harness/external_tool_registry.yml` as the registry for external economic
 
 - The requested output exists.
 - The run report is complete.
-- A completion receipt exists and passes for any task claimed complete.
+- A version-2 completion receipt exists and passes for any task claimed complete.
+- The completion receipt records substantive allowed outputs, output hashes for files, check commands, exit codes, and what completion does not prove.
 - Protected definitions were not changed, or changes were explicitly flagged.
 - Open issues requiring human judgment are listed.
 - Mechanical checks were run when relevant.
@@ -468,6 +471,7 @@ conflicts with the points below, prefer these.
 - If work was not run, the task is classified with an explicit automation/gate status and any required evidence receipt exists.
 - Treat validation projects as pressure tests, not template sources. Lessons may be generalized into harness rules, checks, or task templates, but project-specific data and conclusions must stay inside the validation project.
 - Do not state that a task is complete unless the runtime has written a passing completion receipt in `agent_runs/completion_receipts/`.
+- Do not use completion language for partial, blocked, or hygiene-only runs; say `partial`, `blocked`, or `hygiene` and record the blocker or limited scope.
 
 
 ## Kernel Anti-Creep and Scope Rules
