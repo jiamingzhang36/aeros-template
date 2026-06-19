@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-19 - External economics tool registry and replication alignment
 
-**Commit(s)**: `pending`
+**Commit(s)**: `99937bd`
 
 **Action**: Added an external economics tool registry and advisory boundaries for OpenAlex, CitEc/RePEc, pyBiblioNet, PreprintResolver, AEA Data Editor guidance, OpenSourceEconomics, Econstellar, Econometrics-Agent, Causal-Copilot, and CausalAgent. Added econ literature discovery adapter policy, AEA replication alignment policy/template/check, external-tool registry check, and optional Econstellar-style reproducibility metadata in the result registry.
 
