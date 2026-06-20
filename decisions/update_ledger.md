@@ -17,6 +17,31 @@ How to read this ledger:
 
 ## 2026-06-20
 
+### 2026-06-20 - Guard against unpushable large files (check_no_large_files)
+
+**Commit(s)**: `pending`
+
+**Action**: Added `checks/check_no_large_files.py` and wired it into
+`check_git_guardrails.py` (already in the harness runner). It fails if any
+git-tracked file exceeds GitHub's 100 MiB hard limit, surfacing the problem in the
+harness instead of at push time. Default threshold = 100 MiB (only fires on
+genuinely unpushable files → zero false positives; LIMIT_MB is lowered easily for
+stricter hygiene). Motivated by a real CMPD blocker: an autonomous run committed a
+162 MB backup tarball that rejected the whole push and required a history rewrite.
+
+**Alignment**: Keeps repos pushable and lean, and stops an autonomous run from
+silently wedging a project's remote. A path-based `.gitignore` only helps if the
+path matches; this check catches an oversized tracked file anywhere.
+
+**Non-goal**: Does not scan deep history (only the current tracked tree), does not
+auto-remove or LFS-migrate offenders, and does not replace `.gitignore` hygiene.
+
+**Drift risk**: The 100 MiB default could let 50–100 MB files accumulate; projects
+that care can lower LIMIT_MB. Keep it a size gate, not a data-policy engine.
+
+**Next check**: After syncing a project, confirm a deliberately oversized tracked
+file fails the harness and a normal tree passes.
+
 ### 2026-06-20 - Sync script takes project args (no hardcoded project list)
 
 **Commit(s)**: `4ab2046`

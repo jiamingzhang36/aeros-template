@@ -11,6 +11,7 @@ from pathlib import Path
 GUARDRAIL_CHECKS = [
     "check_no_raw_data_changes.py",
     "check_no_placeholders.py",
+    "check_no_large_files.py",
 ]
 
 
