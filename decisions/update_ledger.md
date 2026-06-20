@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-20 - Reconcile framework drift: port CMPD improvements up
 
-**Commit(s)**: `pending`
+**Commit(s)**: `0c5fdce`
 
 **Action**: Closed bidirectional drift between the template and the CMPD vendored
 copy. Ported two CMPD-only framework improvements *up* to the template before
