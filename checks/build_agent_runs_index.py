@@ -116,11 +116,11 @@ def write_index(rows: list[dict[str, str]]) -> None:
         print(f"unchanged 0 row(s) -> {INDEX_PATH}")
         return
     buffer = io.StringIO()
-    writer = csv.DictWriter(buffer, fieldnames=RUN_METADATA_FIELDS)
+    writer = csv.DictWriter(buffer, fieldnames=RUN_METADATA_FIELDS, lineterminator="\n")
     writer.writeheader()
     writer.writerows(rows)
     content = buffer.getvalue()
-    if INDEX_PATH.exists() and INDEX_PATH.read_text(encoding="utf-8") == content:
+    if INDEX_PATH.exists() and INDEX_PATH.read_bytes() == content.encode("utf-8"):
         print(f"unchanged {len(rows)} row(s) -> {INDEX_PATH}")
         return
     INDEX_PATH.parent.mkdir(parents=True, exist_ok=True)

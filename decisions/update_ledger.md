@@ -17,6 +17,38 @@ How to read this ledger:
 
 ## 2026-06-20
 
+### 2026-06-20 - Reconcile framework drift: port CMPD improvements up
+
+**Commit(s)**: `pending`
+
+**Action**: Closed bidirectional drift between the template and the CMPD vendored
+copy. Ported two CMPD-only framework improvements *up* to the template before
+syncing down: (1) `aeros/runtime/skill_receipt.py` auto-writes a
+`mechanical_revalidation` skill waiver when a task declares recommended skills but
+the receipt is a check-only revalidation with no skills used; (2)
+`checks/build_agent_runs_index.py` uses `lineterminator="\n"` + byte-exact compare
+for deterministic index writing. The remaining diverged files (skill_router,
+skill_registry/invocation/menu, check_skill_layer) were template-ahead and go down
+via the forward-only sync.
+
+**Alignment**: Restores the single-source-of-truth invariant — the framework lives
+in the template and projects vendor it. CMPD had drifted *ahead* on skill_receipt
+(the auto-waiver used during its v2 receipt migration), which a naive sync would
+have destroyed; porting up first prevents that loss.
+
+**Non-goal**: Does not relocate project-owned files that live under `aeros/`
+(project_contract.yml, task_registry.csv, state/, and CMPD-specific gate_map /
+replication_guardrails / status_board) — per Framework Propagation Discipline the
+sync tolerates these and they must not be moved.
+
+**Drift risk**: Bidirectional drift recurs whenever framework code is hand-edited
+inside a project. Mitigation is procedural: develop framework changes in the
+template, propagate only via `tools/sync_aeros_latest.zsh`.
+
+**Next check**: After syncing CMPD, confirm `diff -rq` of aeros/checks/harness
+(excluding project-owned files) is clean and both harnesses stay green.
+
+
 ### 2026-06-20 - Completion attestation v2 validated on a real project
 
 **Commit(s)**: `30dd9fb` (template ledger note); rollout landed in CMPD as `f69fcdd3` + `275c85ee`

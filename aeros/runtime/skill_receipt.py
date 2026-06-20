@@ -79,6 +79,16 @@ def write_skill_invocation_receipt(
             "human_gate_required": bool(meta.get("human_gate_required", False)),
             "aeros_constraints": meta.get("aeros_constraints", []),
         })
+    if recommended and not records and not waivers:
+        waivers = [{
+            "skill_class": "recommended_skills",
+            "scope": "mechanical_revalidation",
+            "reason": (
+                "Runtime wrote this receipt during mechanical revalidation of existing "
+                "artifacts; no external skill was invoked."
+            ),
+            "progress_label": "mechanical_hygiene",
+        }]
     payload = {
         "version": 1,
         "task_id": contract.task_id,
