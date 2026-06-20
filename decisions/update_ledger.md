@@ -15,6 +15,22 @@ How to read this ledger:
 - `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
 - `Next check`: what should be watched in the next real project run.
 
+## 2026-06-20
+
+### 2026-06-20 - Completion attestation v2 validated on a real project
+
+**Commit(s)**: `1dc585f` (template ledger note); rollout landed in CMPD as `f69fcdd3` + `275c85ee`
+
+**Action**: Ran the v2 completion-attestation feature end to end on a real project (CMPD). Confirmed the migration path: 17 legacy v1 receipts were regenerated to v2 via `aeros recover <task> --check` (each task's own checks re-run and passed), and `recover` auto-wrote `mechanical_revalidation` skill waivers for tasks declaring recommended skills. Final state: 18/18 v2 receipts, full harness green.
+
+**Alignment**: Closes the prior entry's "Next check". The v2 layer is now evidence-backed on a live project, not just wired and template-tested. Concretely demonstrated both halves: a passed task writes a valid v2 receipt, and a legacy v1 receipt fails cleanly with `legacy version <2`.
+
+**Non-goal**: Validates the `recover`/revalidation migration path on one project; does not certify CMPD's research conclusions, and does not prove the path generalizes to projects whose task checks fail under v2 (those correctly will not recover).
+
+**Drift risk**: Two real gotchas surfaced and should be watched on the next rollout: (1) introducing v2 turns every downstream project's existing v1 receipts red until migrated — sync must be paired with a `recover` pass; (2) a stale `.pyc` left a skill waiver empty on first recover, so a clean run (or pyc clear) may be needed.
+
+**Next check**: On a project where some task's checks legitimately fail under v2, confirm `recover` refuses it and the task stays non-passed with an honest status rather than getting a green receipt.
+
 ## 2026-06-19
 
 ### 2026-06-19 - Lightweight completion attestation
