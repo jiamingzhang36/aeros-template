@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-20 - Related-work positioning of AEROS (provisional)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `f5157f3`
 
 **Action**: Ran the AEROS literature workflow (search → registry → extraction →
 synthesis) on the autonomous-/LLM-research literature to locate AEROS's niche;
