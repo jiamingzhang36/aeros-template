@@ -17,6 +17,34 @@ How to read this ledger:
 
 ## 2026-06-20
 
+### 2026-06-20 - Related-work positioning of AEROS (provisional)
+
+**Commit(s)**: `pending`
+
+**Action**: Ran the AEROS literature workflow (search → registry → extraction →
+synthesis) on the autonomous-/LLM-research literature to locate AEROS's niche;
+wrote `docs/related_work_autonomous_research.md`. Finding: the field already
+imitates the staged research workflow (AI Scientist, Agent Laboratory, FARS), but
+the literature's own consensus is that the bottleneck is *validation, not
+generation* (the "plausible pseudo-science" risk), and few systems make an
+integrity/admissibility layer first-class. Closest analogs: HLER (human-in-the-loop
+econ) and AIGS (falsification-as-engine).
+
+**Alignment**: Grounds AEROS's design bet (claim ceiling + evidence admissibility +
+human gates) in external literature instead of self-assertion, and names concretely
+what AEROS can borrow (AIGS falsification engine; HLER stage decomposition).
+
+**Non-goal**: Not a systematic review; extraction stayed below AEROS's full-text
+bar (2 of 5 fetched, machine-summarized). It is a positioning hypothesis, not a
+verified gap claim — honestly graded as such in the doc.
+
+**Drift risk**: A related-work doc could ossify into self-justification. Keep it
+provisional and re-extract at full-text depth before it supports any formal claim.
+
+**Next check**: If AEROS's positioning matters for a paper/grant, promote L1/L2/L4
+to real full-text extraction cards and re-verify the table.
+
+
 ### 2026-06-20 - Framework failure-paths validated on CMPD
 
 **Commit(s)**: `3818122`
