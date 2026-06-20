@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-20 - Sync script takes project args (no hardcoded project list)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `4ab2046`
 
 **Action**: Rewrote `tools/sync_aeros_latest.zsh` to accept project paths as
 arguments (`sync_aeros_latest.zsh <path> [<path>...]`) instead of three hardcoded
