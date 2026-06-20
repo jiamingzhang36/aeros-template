@@ -17,6 +17,37 @@ How to read this ledger:
 
 ## 2026-06-20
 
+### 2026-06-20 - Design proposal: Claim Falsification Engine
+
+**Commit(s)**: `pending`
+
+**Action**: Wrote `docs/design/falsification_engine.md` (DESIGN, not implemented) and
+backlog item AEROS-IMPROVE-005. Borrows AIGS's falsification-as-engine (L2 card): a
+`FALSIFY <claim_id>` task in the analysis lane that runs a claim-type-aware attack
+battery as registered spec runs, computes an attack-survival profile, and emits a
+claim-ceiling *recommendation* — reusing spec_run_index, result_index/provenance,
+negative_result_ledger, and the claim-ceiling compiler rather than new layers. Seeded
+by `code/27_referee_robustness.py`; proven manually as this session's R1–R7 pressure
+test, which found caveats the passive `T006_referee_panel` missed.
+
+**Alignment**: Turns AEROS's passive robustness parts into an active, claim-targeted
+falsifier and makes the claim ceiling a function of attack survival — directly serving
+"claims stay within evidence." Also yields AEROS's first self-metric (claim-survival
+rate), attacking its "no measured value" gap.
+
+**Non-goal**: A *design*, not a feature — must not be cited as built. The engine may
+lower/hold a ceiling autonomously but a raise or claim release stays human-gated; it
+is not a truth oracle (surviving attacks ≠ true).
+
+**Drift risk**: A fixed battery could be gamed (L4 reward-hacking warning) — mitigated
+by a typed/extensible battery, registering the full attack denominator, and keeping
+raises human-gated. Must enter via the kernel as a transition input, not a parallel
+layer (Kernel Anti-Creep).
+
+**Next check**: If approved, P0 = generalize 27_referee_robustness into a `falsify`
+runner for the associational battery on CMPD C1/C2 (recommend-only), then validate.
+
+
 ### 2026-06-20 - Full-text extraction cards for AEROS related work (L1/L2/L4)
 
 **Commit(s)**: `45bb195`

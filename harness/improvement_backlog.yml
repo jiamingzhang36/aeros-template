@@ -59,3 +59,15 @@ entries:
     resolved_at: "2026-06-17"
     resolution_commit: "pending"
     notes: "Surfaced when a manual partial rsync (anti-pattern) brought check_update_ledger into CMPD; the official sync tool would propagate it too. Resolved: harness/check_scope.yml lists template_only_checks and run_harness_checks.py skips them unless run inside the template (detected via tools/sync_aeros_latest.zsh). Currently scopes out check_update_ledger only."
+  - id: AEROS-IMPROVE-005
+    created_at: "2026-06-20"
+    updated_at: "2026-06-20"
+    status: open
+    priority: high
+    area: claim_integrity
+    source: literature_borrow + real_project_validation
+    issue: "AEROS has the parts for falsification (negative_result_ledger, placebo, robustness_suite, spec_run_index) but they are passive and not claim-targeted; nothing feeds 'how hard a claim was attacked' into the claim ceiling. T006_referee_panel is wording-only and never opens the data."
+    proposed_fix: "Build a Claim Falsification Engine (design: docs/design/falsification_engine.md): a FALSIFY <claim_id> task that runs a claim-type-aware attack battery as registered spec runs, computes an attack-survival profile, and emits a claim-ceiling RECOMMENDATION (lower/hold autonomously; raises stay human-gated). Borrows AIGS falsification-as-engine; seeded by code/27_referee_robustness.py. Yields AEROS's first self-metric (claim-survival rate)."
+    owner: human
+    target_gate: G7
+    notes: "Design proposal only, not implemented. Proven manually as the 2026-06-20 referee pressure-test (R1-R7 on CMPD C1/C2), which found caveats the passive referee_panel missed. Anti-Goodhart (L4 creativity survey): output is registered artifacts + recommendation, full attack denominator registered, human gate for raises."
