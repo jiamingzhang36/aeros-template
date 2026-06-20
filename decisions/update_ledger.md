@@ -17,6 +17,30 @@ How to read this ledger:
 
 ## 2026-06-20
 
+### 2026-06-20 - Framework failure-paths validated on CMPD
+
+**Commit(s)**: `pending`
+
+**Action**: Closed two prior "Next check" items by exercising the *failure* paths
+on the live CMPD project (not just synthetic/PASS paths). (1) **Large-file guard**:
+staged a 101 MB tracked file → `check_no_large_files` and `check_git_guardrails`
+both FAIL naming the file; unstaged, tree clean. (2) **v2 completion attestation**:
+ran `aeros recover` on a throwaway task whose declared output cannot exist → the
+contract's checks PASS but the v2 receipt is verdict=fail ("no substantive allowed
+output artifact exists"), `recover` refuses, the task is NOT marked passed, and no
+green receipt is issued. Throwaway fully removed; CMPD harness green afterward.
+
+**Alignment**: Confirms the guardrails actually *block* the bad case on a real
+project, which is what the prior entries promised but had only synthetic/PASS
+evidence for. Completion stays honest: no real output → no pass.
+
+**Non-goal**: One project, two paths; does not exhaustively fuzz every check.
+
+**Drift risk**: None added; this is validation, not new capability.
+
+**Next check**: Keep using CMPD (the designated validation project) to exercise new
+guardrails' failure paths before declaring them validated.
+
 ### 2026-06-20 - Guard against unpushable large files (check_no_large_files)
 
 **Commit(s)**: `fcd2fa5`
