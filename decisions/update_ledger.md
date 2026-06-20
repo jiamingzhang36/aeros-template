@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-20 - Guard against unpushable large files (check_no_large_files)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `fcd2fa5`
 
 **Action**: Added `checks/check_no_large_files.py` and wired it into
 `check_git_guardrails.py` (already in the harness runner). It fails if any
