@@ -17,6 +17,34 @@ How to read this ledger:
 
 ## 2026-06-20
 
+### 2026-06-20 - Sync script takes project args (no hardcoded project list)
+
+**Commit(s)**: `pending`
+
+**Action**: Rewrote `tools/sync_aeros_latest.zsh` to accept project paths as
+arguments (`sync_aeros_latest.zsh <path> [<path>...]`) instead of three hardcoded
+TARGETS lists (one bash + two python). No project list is baked in, so it works
+for any current or future project. Targets without `project_manifest.yml` are
+skipped with a warning; with no args it prints usage and exits 2. The single
+hardcoded special case (preserve a project's custom AGENTS.md) is generalized to a
+`.aeros_sync_keep_agents` sentinel file. The two python post-processors now read
+the resolved targets from the `AEROS_SYNC_TARGETS` env var.
+
+**Alignment**: Removes a maintenance trap and a footgun — the old list went stale
+as projects were added, and "run the script" silently synced 10 projects at once
+(risking clobbering uncommitted WIP in projects the user wasn't thinking about).
+Per-project invocation makes propagation deliberate and safe.
+
+**Non-goal**: Does not auto-discover projects (deliberate — explicit paths only,
+so a sync never surprises a project with WIP). Does not change what is synced.
+
+**Drift risk**: Per-project syncing could let some projects fall behind if the
+user forgets them. Mitigation: the user owns propagation timing; falling behind is
+visible via a framework `diff -rq` against the template.
+
+**Next check**: On the next framework change, sync one project by path and confirm
+only that project changes and its harness stays green.
+
 ### 2026-06-20 - Reconcile framework drift: port CMPD improvements up
 
 **Commit(s)**: `0c5fdce`

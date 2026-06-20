@@ -1,22 +1,40 @@
 #!/bin/zsh
+# Sync the AEROS framework from this template into one or more project copies.
+#
+# Usage:
+#   tools/sync_aeros_latest.zsh <project_path> [<project_path> ...]
+#
+# Forward-only and non-destructive: uses `rsync -a` WITHOUT `--delete`, so it
+# updates framework files and preserves project-owned files that live alongside
+# them (e.g. aeros/project_contract.yml, aeros/task_registry.csv, aeros/state/).
+#
+# There is intentionally NO hardcoded project list — pass the project(s) you want
+# to sync. This works for any current or future project. Each target must contain
+# project_manifest.yml (targets without it are skipped with a warning).
+#
+# To keep a project's customized AGENTS.md across syncs, drop an empty marker file
+# named `.aeros_sync_keep_agents` in that project's root.
 set -euo pipefail
 SRC="/Users/jiamingzhang/aeros-template"
-TARGETS=(
-  "/Users/jiamingzhang/Desktop/SNAP_Store_Format_Purchasing_Power_Project"
-  "/Users/jiamingzhang/Desktop/cultured_meat_policy_project"
-  "/Users/jiamingzhang/Desktop/cultured_meat_policy_project/validation_projects/maha_snap_waiver"
-  "/Users/jiamingzhang/Desktop/aeros-template-desktop"
-  "/Users/jiamingzhang/Desktop/aeros-pilot-franchise-fraud"
-  "/Users/jiamingzhang/Desktop/land-grid-farm"
-  "/Users/jiamingzhang/Desktop/AI_Grocery_Recommendation_Audit"
-  "/Users/jiamingzhang/Desktop/VLM_Satellite_GDP_Revision_Project"
-  "/Users/jiamingzhang/Desktop/LLM_SNAP"
-  "/Users/jiamingzhang/Desktop/implementation_mismatch_project"
-)
+
+if [ "$#" -eq 0 ]; then
+  print -u2 "usage: tools/sync_aeros_latest.zsh <project_path> [<project_path> ...]"
+  print -u2 "  Syncs the AEROS framework from $SRC into each given project."
+  print -u2 "  Forward-only, non-destructive. Each project needs project_manifest.yml."
+  print -u2 "  Keep a project's own AGENTS.md by placing .aeros_sync_keep_agents in its root."
+  exit 2
+fi
+
+typeset -a TARGETS SYNCED
+TARGETS=("$@")
+SYNCED=()
+
 for T in "${TARGETS[@]}"; do
-  [ -f "$T/project_manifest.yml" ] || continue
+  if [ ! -f "$T/project_manifest.yml" ]; then
+    print -u2 "!! skip (no project_manifest.yml): $T"
+    continue
+  fi
   echo "==> sync framework to $T"
-  mkdir -p "$T"
   rsync -a "$SRC/aeros/" "$T/aeros/"
   rsync -a "$SRC/checks/" "$T/checks/"
   rsync -a "$SRC/harness/" "$T/harness/"
@@ -29,8 +47,8 @@ for T in "${TARGETS[@]}"; do
   mkdir -p "$T/agent_runs"
   rsync -a "$SRC/agent_runs/TEMPLATE_agent_run_report.md" "$T/agent_runs/TEMPLATE_agent_run_report.md"
   rsync -a "$SRC/agent_runs/TEMPLATE_critic_report.md" "$T/agent_runs/TEMPLATE_critic_report.md"
-  if [ "$T" = "/Users/jiamingzhang/Desktop/implementation_mismatch_project" ] && [ -f "$T/AGENTS.md" ]; then
-    echo "    preserving project AGENTS.md for $T"
+  if [ -f "$T/.aeros_sync_keep_agents" ]; then
+    echo "    preserving project AGENTS.md (.aeros_sync_keep_agents present)"
   else
     rsync -a "$SRC/AGENTS.md" "$T/AGENTS.md"
   fi
@@ -43,23 +61,27 @@ for T in "${TARGETS[@]}"; do
   [ -f "$SRC/discovery/literature/function_taxonomy.md" ] && rsync -a "$SRC/discovery/literature/function_taxonomy.md" "$T/discovery/literature/function_taxonomy.md"
   [ -f "$SRC/execution/AGENTS.md" ] && rsync -a "$SRC/execution/AGENTS.md" "$T/execution/AGENTS.md"
   [ -f "$SRC/tasks/TEMPLATE_task.md" ] && rsync -a "$SRC/tasks/TEMPLATE_task.md" "$T/tasks/TEMPLATE_task.md"
+  SYNCED+=("$T")
 done
+
+if [ "${#SYNCED[@]}" -eq 0 ]; then
+  print -u2 "no valid targets synced."
+  exit 1
+fi
+
+# Hand the resolved targets to the python post-processors (newline-joined).
+export AEROS_SYNC_TARGETS="${(F)SYNCED}"
+
+# Post-process 1: propagate task skill metadata (allowed/recommended skills) from
+# the template's task contracts into each project's matching task_id files.
 python3 - <<'PY'
+import os
 from pathlib import Path
 import yaml
 
 src = Path("/Users/jiamingzhang/aeros-template")
-targets = [
-    Path("/Users/jiamingzhang/Desktop/cultured_meat_policy_project"),
-    Path("/Users/jiamingzhang/Desktop/cultured_meat_policy_project/validation_projects/maha_snap_waiver"),
-    Path("/Users/jiamingzhang/Desktop/aeros-template-desktop"),
-    Path("/Users/jiamingzhang/Desktop/aeros-pilot-franchise-fraud"),
-    Path("/Users/jiamingzhang/Desktop/land-grid-farm"),
-    Path("/Users/jiamingzhang/Desktop/AI_Grocery_Recommendation_Audit"),
-    Path("/Users/jiamingzhang/Desktop/VLM_Satellite_GDP_Revision_Project"),
-    Path("/Users/jiamingzhang/Desktop/LLM_SNAP"),
-    Path("/Users/jiamingzhang/Desktop/implementation_mismatch_project"),
-]
+targets = [Path(p) for p in os.environ.get("AEROS_SYNC_TARGETS", "").splitlines() if p.strip()]
+
 source_meta = {}
 for path in sorted((src / "tasks").rglob("*.yml")):
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
@@ -126,23 +148,14 @@ for root in targets:
     print(f"skill metadata updated: {root} ({changed} task file(s))")
 PY
 
+# Post-process 2: ensure each project's manifest wires the required framework
+# files and checks.
 python3 - <<'PYMANIFEST'
+import os
 from pathlib import Path
-import yaml
 
 src = Path("/Users/jiamingzhang/aeros-template")
-targets = [
-    Path("/Users/jiamingzhang/Desktop/SNAP_Store_Format_Purchasing_Power_Project"),
-    Path("/Users/jiamingzhang/Desktop/cultured_meat_policy_project"),
-    Path("/Users/jiamingzhang/Desktop/cultured_meat_policy_project/validation_projects/maha_snap_waiver"),
-    Path("/Users/jiamingzhang/Desktop/aeros-template-desktop"),
-    Path("/Users/jiamingzhang/Desktop/aeros-pilot-franchise-fraud"),
-    Path("/Users/jiamingzhang/Desktop/land-grid-farm"),
-    Path("/Users/jiamingzhang/Desktop/AI_Grocery_Recommendation_Audit"),
-    Path("/Users/jiamingzhang/Desktop/VLM_Satellite_GDP_Revision_Project"),
-    Path("/Users/jiamingzhang/Desktop/LLM_SNAP"),
-    Path("/Users/jiamingzhang/Desktop/implementation_mismatch_project"),
-]
+targets = [Path(p) for p in os.environ.get("AEROS_SYNC_TARGETS", "").splitlines() if p.strip()]
 
 REQUIRED_FILES = [
     "harness/improvement_backlog.yml",
@@ -210,24 +223,6 @@ CHECKS = {
     "estimand_cards": "checks/check_estimand_cards.py",
     "negative_result_ledger": "checks/check_negative_result_ledger.py",
 }
-
-def ensure_list_item_after(text: str, anchor: str, item: str) -> str:
-    if item in text:
-        return text
-    marker = anchor if anchor in text else "required_files:\n"
-    if marker in text:
-        lines = text.splitlines(keepends=True)
-        out = []
-        inserted = False
-        for line in lines:
-            out.append(line)
-            if not inserted and line.strip() == "required_files:":
-                indent = line[: len(line) - len(line.lstrip())] + "  "
-                out.append(f"{indent}- {item}\n")
-                inserted = True
-        if inserted:
-            return "".join(out)
-    return text.rstrip() + f"\nrequired_files:\n  - {item}\n"
 
 def ensure_manifest_wiring(path: Path) -> bool:
     if not path.exists():
