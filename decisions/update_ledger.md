@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-20 - Framework failure-paths validated on CMPD
 
-**Commit(s)**: `pending`
+**Commit(s)**: `3818122`
 
 **Action**: Closed two prior "Next check" items by exercising the *failure* paths
 on the live CMPD project (not just synthetic/PASS paths). (1) **Large-file guard**:
