@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-20 - Completion attestation v2 validated on a real project
 
-**Commit(s)**: `1dc585f` (template ledger note); rollout landed in CMPD as `f69fcdd3` + `275c85ee`
+**Commit(s)**: `30dd9fb` (template ledger note); rollout landed in CMPD as `f69fcdd3` + `275c85ee`
 
 **Action**: Ran the v2 completion-attestation feature end to end on a real project (CMPD). Confirmed the migration path: 17 legacy v1 receipts were regenerated to v2 via `aeros recover <task> --check` (each task's own checks re-run and passed), and `recover` auto-wrote `mechanical_revalidation` skill waivers for tasks declaring recommended skills. Final state: 18/18 v2 receipts, full harness green.
 
