@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-20 - Design proposal: Claim Falsification Engine
 
-**Commit(s)**: `pending`
+**Commit(s)**: `6aeb40e`
 
 **Action**: Wrote `docs/design/falsification_engine.md` (DESIGN, not implemented) and
 backlog item AEROS-IMPROVE-005. Borrows AIGS's falsification-as-engine (L2 card): a
