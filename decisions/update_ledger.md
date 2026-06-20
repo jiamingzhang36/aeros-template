@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-20 - Full-text extraction cards for AEROS related work (L1/L2/L4)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `45bb195`
 
 **Action**: Upgraded the related-work positioning from provisional to full-text:
 extracted the real PDFs (pdftotext) of HLER (L1), AIGS (L2), and the creativity
