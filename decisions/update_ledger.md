@@ -17,6 +17,36 @@ How to read this ledger:
 
 ## 2026-06-20
 
+### 2026-06-20 - Full-text extraction cards for AEROS related work (L1/L2/L4)
+
+**Commit(s)**: `pending`
+
+**Action**: Upgraded the related-work positioning from provisional to full-text:
+extracted the real PDFs (pdftotext) of HLER (L1), AIGS (L2), and the creativity
+survey (L4) and read them directly; wrote `docs/related_work_cards/L1_HLER.md`,
+`L2_AIGS.md`, `L4_creativity_survey.md` with section/line-anchored evidence, and
+updated the registry/synthesis to full_text depth.
+
+**Alignment**: Demonstrates AEROS's literature rule paying off: real extraction
+*corrected* two errors the machine summaries/snippets introduced — HLER's actual
+human gates are "question selection + publication approval" (not the invented
+"approval of novel theoretical claims"), and the creativity survey's verified risk
+is "verifier reward-hacking / superficially-persuasive-without-being-correct" (not
+the snippet's "plausible pseudo-science"). Abstract-level confidence would have
+carried both errors forward.
+
+**Non-goal**: Three full-text papers is a positioning sketch, not a systematic
+review; L3/L5 stay at snippet level. Does not establish that any system (incl.
+AEROS) produces *valid* findings — HLER metrics are feasibility/score, AIGS is a
+self-described "baby-step" below human researchers.
+
+**Drift risk**: Related-work can ossify into self-justification; keep it evidence-
+anchored and re-open if it starts being cited as proof AEROS works.
+
+**Next check**: If positioning goes into a paper/grant, run a pre-specified
+systematic search rather than this opportunistic five-paper pass.
+
+
 ### 2026-06-20 - Related-work positioning of AEROS (provisional)
 
 **Commit(s)**: `f5157f3`
