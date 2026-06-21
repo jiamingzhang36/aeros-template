@@ -17,6 +17,7 @@ REQUIRED_FILES = {
         "## Skill Layer Principle",
         "## Borrowed Organization",
         "## Practical Skill Menu",
+        "## Data-First Routing",
         "## Skill Tiers",
         "## Skill Use Status",
     ],
@@ -24,12 +25,15 @@ REQUIRED_FILES = {
         "## Invocation Order",
         "## Skill Selection Rule",
         "## Literature Skills",
+        "## Data-First Skill Chain",
+        "## Skill Output Boundary",
         "## Skill Conflict Rule",
     ],
     Path("harness/practical_skill_menu.md"): [
         "## Core Skills",
         "## Optional Skills",
         "## Reference Skills",
+        "## Default data-lane chain",
     ],
     Path("harness/skill_map_core.yml"): [
         "sources:",

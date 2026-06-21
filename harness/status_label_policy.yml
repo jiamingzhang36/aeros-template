@@ -1,0 +1,36 @@
+version: "0.1"
+policy: AEROS-STATUS-LABELS-001
+principle: >
+  AEROS final updates must distinguish mechanical checks, route readiness, and
+  substantive research progress. A PASS is not automatically a research result.
+labels:
+  CHECK_PASS:
+    meaning: Mechanical checks, schemas, receipts, or harness validations passed.
+    may_claim:
+      - "A check or guardrail passed."
+      - "The route did not break framework invariants."
+    must_not_claim:
+      - "Data was acquired."
+      - "Literature was fully reviewed."
+      - "A result or claim is substantively supported."
+  ROUTE_READY:
+    meaning: A plan, queue, approval packet, route audit, or execution packet is ready.
+    may_claim:
+      - "The next route is specified."
+      - "The human can approve, block, or modify the route."
+    must_not_claim:
+      - "The routed work has already produced evidence."
+      - "Blocked work is complete."
+  SUBSTANTIVE_DONE:
+    meaning: A real source snapshot, data artifact, full-text extraction, result, paper edit, or approved decision changed the research substance.
+    may_claim:
+      - "The specified substantive artifact exists."
+      - "The artifact changed what the project knows or can say."
+    must_not_claim:
+      - "Scientific validity beyond the registered evidence."
+      - "Human gate approval unless an approval artifact exists."
+final_response_rule:
+  required: true
+  instruction: >
+    When reporting task outcomes, end with one of CHECK_PASS, ROUTE_READY, or
+    SUBSTANTIVE_DONE. Use the weakest honest label.

@@ -61,6 +61,21 @@ If a skill makes the project sound better by weakening evidence standards, do no
 
 For data feasibility, do not skip the skill pass. Use or explicitly consider `data-inventory` first, then add `data-quality-checker`, `data-codebook`, `describe-data`, or `data-merge-audit` when sample data, schema, or linkage keys are available. If the skill cannot run, record the blocker and the next probe instead of making a final feasibility call.
 
+## Default data-lane chain
+
+Use this chain as a route, not as busywork. Stop at the first unavailable prerequisite and record the blocker.
+
+| Step | Skill | Requires | Output should prove |
+| --- | --- | --- | --- |
+| 1 | `data-inventory` | Candidate source or dataset lead | Source owner, access path, unit, coverage, restrictions, and next probe |
+| 2 | `describe-data` | Real sample, snapshot, extract, or schema | Observed structure, rows/columns or documented schema, limitations |
+| 3 | `data-codebook` | Variables or schema | Variables, units, construction rules, source limitations |
+| 4 | `data-quality-checker` | Real data artifact | Missingness, duplicates, coverage, impossible values, diagnostic risks |
+| 5 | `data-merge-audit` | Linkage keys or joins | Join keys, unmatched records, denominator effects, linkage risk |
+| 6 | `diagnostics-panel` / `summary-stats-table` | Validated analysis artifact | Reportable diagnostics, not claim support by itself |
+
+Do not call later steps to create the appearance of progress when earlier prerequisites are missing. A blocked data skill should produce a blocker record, not a fake-green completion.
+
 ## Economics data-mining and paper-stage skill clusters
 
 AEROS keeps these skills available through `harness/skill_map_core.yml`, but task

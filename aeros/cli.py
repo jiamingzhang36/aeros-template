@@ -14,6 +14,7 @@ import argparse
 import csv
 import json
 import os
+import subprocess
 import sys
 from datetime import datetime, timezone
 from functools import partial
@@ -28,6 +29,8 @@ from .runtime.adoption import AdoptionArgs, run_adoption
 from .runtime.checks import run_checks
 from .runtime.collection import collect_prompt_grid, resolve_config
 from .runtime.contract import load_contract
+from .runtime.context_bundle import build_context_bundle, format_context_bundle, write_context_bundle
+from .runtime.cockpit import build_cockpit, format_cockpit, write_cockpit
 from .runtime.controller import run_iteration
 from .runtime import identity
 from .runtime.data_backfill import BackfillArgs, run_data_backfill
@@ -39,9 +42,12 @@ from .runtime.decision_packet import write_decision_packet
 from .runtime.evidence_delta import EvidenceDeltaArgs, append_delta, read_delta_records
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
+from .runtime.literature_adapter import LiteratureSearchArgs, format_literature_status, run_literature_search
 from .runtime.kernel import _record_task_fingerprints, _task_gates, discover_contracts, topo_order
 from .runtime.milestones import format_roadmap, format_simple_status
+from .runtime.next_action import compute_next_action, format_next_action, write_next_action
 from .runtime.skill_router import format_skill_hint, skill_route
+from .runtime.stale_triage import format_stale_triage, stale_triage_json, triage_stale_tasks, write_stale_triage
 from .runtime.state import (
     approve_gate,
     block_gate,
@@ -246,8 +252,23 @@ def _cmd_adopt(args: argparse.Namespace) -> int:
 
 
 def _cmd_check(args: argparse.Namespace) -> int:
-    contract = load_contract(args.contract)
-    root = find_project_root(Path(args.contract).resolve())
+    root = _project_root()
+    if getattr(args, "profile", ""):
+        cmd = [
+            sys.executable,
+            "checks/run_harness_checks.py",
+            "--profile",
+            args.profile,
+        ]
+        if getattr(args, "timeout", None) is not None:
+            cmd.extend(["--timeout", str(args.timeout)])
+        return subprocess.call(cmd, cwd=root)
+    if not args.contract:
+        print("FAIL: provide a task contract, or use `aeros check --profile smoke`")
+        return 2
+    contract_path = Path(args.contract)
+    contract = load_contract(contract_path)
+    root = find_project_root(contract_path.resolve())
     passed, results = run_checks(root, contract.checks)
     for r in results:
         print(f"{'PASS' if r.passed else 'FAIL'}  {r.name}")
@@ -363,6 +384,60 @@ def _cmd_status(args: argparse.Namespace) -> int:
               f"${entry.get('cost_usd_total',0.0):.4f}")
     return 0
 
+
+def _cmd_context(args: argparse.Namespace) -> int:
+    root = _project_root()
+    bundle = build_context_bundle(root, lane=args.lane or "project", brief=args.brief)
+    if args.stale:
+        stale = bundle.get("context_staleness") or {}
+        print(f"context_stale: {stale.get('stale', False)}")
+        print(f"status: {stale.get('status', 'unknown')}")
+        print(f"message: {stale.get('message', '')}")
+        changed = stale.get("changed_sources") or []
+        if changed:
+            print("changed_sources:")
+            for rel in changed:
+                print(f"  - {rel}")
+        return 1 if stale.get("stale") else 0
+    if args.json:
+        print(json.dumps(bundle, indent=2, ensure_ascii=False))
+    else:
+        print(format_context_bundle(bundle, brief=args.brief))
+    if args.write:
+        md_path, json_path = write_context_bundle(root, bundle)
+        print(f"wrote {md_path.relative_to(root)}")
+        print(f"wrote {json_path.relative_to(root)}")
+    return 0
+
+
+def _cmd_next(args: argparse.Namespace) -> int:
+    root = _project_root()
+    action = compute_next_action(root, lane=args.lane or "")
+    print(format_next_action(action))
+    if args.write:
+        path = write_next_action(root, action)
+        print(f"wrote {path.relative_to(root)}")
+    return 0
+
+
+
+def _cmd_stale(args: argparse.Namespace) -> int:
+    root = _project_root()
+    if args.stale_command == "triage":
+        result = triage_stale_tasks(root, stage=args.stage, lane=args.lane or "")
+        if args.json:
+            print(stale_triage_json(result))
+        else:
+            print(format_stale_triage(result))
+        if args.write and not args.dry_run:
+            md_path, json_path = write_stale_triage(root, result)
+            print(f"wrote {md_path.relative_to(root)}")
+            print(f"wrote {json_path.relative_to(root)}")
+        elif args.write and args.dry_run:
+            print("dry-run: stale triage artifacts not written")
+        return 0
+    print("unknown stale command")
+    return 2
 
 def _cmd_state_prune(args: argparse.Namespace) -> int:
     root = _project_root()
@@ -800,6 +875,33 @@ def _cmd_action_receipt(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_literature(args: argparse.Namespace) -> int:
+    root = _project_root()
+    if args.literature_command == "status":
+        print(format_literature_status(root))
+        return 0
+    if args.literature_command == "search":
+        try:
+            return run_literature_search(root, LiteratureSearchArgs(
+                source=args.source,
+                query=args.query or "",
+                limit=args.limit,
+                primary_function=args.primary_function,
+                dry_run=args.dry_run,
+                title=args.title or "",
+                authors=args.authors or "",
+                year=args.year or "",
+                doi=args.doi or "",
+                url=args.url or "",
+                pdf_url=args.pdf_url or "",
+            ))
+        except Exception as exc:  # noqa: BLE001
+            print(f"FAIL: literature adapter failed: {exc}")
+            return 1
+    print("unknown literature command")
+    return 2
+
+
 def _cmd_data(args: argparse.Namespace) -> int:
     root = _project_root()
     if args.data_command == "scan":
@@ -837,6 +939,21 @@ def _cmd_data_backfill(args: argparse.Namespace) -> int:
         human_decision=args.human_decision or "",
     ))
 
+
+
+def _cmd_cockpit(args: argparse.Namespace) -> int:
+    root = _project_root()
+    cockpit = build_cockpit(root, lane=args.lane or "project", check_profile=args.profile)
+    if args.json:
+        print(json.dumps(cockpit, indent=2, ensure_ascii=False))
+    else:
+        print(format_cockpit(cockpit))
+    if args.write:
+        md_path, bundle_path, graph_path = write_cockpit(root, lane=args.lane or "project", check_profile=args.profile)
+        print(f"wrote {md_path.relative_to(root)}")
+        print(f"wrote {bundle_path.relative_to(root)}")
+        print(f"wrote {graph_path.relative_to(root)}")
+    return 0
 
 def _cmd_roadmap(args: argparse.Namespace) -> int:
     root = _project_root()
@@ -1075,8 +1192,10 @@ def main(argv: list[str] | None = None) -> int:
                      help="override this task's agent/command timeout in seconds")
     run.set_defaults(func=_cmd_run)
 
-    chk = sub.add_parser("check", help="run a contract's checks without calling the agent")
-    chk.add_argument("contract", help="path to a task contract .yml")
+    chk = sub.add_parser("check", help="run a contract's checks or a harness profile without calling the agent")
+    chk.add_argument("contract", nargs="?", help="path to a task contract .yml")
+    chk.add_argument("--profile", default="", help="run a harness profile such as smoke, lane:data, lane:literature, or full")
+    chk.add_argument("--timeout", type=int, default=None, help="per-check timeout when using --profile")
     chk.set_defaults(func=_cmd_check)
 
     recover = sub.add_parser(
@@ -1096,6 +1215,29 @@ def main(argv: list[str] | None = None) -> int:
     roadmap = sub.add_parser("roadmap", help="show compressed 5-milestone roadmap")
     roadmap.set_defaults(func=_cmd_roadmap)
 
+
+    context_p = sub.add_parser("context", help="show a compact source-anchored context bundle")
+    context_p.add_argument("--lane", default="project", choices=["project", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"], help="context lane to focus")
+    context_p.add_argument("--brief", action="store_true", help="emit a shorter context bundle")
+    context_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    context_p.add_argument("--write", action="store_true", help="write CONTEXT_BUNDLE.md and outputs/context/context_bundle.json")
+    context_p.add_argument("--stale", action="store_true", help="only report whether the written context bundle is stale")
+    context_p.set_defaults(func=_cmd_context)
+
+    cockpit_p = sub.add_parser("cockpit", help="show one compact context + next-action + fast-check dashboard")
+    cockpit_p.add_argument("--lane", default="project", choices=["project", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"], help="cockpit lane to focus")
+    cockpit_p.add_argument("--profile", default="smoke", help="fast check profile to display")
+    cockpit_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    cockpit_p.add_argument("--write", action="store_true", help="write cockpit, context bundle, and context graph artifacts")
+    cockpit_p.set_defaults(func=_cmd_cockpit)
+
+    next_p = sub.add_parser("next", help="show the deterministic next recommended action")
+    next_p.add_argument("--lane", default="",
+                        choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"],
+                        help="prefer the next action for one work lane")
+    next_p.add_argument("--write", action="store_true", help="write NEXT_ACTION.md")
+    next_p.set_defaults(func=_cmd_next)
+
     skills = sub.add_parser("skills", help="inspect AEROS skill routing")
     skills_sub = skills.add_subparsers(dest="skills_command", required=True)
     skills_plan = skills_sub.add_parser("plan", help="show recommended/allowed skills by task")
@@ -1103,6 +1245,25 @@ def main(argv: list[str] | None = None) -> int:
                              help="task stage to inspect (default: all)")
     skills_plan.set_defaults(func=_cmd_skills_plan)
 
+
+
+    literature = sub.add_parser("literature", help="literature discovery adapters and status")
+    literature_sub = literature.add_subparsers(dest="literature_command", required=True)
+    literature_status = literature_sub.add_parser("status", help="show literature discovery/extraction counts")
+    literature_status.set_defaults(func=_cmd_literature)
+    literature_search = literature_sub.add_parser("search", help="search/import literature metadata into registry/queues")
+    literature_search.add_argument("--source", required=True, choices=["openalex", "manual"], help="metadata source adapter")
+    literature_search.add_argument("--query", default="", help="search query for source adapters such as OpenAlex")
+    literature_search.add_argument("--limit", type=int, default=20, help="maximum candidates to fetch/import")
+    literature_search.add_argument("--primary-function", default="idea-inspiring", choices=["idea-inspiring", "gap-verification", "method-identification", "data-measurement", "background-institutional", "theory-mechanism"], help="initial literature function label for candidates")
+    literature_search.add_argument("--title", default="", help="manual import title")
+    literature_search.add_argument("--authors", default="", help="manual import authors")
+    literature_search.add_argument("--year", default="", help="manual import year")
+    literature_search.add_argument("--doi", default="", help="manual import DOI")
+    literature_search.add_argument("--url", default="", help="manual import URL/OpenAlex ID")
+    literature_search.add_argument("--pdf-url", default="", help="manual import PDF URL")
+    literature_search.add_argument("--dry-run", action="store_true", help="preview registry/search-log changes without writing")
+    literature_search.set_defaults(func=_cmd_literature)
 
     action = sub.add_parser("action", help="write/validate action progress receipts")
     action_sub = action.add_subparsers(dest="action_command", required=True)
@@ -1148,7 +1309,7 @@ def main(argv: list[str] | None = None) -> int:
     delta_append.set_defaults(func=_cmd_delta)
     delta_list = delta_sub.add_parser("list", help="list recent evidence deltas")
     delta_list.add_argument("--lane", default="",
-                            choices=["", "data", "literature", "analysis", "claim", "writing", "compliance", "harness"],
+                            choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"],
                             help="filter by lane")
     delta_list.add_argument("--limit", type=int, default=20, help="number of recent records to show")
     delta_list.set_defaults(func=_cmd_delta)
@@ -1242,6 +1403,17 @@ def main(argv: list[str] | None = None) -> int:
     funnel_sel.add_argument("--champion", required=True, help="candidate id to crown")
     funnel_sel.add_argument("--rationale", default="", help="why this champion (not significance alone)")
     funnel_sel.set_defaults(func=_cmd_funnel)
+
+
+    stale = sub.add_parser("stale", help="inspect stale task impact without running agents")
+    stale_sub = stale.add_subparsers(dest="stale_command", required=True)
+    stale_triage = stale_sub.add_parser("triage", help="classify stale tasks as rerun_required, revalidate_free, or suppress_as_irrelevant")
+    stale_triage.add_argument("--stage", default="discovery", choices=["discovery", "execution", "all"], help="stage to inspect")
+    stale_triage.add_argument("--lane", default="", choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"], help="optional lane focus")
+    stale_triage.add_argument("--dry-run", action="store_true", help="do not write triage artifacts")
+    stale_triage.add_argument("--write", action="store_true", help="write outputs/context/stale_triage.md and .json")
+    stale_triage.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    stale_triage.set_defaults(func=_cmd_stale)
 
     state_parser = sub.add_parser("state", help="inspect or clean runtime state")
     state_sub = state_parser.add_subparsers(dest="state_command", required=True)
@@ -1400,7 +1572,7 @@ def main(argv: list[str] | None = None) -> int:
     iterate.add_argument("--stage", default="discovery", choices=["discovery", "execution"],
                          help="stage to iterate (default: discovery)")
     iterate.add_argument("--lane", default="",
-                         choices=["", "data", "literature", "analysis", "claim", "writing", "compliance", "harness"],
+                         choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"],
                          help="restrict iterate to one work lane; prevents cross-lane drift")
     iterate.add_argument("--dry-run", action="store_true",
                          help="show the controller plan; do not run tasks or write packets")

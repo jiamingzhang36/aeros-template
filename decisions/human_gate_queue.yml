@@ -1,0 +1,24 @@
+version: "0.1"
+policy: AEROS-HUMAN-GATE-QUEUE-001
+items: []
+schema:
+  required_fields:
+    - project
+    - request
+    - why_human_needed
+    - after_approval_codex_can
+    - risk_boundary
+    - status
+  allowed_statuses:
+    - pending
+    - approved
+    - blocked
+    - superseded
+    - done
+example:
+  project: example_project
+  request: Approve official source snapshot collection.
+  why_human_needed: Requires credentialed portal access or source-date decision.
+  after_approval_codex_can: Fetch the approved source snapshot and write provenance.
+  risk_boundary: No claim upgrade, no public release, no protected-definition change.
+  status: pending

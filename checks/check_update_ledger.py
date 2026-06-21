@@ -20,6 +20,13 @@ def _git(args: list[str]) -> str:
     return subprocess.check_output(["git", *args], text=True, stderr=subprocess.DEVNULL).strip()
 
 
+
+def _worktree_dirty() -> bool:
+    try:
+        return bool(_git(["status", "--porcelain"]).strip())
+    except Exception:
+        return False
+
 def _commit_touches_ledger(commit: str) -> bool:
     try:
         names = _git(["show", "--name-only", "--format=", commit]).splitlines()
@@ -39,7 +46,7 @@ def main() -> int:
             failures.append(f"update ledger missing required phrase: {phrase}")
 
     pending_count = text.count("**Commit(s)**: `pending`")
-    if pending_count:
+    if pending_count and not _worktree_dirty():
         failures.append(
             f"pending commit marker remains in update ledger ({pending_count}); "
             "replace with commit hash before claiming tracking is current"

@@ -88,6 +88,46 @@ Rules:
 - Before a feasibility recommendation, consider relevant data skills and record use, non-use rationale, or blocked probes in `discovery/data_inventory.csv` and the feasibility memo.
 - Do not create analysis-ready claims from unvalidated data.
 
+## Data-First Skill Chain
+
+For data-lane tasks, use the smallest applicable prefix of this chain:
+
+```text
+data-inventory -> describe-data -> data-codebook -> data-quality-checker -> data-merge-audit -> diagnostics/summary-stats
+```
+
+Interpretation:
+
+- `data-inventory` establishes whether a source exists, who owns it, where it can be accessed, and what blocker remains.
+- `describe-data` applies only after a real sample, snapshot, extract, or documented schema exists.
+- `data-codebook` records variables, units, construction limits, and source-grounded definitions.
+- `data-quality-checker` records missingness, coverage, duplicates, impossible values, and other measurable diagnostics.
+- `data-merge-audit` applies only when linkage keys or joins are part of the design.
+- Diagnostics and summary statistics are downstream of a real artifact, not substitutes for source access.
+
+If a required data skill cannot run because there is no source, no access, no sample, no schema, missing credentials, or a human approval requirement, the task must record a waiver/blocker and the next probe. Do not turn a blocked skill into a completed data claim.
+
+## Skill Output Boundary
+
+Skill use is not task completion.
+
+A skill invocation receipt proves only that:
+
+- the skill was known to AEROS,
+- the task contract allowed it,
+- any missing required class was waived or blocked explicitly.
+
+It does not prove:
+
+- substantive data progress,
+- literature synthesis quality,
+- empirical validity,
+- identification quality,
+- claim support,
+- human gate approval.
+
+Substantive completion still requires task outputs, completion attestation, evidence deltas where applicable, and passing checks.
+
 ## Econometrics and Analysis Skills
 
 Analysis skills may run R, Python, Stata, or other empirical workflows only in execution-stage tasks.

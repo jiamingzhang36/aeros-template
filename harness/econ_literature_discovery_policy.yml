@@ -20,6 +20,7 @@ adapters:
     default_output:
       - discovery/literature/citation_graph_edges.csv
       - discovery/literature/citation_audit.md
+      - discovery/literature/citation_snowball_queue.csv
     cannot_support:
       - gap_claims
       - findings_claims
@@ -44,6 +45,7 @@ required_artifacts_if_used:
   - discovery/literature/search_log.csv
   - discovery/literature/paper_registry.csv
   - discovery/literature/citation_audit.md
+  - discovery/literature/citation_snowball_queue.csv
 optional_artifacts_if_used:
   - discovery/literature/citation_graph_edges.csv
   - discovery/literature/preprint_resolution_log.csv
@@ -53,3 +55,22 @@ hard_boundaries:
   - Working-paper resolution is an advisory candidate until a human or receipt confirms the identity.
   - Full-text extraction cards remain the minimum unit for synthesis support.
   - Adapter output may generate a queue; it may not certify a gap.
+
+
+citation_faithfulness:
+  role: citation_existence_metadata_and_claim_alignment_audit
+  borrowed_patterns:
+    - CiteCheck: retrieval-grounded citation existence and metadata faithfulness
+    - HalluCiteChecker: lightweight hallucinated citation verification
+    - DeepSciVerify: claim-citation alignment with selective full-text escalation
+  required_output:
+    - discovery/literature/citation_audit.md
+    - discovery/literature/citation_snowball_queue.csv
+  cannot_support:
+    - scientific_truth
+    - identification_validity
+    - gap_claims_without_full_text
+    - synthesis_without_extraction_cards
+  escalation_rule: >
+    If metadata or abstract-level evidence is uncertain, escalate to full-text
+    extraction or mark claim support as not_checked/partial; do not infer support.

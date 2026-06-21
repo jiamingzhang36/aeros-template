@@ -33,3 +33,14 @@ OpenAlex, CitEc/RePEc, pyBiblioNet, and PreprintResolver are allowed as economic
 - PreprintResolver may propose working-paper/preprint to published-version matches, but identity resolution must be reviewed before overwriting registry identity or final bibliography entries.
 - Adapter outputs must be logged as discovery artifacts such as `search_log.csv`, `citation_graph_edges.csv`, `citation_audit.md`, or `preprint_resolution_log.csv`.
 - Adapter outputs cannot support gap claims, method claims, findings claims, or paper literature positioning until full-text extraction cards exist.
+
+
+## Citation Faithfulness Rules
+
+Citation checking has three separate questions:
+
+- `Citation exists`: the cited work or stable bibliographic record exists.
+- `Metadata faithful`: title/authors/year/DOI/venue match the cited work closely enough for the current purpose.
+- `Claim support checked`: the cited work has been checked against the sentence or claim it is supposed to support.
+
+A paper can be real and still fail claim-support alignment. If alignment is uncertain, mark `partial` or `not_checked` and escalate to full-text extraction; do not infer support from metadata or title/abstract alone.

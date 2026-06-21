@@ -19,6 +19,10 @@ allowed_declared_outcomes:
   - partial
   - blocked
   - hygiene
+outcome_labels:
+  CHECK_PASS: Mechanical checks, schemas, receipts, or harness validations passed.
+  ROUTE_READY: A plan, queue, approval packet, route audit, or execution packet is ready.
+  SUBSTANTIVE_DONE: A real source snapshot, data artifact, full-text extraction, result, paper edit, or approved decision changed the research substance.
 passed_task_rule:
   declared_outcome: complete
   requires:

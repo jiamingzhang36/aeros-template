@@ -19,6 +19,8 @@ recommended_skills:
 - data-codebook
 - data-quality-checker
 - feature-engineering
+required_skill_classes:
+- data_scouting
 goal: "G2 Measurement. For every key variable the candidate designs need, specify\
   \ how it is constructed from a real data source and whether it can actually be built.\
   \ This is the bridge between the data (G1) and the designs (G3): a design that needs\

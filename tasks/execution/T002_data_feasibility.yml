@@ -15,6 +15,8 @@ recommended_skills:
 - data-quality-checker
 - data-merge-audit
 - summary-stats-table
+required_skill_classes:
+- data_scouting
 depends_on:
 - T001_discovery_audit
 goal: 'Audit whether the candidate data and constructed diagnostics can support the

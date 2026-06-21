@@ -33,6 +33,7 @@ DIRS = [
     "execution",
     "harness/protocols",
     "outputs/logs",
+    "outputs/context",
     "outputs/source_snapshots",
     "outputs/tables",
     "outputs/figures",
@@ -45,6 +46,48 @@ DIRS = [
 
 
 FILES = {
+    "CONTEXT_BUNDLE.md": """# CONTEXT_BUNDLE
+
+generated_at: TEMPLATE
+lane: project
+current_goal: Initialize or continue the project with a compact, source-anchored context.
+current_gate: G0
+candidate_gate: G0
+gate_status: open
+recommended_next_action: Run `python3 -m aeros.cli context --brief` and `python3 -m aeros.cli next`.
+status_label: ROUTE_READY
+next_command: python3 -m aeros.cli next
+current_blocker: None recorded.
+latest_substantive_artifact: None recorded.
+last_validation: Not run.
+does_not_prove: This context bundle does not prove data access, literature extraction, empirical validity, claim support, paper readiness, or gate approval.
+context_stale: false
+context_stale_reason: TEMPLATE bundle; run `aeros cockpit --write` to generate source hashes.
+stop_rule: Stop before switching lanes or claiming substantive progress without evidence.
+latest_revision: TEMPLATE
+
+## Lane Snapshot
+- none
+
+## Open Human Gate Items
+- none
+
+## Files To Read If Needed
+- CURRENT_STATE.md
+- NEXT_ACTION.md
+- AGENTS.md
+
+This bundle is context, not completion evidence, gate approval, claim support, or validation.
+""",
+    "CURRENT_STATE.md": """# CURRENT_STATE
+
+current_goal: Initialize the project and decide the first data/literature route.
+latest_substantive_artifact: None yet.
+current_blocker: None.
+next_command: `python3 -m aeros.cli next`
+does_not_prove: Project initialization does not prove data access, literature extraction, results, claims, paper readiness, or gate approval.
+last_validation: Not run yet.
+""",
     "project_manifest.yml": """project:
   name: "AEROS project"
   status: "draft"
@@ -65,6 +108,60 @@ automation:
     cwd: "."
     command: []
     key_outputs: []
+""",
+    "harness/econ_method_advisory_policy.yml": """version: "0.1"
+policy: AEROS-ECON-METHOD-ADVISORY-001
+principle: Advisory method skills cannot certify identification, claims, or gates.
+""",
+    "harness/context_budget.yml": """version: "0.1"
+policy: AEROS-CONTEXT-BUDGET-001
+brief_max_lines: 40
+lane_max_lines: 80
+max_recent_deltas: 5
+max_human_gate_items: 3
+max_source_hashes: 12
+""",
+    "harness/check_profiles.yml": """version: "0.1"
+default_profile: full
+profiles:
+  smoke: {checks: [check_next_action.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  full: {checks: all}
+""",
+    "harness/stale_triage_policy.yml": """version: "0.1"
+policy: AEROS-STALE-TRIAGE-001
+principle: Deterministic stale triage only; no LLM ranking and no state mutation.
+""",
+    "harness/context_graph_policy.yml": """version: "0.1"
+policy: AEROS-CONTEXT-GRAPH-001
+principle: Context graph is derived navigation only, not research evidence.
+""",
+    "harness/status_label_policy.yml": """version: "0.1"
+policy: AEROS-STATUS-LABELS-001
+principle: "Distinguish mechanical checks, route readiness, and substantive progress."
+labels:
+  CHECK_PASS: {meaning: "Mechanical checks passed."}
+  ROUTE_READY: {meaning: "A route, packet, queue, or plan is ready."}
+  SUBSTANTIVE_DONE: {meaning: "A real research artifact changed project substance."}
+final_response_rule:
+  required: true
+""",
+    "harness/rollout_playbook.md": """# AEROS Rollout Playbook
+
+1. Preserve target project work.
+2. Run `tools/sync_aeros_latest.zsh <project_path>`.
+3. Run `python3 checks/check_work_lanes.py`.
+4. Recover or revalidate old completion receipts.
+5. Run `python3 checks/run_harness_checks.py --timeout 30`.
+6. Write a rollout report in `agent_runs/`.
+7. Update `CURRENT_STATE.md`.
+8. Commit the rollout.
+""",
+    "decisions/human_gate_queue.yml": """version: "0.1"
+policy: AEROS-HUMAN-GATE-QUEUE-001
+items: []
+schema:
+  required_fields: [project, request, why_human_needed, after_approval_codex_can, risk_boundary, status]
+  allowed_statuses: [pending, approved, blocked, superseded, done]
 """,
     "harness/permissions.yml": """# Minimal permission policy. See the root template for the full version.
 version: "0.1"
@@ -95,6 +192,15 @@ gate_decisions: []
         "Date,Decision ID,Task ID,Agent Recommendation,Critic Verdict,"
         "Human Decision,Rationale,Owner,Follow-up\n"
     ),
+    "discovery/literature/paper_registry.csv": """paper_id,citation_key,title,authors,year,source,doi,url,pdf_url,primary_function,secondary_functions,reading_depth,status,full_text_available,opened_source,opened_date,evidence_basis,screening_decision,extraction_card,used_in_synthesis,notes
+""",
+    "discovery/literature/citation_audit.md": """# Citation Audit
+
+| Paper ID | Requires audit | Verification basis | Stable locator | Citation exists | Metadata faithful | Claim support checked | Evidence level | Status | Notes |
+|---|---|---|---|---|---|---|---|---|---|
+""",
+    "discovery/literature/citation_snowball_queue.csv": """queued_at,source_paper_id,related_locator,relation,source,status,notes
+""",
     "discovery/anchor.yml": """# Research anchor: 4 components, set ONCE at intake and then frozen (anti-drift).
 # Set status: locked once decided; after that it is a protected file.
 anchor:
@@ -155,6 +261,52 @@ does_not_prove:
   - claim support
   - human gate approval
 completion_verdict: fail
+""",
+    "templates/CONTEXT_BUNDLE.md": """# CONTEXT_BUNDLE
+
+generated_at: TEMPLATE
+lane: project
+current_goal: Initialize or continue the project with a compact, source-anchored context.
+current_gate: G0
+candidate_gate: G0
+gate_status: open
+recommended_next_action: Run `python3 -m aeros.cli context --brief` and `python3 -m aeros.cli next`.
+status_label: ROUTE_READY
+next_command: python3 -m aeros.cli next
+current_blocker: None recorded.
+latest_substantive_artifact: None recorded.
+last_validation: Not run.
+does_not_prove: This context bundle does not prove data access, literature extraction, empirical validity, claim support, paper readiness, or gate approval.
+context_stale: false
+context_stale_reason: TEMPLATE bundle; run `aeros cockpit --write` to generate source hashes.
+stop_rule: Stop before switching lanes or claiming substantive progress without evidence.
+latest_revision: TEMPLATE
+
+## Lane Snapshot
+- none
+
+## Open Human Gate Items
+- none
+
+## Files To Read If Needed
+- CURRENT_STATE.md
+- NEXT_ACTION.md
+- AGENTS.md
+
+This bundle is context, not completion evidence, gate approval, claim support, or validation.
+""",
+    "templates/NEXT_ACTION.md": """# NEXT_ACTION
+
+recommended_next_action: The deterministic next step AEROS recommends.
+why_this_next: Why this step outranks checks, human gates, data, literature, analysis, claim, writing, or compliance alternatives.
+lane: data | literature | analysis | claim | writing | compliance | harness | human_gate | discovery | project
+status_label: CHECK_PASS | ROUTE_READY | SUBSTANTIVE_DONE
+command: The next command to run, or the human decision needed.
+stop_condition: The exact condition where Codex must stop rather than drift into another lane.
+source: deterministic
+blocked: false
+
+This is a recommendation, not an execution record, gate approval, or claim-support artifact.
 """,
     "harness/human_review_receipt_template.md": """---
 receipt_type: human_review_receipt

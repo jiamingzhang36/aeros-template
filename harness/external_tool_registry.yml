@@ -176,3 +176,65 @@ tools:
       - certify identification
       - upgrade claim status
       - replace human G3/G7/G12 decisions
+
+
+econ_agent_skills:
+  lane: analysis
+  role: advisory_reviewer
+  maturity: emerging_tool
+  url: "https://github.com/JonasWeinert/EconAgentSkills"
+  use_for:
+    - economics-specific data, DiD, IV, RDD, panel, writing, and visualization skill policy
+    - ASK/DEFAULT+flag/DOCUMENT/PROCEED method discipline
+  evidence_output:
+    - audits/advisory/econ_agent_skills_notes.md
+    - docs/method_card.md
+  must_not_do:
+    - approve gates
+    - certify identification
+    - certify claims
+    - silently swap estimators without documentation
+did_agent_workflow:
+  lane: analysis
+  role: advisory_reviewer
+  maturity: emerging_tool
+  url: "https://github.com/zhangxiany-tamu/DID"
+  use_for:
+    - modern DiD treatment profiling and estimator-risk routing
+    - advisory pretrend, heterogeneity, and HonestDiD checklists
+  evidence_output:
+    - audits/advisory/did_agent_workflow_notes.md
+  must_not_do:
+    - approve gates
+    - certify identification
+    - certify causal claims
+    - replace project-owned analysis code or result registry
+scholar_deep_research:
+  lane: literature
+  role: reference_pattern
+  maturity: emerging_tool
+  url: "https://github.com/Agents365-ai/scholar-deep-research"
+  use_for:
+    - literature search phase decomposition
+    - citation chasing, deduplication, and self-critique pattern design
+  evidence_output:
+    - discovery/literature/search_log.csv
+    - discovery/literature/citation_snowball_queue.csv
+  must_not_do:
+    - approve gates
+    - certify literature gaps
+    - replace full-text extraction cards
+    - write synthesis without source-bound extraction
+citecheck:
+  lane: literature
+  role: reference_pattern
+  maturity: emerging_reference
+  url: "https://arxiv.org/abs/2605.27700"
+  use_for:
+    - citation existence and metadata faithfulness audit design
+  evidence_output:
+    - discovery/literature/citation_audit.md
+  must_not_do:
+    - approve gates
+    - certify scientific truth
+    - certify claim support without project evidence

@@ -11,6 +11,17 @@ from typing import Any
 from .contract import Contract
 from .skill_receipt import load_core_skill_map
 
+DATA_SKILL_NAMES = {
+    "data-inventory",
+    "describe-data",
+    "data-codebook",
+    "data-quality-checker",
+    "data-merge-audit",
+    "diagnostics-panel",
+    "summary-stats-table",
+    "quick-stats",
+}
+
 
 def _norm_list(value: Any) -> list[str]:
     if not isinstance(value, list):
@@ -38,10 +49,10 @@ def infer_skill_stage(contract: Contract) -> str:
         " ".join(contract.allowed_outputs),
     ]).lower()
 
-    if "data_inventory" in blob or "data_scout" in blob or "data source" in blob:
-        return "data_scouting"
     if "design" in blob or "method_card" in blob or "identification" in blob:
         return "design_formation"
+    if "data_inventory" in blob or "data_scout" in blob or "data source" in blob:
+        return "data_scouting"
     if "claim" in blob or "ceiling" in blob or "language_constraints" in blob:
         return "writing_revision" if "paper" in blob else "execution_analysis"
     if "paper" in blob or "draft" in blob or "referee" in blob or "revision" in blob:
@@ -135,4 +146,9 @@ def validate_skill_contracts(project_root: Path, contracts: dict[str, tuple[Cont
                 failures.append(f"{task_id}: skill {name!r} is not in harness/skill_map_core.yml")
         for name in sorted(rec - allowed):
             failures.append(f"{task_id}: recommended skill {name!r} is not allowed by task contract")
+        if infer_skill_stage(contract) == "data_scouting":
+            if not (allowed & DATA_SKILL_NAMES):
+                failures.append(f"{task_id}: data-lane task has no allowed data skill")
+            if not (rec & DATA_SKILL_NAMES):
+                failures.append(f"{task_id}: data-lane task has no recommended data skill")
     return failures

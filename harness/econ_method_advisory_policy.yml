@@ -1,0 +1,82 @@
+version: "0.1"
+policy: AEROS-ECON-METHOD-ADVISORY-001
+principle: >
+  Economics method skills and external method agents are advisory compilers.
+  They may surface estimator defaults, blocking questions, diagnostics, and
+  method risks, but they cannot certify identification, approve gates, write
+  supported claims, or silently swap estimators.
+decision_levels:
+  ASK:
+    meaning: Stop and ask the human; do not proceed silently.
+    examples:
+      - unit of analysis
+      - treatment definition
+      - identification strategy
+      - clustering level when not mechanically implied
+      - PII, credentials, paid APIs, or raw data mutation
+  DEFAULT_FLAG:
+    meaning: Use a conservative default and flag it in the method/run log.
+    examples:
+      - staggered DiD should not default to plain TWFE
+      - cluster at treatment-assignment or panel unit when appropriate
+      - use vector figure/table outputs
+  DOCUMENT:
+    meaning: Proceed only after recording the assumption and before/after counts.
+    examples:
+      - sample restrictions
+      - merge cardinality
+      - dropped observations
+      - inferred panel keys
+  PROCEED:
+    meaning: Safe mechanical hygiene.
+    examples:
+      - set seeds
+      - assert unique keys before saving
+      - write reproducible commands
+      - keep raw data immutable
+method_defaults:
+  did:
+    required_diagnostics:
+      - treatment timing profile
+      - pre-trend/power discussion
+      - TWFE weight or heterogeneity-risk diagnostic when staggered
+    advisory_estimators:
+      - Callaway-SantAnna
+      - Sun-Abraham
+      - Borusyak-Jaravel-Spiess imputation
+      - de Chaisemartin-DHaultfoeuille
+    must_not_do:
+      - silently use plain TWFE for staggered adoption
+      - treat parallel trends as proven by a pretty event-study plot
+  iv:
+    required_diagnostics:
+      - first stage
+      - weak-IV robust inference or justification
+      - exclusion restriction risk memo
+    must_not_do:
+      - treat F>10 as sufficient by itself
+      - upgrade causal language without human gate
+  rdd:
+    required_diagnostics:
+      - bandwidth sensitivity
+      - manipulation/sorting check
+      - local balance checks
+    must_not_do:
+      - pick bandwidth solely for significance
+  panel:
+    required_diagnostics:
+      - panel key uniqueness
+      - attrition/missingness summary
+      - cluster-level rationale
+    must_not_do:
+      - drop unmatched observations without a logged reason
+output_artifacts:
+  - docs/method_card.md
+  - agent_runs/*method*.md
+  - evidence/spec_run_index.csv
+  - evidence/analysis_ledger.yml
+does_not_prove:
+  - empirical validity
+  - identification credibility
+  - claim support
+  - human gate approval

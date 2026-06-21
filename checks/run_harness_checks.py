@@ -13,9 +13,18 @@ import sys
 import time
 from pathlib import Path
 
+import yaml
+
 
 CHECKS = [
     "check_stage_agents.py",
+    "check_operating_dashboard.py",
+    "check_next_action.py",
+    "check_stale_triage.py",
+    "check_context_bundle.py",
+    "check_context_graph.py",
+    "check_cockpit.py",
+    "check_harness_profiles.py",
     "check_skill_layer.py",
     "check_skill_invocations.py",
     "check_correction_ledger.py",
@@ -27,6 +36,9 @@ CHECKS = [
     "check_idea_bank.py",
     "check_feasibility_matrix.py",
     "check_literature_tools.py",
+    "check_literature_adapters.py",
+    "check_literature_fulltext_execution.py",
+    "check_citation_audit.py",
     "check_external_tool_registry.py",
     "check_git_guardrails.py",
     "check_data_inventory.py",
@@ -56,6 +68,7 @@ CHECKS = [
     "check_claim_numbers_bound.py",
     "check_number_registry.py",
     "check_number_scan.py",
+    "check_paper_package.py",
     "check_bib_verification_present.py",
     "check_table_cell_sources.py",
     "check_data_availability_present.py",
@@ -85,8 +98,38 @@ CHECKS = [
     "check_pipeline_runs.py",
     "check_replication_package.py",
     "check_aea_replication_alignment.py",
+    "check_compliance_gate.py",
 ]
 
+
+
+def _load_profiles() -> dict:
+    path = Path("harness/check_profiles.yml")
+    if not path.exists():
+        return {"profiles": {"full": {"checks": "all"}}}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return data if isinstance(data, dict) else {"profiles": {"full": {"checks": "all"}}}
+
+
+def _available_profiles() -> list[str]:
+    profiles = (_load_profiles().get("profiles") or {})
+    return sorted(profiles) or ["full"]
+
+
+def _checks_for_profile(profile: str) -> list[str]:
+    profile = (profile or "full").strip()
+    if profile == "full":
+        return list(CHECKS)
+    profiles = (_load_profiles().get("profiles") or {})
+    if profile not in profiles:
+        known = ", ".join(sorted(profiles) or ["full"])
+        raise ValueError(f"unknown check profile {profile!r}; known profiles: {known}")
+    checks = (profiles.get(profile) or {}).get("checks")
+    if checks == "all":
+        return list(CHECKS)
+    if not isinstance(checks, list) or not checks:
+        raise ValueError(f"profile {profile!r} has no checks")
+    return [str(check) for check in checks]
 
 def _is_template_repo() -> bool:
     """True only inside the AEROS template itself.
@@ -278,7 +321,21 @@ def main() -> int:
         default=None,
         help="write a structured JSON summary while still streaming human-readable output",
     )
+    parser.add_argument(
+        "--profile",
+        default="full",
+        help="check profile to run: full, smoke, lane:data, lane:literature, lane:method, lane:claim, lane:writing, lane:compliance",
+    )
+    parser.add_argument(
+        "--list-profiles",
+        action="store_true",
+        help="list configured check profiles and exit",
+    )
     args = parser.parse_args()
+    if args.list_profiles:
+        for profile in _available_profiles():
+            print(profile)
+        return 0
 
     draft_warning_mode = _normalize_draft_warning_mode(
         args.draft_warning or os.getenv("AEROS_DRAFT_WARNING", "off")
@@ -289,12 +346,18 @@ def main() -> int:
     check_dir = Path("checks")
     failures = 0
     results: list[dict] = []
+    try:
+        selected_checks = _checks_for_profile(args.profile)
+    except ValueError as exc:
+        print(f"FAIL: {exc}", flush=True)
+        return 2
+    print(f"AEROS harness profile: {args.profile} ({len(selected_checks)} check(s))", flush=True)
 
     skip_checks: set[str] = set()
     if not _is_template_repo():
         skip_checks = _template_only_checks()
 
-    for check in CHECKS:
+    for check in selected_checks:
         if check in skip_checks:
             print(f"==> checks/{check} SKIP (template-only; not run in a downstream project)", flush=True)
             results.append({"name": f"checks/{check}", "status": "skipped", "exit_code": 0})
@@ -307,6 +370,7 @@ def main() -> int:
             failures += 1
     summary = {
         "status": "fail" if failures else "pass",
+        "profile": args.profile,
         "failures": failures,
         "checks": results,
     }

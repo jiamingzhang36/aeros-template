@@ -40,8 +40,17 @@ for T in "${TARGETS[@]}"; do
   rsync -a "$SRC/harness/" "$T/harness/"
   rsync -a "$SRC/examples/" "$T/examples/"
   mkdir -p "$T/docs" "$T/templates" "$T/tests/adversarial" "$T/decisions"
+  if [ ! -f "$T/CURRENT_STATE.md" ]; then
+    rsync -a "$SRC/templates/CURRENT_STATE.md" "$T/CURRENT_STATE.md"
+  fi
+  if [ ! -f "$T/CONTEXT_BUNDLE.md" ]; then
+    rsync -a "$SRC/templates/CONTEXT_BUNDLE.md" "$T/CONTEXT_BUNDLE.md"
+  fi
   [ -f "$SRC/docs/architecture_v0_5.md" ] && rsync -a "$SRC/docs/architecture_v0_5.md" "$T/docs/architecture_v0_5.md"
   [ -f "$SRC/decisions/update_ledger.md" ] && rsync -a "$SRC/decisions/update_ledger.md" "$T/decisions/update_ledger.md"
+  if [ ! -f "$T/decisions/human_gate_queue.yml" ]; then
+    rsync -a "$SRC/decisions/human_gate_queue.yml" "$T/decisions/human_gate_queue.yml"
+  fi
   [ -d "$SRC/templates" ] && rsync -a "$SRC/templates/" "$T/templates/"
   [ -d "$SRC/tests/adversarial" ] && rsync -a "$SRC/tests/adversarial/" "$T/tests/adversarial/"
   mkdir -p "$T/agent_runs"
@@ -59,6 +68,10 @@ for T in "${TARGETS[@]}"; do
   [ -f "$SRC/discovery/literature/extraction_cards/TEMPLATE_extraction_card.md" ] && rsync -a "$SRC/discovery/literature/extraction_cards/TEMPLATE_extraction_card.md" "$T/discovery/literature/extraction_cards/TEMPLATE_extraction_card.md"
   [ -f "$SRC/discovery/literature/literature_rules.md" ] && rsync -a "$SRC/discovery/literature/literature_rules.md" "$T/discovery/literature/literature_rules.md"
   [ -f "$SRC/discovery/literature/function_taxonomy.md" ] && rsync -a "$SRC/discovery/literature/function_taxonomy.md" "$T/discovery/literature/function_taxonomy.md"
+  [ -f "$T/discovery/literature/search_log.csv" ] || rsync -a "$SRC/discovery/literature/search_log.csv" "$T/discovery/literature/search_log.csv"
+  [ -f "$T/discovery/literature/paper_registry.csv" ] || rsync -a "$SRC/discovery/literature/paper_registry.csv" "$T/discovery/literature/paper_registry.csv"
+  [ -f "$T/discovery/literature/citation_audit.md" ] || rsync -a "$SRC/discovery/literature/citation_audit.md" "$T/discovery/literature/citation_audit.md"
+  [ -f "$T/discovery/literature/citation_snowball_queue.csv" ] || rsync -a "$SRC/discovery/literature/citation_snowball_queue.csv" "$T/discovery/literature/citation_snowball_queue.csv"
   [ -f "$SRC/execution/AGENTS.md" ] && rsync -a "$SRC/execution/AGENTS.md" "$T/execution/AGENTS.md"
   [ -f "$SRC/tasks/TEMPLATE_task.md" ] && rsync -a "$SRC/tasks/TEMPLATE_task.md" "$T/tasks/TEMPLATE_task.md"
   SYNCED+=("$T")
@@ -90,6 +103,7 @@ for path in sorted((src / "tasks").rglob("*.yml")):
         source_meta[task_id] = {
             "allowed_skills": list(data.get("allowed_skills") or []),
             "recommended_skills": list(data.get("recommended_skills") or []),
+            "required_skill_classes": list(data.get("required_skill_classes") or []),
         }
 
 def block(key, skills):
@@ -142,6 +156,7 @@ for root in targets:
             continue
         new = replace_block(text, "allowed_skills", meta["allowed_skills"])
         new = replace_block(new, "recommended_skills", meta["recommended_skills"])
+        new = replace_block(new, "required_skill_classes", meta["required_skill_classes"])
         if new != text:
             path.write_text(new, encoding="utf-8")
             changed += 1
@@ -167,8 +182,15 @@ REQUIRED_FILES = [
     "harness/literature_fulltext_policy.yml",
     "harness/external_tool_registry.yml",
     "harness/econ_literature_discovery_policy.yml",
+    "harness/econ_method_advisory_policy.yml",
     "harness/aea_replication_policy.yml",
     "harness/completion_attestation_policy.yml",
+    "harness/status_label_policy.yml",
+    "harness/context_budget.yml",
+    "harness/context_graph_policy.yml",
+    "harness/check_profiles.yml",
+    "harness/stale_triage_policy.yml",
+    "harness/rollout_playbook.md",
     "harness/goal_mode_policy.yml",
     "harness/work_lane_policy.yml",
     "harness/admissibility_matrix.yml",
@@ -192,14 +214,25 @@ REQUIRED_FILES = [
     "templates/aea_data_package_manifest.yml",
     "templates/evidence_delta_record.json",
     "templates/completion_attestation.yml",
+    "templates/CURRENT_STATE.md",
+    "templates/NEXT_ACTION.md",
     "templates/update_ledger_entry.md",
     "decisions/update_ledger.md",
+    "decisions/human_gate_queue.yml",
     "docs/architecture_v0_5.md",
 ]
 
 CHECKS = {
+    "operating_dashboard": "checks/check_operating_dashboard.py",
+    "next_action": "checks/check_next_action.py",
+    "stale_triage": "checks/check_stale_triage.py",
+    "context_bundle": "checks/check_context_bundle.py",
+    "harness_profiles": "checks/check_harness_profiles.py",
+    "cockpit": "checks/check_cockpit.py",
+    "context_graph": "checks/check_context_graph.py",
     "improvement_backlog": "checks/check_improvement_backlog.py",
     "literature_fulltext_execution": "checks/check_literature_fulltext_execution.py",
+    "literature_adapters": "checks/check_literature_adapters.py",
     "derived_vs_asserted_audit": "checks/check_derived_vs_asserted_audit.py",
     "event_log_replay": "checks/check_event_log_replay.py",
     "evidence_delta_log": "checks/check_evidence_delta_log.py",

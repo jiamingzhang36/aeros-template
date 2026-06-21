@@ -71,3 +71,75 @@ entries:
     owner: human
     target_gate: G7
     notes: "Design proposal only, not implemented. Proven manually as the 2026-06-20 referee pressure-test (R1-R7 on CMPD C1/C2), which found caveats the passive referee_panel missed. Anti-Goodhart (L4 creativity survey): output is registered artifacts + recommendation, full attack denominator registered, human gate for raises."
+  - id: AEROS-IMPROVE-006
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: next-action
+    source: user_observation
+    issue: "AEROS checks can say whether the project is broken, but Codex still needs the human to manually decide the next best action across checks, human gates, data, literature, analysis, claim, writing, and compliance lanes."
+    proposed_fix: "Add a deterministic `aeros next` command that reads project state, human gate queue, recent harness summaries, and task contracts to emit recommended_next_action, why_this_next, lane, status_label, command, and stop_condition without executing or approving anything."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-21"
+    resolution_commit: "pending"
+    notes: "`aeros next` is a deterministic projection, not an LLM planner. It preserves CHECK_PASS / ROUTE_READY / SUBSTANTIVE_DONE distinctions and cannot certify research substance."
+
+  - id: AEROS-IMPROVE-007
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: literature-method-fusion
+    source: user_observation_plus_external_scan
+    issue: "AEROS had literature registries, skill policies, external tool registry, and next-action routing, but external discovery tools and economics method skills were not fused into a deterministic lane path."
+    proposed_fix: "Add a conservative literature adapter CLI, citation faithfulness audit fields, econ method advisory policy, and next-action lane routing that outputs ROUTE_READY rather than claiming substantive review."
+    owner: human
+    target_gate: G1
+    resolved_at: "2026-06-21"
+    resolution_commit: "pending"
+    notes: "OpenAlex/manual are implemented adapters; Semantic Scholar/CrossRef/RePEc remain registered candidates until deterministic ingestion is added."
+
+  - id: AEROS-IMPROVE-008
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: context-engineering
+    source: user_observation_plus_cs_scan
+    issue: "Agents can preserve project context through files, but context is spread across CURRENT_STATE, NEXT_ACTION, state, ledgers, queues, and lane artifacts, causing over-reading or empty goal-mode drift."
+    proposed_fix: "Add deterministic `aeros context` bundles with lane focus, stop rules, does_not_prove boundaries, source hashes, and a context budget policy."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-21"
+    resolution_commit: "pending"
+    notes: "Inspired by context engineering patterns: write/select/compress/isolate, repo-scoped memory graphs, context-as-tool, and task-aware pruning."
+  - id: AEROS-IMPROVE-009
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: efficiency-cockpit
+    source: user_observation_plus_cs_scan
+    issue: "AEROS had a heavy internal harness but no fast profile/cockpit layer, so small work steps either ran too much or relied on chat memory."
+    proposed_fix: "Add check profiles, context stale detection, a lightweight context graph, cockpit command, and lane-specific next-action refinements."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-21"
+    resolution_commit: "pending"
+    notes: "This is an efficiency/view layer only. It does not reduce full harness obligations, approve gates, certify claims, or turn route readiness into substantive progress."
+  - id: AEROS-IMPROVE-010
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: stale-triage
+    source: critic_review_plus_real_project_cmpd
+    issue: "aeros next conservatively surfaced stale upstream tasks without distinguishing rerun-needed work from free revalidation or provably irrelevant stale noise."
+    proposed_fix: "Add deterministic stale impact triage with three buckets: rerun_required, revalidate_free, and suppress_as_irrelevant. Use task DAG, fingerprints, allowed outputs, research graph, and claim/result/evidence links only; never LLM ranking."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-21"
+    resolution_commit: "pending"
+    notes: "Implemented as `aeros stale triage --dry-run` and consumed by `aeros next`. It is conservative: suppress only when no frontier/claim path and output fingerprint unchanged; claim-bound stale paths are high-impact review items."

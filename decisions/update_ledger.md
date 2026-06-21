@@ -567,3 +567,31 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 **Drift risk**: The new LIT-FULL tasks could become paperwork if agents fill templates without opening sources. The hard check therefore requires opened source/date, extraction depth, direct evidence notes, and support/cannot-support boundaries.
 
 **Next check**: Run one real project literature queue through LIT-FULL-001 and confirm source-bound cards fail if cited in synthesis, while verified full-text cards pass.
+
+### 2026-06-21 — Add fast profiles, stale context, and cockpit view
+
+**Commit(s)**: `pending`
+
+**Action**: Added `harness/check_profiles.yml`, runner `--profile`, `aeros check --profile`, context stale detection, lightweight `outputs/context/context_graph.yml`, and `aeros cockpit` as the one-command daily dashboard over context + next + fast-check guidance. Also aligned `check_update_ledger.py` with AGENTS by allowing `pending` only while the worktree is dirty, and scoped paper/compliance hard gates out of root template mode while preserving them for real projects; fixed the econ literature discovery policy YAML so full harness can parse the literature adapter policy; removed the remaining hardcoded local Python path from next-action fallback and made controller iterate recommendations default to --dry-run so `aeros next` stays advisory.
+
+**Alignment**: Keeps AEROS's rigorous internal guardrails while lowering day-to-day cognitive load. This follows the north star from recent validation: agents need deterministic context and next-action projection, not more free-form memory or a paper-factory loop.
+
+**Non-goal**: Does not remove any full harness check, approve gates, certify claims, or turn route/readiness output into substantive research progress.
+
+**Drift risk**: A profile could be misread as a complete validation. AGENTS now states profiles are latency controls only; full harness remains required for release/internal-control checkpoints.
+
+**Next check**: Use `aeros cockpit --lane data`, `aeros check --profile smoke`, and at least one real-project lane profile to confirm the light cockpit helps agents stop at the right blocker instead of empty-running.
+
+### 2026-06-21 — Add deterministic stale impact triage
+
+**Commit(s)**: `pending`
+
+**Action**: Added `aeros stale triage --dry-run` plus a runtime triage module and check. `aeros next` now consumes triage so stale tasks are classified into `rerun_required`, `revalidate_free`, or `suppress_as_irrelevant` before recommending a command.
+
+**Alignment**: Keeps NEXT_ACTION deterministic and cheap-first. Stale no longer automatically means provider/API rerun; unchanged outputs route to `recover --check`, claim-bound paths are highlighted, and irrelevant stale noise is suppressed only when graph/DAG/fingerprint evidence proves it is unrelated.
+
+**Non-goal**: Does not use LLM ranking, certify scientific importance, change runtime state, mark tasks stale, downgrade claims, approve gates, or replace full harness/research graph checks.
+
+**Drift risk**: Suppression can become dangerous if the proof rule weakens. Keep the rule conservative: if no proof of irrelevance, surface the stale item.
+
+**Next check**: Run on CMPD and one newer data-heavy project to confirm stale upstream tasks route to `recover --check` when outputs are unchanged and still high-light claim-bound stale paths.

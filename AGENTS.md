@@ -139,6 +139,10 @@ Every task contract must include a Mainline Alignment Gate section before execut
 - Create extraction cards before synthesis.
 - Every substantive literature synthesis claim must cite a `paper_id` with an extraction card.
 
+- Literature adapter outputs are ROUTE_READY only: OpenAlex/Semantic Scholar/CrossRef/RePEc/CitEc metadata may populate search logs, paper registries, and citation queues, but cannot support synthesis, gap claims, method claims, paper positioning, or claim registry entries without full-text extraction.
+- Citation faithfulness has three layers: citation exists, metadata faithful, and claim support checked. A real citation can still fail claim-support alignment.
+- Economics method skills are advisory compilers. They may suggest DiD/IV/RDD/panel diagnostics and defaults, but cannot certify identification, approve gates, or silently change estimators.
+
 
 ## Literature Execution Boundary Rules
 
@@ -210,6 +214,17 @@ Every substantial run must classify what kind of progress it made before calling
 - If a run only reduces check failures, say it is harness triage unless it also changed evidence, data, claim ceiling, result registration, or graph support.
 - If a source search finds no usable source artifact, classify it as `source_discovery_attempt` or `blocked_queue_preparation`. Do not call the data task complete.
 - Creating `Txxx` task files, Makefile targets, README notes, checks, receipts, or update-ledger entries is not data acquisition.
+
+
+## Context Bundle Rules
+
+Use `aeros context` to assemble compact project context before long or ambiguous work.
+
+- `aeros context --brief` is the default starting snapshot for an agent turn.
+- `aeros context --lane <lane>` should be used before lane-specific work so data, literature, method, claim, and writing context do not blur together.
+- Context bundles are derived summaries, not evidence. They do not prove task completion, data access, full-text review, empirical validity, claim support, paper readiness, or gate approval.
+- Read files listed under `Files To Read If Needed` only when the next action requires them; do not bulk-read the project to feel safe.
+- If context, `aeros next`, and the user's request disagree, stop and surface the conflict rather than silently switching lanes.
 
 ## Work Lane Rules
 
@@ -412,6 +427,39 @@ Backfill is the bridge between governance automation and data repair automation.
 - Do not leave important improvement ideas only in chat.
 - When resolving a backlog item, update `status`, `resolved_at`, and `resolution_commit`.
 
+## Operating Dashboard Discipline
+
+- Every project must maintain `CURRENT_STATE.md`.
+- At task wrap-up, update only these six fields: `current_goal`, `latest_substantive_artifact`, `current_blocker`, `next_command`, `does_not_prove`, and `last_validation`.
+- Treat `CHECK_PASS`, `ROUTE_READY`, and `SUBSTANTIVE_DONE` as distinct outcome labels.
+- `CHECK_PASS` means mechanical checks passed; it does not mean research substance is complete.
+- `ROUTE_READY` means a plan, queue, approval packet, or execution packet is ready; it does not mean the routed work has produced evidence.
+- `SUBSTANTIVE_DONE` means a real source snapshot, data artifact, full-text extraction, result, paper edit, or approved decision changed project substance.
+- Use the weakest honest label in final task summaries.
+- Human approvals and confirmations that span projects belong in `decisions/human_gate_queue.yml` until resolved.
+- Route audits, execution packets, and approval queues must not be reported as data/literature/result progress.
+- Use `python3 -m aeros.cli next` for the deterministic next recommended action. It may suggest a command, packet, queue item, or blocker; it must not execute tasks or approve gates.
+- Follow `harness/rollout_playbook.md` for AEROS upgrades: sync latest template, check lanes, recover receipts, run harness, write rollout report, update `CURRENT_STATE.md`, then commit.
+
+
+
+## Stale Impact Triage Rules
+
+- Use `python3 -m aeros.cli stale triage --dry-run` when `aeros next` reports stale tasks.
+- Triage is deterministic: task DAG, fingerprints, allowed outputs, research graph, and claim/result/evidence links only. Do not use LLM judgment to rank stale impact.
+- Prefer `revalidate_free` (`aeros recover TASK --check`) before any provider/API rerun when allowed-output fingerprints are unchanged.
+- Only suppress stale work when AEROS can prove it is disconnected from the current frontier and outputs are unchanged. If proof is unavailable, keep the stale item visible.
+- Claim-bound or result-bound stale paths are high-impact review items. Triage may surface them, but must not downgrade claims, approve gates, mark tasks stale, or change runtime state.
+
+## Cockpit and Fast-Profile Rules
+
+- Start non-trivial project work with `python3 -m aeros.cli cockpit --lane <lane>` or `python3 -m aeros.cli context --brief`; do not rely on long chat memory as the source of project state.
+- Use `python3 -m aeros.cli next --lane <lane>` to choose the next deterministic action; if it returns a blocker, stop instead of switching lanes silently.
+- Use `python3 -m aeros.cli check --profile smoke` for small-step validation and lane profiles (`lane:data`, `lane:literature`, `lane:method`, `lane:claim`, `lane:writing`, `lane:compliance`) for focused validation.
+- Full harness remains the release/internal-control layer. A smoke or lane profile reduces latency; it does not weaken gates, prove substantive progress, or replace full release checks.
+- If `aeros context --stale` reports stale context, regenerate with `aeros cockpit --write` or `aeros context --write` before continuing from saved context artifacts.
+- Treat `outputs/context/context_graph.yml` as a navigation graph only. It must not support claims, approve gates, mark tasks stale, or replace `evidence/research_graph.yml`.
+
 ## Skill Layer Rules
 
 - External economics skills may be used only under AEROS task, evidence, permission, and claim rules.
@@ -433,6 +481,9 @@ Treat `harness/external_tool_registry.yml` as the registry for external economic
 - Econometrics-Agent, Causal-Copilot, and CausalAgent are advisory reviewers only. Route their output through AEROS result, identification, claim, and human-gate checks before it affects the paper.
 - Any task that uses a skill must have a passing skill invocation receipt in `agent_runs/skill_invocations/`.
 - `recommended_skills` are advisory routing hints; `allowed_skills` are the hard authorization boundary. A recommended skill must also be allowed by the task.
+- For data-lane tasks, follow the data-first chain: source inventory before description, codebook before quality checks, quality checks before merge audits, and diagnostics only after a real data or schema artifact exists.
+- A skill invocation receipt proves routing compliance only. It does not prove substantive data progress, literature synthesis, empirical validity, claim support, or human gate approval.
+- If a required or recommended data skill cannot run, record a waiver/blocker and the next probe; do not report the task as substantively complete because a skill was considered.
 
 ## Claim Rules
 

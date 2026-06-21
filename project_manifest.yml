@@ -199,6 +199,7 @@ layers:
     - discovery/literature/synthesis/literature_map.md
     - discovery/literature/paper_registry.csv
     - discovery/literature/citation_audit.md
+    - discovery/literature/citation_snowball_queue.csv
     - discovery/data_inventory.csv
     - data/data_state.yml
     - data/data_gap_plan.yml
@@ -208,11 +209,18 @@ layers:
     - discovery/design_sketch.md
     - discovery/PROMOTE_TO_HARNESS.md
     - docs/method_card.md
+    - harness/econ_method_advisory_policy.yml
     - evidence/claim_registry.md
     - evidence/delta_log.jsonl
     - evidence/research_graph.yml
     - decisions/decision_log.md
     - decisions/revision_log.md
+    - harness/context_budget.yml
+    - harness/context_graph_policy.yml
+    - harness/check_profiles.yml
+    - harness/stale_triage_policy.yml
+    - templates/CONTEXT_BUNDLE.md
+    - CONTEXT_BUNDLE.md
     - decisions/update_ledger.md
   agent_execution:
     required_dirs:
@@ -261,6 +269,11 @@ layers:
     - harness/econ_literature_discovery_policy.yml
     - harness/aea_replication_policy.yml
     - harness/completion_attestation_policy.yml
+    - harness/status_label_policy.yml
+    - harness/rollout_playbook.md
+    - decisions/human_gate_queue.yml
+    - CURRENT_STATE.md
+    - templates/NEXT_ACTION.md
     - harness/goal_mode_policy.yml
     - harness/work_lane_policy.yml
     - templates/result_registry_record.json
@@ -298,6 +311,13 @@ default_task_policy:
   claim_strengthening: requires evidence and claim registry update
   preferred_spec_selection: must not be based on significance alone
 checks:
+  stale_triage: checks/check_stale_triage.py
+  harness_profiles: checks/check_harness_profiles.py
+  cockpit: checks/check_cockpit.py
+  context_graph: checks/check_context_graph.py
+  context_bundle: checks/check_context_bundle.py
+  operating_dashboard: checks/check_operating_dashboard.py
+  next_action: checks/check_next_action.py
   derived_vs_asserted_audit: checks/check_derived_vs_asserted_audit.py
   preanalysis_happens_before: checks/check_preanalysis_happens_before.py
   event_log_replay: checks/check_event_log_replay.py
@@ -384,3 +404,5 @@ checks:
   pipeline_runs: checks/check_pipeline_runs.py
   replication_package: checks/check_replication_package.py
   task_automation_policy: checks/check_task_automation_policy.py
+
+# AEROS context bundle check: checks/check_context_bundle.py

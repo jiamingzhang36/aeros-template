@@ -17,6 +17,7 @@ In practice:
 - A skill can draft writing, but `evidence/claim_registry.md` and `docs/language_constraints.md` control claim strength.
 - A skill can run analysis, but `docs/protected_definitions.yml`, `docs/data_contract.yml`, and `checks/` control empirical validity.
 - A skill can improve presentation, but it cannot override human research judgment.
+- A skill invocation receipt controls routing admissibility only; completion attestation, evidence deltas, checks, and human gates control whether work actually progressed.
 
 ## Borrowed Organization
 
@@ -62,6 +63,12 @@ It maps common tasks to useful skill types:
 - paper drafting, results narration, tables, figures, LaTeX QA, pre-submission audit, and response letters
 
 The menu is advisory. `harness/skill_map_core.yml` is the machine-readable core map, and `harness/skill_map_reference.md` stores the optional/reference catalog.
+
+## Data-First Routing
+
+Data-lane work should start with source existence and access before moving to profiling, codebooks, quality checks, merge audits, diagnostics, or summary tables. Later data skills are not allowed to launder missing source access into apparent progress.
+
+If a data skill cannot run, record the blocker and next probe in the task output and skill invocation receipt. A waiver is an honesty mechanism, not a substitute for data evidence.
 
 ## External Economics Advisory Tools
 
