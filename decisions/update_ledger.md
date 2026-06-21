@@ -15,6 +15,37 @@ How to read this ledger:
 - `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
 - `Next check`: what should be watched in the next real project run.
 
+## 2026-06-21
+
+### 2026-06-21 - Design proposal: Graph-Propagated Claim Impact (stale-triage v3)
+
+**Commit(s)**: `pending`
+
+**Action**: Wrote `docs/design/graph_propagated_claim_impact.md` (DESIGN, not
+implemented) + backlog AEROS-IMPROVE-011, prompted by a read-only acid test of the
+v2 stale-triage on CMPD's real G10 state: it discriminated correctly (1/18 high,
+paper task de-escalated to `paper_global_review`) but no task hit `specific_claims`
+— result-producing tasks fell back to `registry_unknown` because CMPD task outputs
+are coarser than the result CSV paths. v3 resolves a task's claims via results it
+(transitively) produces (research_graph + result_index), not only own-output string
+match.
+
+**Alignment**: Sharpens the impact ranking so a stale upstream task is attributed to
+the *specific* claims its results feed — directly serving "claims stay within
+evidence" and reducing both false-high noise and missed claim-bound risk.
+
+**Non-goal**: Design only. Does not change buckets/suppression/volatile handling,
+does not make impact an LLM judgment, and keeps the conservative `registry_unknown`
+fallback when production mapping is ambiguous.
+
+**Drift risk**: Graph propagation can over-attribute (a foundational task feeds
+everything). Mitigation: direct production first, cap transitive propagation to the
+frontier band, downgrade to `registry_unknown` past a claim count threshold.
+
+**Next check**: After implementation, re-run the CMPD read-only acid test and
+confirm result-producing tasks resolve to specific claims (C1/C2/C4) with no
+regression to everything-high.
+
 ## 2026-06-20
 
 ### 2026-06-21 — Tighten stale impact scopes

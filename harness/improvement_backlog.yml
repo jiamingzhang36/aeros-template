@@ -143,3 +143,15 @@ entries:
     resolved_at: "2026-06-21"
     resolution_commit: "pending"
     notes: "Implemented as `aeros stale triage --dry-run` and consumed by `aeros next`. It is conservative: suppress only when no frontier/claim path and output fingerprint unchanged; claim-bound stale paths are high-impact review items."
+  - id: AEROS-IMPROVE-011
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: open
+    priority: medium
+    area: stale-triage
+    source: critic_review_plus_real_project_cmpd
+    issue: "Stale-triage claim impact attributes claims only when a task's own allowed_outputs string-match a registered result path. The 2026-06-21 CMPD acid test (G10, 18 tasks) showed correct discrimination (1/18 high) but NO task hit specific_claims; result-producing tasks fell back to registry_unknown because CMPD task outputs are coarser than the result CSV paths."
+    proposed_fix: "Graph-propagated claim impact (design: docs/design/graph_propagated_claim_impact.md): resolve a stale task's impacted claims via results it (transitively) produces, using research_graph result_generated_by edges + result_index, not only own-output string match. Deterministic; keep registry_unknown fallback when production mapping is ambiguous; cap transitive propagation to the frontier band; recommend-only."
+    owner: human
+    target_gate: G0
+    notes: "Design only, not implemented. Acceptance test: re-run the CMPD read-only acid test; result-producing tasks (e.g. T004_main_execution) should resolve to specific claims (C1/C2/C4) instead of registry_unknown, with no regression to everything-high."
