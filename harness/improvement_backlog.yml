@@ -146,7 +146,7 @@ entries:
   - id: AEROS-IMPROVE-011
     created_at: "2026-06-21"
     updated_at: "2026-06-21"
-    status: in_progress
+    status: resolved
     priority: medium
     area: stale-triage
     source: critic_review_plus_real_project_cmpd
@@ -154,4 +154,6 @@ entries:
     proposed_fix: "Graph-propagated claim impact (design: docs/design/graph_propagated_claim_impact.md): resolve a stale task's impacted claims via results it (transitively) produces, using research_graph result_generated_by edges + result_index, not only own-output string match. Deterministic; keep registry_unknown fallback when production mapping is ambiguous; cap transitive propagation to the frontier band; recommend-only."
     owner: human
     target_gate: G0
-    notes: "Phase 1 (registrar production edge) IMPLEMENTED in _output_claim_impact + tested in check_stale_triage.py; validated read-only on CMPD: T004_main_execution now resolves to specific_claims [C1,C2,C3,C4] with no regression (paper/audit/pipeline unchanged). Phase 2 (transitive descendant propagation) DEFERRED pending the cap + frontier-band restriction in the design's Risk section."
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "Phase 1 (registrar production edge) + Phase 2 (depth-1 descendant propagation with over-attribution cap) both IMPLEMENTED in stale_triage.py and tested in check_stale_triage.py. Validated read-only on CMPD: T004_main_execution -> specific_claims [C1,C2,C3,C4]; T003b inherits via Phase 2 but downgrades to broad registry_unknown (covers all claims); all other ancestors stay none (no flood). Depth-1 bound + all-active->registry_unknown cap prevent over-attribution; impact_propagated_from records the source for auditability."

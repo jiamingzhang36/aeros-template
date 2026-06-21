@@ -84,6 +84,7 @@ class StaleTriageItem:
     impacted_claims: list[str]
     downstream_frontier_tasks: list[str]
     allowed_outputs: list[str]
+    impact_propagated_from: list[str]
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -271,6 +272,57 @@ def _output_claim_impact(outputs: list[str], links: dict[str, Any]) -> tuple[boo
     return False, [], "none"
 
 
+def _direct_dependents(contracts: dict[str, tuple[Any, Path]]) -> dict[str, set[str]]:
+    """Depth-1 reverse dependency map: task_id -> tasks that directly depend on it."""
+    reverse: dict[str, set[str]] = {task_id: set() for task_id in contracts}
+    for task_id, (contract, _path) in contracts.items():
+        for dep in contract.depends_on or []:
+            reverse.setdefault(dep, set()).add(task_id)
+    return reverse
+
+
+def _propagate_descendant_claims(
+    task_id: str,
+    contracts: dict[str, tuple[Any, Path]],
+    direct_dependents: dict[str, set[str]],
+    links: dict[str, Any],
+) -> tuple[set[str], list[str]]:
+    """Graph-propagated claim impact (stale-triage v3, Phase 2).
+
+    A stale task inherits claim impact from the tasks that *directly* consume its
+    output (depth-1 dependents) when those consumers resolve to specific claims via
+    their own output edges. Bounded to depth-1 (frontier-band proxy): we do not walk
+    the full downstream cone, which would attribute every ancestor's staleness to
+    every claim. Only own-output ``specific_claims`` of a direct consumer propagate;
+    a consumer that is itself only broad/unknown does not cascade fake precision.
+    """
+    claims: set[str] = set()
+    sources: list[str] = []
+    for child_id in sorted(direct_dependents.get(task_id, set())):
+        child = contracts.get(child_id, (None, None))[0]
+        if child is None:
+            continue
+        _bound, child_claims, child_scope = _output_claim_impact(_task_outputs(child), links)
+        if child_scope == "specific_claims" and child_claims:
+            claims.update(child_claims)
+            sources.append(child_id)
+    return claims, sorted(set(sources))
+
+
+def _cap_propagated_impact(prop_claims: set[str], active: set[str]) -> tuple[list[str], str]:
+    """Apply the over-attribution cap to propagated claims.
+
+    If propagation would cover *every* active claim it is broad, not precise: report
+    ``registry_unknown`` (high, but no fabricated per-claim IDs) rather than a
+    falsely specific list. A genuine subset propagates as ``specific_claims``.
+    """
+    if not prop_claims:
+        return [], "none"
+    if active and prop_claims >= active:
+        return [], "registry_unknown"
+    return sorted(prop_claims), "specific_claims"
+
+
 def _frontier_connected(
     task_id: str,
     contract: Any,
@@ -348,7 +400,9 @@ def triage_stale_tasks(root: Path, *, stage: str = "discovery", lane: str = "") 
     frontier_rank = _gate_rank(frontier)
     contracts = discover_contracts(root)
     descendants = _dependency_descendants(contracts)
+    direct_dependents = _direct_dependents(contracts)
     links = _claim_links(root)
+    active_claims = set(links.get("active_claims") or [])
     stages = STAGES if stage == "all" else [stage]
     items: list[StaleTriageItem] = []
     seen: set[tuple[str, str, str]] = set()
@@ -370,6 +424,16 @@ def triage_stale_tasks(root: Path, *, stage: str = "discovery", lane: str = "") 
             input_changed = _input_fingerprint_changed(root, state, step.task_id, contract)
             dependency_changed = _dependency_fingerprint_changed(root, state, step.task_id, contract, contracts)
             claim_bound, impacted_claims, impact_scope = _output_claim_impact(outputs, links)
+            propagated_from: list[str] = []
+            if impact_scope == "none":
+                prop_claims, propagated_from = _propagate_descendant_claims(
+                    step.task_id, contracts, direct_dependents, links
+                )
+                if prop_claims:
+                    impacted_claims, impact_scope = _cap_propagated_impact(prop_claims, active_claims)
+                    claim_bound = True
+                else:
+                    propagated_from = []
             connected, downstream = _frontier_connected(
                 step.task_id,
                 contract,
@@ -403,6 +467,18 @@ def triage_stale_tasks(root: Path, *, stage: str = "discovery", lane: str = "") 
                     rationale += " Claim-bound registry changed but impacted claims cannot be localized; run claim/graph consistency checks before interpreting impact."
             elif impact_scope == "paper_global_review":
                 rationale += " Paper artifact changed without a deterministic claim link; review paper-level consistency but do not assume all claims are impacted."
+            if propagated_from:
+                if impact_scope == "registry_unknown":
+                    rationale += (
+                        " Claim impact propagated from directly-dependent producer task(s) "
+                        f"{', '.join(propagated_from)}, which cover every active claim; reported as "
+                        "broad registry-unknown rather than a falsely specific claim list."
+                    )
+                else:
+                    rationale += (
+                        " Claim impact propagated (graph edge) from directly-dependent producer "
+                        f"task(s): {', '.join(propagated_from)}."
+                    )
             if volatile_only_outputs and output_changed:
                 rationale += " Only volatile allowed outputs changed; do not call a provider/API before free revalidation."
             items.append(StaleTriageItem(
@@ -425,6 +501,7 @@ def triage_stale_tasks(root: Path, *, stage: str = "discovery", lane: str = "") 
                 impacted_claims=impacted_claims,
                 downstream_frontier_tasks=downstream,
                 allowed_outputs=outputs,
+                impact_propagated_from=propagated_from,
             ))
     bucket_order = {"rerun_required": 0, "revalidate_free": 1, "suppress_as_irrelevant": 2}
     impact_order = {"high": 0, "medium": 1, "low": 2}
@@ -489,6 +566,7 @@ def format_stale_triage(result: StaleTriageResult) -> str:
             f"claim_bound: {item.claim_bound}",
             f"impacted_claims: {'unknown' if item.impact_scope in {'claim_registry_unknown', 'registry_unknown'} else ', '.join(item.impacted_claims) if item.impacted_claims else 'none'}",
             f"downstream_frontier_tasks: {', '.join(item.downstream_frontier_tasks) if item.downstream_frontier_tasks else 'none'}",
+            f"impact_propagated_from: {', '.join(item.impact_propagated_from) if item.impact_propagated_from else 'none'}",
             f"rationale: {item.rationale}",
             "",
         ])

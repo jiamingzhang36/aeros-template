@@ -11,8 +11,10 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from aeros.runtime.stale_triage import (  # noqa: E402
     BUCKETS,
+    _cap_propagated_impact,
     _classify,
     _output_claim_impact,
+    _propagate_descendant_claims,
     format_stale_triage,
     triage_stale_tasks,
 )
@@ -91,6 +93,30 @@ def main() -> int:
     claim_bound, impacted, scope = _output_claim_impact(["evidence/result_index.csv"], empty_links)
     if not claim_bound or impacted or scope != "registry_unknown":
         failures.append(f"empty result registry must stay registry_unknown, got scope={scope} impacted={impacted}")
+    # v3 Phase 2: depth-1 descendant propagation + over-attribution cap.
+    from types import SimpleNamespace  # noqa: PLC0415
+    fake_contracts = {
+        "PROD": (SimpleNamespace(allowed_outputs=["evidence/result_index.csv"], depends_on=["UP"]), None),
+        "SUBSET": (SimpleNamespace(allowed_outputs=["paper/tables/table1.csv"], depends_on=["UP2"]), None),
+    }
+    direct = {"UP": {"PROD"}, "UP2": {"SUBSET"}, "PROD": set(), "SUBSET": set()}
+    claims, srcs = _propagate_descendant_claims("UP", fake_contracts, direct, fake_links)
+    if claims != {"C001"} or srcs != ["PROD"]:
+        failures.append(f"depth-1 propagation should inherit producer claims, got {claims} from {srcs}")
+    # A task whose direct dependent has no specific scope must not propagate.
+    no_prop, no_srcs = _propagate_descendant_claims("PROD", fake_contracts, direct, fake_links)
+    if no_prop or no_srcs:
+        failures.append(f"leaf producer must not propagate, got {no_prop} from {no_srcs}")
+    # Cap: a genuine subset stays specific; covering all active claims downgrades.
+    imp, sc = _cap_propagated_impact({"C001"}, {"C001", "C002", "C003"})
+    if imp != ["C001"] or sc != "specific_claims":
+        failures.append(f"subset propagation must stay specific, got {sc} {imp}")
+    imp, sc = _cap_propagated_impact({"C001", "C002"}, {"C001", "C002"})
+    if imp or sc != "registry_unknown":
+        failures.append(f"all-active propagation must downgrade to registry_unknown, got {sc} {imp}")
+    imp, sc = _cap_propagated_impact(set(), {"C001"})
+    if imp or sc != "none":
+        failures.append(f"empty propagation must be none, got {sc} {imp}")
     bucket, _level, command = _classify(
         output_changed=True,
         volatile_only_outputs=True,

@@ -1,6 +1,6 @@
 # Design Proposal: Graph-Propagated Claim Impact (stale-triage v3)
 
-**Status: PHASE 1 IMPLEMENTED & VALIDATED. PHASE 2 DEFERRED.** Backlog: AEROS-IMPROVE-011.
+**Status: PHASE 1 & PHASE 2 IMPLEMENTED & VALIDATED.** Backlog: AEROS-IMPROVE-011.
 
 ## Implementation status
 
@@ -10,18 +10,30 @@
   `evidence_ledger.csv`) is the producer-of-record for the claims that registry
   links, so its impacted claims resolve to the concrete claim IDs instead of an
   unscoped `registry_unknown`. Conservative fallback preserved: if the registry
-  links no claims, it stays `registry_unknown` (high but unscoped). Covered by
-  `checks/check_stale_triage.py` (registrar-resolves and empty-registry-fallback
-  cases). **Validated** on CMPD (read-only, 2026-06-21): `T004_main_execution`
-  now resolves to `specific_claims [C1,C2,C3,C4]` (was unscoped); paper/audit/
-  pipeline tasks unchanged (`paper_global_review`/`none`) — no regression, no
-  over-attribution to T004's ancestors.
-- **Phase 2 — transitive descendant propagation (DEFERRED).** Propagating claims
-  to a stale task from a frontier-connected descendant that produces a bound
-  result. Deferred because it carries the over-attribution risk (a foundational
-  task "feeds everything") and needs the cap + frontier-band restriction below
-  before it is safe to enable. The Phase-1 registrar edge already resolves the
-  validated CMPD gap without that risk.
+  links no claims, it stays `registry_unknown` (high but unscoped).
+- **Phase 2 — depth-1 descendant propagation with over-attribution cap
+  (IMPLEMENTED).** `_propagate_descendant_claims` + `_cap_propagated_impact`,
+  wired into `triage_stale_tasks` and surfaced via a new
+  `impact_propagated_from` field. A stale task whose own outputs resolve to
+  `none` inherits claim impact from the tasks that **directly** consume its
+  output (depth-1 dependents) when those consumers resolve to `specific_claims`.
+  Two guardrails enforce safety: (1) **bounded to depth-1** — we do not walk the
+  full downstream cone, so a stale task only inherits from its immediate
+  producer-consumers, not from every transitive descendant; (2) **over-attribution
+  cap** — if propagation would cover *every* active claim it is reported as broad
+  `registry_unknown` (high, no fabricated per-claim IDs) rather than a falsely
+  specific list. The propagation source task IDs are recorded for auditability.
+  Covered by `checks/check_stale_triage.py` (depth-1 inheritance, leaf
+  non-propagation, subset-stays-specific, all-active-downgrades, empty-is-none).
+
+**Validated** on CMPD (read-only, 2026-06-21/22, 18 tasks): `T004_main_execution`
+resolves to `specific_claims [C1,C2,C3,C4]` (Phase 1); its direct parent
+`T003b_pipeline_instantiation` inherits via Phase 2 but, because T004 produces
+every active claim, is honestly downgraded to broad `registry_unknown`
+(propagated_from=`T004_main_execution`); **every other ancestor and the
+audit/robustness tasks stay `none`** (no flood), and the paper task stays
+`paper_global_review`. Exactly one propagation edge fired — the bounded,
+non-cascading behaviour the design requires.
 
 The original design follows.
 

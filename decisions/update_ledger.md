@@ -15,7 +15,39 @@ How to read this ledger:
 - `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
 - `Next check`: what should be watched in the next real project run.
 
-## 2026-06-21
+## 2026-06-22
+
+### 2026-06-22 - Implement Phase 2 of graph-propagated claim impact (depth-1 propagation + cap)
+
+**Commit(s)**: `pending`
+
+**Action**: Implemented Phase 2 of the v3 design. Added
+`_propagate_descendant_claims` (a stale task whose own outputs resolve to `none`
+inherits claim impact from its **depth-1** dependents that resolve to
+`specific_claims`) and `_cap_propagated_impact` (if propagation would cover every
+active claim, report broad `registry_unknown` instead of a falsely specific list),
+wired into `triage_stale_tasks`, surfaced via a new `impact_propagated_from`
+field/line. Added five `check_stale_triage.py` cases. Validated read-only on CMPD:
+`T003b_pipeline_instantiation` inherits from `T004_main_execution` and downgrades
+to broad `registry_unknown`; all other ancestors stay `none` (one edge fired, no
+cascade); paper task unchanged. Closes AEROS-IMPROVE-011.
+
+**Alignment**: Completes the impact-localization story — a stale upstream task now
+reflects the claims its direct downstream producer puts at risk, without the
+"everything is high" flood, so the human reviews the right tasks.
+
+**Non-goal**: Not full transitive-cone propagation (deliberately depth-1). Does not
+change buckets/suppression, is not an LLM judgment, and never fabricates specific
+claim IDs when the inherited set is broad (cap downgrades to registry_unknown).
+
+**Drift risk**: Depth-1 could miss a multi-hop production chain (an indirect
+producer two hops down). Accepted: missing a far edge yields a conservative `none`/
+own-scope, never a false high; widening to bounded multi-hop would need a new cap
+study before enabling. The all-active downgrade prevents fake precision.
+
+**Next check**: On a project where a direct dependent produces a *subset* of claims
+(CMPD's T004 produces all), confirm the parent inherits exactly that subset as
+`specific_claims` with `impact_propagated_from` populated.
 
 ### 2026-06-21 - Implement Phase 1 of graph-propagated claim impact (registrar edge)
 
