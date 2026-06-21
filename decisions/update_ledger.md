@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-21 — Tighten stale impact scopes
 
-**Commit(s)**: `pending`
+**Commit(s)**: `196f37a`
 
 **Action**: Refined deterministic stale triage so paper/claim-registry outputs no
 longer expand to all active claims unless a concrete result/evidence/graph path
