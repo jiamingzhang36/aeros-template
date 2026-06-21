@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-21 - Implement Phase 1 of graph-propagated claim impact (registrar edge)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `0c0ac5a`
 
 **Action**: Implemented Phase 1 of the v3 design in
 `aeros/runtime/stale_triage.py::_output_claim_impact`: a task that writes a
