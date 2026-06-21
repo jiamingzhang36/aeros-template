@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-22 - Implement Phase 2 of graph-propagated claim impact (depth-1 propagation + cap)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `6ac6748`
 
 **Action**: Implemented Phase 2 of the v3 design. Added
 `_propagate_descendant_claims` (a stale task whose own outputs resolve to `none`
