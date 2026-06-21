@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-21 - Design proposal: Graph-Propagated Claim Impact (stale-triage v3)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `528810e`
 
 **Action**: Wrote `docs/design/graph_propagated_claim_impact.md` (DESIGN, not
 implemented) + backlog AEROS-IMPROVE-011, prompted by a read-only acid test of the
