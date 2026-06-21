@@ -146,7 +146,7 @@ entries:
   - id: AEROS-IMPROVE-011
     created_at: "2026-06-21"
     updated_at: "2026-06-21"
-    status: open
+    status: in_progress
     priority: medium
     area: stale-triage
     source: critic_review_plus_real_project_cmpd
@@ -154,4 +154,4 @@ entries:
     proposed_fix: "Graph-propagated claim impact (design: docs/design/graph_propagated_claim_impact.md): resolve a stale task's impacted claims via results it (transitively) produces, using research_graph result_generated_by edges + result_index, not only own-output string match. Deterministic; keep registry_unknown fallback when production mapping is ambiguous; cap transitive propagation to the frontier band; recommend-only."
     owner: human
     target_gate: G0
-    notes: "Design only, not implemented. Acceptance test: re-run the CMPD read-only acid test; result-producing tasks (e.g. T004_main_execution) should resolve to specific claims (C1/C2/C4) instead of registry_unknown, with no regression to everything-high."
+    notes: "Phase 1 (registrar production edge) IMPLEMENTED in _output_claim_impact + tested in check_stale_triage.py; validated read-only on CMPD: T004_main_execution now resolves to specific_claims [C1,C2,C3,C4] with no regression (paper/audit/pipeline unchanged). Phase 2 (transitive descendant propagation) DEFERRED pending the cap + frontier-band restriction in the design's Risk section."

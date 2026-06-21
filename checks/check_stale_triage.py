@@ -73,6 +73,24 @@ def main() -> int:
     claim_bound, impacted, scope = _output_claim_impact(["evidence/claim_registry.md"], fake_links)
     if not claim_bound or impacted or scope != "claim_registry_unknown":
         failures.append("claim registry changes must be high-risk unknown scope, not all active claims")
+    # v3 registrar edge: a result-registry writer resolves to the concrete claims
+    # its registry links, even when its allowed_outputs don't path-match the
+    # per-result artifact paths (the CMPD coarse-output case).
+    claim_bound, impacted, scope = _output_claim_impact(["evidence/result_index.csv"], fake_links)
+    if not claim_bound or impacted != ["C001"] or scope != "specific_claims":
+        failures.append(f"result-registry writer should resolve linked claims, got scope={scope} impacted={impacted}")
+    # Conservative fallback: when the registry links no claims, stay registry_unknown
+    # (high but unscoped) rather than collapsing to none.
+    empty_links = {
+        "active_claims": ["C001"],
+        "result_to_claims": {},
+        "result_paths": [],
+        "evidence_to_claims": {},
+        "evidence_paths": [],
+    }
+    claim_bound, impacted, scope = _output_claim_impact(["evidence/result_index.csv"], empty_links)
+    if not claim_bound or impacted or scope != "registry_unknown":
+        failures.append(f"empty result registry must stay registry_unknown, got scope={scope} impacted={impacted}")
     bucket, _level, command = _classify(
         output_changed=True,
         volatile_only_outputs=True,

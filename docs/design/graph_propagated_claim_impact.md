@@ -1,6 +1,29 @@
 # Design Proposal: Graph-Propagated Claim Impact (stale-triage v3)
 
-**Status: DESIGN PROPOSAL — NOT IMPLEMENTED.** Backlog: AEROS-IMPROVE-011.
+**Status: PHASE 1 IMPLEMENTED & VALIDATED. PHASE 2 DEFERRED.** Backlog: AEROS-IMPROVE-011.
+
+## Implementation status
+
+- **Phase 1 — registrar production edge (IMPLEMENTED).** In
+  `aeros/runtime/stale_triage.py::_output_claim_impact`: a task that writes a
+  result/evidence registry (`evidence/result_index.csv`, `result_registry.csv`,
+  `evidence_ledger.csv`) is the producer-of-record for the claims that registry
+  links, so its impacted claims resolve to the concrete claim IDs instead of an
+  unscoped `registry_unknown`. Conservative fallback preserved: if the registry
+  links no claims, it stays `registry_unknown` (high but unscoped). Covered by
+  `checks/check_stale_triage.py` (registrar-resolves and empty-registry-fallback
+  cases). **Validated** on CMPD (read-only, 2026-06-21): `T004_main_execution`
+  now resolves to `specific_claims [C1,C2,C3,C4]` (was unscoped); paper/audit/
+  pipeline tasks unchanged (`paper_global_review`/`none`) — no regression, no
+  over-attribution to T004's ancestors.
+- **Phase 2 — transitive descendant propagation (DEFERRED).** Propagating claims
+  to a stale task from a frontier-connected descendant that produces a bound
+  result. Deferred because it carries the over-attribution risk (a foundational
+  task "feeds everything") and needs the cap + frontier-band restriction below
+  before it is safe to enable. The Phase-1 registrar edge already resolves the
+  validated CMPD gap without that risk.
+
+The original design follows.
 
 ## Motivation (grounded in a real test)
 

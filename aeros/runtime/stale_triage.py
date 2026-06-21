@@ -44,6 +44,16 @@ CLAIM_BOUND_OUTPUTS = {
     "evidence/research_graph.yml",
 }
 
+# Registries whose writer is the producer-of-record for the claims they link.
+# Used by the graph-propagated claim-impact edge (stale-triage v3, Phase 1).
+RESULT_REGISTRY_OUTPUTS = {
+    "evidence/result_index.csv",
+    "evidence/result_registry.csv",
+}
+EVIDENCE_REGISTRY_OUTPUTS = {
+    "evidence/evidence_ledger.csv",
+}
+
 PAPER_OUTPUT_PREFIXES = ("paper/", "tex/")
 VOLATILE_OUTPUT_PREFIXES = ("agent_runs/", "outputs/logs/", "outputs/context/")
 VOLATILE_OUTPUT_FILES = {
@@ -216,20 +226,39 @@ def _output_claim_impact(outputs: list[str], links: dict[str, Any]) -> tuple[boo
     registry_unknown = False
     claim_registry_unknown = False
     paper_global_review = False
+    result_to_claims = links.get("result_to_claims", {}) or {}
+    evidence_to_claims = links.get("evidence_to_claims", {}) or {}
     for output in outputs:
         normalized = _norm(output)
-        if normalized == "evidence/claim_registry.md":
+        # Direct artifact edge: a task output that is (or contains) a registered
+        # result/evidence path -- or its generating script -- localizes that claim.
+        for rid, result_path, script_path in links.get("result_paths") or []:
+            if _path_matches(output, result_path) or _path_matches(output, script_path):
+                impacted.update(result_to_claims.get(rid, set()))
+        for eid, source_path in links.get("evidence_paths") or []:
+            if _path_matches(output, source_path):
+                impacted.update(evidence_to_claims.get(eid, set()))
+        # Registrar production edge (stale-triage v3, Phase 1): a task that writes
+        # a result/evidence registry is the producer-of-record for the claims those
+        # registries link. Resolve concrete claim IDs from the registry instead of
+        # collapsing to an unscoped "registry_unknown" -- this is what lets a coarse
+        # execution task (whose allowed_outputs don't string-match the per-result
+        # CSV paths) still attribute the specific claims it feeds. Keep
+        # registry_unknown=True as the conservative fallback when no claim resolves.
+        if normalized in RESULT_REGISTRY_OUTPUTS:
+            for claim_set in result_to_claims.values():
+                impacted.update(claim_set)
+            registry_unknown = True
+        elif normalized in EVIDENCE_REGISTRY_OUTPUTS:
+            for claim_set in evidence_to_claims.values():
+                impacted.update(claim_set)
+            registry_unknown = True
+        elif normalized == "evidence/claim_registry.md":
             claim_registry_unknown = True
         elif normalized in CLAIM_BOUND_OUTPUTS:
             registry_unknown = True
         elif normalized.startswith(PAPER_OUTPUT_PREFIXES):
             paper_global_review = True
-        for rid, result_path, script_path in links.get("result_paths") or []:
-            if _path_matches(output, result_path) or _path_matches(output, script_path):
-                impacted.update(links.get("result_to_claims", {}).get(rid, set()))
-        for eid, source_path in links.get("evidence_paths") or []:
-            if _path_matches(output, source_path):
-                impacted.update(links.get("evidence_to_claims", {}).get(eid, set()))
     impacted_claims = sorted(cid for cid in impacted if cid)
     if impacted_claims:
         return True, impacted_claims, "specific_claims"

@@ -17,6 +17,40 @@ How to read this ledger:
 
 ## 2026-06-21
 
+### 2026-06-21 - Implement Phase 1 of graph-propagated claim impact (registrar edge)
+
+**Commit(s)**: `pending`
+
+**Action**: Implemented Phase 1 of the v3 design in
+`aeros/runtime/stale_triage.py::_output_claim_impact`: a task that writes a
+result/evidence registry (`result_index.csv`, `result_registry.csv`,
+`evidence_ledger.csv`) now resolves its impacted claims to the concrete claim IDs
+those registries link, instead of collapsing to an unscoped `registry_unknown`.
+Added two `check_stale_triage.py` cases (registrar resolves linked claims;
+empty registry stays `registry_unknown`). Validated read-only on CMPD:
+`T004_main_execution` now resolves to `specific_claims [C1,C2,C3,C4]`; paper/audit/
+pipeline tasks unchanged. Phase 2 (transitive descendant propagation) deferred.
+
+**Alignment**: Closes the validated gap from the 2026-06-21 acid test — the sharp
+claim attribution we built is no longer dormant for projects whose task outputs are
+coarser than per-result paths. Tighter "which claims are at risk" without inventing
+impact.
+
+**Non-goal**: Not Phase 2. Does not propagate through the dependency graph to a
+task's ancestors/descendants (the over-attribution risk), does not change buckets/
+suppression, and is not an LLM judgment. Keeps the conservative `registry_unknown`
+fallback when the registry links no claims.
+
+**Drift risk**: The registrar edge attributes *all* registry-linked claims to the
+registry writer. For a task that genuinely produces the whole index (CMPD T004)
+this is correct; if a project splits "compute" and "register" into different tasks,
+it labels the register-writer, not the compute task. Acceptable for an *impact*
+(claims-at-risk) signal, not a rerun-target signal — re-check if Phase 2 lands.
+
+**Next check**: When Phase 2 (descendant propagation) is built, enforce the cap +
+frontier-band restriction and re-run the CMPD acid test to confirm ancestors of
+T004 do not flood to high.
+
 ### 2026-06-21 - Design proposal: Graph-Propagated Claim Impact (stale-triage v3)
 
 **Commit(s)**: `528810e`
