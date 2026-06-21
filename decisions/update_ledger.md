@@ -570,7 +570,7 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 
 ### 2026-06-21 — Add fast profiles, stale context, and cockpit view
 
-**Commit(s)**: `pending`
+**Commit(s)**: `a6da765`
 
 **Action**: Added `harness/check_profiles.yml`, runner `--profile`, `aeros check --profile`, context stale detection, lightweight `outputs/context/context_graph.yml`, and `aeros cockpit` as the one-command daily dashboard over context + next + fast-check guidance. Also aligned `check_update_ledger.py` with AGENTS by allowing `pending` only while the worktree is dirty, and scoped paper/compliance hard gates out of root template mode while preserving them for real projects; fixed the econ literature discovery policy YAML so full harness can parse the literature adapter policy; removed the remaining hardcoded local Python path from next-action fallback and made controller iterate recommendations default to --dry-run so `aeros next` stays advisory.
 
@@ -584,7 +584,7 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 
 ### 2026-06-21 — Add deterministic stale impact triage
 
-**Commit(s)**: `pending`
+**Commit(s)**: `a6da765`
 
 **Action**: Added `aeros stale triage --dry-run` plus a runtime triage module and check. `aeros next` now consumes triage so stale tasks are classified into `rerun_required`, `revalidate_free`, or `suppress_as_irrelevant` before recommending a command.
 
