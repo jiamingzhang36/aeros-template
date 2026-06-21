@@ -9,7 +9,13 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-from aeros.runtime.stale_triage import BUCKETS, format_stale_triage, triage_stale_tasks  # noqa: E402
+from aeros.runtime.stale_triage import (  # noqa: E402
+    BUCKETS,
+    _classify,
+    _output_claim_impact,
+    format_stale_triage,
+    triage_stale_tasks,
+)
 
 
 def main() -> int:
@@ -47,6 +53,36 @@ def main() -> int:
                 failures.append(f"{item.task_id}: suppressed item is not proven irrelevant")
             if item.claim_bound and item.impact_level != "high":
                 failures.append(f"{item.task_id}: claim-bound stale item must be high impact")
+            if item.impact_scope == "paper_global_review" and item.impacted_claims:
+                failures.append(f"{item.task_id}: paper-global review must not invent impacted claims")
+            if item.volatile_only_outputs and item.bucket == "rerun_required":
+                failures.append(f"{item.task_id}: volatile-only outputs must not require provider/API rerun")
+    fake_links = {
+        "active_claims": ["C001", "C002", "C003"],
+        "result_to_claims": {"R001": {"C001"}},
+        "result_paths": [("R001", "paper/tables/table1.csv", "code/make_table1.py")],
+        "evidence_to_claims": {"E002": {"C002"}},
+        "evidence_paths": [("E002", "data/processed/evidence_snapshot.csv")],
+    }
+    claim_bound, impacted, scope = _output_claim_impact(["paper/draft.md"], fake_links)
+    if claim_bound or impacted or scope != "paper_global_review":
+        failures.append("paper artifact without deterministic claim link must be paper_global_review only")
+    claim_bound, impacted, scope = _output_claim_impact(["paper/tables/table1.csv"], fake_links)
+    if not claim_bound or impacted != ["C001"] or scope != "specific_claims":
+        failures.append(f"paper result path should localize only C001, got scope={scope} impacted={impacted}")
+    claim_bound, impacted, scope = _output_claim_impact(["evidence/claim_registry.md"], fake_links)
+    if not claim_bound or impacted or scope != "claim_registry_unknown":
+        failures.append("claim registry changes must be high-risk unknown scope, not all active claims")
+    bucket, _level, command = _classify(
+        output_changed=True,
+        volatile_only_outputs=True,
+        frontier_connected=False,
+        claim_bound=False,
+        impacted_claims=[],
+        impact_scope="none",
+    )
+    if bucket != "revalidate_free" or "recover" not in command or "--check" not in command:
+        failures.append("volatile-only output changes must route to recover --check")
     for marker in ["STALE_TRIAGE", "does_not_prove", "does not run agents"]:
         if marker not in rendered:
             failures.append(f"rendered stale triage missing {marker!r}")

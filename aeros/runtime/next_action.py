@@ -226,7 +226,7 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                     why_this_next=(
                         f"Stale reason: {triage.stale_reason}. {triage.rationale} "
                         f"Output changed={triage.output_changed}; frontier_connected={triage.frontier_connected}; "
-                        f"claim_bound={triage.claim_bound}."
+                        f"claim_bound={triage.claim_bound}; impact_scope={triage.impact_scope}."
                     ),
                     lane=triage.lane,
                     status_label="CHECK_PASS",
@@ -236,13 +236,18 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                     blocked=False,
                 )
             if triage and triage.bucket == "rerun_required":
-                claims = f" Impacted claims: {', '.join(triage.impacted_claims)}." if triage.impacted_claims else ""
+                if triage.impacted_claims:
+                    claims = f" Impacted claims: {', '.join(triage.impacted_claims)}."
+                elif triage.impact_scope in {"claim_registry_unknown", "registry_unknown"}:
+                    claims = " Impacted claims: unknown."
+                else:
+                    claims = ""
                 return NextAction(
                     recommended_next_action=f"Preview high/visible stale rerun path for {triage.task_id}.",
                     why_this_next=(
                         f"Stale reason: {triage.stale_reason}. {triage.rationale} "
                         f"Output changed={triage.output_changed}; frontier_connected={triage.frontier_connected}; "
-                        f"impact={triage.impact_level}.{claims}"
+                        f"impact={triage.impact_level}; impact_scope={triage.impact_scope}.{claims}"
                     ),
                     lane=triage.lane,
                     status_label="ROUTE_READY",

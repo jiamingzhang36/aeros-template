@@ -130,6 +130,15 @@ profiles:
     "harness/stale_triage_policy.yml": """version: "0.1"
 policy: AEROS-STALE-TRIAGE-001
 principle: Deterministic stale triage only; no LLM ranking and no state mutation.
+impact_scopes:
+  specific_claims: "High impact only when a deterministic path localizes affected claim IDs."
+  claim_registry_unknown: "High-risk unknown scope; do not invent affected claim IDs."
+  registry_unknown: "High-risk unknown scope; run registry/graph consistency checks."
+  paper_global_review: "Paper review needed, but not all claims are assumed affected."
+  none: "No deterministic claim/paper impact path."
+volatile_outputs:
+  examples: [agent_runs/, outputs/logs/, outputs/context/, decisions/revision_log.md]
+  rule: "If only volatile allowed outputs changed, route to recover --check before provider/API rerun."
 """,
     "harness/context_graph_policy.yml": """version: "0.1"
 policy: AEROS-CONTEXT-GRAPH-001

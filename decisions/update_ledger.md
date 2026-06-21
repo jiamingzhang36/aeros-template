@@ -17,6 +17,34 @@ How to read this ledger:
 
 ## 2026-06-20
 
+### 2026-06-21 — Tighten stale impact scopes
+
+**Commit(s)**: `pending`
+
+**Action**: Refined deterministic stale triage so paper/claim-registry outputs no
+longer expand to all active claims unless a concrete result/evidence/graph path
+localizes the affected claim IDs. Added `impact_scope` values
+(`specific_claims`, `claim_registry_unknown`, `registry_unknown`,
+`paper_global_review`, `none`), routed volatile-only output changes to
+`recover --check`, and added synthetic checks for paper-localized impact,
+unknown claim-registry impact, and volatile-output free revalidation.
+
+**Alignment**: Preserves AEROS's conservative stale handling while preventing
+"everything is high impact" noise. Claim-bound paths stay high when derived;
+unknown registry changes stay high-risk but honest; paper changes without a
+deterministic claim link become review-needed rather than fabricated claim impact.
+
+**Non-goal**: Does not infer scientific importance, read paper prose, decide
+which claims are true, mutate runtime state, downgrade claims, or approve gates.
+
+**Drift risk**: Scope labels could be mistaken for proof of no impact. They are
+only deterministic navigation aids; if a link cannot be localized, the system must
+surface `unknown` rather than suppress.
+
+**Next check**: On the next paper-stage project, create or observe a stale paper
+artifact with one linked claim and verify triage lists only that claim, not every
+active claim.
+
 ### 2026-06-20 - Design proposal: Claim Falsification Engine
 
 **Commit(s)**: `6aeb40e`

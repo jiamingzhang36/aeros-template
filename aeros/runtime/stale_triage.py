@@ -42,9 +42,15 @@ CLAIM_BOUND_OUTPUTS = {
     "evidence/result_index.csv",
     "evidence/result_registry.csv",
     "evidence/research_graph.yml",
-    "paper/draft.md",
-    "paper/numbers.yml",
 }
+
+PAPER_OUTPUT_PREFIXES = ("paper/", "tex/")
+VOLATILE_OUTPUT_PREFIXES = ("agent_runs/", "outputs/logs/", "outputs/context/")
+VOLATILE_OUTPUT_FILES = {
+    "decisions/revision_log.md",
+    "decisions/update_ledger.md",
+}
+HIGH_IMPACT_SCOPES = {"specific_claims", "claim_registry_unknown", "registry_unknown"}
 
 
 @dataclass(frozen=True)
@@ -56,9 +62,11 @@ class StaleTriageItem:
     stale_reason: str
     bucket: str
     impact_level: str
+    impact_scope: str
     command: str
     rationale: str
     output_changed: bool
+    volatile_only_outputs: bool
     input_changed: bool
     dependency_changed: bool
     frontier_connected: bool
@@ -108,6 +116,11 @@ def _path_matches(output: str, candidate: str) -> bool:
     if not out or not cand:
         return False
     return cand == out or cand.startswith(out.rstrip("/") + "/") or out.startswith(cand.rstrip("/") + "/")
+
+
+def _is_volatile_output(output: str) -> bool:
+    out = _norm(output)
+    return out in VOLATILE_OUTPUT_FILES or any(out.startswith(prefix) for prefix in VOLATILE_OUTPUT_PREFIXES)
 
 
 def _frontier_gate(state: dict[str, Any]) -> str:
@@ -198,22 +211,35 @@ def _claim_links(root: Path) -> dict[str, Any]:
     }
 
 
-def _output_claim_impact(outputs: list[str], links: dict[str, Any]) -> tuple[bool, list[str]]:
+def _output_claim_impact(outputs: list[str], links: dict[str, Any]) -> tuple[bool, list[str], str]:
     impacted: set[str] = set()
-    claim_bound = False
+    registry_unknown = False
+    claim_registry_unknown = False
+    paper_global_review = False
     for output in outputs:
-        if output in CLAIM_BOUND_OUTPUTS or output.startswith("paper/"):
-            claim_bound = True
-            impacted.update(links.get("active_claims") or [])
+        normalized = _norm(output)
+        if normalized == "evidence/claim_registry.md":
+            claim_registry_unknown = True
+        elif normalized in CLAIM_BOUND_OUTPUTS:
+            registry_unknown = True
+        elif normalized.startswith(PAPER_OUTPUT_PREFIXES):
+            paper_global_review = True
         for rid, result_path, script_path in links.get("result_paths") or []:
             if _path_matches(output, result_path) or _path_matches(output, script_path):
-                claim_bound = True
                 impacted.update(links.get("result_to_claims", {}).get(rid, set()))
         for eid, source_path in links.get("evidence_paths") or []:
             if _path_matches(output, source_path):
-                claim_bound = True
                 impacted.update(links.get("evidence_to_claims", {}).get(eid, set()))
-    return claim_bound, sorted(cid for cid in impacted if cid)
+    impacted_claims = sorted(cid for cid in impacted if cid)
+    if impacted_claims:
+        return True, impacted_claims, "specific_claims"
+    if claim_registry_unknown:
+        return True, [], "claim_registry_unknown"
+    if registry_unknown:
+        return True, [], "registry_unknown"
+    if paper_global_review:
+        return False, [], "paper_global_review"
+    return False, [], "none"
 
 
 def _frontier_connected(
@@ -251,24 +277,34 @@ def _frontier_connected(
 def _classify(
     *,
     output_changed: bool,
+    volatile_only_outputs: bool,
     frontier_connected: bool,
     claim_bound: bool,
     impacted_claims: list[str],
+    impact_scope: str,
 ) -> tuple[str, str, str]:
-    if not frontier_connected and not output_changed:
+    effective_output_changed = output_changed and not volatile_only_outputs
+    high_impact = bool(impacted_claims) or impact_scope in HIGH_IMPACT_SCOPES
+    if output_changed and volatile_only_outputs:
+        return (
+            "revalidate_free",
+            "high" if high_impact else "medium",
+            "python3 -m aeros.cli recover {task_id} --check",
+        )
+    if not frontier_connected and not effective_output_changed:
         return (
             "suppress_as_irrelevant",
             "low",
             "No action: stale task is disconnected from the current frontier and allowed-output fingerprint is unchanged.",
         )
-    if not output_changed:
-        level = "high" if claim_bound or impacted_claims else "medium"
+    if not effective_output_changed:
+        level = "high" if high_impact else "medium"
         return (
             "revalidate_free",
             level,
             "python3 -m aeros.cli recover {task_id} --check",
         )
-    level = "high" if claim_bound or impacted_claims or frontier_connected else "medium"
+    level = "high" if high_impact or (frontier_connected and impact_scope != "paper_global_review") else "medium"
     return (
         "rerun_required",
         level,
@@ -301,9 +337,10 @@ def triage_stale_tasks(root: Path, *, stage: str = "discovery", lane: str = "") 
                 continue
             outputs = _task_outputs(contract)
             output_changed = _output_fingerprint_changed(root, state, step.task_id, contract)
+            volatile_only_outputs = bool(outputs) and all(_is_volatile_output(output) for output in outputs)
             input_changed = _input_fingerprint_changed(root, state, step.task_id, contract)
             dependency_changed = _dependency_fingerprint_changed(root, state, step.task_id, contract, contracts)
-            claim_bound, impacted_claims = _output_claim_impact(outputs, links)
+            claim_bound, impacted_claims, impact_scope = _output_claim_impact(outputs, links)
             connected, downstream = _frontier_connected(
                 step.task_id,
                 contract,
@@ -315,9 +352,11 @@ def triage_stale_tasks(root: Path, *, stage: str = "discovery", lane: str = "") 
             )
             bucket, impact_level, command_template = _classify(
                 output_changed=output_changed,
+                volatile_only_outputs=volatile_only_outputs,
                 frontier_connected=connected,
                 claim_bound=claim_bound,
                 impacted_claims=impacted_claims,
+                impact_scope=impact_scope,
             )
             lane_value = step.lane or lane or ""
             lane_part = f" --lane {lane_value}" if lane_value else ""
@@ -329,7 +368,14 @@ def triage_stale_tasks(root: Path, *, stage: str = "discovery", lane: str = "") 
             else:
                 rationale = "Deterministically suppressed: no frontier/claim path and allowed-output fingerprint unchanged."
             if claim_bound or impacted_claims:
-                rationale += " Claim-bound/result-bound path detected; human review may be needed if checks fail."
+                if impact_scope == "specific_claims":
+                    rationale += " Specific claim-bound/result-bound path detected; human review may be needed if checks fail."
+                else:
+                    rationale += " Claim-bound registry changed but impacted claims cannot be localized; run claim/graph consistency checks before interpreting impact."
+            elif impact_scope == "paper_global_review":
+                rationale += " Paper artifact changed without a deterministic claim link; review paper-level consistency but do not assume all claims are impacted."
+            if volatile_only_outputs and output_changed:
+                rationale += " Only volatile allowed outputs changed; do not call a provider/API before free revalidation."
             items.append(StaleTriageItem(
                 task_id=step.task_id,
                 stage=stage_name,
@@ -338,9 +384,11 @@ def triage_stale_tasks(root: Path, *, stage: str = "discovery", lane: str = "") 
                 stale_reason=step.stale_reason,
                 bucket=bucket,
                 impact_level=impact_level,
+                impact_scope=impact_scope,
                 command=command,
                 rationale=rationale,
                 output_changed=output_changed,
+                volatile_only_outputs=volatile_only_outputs,
                 input_changed=input_changed,
                 dependency_changed=dependency_changed,
                 frontier_connected=connected,
@@ -401,14 +449,16 @@ def format_stale_triage(result: StaleTriageResult) -> str:
             f"## {item.task_id}",
             f"bucket: {item.bucket}",
             f"impact_level: {item.impact_level}",
+            f"impact_scope: {item.impact_scope}",
             f"stage: {item.stage}",
             f"lane: {item.lane}",
             f"gate: {item.gate}",
             f"stale_reason: {item.stale_reason}",
             f"command: {item.command}",
+            f"volatile_only_outputs: {item.volatile_only_outputs}",
             f"frontier_connected: {item.frontier_connected}",
             f"claim_bound: {item.claim_bound}",
-            f"impacted_claims: {', '.join(item.impacted_claims) if item.impacted_claims else 'none'}",
+            f"impacted_claims: {'unknown' if item.impact_scope in {'claim_registry_unknown', 'registry_unknown'} else ', '.join(item.impacted_claims) if item.impacted_claims else 'none'}",
             f"downstream_frontier_tasks: {', '.join(item.downstream_frontier_tasks) if item.downstream_frontier_tasks else 'none'}",
             f"rationale: {item.rationale}",
             "",

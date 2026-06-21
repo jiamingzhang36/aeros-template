@@ -22,8 +22,33 @@ impact_sources:
   - evidence/evidence_ledger.csv
   - evidence/claim_registry.md
   - evidence/research_graph.yml
+impact_scopes:
+  specific_claims:
+    meaning: "A deterministic result/evidence/graph path localizes the stale artifact to named claim IDs."
+    impact_rule: "high"
+  claim_registry_unknown:
+    meaning: "The claim registry changed; impact is high-risk but affected claims cannot be localized mechanically."
+    impact_rule: "high with impacted_claims=unknown"
+  registry_unknown:
+    meaning: "A claim/result/evidence graph registry changed; impact is high-risk but affected claims cannot be localized mechanically."
+    impact_rule: "high with impacted_claims=unknown"
+  paper_global_review:
+    meaning: "A paper artifact changed without a deterministic claim link; review paper consistency but do not assume every claim is affected."
+    impact_rule: "medium unless a specific claim path is derived"
+  none:
+    meaning: "No deterministic claim/paper impact path was found."
+volatile_outputs:
+  meaning: "Run logs, context views, and revision ledgers are not substantive outputs for rerun necessity."
+  examples:
+    - agent_runs/
+    - outputs/logs/
+    - outputs/context/
+    - decisions/revision_log.md
+  rule: "If only volatile allowed outputs changed, route to recover --check before any provider/API rerun."
 hard_boundaries:
   - "No LLM or heuristic/vibe ranking."
   - "If irrelevance cannot be proven, keep the stale item visible."
-  - "Claim-bound or result-bound stale paths must be high-impact review items."
+  - "Specific claim-bound or result-bound stale paths must be high-impact review items."
+  - "Paper artifact changes must not be expanded to all active claims without a deterministic claim link."
+  - "Unknown claim-registry impact must be labeled unknown, not invented as a concrete impacted-claim list."
   - "Triage must not mark tasks stale, approve gates, downgrade claims, or change runtime state."
