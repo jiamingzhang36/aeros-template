@@ -305,3 +305,17 @@ entries:
     resolved_at: "2026-06-22"
     resolution_commit: "pending"
     notes: "This makes environment expectations explicit. It does not install dependencies, choose conda environments automatically, or prove the delegated pipeline is reproducible on another machine."
+  - id: AEROS-IMPROVE-023
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: conversation-guard
+    source: user_observation
+    issue: "Chat-driven agent work can drift across lanes: a data request may turn into literature cleanup, harness edits, claim changes, or paper writing because AGENTS.md is a soft instruction rather than a mechanically audited scope."
+    proposed_fix: "Add a thin session scope guard: `aeros session start/status/audit`, lane file allowlists, `SESSION_CONTRACT.yml`, and `check_session_scope.py` so off-scope diffs become visible as SCOPE_DRIFT."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "This reuses existing lanes/status labels rather than adding a new planning authority. It does not revert files automatically, approve cross-lane work, or certify research substance."

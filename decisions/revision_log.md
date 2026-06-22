@@ -350,3 +350,26 @@ Use this file to track template or project-level changes that alter workflow, ev
 - checks:
   - Not run in this edit pass unless explicitly requested.
 - notes: Reconcile refreshes derived projections only. It does not approve gates, recover tasks, upgrade claims, validate scientific correctness, or install project dependencies.
+
+## REV032 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: conversation guard / lane scope
+- summary: Added session scope guard so chat-driven work can declare one active lane/objective and audit changed files for off-scope drift.
+- files:
+  - aeros/runtime/session_guard.py
+  - aeros/cli.py
+  - checks/check_session_scope.py
+  - checks/run_harness_checks.py
+  - harness/session_scope.yml
+  - harness/check_profiles.yml
+  - templates/session_contract.yml
+  - project_manifest.yml
+  - aeros/runtime/init_project.py
+  - AGENTS.md
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - Not run in this edit pass unless explicitly requested.
+- notes: Session scope guard reports `SCOPE_DRIFT` but does not revert files, approve cross-lane work, certify research validity, or replace human judgment.

@@ -316,6 +316,7 @@ default_task_policy:
   preferred_spec_selection: must not be based on significance alone
 checks:
   stale_triage: checks/check_stale_triage.py
+  session_scope: checks/check_session_scope.py
   harness_profiles: checks/check_harness_profiles.py
   cockpit: checks/check_cockpit.py
   context_graph: checks/check_context_graph.py

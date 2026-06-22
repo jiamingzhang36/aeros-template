@@ -140,7 +140,34 @@ impact_scopes:
   none: "No deterministic claim/paper impact path."
 volatile_outputs:
   examples: [agent_runs/, outputs/logs/, outputs/context/, decisions/revision_log.md]
-  rule: "If only volatile allowed outputs changed, route to recover --check before provider/API rerun."
+rule: "If only volatile allowed outputs changed, route to recover --check before provider/API rerun."
+""",
+    "harness/session_scope.yml": """version: "0.1"
+policy: AEROS-SESSION-SCOPE-001
+principle: Chat-driven work must declare one active lane and audit changed files against lane scope.
+common_allowed_prefixes: [SESSION_CONTRACT.yml, CURRENT_STATE.md, NEXT_ACTION.md, CONTEXT_BUNDLE.md, agent_runs/, outputs/logs/, outputs/context/, decisions/revision_log.md, decisions/update_ledger.md, harness/improvement_backlog.yml]
+lanes:
+  data: {allowed_prefixes: [data/, discovery/data_inventory.csv, discovery/feasibility_matrix.md, docs/data_contract.yml, docs/data_dictionary.md, code/00_setup/, code/01_ingest/, code/02_clean/, code/03_construct/], forbidden_prefixes: [paper/, discovery/literature/, evidence/claim_registry.md]}
+  literature: {allowed_prefixes: [discovery/literature/, docs/related_work, paper/references], forbidden_prefixes: [data/raw/, data/clean/, evidence/claim_registry.md, paper/draft]}
+  method: {allowed_prefixes: [design/, docs/method, code/04_analysis/, code/05_robustness/, templates/estimand, evidence/estimand], forbidden_prefixes: [data/raw/, paper/draft, evidence/claim_registry.md]}
+  analysis: {allowed_prefixes: [code/04_analysis/, code/05_robustness/, code/06_tables/, code/07_figures/, outputs/tables/, outputs/figures/, outputs/model_outputs/, evidence/result_index.csv, evidence/result_registry.csv, outputs/.provenance/], forbidden_prefixes: [paper/draft, evidence/claim_registry.md]}
+  claim: {allowed_prefixes: [evidence/, audits/, decisions/gates/, docs/design/falsification], forbidden_prefixes: [data/raw/, paper/draft]}
+  writing: {allowed_prefixes: [paper/, docs/, outputs/tables/, outputs/figures/], forbidden_prefixes: [data/raw/, evidence/claim_registry.md]}
+  compliance: {allowed_prefixes: [replication/, compliance/, docs/data_availability, paper/supplement, outputs/logs/], forbidden_prefixes: [data/raw/, evidence/claim_registry.md]}
+  harness: {allowed_prefixes: [aeros/, checks/, harness/, templates/, tools/, docs/design/, project_manifest.yml, AGENTS.md], forbidden_prefixes: [data/raw/, paper/draft.md, evidence/claim_registry.md]}
+""",
+    "templates/session_contract.yml": """version: "0.1"
+policy: AEROS-SESSION-SCOPE-001
+active: true
+active_lane: data
+objective: "One concrete objective for this chat/run."
+max_actions: 2
+allowed_actions: [aeros cockpit, aeros next, lane-scoped action]
+allowed_prefixes: [SESSION_CONTRACT.yml, agent_runs/, outputs/logs/, decisions/revision_log.md]
+forbidden_prefixes: [paper/, evidence/claim_registry.md]
+stop_condition: "Stop at human gate, blocker, no-progress, max_actions, or first off-scope diff."
+completion_label_rule: "Use CHECK_PASS, ROUTE_READY, or SUBSTANTIVE_PRODUCED."
+does_not_prove: [task completion, research validity, claim support, gate approval, off-scope acceptance]
 """,
     "harness/context_graph_policy.yml": """version: "0.1"
 policy: AEROS-CONTEXT-GRAPH-001

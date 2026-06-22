@@ -19,6 +19,7 @@ import yaml
 CHECKS = [
     "check_stage_agents.py",
     "check_operating_dashboard.py",
+    "check_session_scope.py",
     "check_next_action.py",
     "check_action_spec.py",
     "check_stale_triage.py",

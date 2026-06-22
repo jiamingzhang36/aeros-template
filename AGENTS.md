@@ -250,6 +250,10 @@ python3 -m aeros.cli iterate --lane literature --dry-run
 Lane rules:
 
 - Stay in the active lane for the whole run unless the human explicitly asks to switch lanes.
+- Before a chat-driven work burst that may edit files, prefer starting a scoped session with `aeros session start --lane <lane> --objective "..."`.
+- If a session is active, stay inside `SESSION_CONTRACT.yml` until the stop condition or run `aeros session audit`.
+- Off-scope changes reported by `aeros session audit` are `SCOPE_DRIFT`. Do not call the work complete until the drift is reverted, explicitly human-approved, or moved into `harness/improvement_backlog.yml` as deferred work.
+- A session scope is a guardrail, not authority. It cannot approve gates, upgrade claims, or turn route/check work into `SUBSTANTIVE_PRODUCED`.
 - If the active lane is blocked, stop with a blocker/source-discovery/action receipt. Do not silently move to another lane.
 - Data lane completion requires a data/source/probe artifact or an honest blocker; task scaffolding and receipts alone do not count.
 - Literature lane completion requires full-text extraction or function-specific synthesis; registry cleanup alone is bookkeeping.

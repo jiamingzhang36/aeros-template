@@ -460,6 +460,41 @@ def _cmd_stale(args: argparse.Namespace) -> int:
     print("unknown stale command")
     return 2
 
+
+def _cmd_session(args: argparse.Namespace) -> int:
+    from .runtime.session_guard import (
+        audit_session,
+        format_audit,
+        format_session_status,
+        load_session,
+        start_session,
+    )
+
+    root = _project_root()
+    if args.session_command == "start":
+        path, payload = start_session(
+            root,
+            lane=args.lane,
+            objective=args.objective,
+            max_actions=args.max_actions,
+            allowed_actions=args.allowed_action or None,
+            dry_run=args.dry_run,
+        )
+        action = "would write" if args.dry_run else "wrote"
+        print(f"{action} session contract: {path.relative_to(root)}")
+        print(format_session_status(payload))
+        return 0
+    if args.session_command == "status":
+        print(format_session_status(load_session(root)))
+        return 0
+    if args.session_command == "audit":
+        audit = audit_session(root)
+        print(format_audit(audit, as_json=args.json))
+        return 0 if audit.ok else 1
+    print("unknown session command")
+    return 2
+
+
 def _cmd_state_prune(args: argparse.Namespace) -> int:
     root = _project_root()
     state = load_state(root)
@@ -1300,6 +1335,23 @@ def main(argv: list[str] | None = None) -> int:
                         help="prefer the next action for one work lane")
     next_p.add_argument("--write", action="store_true", help="write NEXT_ACTION.md")
     next_p.set_defaults(func=_cmd_next)
+
+    session = sub.add_parser("session", help="start/status/audit a lane-scoped chat session")
+    session_sub = session.add_subparsers(dest="session_command", required=True)
+    session_start = session_sub.add_parser("start", help="write SESSION_CONTRACT.yml for one lane-scoped work session")
+    session_start.add_argument("--lane", required=True,
+                               choices=["data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"],
+                               help="active lane for this session")
+    session_start.add_argument("--objective", required=True, help="one concrete objective for this session")
+    session_start.add_argument("--max-actions", type=int, default=2, help="maximum intended actions before stopping")
+    session_start.add_argument("--allowed-action", action="append", default=[], help="allowed action phrase; may be repeated")
+    session_start.add_argument("--dry-run", action="store_true", help="preview the session contract without writing")
+    session_start.set_defaults(func=_cmd_session)
+    session_status = session_sub.add_parser("status", help="show active SESSION_CONTRACT.yml")
+    session_status.set_defaults(func=_cmd_session)
+    session_audit = session_sub.add_parser("audit", help="audit changed files against active session scope")
+    session_audit.add_argument("--json", action="store_true", help="emit machine-readable audit JSON")
+    session_audit.set_defaults(func=_cmd_session)
 
     skills = sub.add_parser("skills", help="inspect AEROS skill routing")
     skills_sub = skills.add_subparsers(dest="skills_command", required=True)

@@ -1025,3 +1025,29 @@ a projection refresh only.
 **Next check**: On CMPD after the next real pipeline run, run `python3 -m aeros.cli
 reconcile`, then full harness, and confirm no manual provenance/graph/state sync is
 needed.
+
+### 2026-06-22 — Add session scope guard for chat-driven lane drift
+
+**Commit(s)**: `pending`
+
+**Action**: Added `aeros session start/status/audit`, `SESSION_CONTRACT.yml`
+template, `harness/session_scope.yml`, and `check_session_scope.py`. A session
+declares one active lane/objective, max actions, allowed prefixes, forbidden
+prefixes, and stop conditions. `aeros session audit` compares the current diff to
+that scope and reports `SCOPE_DRIFT` for off-lane edits.
+
+**Alignment**: Turns the recurring chat problem ("I asked for data, the agent
+wandered into literature/harness/writing") into a mechanical, reviewable boundary
+without adding another research authority layer.
+
+**Non-goal**: Does not execute work, approve gates, revert files automatically,
+certify research substance, or make cross-lane work impossible when explicitly
+approved by the human.
+
+**Drift risk**: File allowlists can become either too strict or too broad. Keep the
+guard as advisory/auditable scope control and refine lane prefixes only after real
+project audits show false positives/negatives.
+
+**Next check**: In CMPD or the next active project, start a data session, make one
+allowed data edit and one intentionally off-scope paper edit, then confirm
+`aeros session audit` reports only the paper edit as `SCOPE_DRIFT`.
