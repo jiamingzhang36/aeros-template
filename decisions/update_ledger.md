@@ -195,7 +195,7 @@ regression to everything-high.
 
 ### 2026-06-22 — Tighten bounded controller stop semantics
 
-**Commit(s)**: `pending`
+**Commit(s)**: `8690197`
 
 **Action**: Tightened the bounded controller mental model. Renamed the misleading
 `--until budget` stop to `--until max-steps`, clarified that this is a step-count
