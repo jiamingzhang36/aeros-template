@@ -209,5 +209,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "0c380a0"
     notes: "Validated on CMPD: `aeros next --lane literature` now stops on P013/P016/P030, and `aeros run --until no-progress --dry-run --lane literature` stops with reason human_authority_or_blocker instead of would-running stale discovery."

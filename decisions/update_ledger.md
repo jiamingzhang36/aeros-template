@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-22 - Make controller stop on literature full-text blockers (IMPROVE-015)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `0c380a0`
 
 **Action**: CMPD validation showed that the new bounded controller stopped after one
 no-progress dry-run step, but the literature lane route still preferred a stale
