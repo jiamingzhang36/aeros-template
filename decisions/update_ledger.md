@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-22 - Record CMPD first-sync drift; defer full framework upgrade (IMPROVE-012)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `8f32bb6`
 
 **Action**: Attempted to sync stale-triage v3 into CMPD. The forward-only sync brings
 the whole recent feature family (next_action/cockpit/context_bundle/stale_triage) and
