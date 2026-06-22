@@ -1132,7 +1132,7 @@ Keep `check_next_action.py` exercising the CLI JSON path directly.
 
 ### 2026-06-22 — Add first executable adversarial benchmark slice
 
-**Commit(s)**: `pending`
+**Commit(s)**: `3b16b2d`
 
 **Action**: Converted `exit_zero_no_output` from a named adversarial scenario
 into an executable fixture. The benchmark now runs a script that exits 0 without

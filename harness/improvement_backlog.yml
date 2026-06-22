@@ -373,5 +373,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "3b16b2d"
     notes: "This starts adversarial execution with one fixture. Other scenarios remain scaffold-only until fixtures are added; parser and EstimandDataContract checks now label scaffold-only states explicitly."

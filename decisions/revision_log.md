@@ -125,7 +125,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV021 - 2026-06-16 00:00 +0800
 
-- commit: pending
+- commit: 3b16b2d
 - change_type: v0.4 formal kernel scaffold
 - summary: Added the AEROS formal kernel with typed State, Action, Evidence, transition enforcement, executable invariants, event log primitives, and adversarial tests for fake progress, probe bypass, and receipt laundering attacks.
 - files:
