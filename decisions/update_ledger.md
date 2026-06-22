@@ -168,7 +168,7 @@ regression to everything-high.
 
 ### 2026-06-22 — Tighten Zotero full-text availability semantics
 
-**Commit(s)**: `pending`
+**Commit(s)**: `5fe6eb8`
 
 **Action**: Refined the Zotero literature adapter so
 `paper_registry.full_text_available=yes` is reserved for locally indexed/readable
