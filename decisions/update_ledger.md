@@ -1054,7 +1054,7 @@ allowed data edit and one intentionally off-scope paper edit, then confirm
 
 ### 2026-06-22 — Consolidate runtime contracts with ExecutionProfile and semantic scope audit
 
-**Commit(s)**: `pending`
+**Commit(s)**: `e783c77`
 
 **Action**: Added `ExecutionProfile` v1 and wired pipeline checks to resolve a
 named profile from `project_manifest.yml`. Extended ActionSpec with runtime profile,
@@ -1083,7 +1083,7 @@ is labeled `CLAIM_SCOPE_DRIFT` or `AUTHORITY_DRIFT`.
 
 ### 2026-06-22 — Add second-batch research contract scaffolds
 
-**Commit(s)**: `pending`
+**Commit(s)**: `e783c77`
 
 **Action**: Added lightweight scaffolds and checks for EstimandDataContract,
 EvidenceUnit, parser benchmark, adversarial benchmark, and readiness vector.
@@ -1109,7 +1109,7 @@ schemas.
 
 ### 2026-06-22 — Expose ActionSpec through `aeros next --json`
 
-**Commit(s)**: `pending`
+**Commit(s)**: `e783c77`
 
 **Action**: Added `--json` to `aeros next` so the primary next-action producer
 emits the full `NextAction.to_dict()` payload, including the declared

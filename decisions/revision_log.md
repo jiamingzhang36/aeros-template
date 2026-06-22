@@ -376,7 +376,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV033 - 2026-06-22 00:00 +0800
 
-- commit: pending
+- commit: e783c77
 - change_type: contract runtime consolidation
 - summary: Added ExecutionProfile v1, ActionSpec authority/progress/hook fields, automatic reconcile post-run hooks, and semantic session-scope audit verdicts.
 - files:
@@ -410,7 +410,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV034 - 2026-06-22 00:00 +0800
 
-- commit: pending
+- commit: e783c77
 - change_type: research contracts / readiness projection
 - summary: Added second-batch lightweight scaffolds for EstimandDataContract, EvidenceUnit, parser benchmark, adversarial benchmark, and readiness vector.
 - files:
@@ -454,7 +454,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV035 - 2026-06-22 00:00 +0800
 
-- commit: pending
+- commit: e783c77
 - change_type: action-spec / machine-readable next action
 - summary: Added `aeros next --json` so the primary next-action producer exposes the full declared ActionSpec, and extended `check_next_action.py` to exercise the CLI JSON surface.
 - files:

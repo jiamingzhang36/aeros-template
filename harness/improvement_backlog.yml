@@ -237,7 +237,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "1376748"
     notes: "Implemented compatibly: SUBSTANTIVE_PRODUCED is the preferred label, while SUBSTANTIVE_DONE remains a deprecated runtime/check alias. Existing v2 receipts remain accepted; newly written receipts are version 3 with orthogonal fields."
   - id: AEROS-IMPROVE-018
     created_at: "2026-06-22"
@@ -251,7 +251,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "1376748"
     notes: "Producer inversion implemented: next_action branches now use declared ActionSpecs and check_next_action requires producer_mode=declared for computed actions. Compatibility inference remains only for old/bare NextAction callers."
   - id: AEROS-IMPROVE-019
     created_at: "2026-06-22"
@@ -289,7 +289,7 @@ entries:
     owner: human
     target_gate: G6
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "aff9ec9"
     notes: "`aeros reconcile` is a projection refresh, not evidence validation. It does not approve gates, recover stale tasks, upgrade claims, or certify scientific correctness."
   - id: AEROS-IMPROVE-022
     created_at: "2026-06-22"
@@ -303,7 +303,7 @@ entries:
     owner: human
     target_gate: G6
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "aff9ec9"
     notes: "This makes environment expectations explicit. It does not install dependencies, choose conda environments automatically, or prove the delegated pipeline is reproducible on another machine."
   - id: AEROS-IMPROVE-023
     created_at: "2026-06-22"
@@ -317,7 +317,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "849632f"
     notes: "This reuses existing lanes/status labels rather than adding a new planning authority. It does not revert files automatically, approve cross-lane work, or certify research substance."
   - id: AEROS-IMPROVE-024
     created_at: "2026-06-22"
@@ -331,7 +331,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "e783c77"
     notes: "This is consolidation, not a new research module. It does not migrate to SQLite, add parser adapters, create new lanes, or make AEROS decide scientific truth."
   - id: AEROS-IMPROVE-025
     created_at: "2026-06-22"
@@ -345,7 +345,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "e783c77"
     notes: "This is scaffolding and validation plumbing only. It does not certify data availability, full-text synthesis, scientific validity, claim support, or paper/release readiness."
   - id: AEROS-IMPROVE-026
     created_at: "2026-06-22"
@@ -359,5 +359,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "e783c77"
     notes: "This closes the contract-surface inconsistency. It does not change controller execution, approve gates, or remove the legacy inferred compatibility path."
