@@ -30,7 +30,8 @@ CURRENT_STATE_FIELDS = [
     "last_validation:",
 ]
 
-STATUS_LABELS = {"CHECK_PASS", "ROUTE_READY", "SUBSTANTIVE_DONE"}
+STATUS_LABELS = {"CHECK_PASS", "ROUTE_READY", "SUBSTANTIVE_PRODUCED"}
+STATUS_LABEL_ALIASES = {"SUBSTANTIVE_DONE"}
 QUEUE_REQUIRED_FIELDS = {
     "project",
     "request",
@@ -98,7 +99,7 @@ def main() -> int:
             "CURRENT_STATE.md",
             "CHECK_PASS",
             "ROUTE_READY",
-            "SUBSTANTIVE_DONE",
+            "SUBSTANTIVE_PRODUCED",
         ]:
             if phrase not in text:
                 failures.append(f"harness/rollout_playbook.md missing {phrase!r}")

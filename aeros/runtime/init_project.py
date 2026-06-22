@@ -150,7 +150,7 @@ principle: "Distinguish mechanical checks, route readiness, and substantive prog
 labels:
   CHECK_PASS: {meaning: "Mechanical checks passed."}
   ROUTE_READY: {meaning: "A route, packet, queue, or plan is ready."}
-  SUBSTANTIVE_DONE: {meaning: "A real research artifact changed project substance."}
+  SUBSTANTIVE_PRODUCED: {meaning: "A real research artifact changed project substance."}
 final_response_rule:
   required: true
 """,
@@ -256,11 +256,17 @@ status: draft
   "sufficiency_for_current_purpose": "inventory_started"
 }
 """,
-    "templates/completion_attestation.yml": """version: 2
+    "templates/completion_attestation.yml": """version: 3
 task_id: T000
 generated_at: ""
 completion_mode: agent_run
 declared_outcome: complete
+outcome_kind: complete
+contract_status: failed
+verification_level: failed_attestation
+progress_class: none
+progress_label: CHECK_PASS
+authority_status: no_new_authority
 work_lane: data
 allowed_outputs_expected: []
 actual_outputs: []
@@ -313,7 +319,7 @@ This bundle is context, not completion evidence, gate approval, claim support, o
 recommended_next_action: The deterministic next step AEROS recommends.
 why_this_next: Why this step outranks checks, human gates, data, literature, analysis, claim, writing, or compliance alternatives.
 lane: data | literature | analysis | claim | writing | compliance | harness | human_gate | discovery | project
-status_label: CHECK_PASS | ROUTE_READY | SUBSTANTIVE_DONE
+status_label: CHECK_PASS | ROUTE_READY | SUBSTANTIVE_PRODUCED
 command: The next command to run, or the human decision needed.
 stop_condition: The exact condition where Codex must stop rather than drift into another lane.
 source: deterministic

@@ -236,3 +236,95 @@ Use this file to track template or project-level changes that alter workflow, ev
 - Added `aeros paper-ci register-result`, `sync-result-index`, and `schema` CLI entry points.
 - Added `harness/result_adapter_contract.yml`, `templates/result_registry_record.json`, and `checks/check_result_registry.py`.
 - Clarified that result registry guarantees result-born provenance/spec extraction, not estimate correctness or claim approval.
+
+## REV027 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: controller kernel / typed action spec
+- summary: Added typed ActionSpec v0 so deterministic next-action output has a controller-facing action object instead of treating the rendered command string as the main authority surface.
+- files:
+  - aeros/runtime/action_spec.py
+  - aeros/runtime/next_action.py
+  - aeros/runtime/controller_loop.py
+  - checks/check_next_action.py
+  - templates/NEXT_ACTION.md
+  - templates/action_spec.yml
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+  - AGENTS.md
+- checks:
+  - Not run in this edit pass unless explicitly requested.
+- notes: ActionSpec is a control-plane shrink step. It does not migrate state to SQLite, delete older CLI commands, approve gates, execute task runs without `--allow-task-runs`, certify scientific validity, or replace human decisions.
+
+## REV028 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: controller kernel / semantic progress
+- summary: Tightened bounded controller safety with always-on action/wall-time/provider/cost limits, semantic progress hashes, frontier/action cycle detection, primary stop reasons, and orthogonal completion receipt fields.
+- files:
+  - aeros/runtime/controller_loop.py
+  - aeros/cli.py
+  - aeros/runtime/completion.py
+  - aeros/runtime/next_action.py
+  - checks/check_next_action.py
+  - checks/check_cockpit.py
+  - checks/check_context_bundle.py
+  - checks/check_operating_dashboard.py
+  - templates/completion_attestation.yml
+  - templates/NEXT_ACTION.md
+  - harness/status_label_policy.yml
+  - harness/completion_attestation_policy.yml
+  - harness/check_profiles.yml
+  - harness/rollout_playbook.md
+  - aeros/runtime/init_project.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+  - AGENTS.md
+- checks:
+  - Not run in this edit pass unless explicitly requested.
+- notes: `SUBSTANTIVE_PRODUCED` is the preferred substantive-progress label. `SUBSTANTIVE_DONE` remains accepted only as a deprecated compatibility alias. Existing v2 completion receipts are still accepted; newly written receipts are version 3 with orthogonal outcome/contract/verification/progress/authority fields.
+
+## REV029 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: controller kernel / ActionSpec phase tracking
+- summary: Added direct ActionSpec invariant checks, corrected completion progress_class taxonomy, and documented ActionSpec Phase 2 inversion so the current derived-shim implementation does not become the resting command-string authority.
+- files:
+  - checks/check_action_spec.py
+  - checks/run_harness_checks.py
+  - project_manifest.yml
+  - harness/check_profiles.yml
+  - aeros/runtime/completion.py
+  - templates/completion_attestation.yml
+  - aeros/runtime/init_project.py
+  - harness/completion_attestation_policy.yml
+  - docs/design/action_spec_inversion_plan.md
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - Not run in this edit pass unless explicitly requested.
+- notes: This keeps ActionSpec Phase 1 honest. Producers still infer specs from rendered commands today; AEROS-IMPROVE-018 tracks the required Phase 2 inversion where next-action branches construct typed specs first and commands become renderings.
+
+## REV030 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: controller kernel / ActionSpec producer inversion
+- summary: Implemented ActionSpec Phase 2 producer inversion so next-action branches declare typed ActionSpecs directly and computed actions must carry `producer_mode: declared`.
+- files:
+  - aeros/runtime/action_spec.py
+  - aeros/runtime/next_action.py
+  - checks/check_next_action.py
+  - checks/check_action_spec.py
+  - templates/NEXT_ACTION.md
+  - templates/action_spec.yml
+  - NEXT_ACTION.md
+  - docs/design/action_spec_inversion_plan.md
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - Not run in this edit pass unless explicitly requested.
+- notes: `_infer_kind()` remains only as inferred-compat fallback for old/bare NextAction callers. Executor argv parsing is still present for compatibility and is tracked separately as AEROS-IMPROVE-019.

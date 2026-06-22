@@ -10,6 +10,7 @@ profiles:
     description: "Fast cockpit/context/next/lane/schema checks for every small step."
     checks:
       - check_next_action.py
+      - check_action_spec.py
       - check_stale_triage.py
       - check_context_bundle.py
       - check_context_graph.py
@@ -21,6 +22,7 @@ profiles:
     description: "Data-first readiness and no-empty-run checks."
     checks:
       - check_next_action.py
+      - check_action_spec.py
       - check_context_bundle.py
       - check_data_inventory.py
       - check_data_first_readiness.py
@@ -33,6 +35,7 @@ profiles:
     description: "Literature discovery/extraction boundary checks."
     checks:
       - check_next_action.py
+      - check_action_spec.py
       - check_context_bundle.py
       - check_literature_tools.py
       - check_literature_adapters.py
@@ -42,6 +45,7 @@ profiles:
     description: "Method/analysis advisory integrity checks."
     checks:
       - check_next_action.py
+      - check_action_spec.py
       - check_context_bundle.py
       - check_estimand_cards.py
       - check_identification_gate.py
@@ -52,6 +56,7 @@ profiles:
     description: "Claim boundary and support graph checks."
     checks:
       - check_next_action.py
+      - check_action_spec.py
       - check_context_bundle.py
       - check_claim_registry.py
       - check_claim_toulmin_schema.py
@@ -62,6 +67,7 @@ profiles:
     description: "Paper-facing number/provenance/writing checks."
     checks:
       - check_next_action.py
+      - check_action_spec.py
       - check_context_bundle.py
       - check_number_registry.py
       - check_number_scan.py
@@ -72,6 +78,7 @@ profiles:
     description: "Release, replication, and compliance checks."
     checks:
       - check_next_action.py
+      - check_action_spec.py
       - check_context_bundle.py
       - check_aea_replication_alignment.py
       - check_replication_package.py
@@ -82,5 +89,5 @@ profiles:
     checks: all
 non_goals:
   - "No profile may weaken gate exit criteria."
-  - "No profile may convert ROUTE_READY into SUBSTANTIVE_DONE."
+  - "No profile may convert ROUTE_READY into SUBSTANTIVE_PRODUCED."
   - "No profile may hide a failed full harness when preparing release or publication."

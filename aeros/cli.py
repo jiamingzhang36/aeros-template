@@ -82,6 +82,9 @@ def _cmd_run(args: argparse.Namespace) -> int:
             lane=args.lane or "",
             max_steps=args.max_steps,
             no_progress_limit=args.no_progress_limit,
+            max_wall_time_seconds=args.max_wall_time_seconds,
+            max_provider_calls=args.max_provider_calls,
+            max_cost_usd=args.max_cost_usd,
             dry_run=args.dry_run,
             allow_task_runs=args.allow_task_runs,
             task_timeout=args.task_timeout,
@@ -1210,6 +1213,14 @@ def main(argv: list[str] | None = None) -> int:
                      help="prefer one lane when using --until")
     run.add_argument("--max-steps", type=int, default=3,
                      help="maximum controller steps when using --until")
+    run.add_argument("--max-actions", dest="max_steps", type=int,
+                     help="alias for --max-steps; maximum controller actions when using --until")
+    run.add_argument("--max-wall-time-seconds", type=int, default=300,
+                     help="maximum controller wall-clock seconds when using --until")
+    run.add_argument("--max-provider-calls", type=int, default=0,
+                     help="maximum estimated provider/API calls when using --until; default 0")
+    run.add_argument("--max-cost-usd", type=float, default=0.0,
+                     help="maximum estimated provider/API cost in USD when using --until; default 0")
     run.add_argument("--no-progress-limit", type=int, default=1,
                      help="stop after this many non-substantive controller steps")
     run.add_argument("--allow-task-runs", action="store_true",

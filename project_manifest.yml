@@ -320,6 +320,7 @@ checks:
   context_bundle: checks/check_context_bundle.py
   operating_dashboard: checks/check_operating_dashboard.py
   next_action: checks/check_next_action.py
+  action_spec: checks/check_action_spec.py
   derived_vs_asserted_audit: checks/check_derived_vs_asserted_audit.py
   preanalysis_happens_before: checks/check_preanalysis_happens_before.py
   event_log_replay: checks/check_event_log_replay.py

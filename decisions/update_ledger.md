@@ -926,3 +926,59 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 **Drift risk**: Suppression can become dangerous if the proof rule weakens. Keep the rule conservative: if no proof of irrelevance, surface the stale item.
 
 **Next check**: Run on CMPD and one newer data-heavy project to confirm stale upstream tasks route to `recover --check` when outputs are unchanged and still high-light claim-bound stale paths.
+
+### 2026-06-22 — Add typed ActionSpec v0 for next-action control
+
+**Commit(s)**: `pending`
+
+**Action**: Added a typed `ActionSpec` runtime model and wired it into `aeros next`, `aeros run --until`, `checks/check_next_action.py`, templates, and AGENTS. `aeros next` still renders a command for human convenience, but the typed ActionSpec now records the action kind, effect class, capabilities, decision requirement, expected outputs, acceptance checks, and zero-cost/resource boundary.
+
+**Alignment**: Shrinks the controller authority surface. The command string is no longer the implicit truth of the next action; it is a compatibility preview behind a typed, deterministic control record and the existing allowlist executor.
+
+**Non-goal**: Does not migrate project state to SQLite, remove existing CLI commands, approve gates, run real tasks without `--allow-task-runs`, certify identification, upgrade claims, or replace human decisions.
+
+**Drift risk**: ActionSpec can become decorative if future code ignores it and executes rendered command strings directly. Keep `check_next_action.py` enforcing ActionSpec presence/consistency and keep bounded controllers validating the spec before command parsing.
+
+**Next check**: Run `python3 checks/check_next_action.py`, `python3 -m aeros.cli next`, and `python3 -m aeros.cli run --until no-progress --dry-run --json` after this edit to confirm controller records carry ActionSpec and stop on decisions/placeholders.
+
+### 2026-06-22 — Tighten controller budgets, semantic progress, and completion fields
+
+**Commit(s)**: `pending`
+
+**Action**: Extended the bounded controller with always-on resource/safety accounting: max actions, wall-time seconds, provider-call budget, cost budget, semantic state hashes, frontier hashes, action signatures, cycle detection, semantic progress flags, and `primary_stop_reason`. Updated completion receipts to write orthogonal fields: `outcome_kind`, `contract_status`, `verification_level`, `progress_class`, and `authority_status`. Renamed the preferred substantive outcome label from `SUBSTANTIVE_DONE` to `SUBSTANTIVE_PRODUCED` while preserving `SUBSTANTIVE_DONE` as a deprecated compatibility alias in runtime/check code.
+
+**Alignment**: Moves AEROS away from "file changed therefore progress" and toward deterministic semantic control state. Completion now separates what happened, whether the contract passed, how it was verified, whether substance was produced, and whether authority was involved.
+
+**Non-goal**: Does not migrate state to SQLite, make scientific validity judgments, execute provider calls by default, approve gates, upgrade claims, or mark old v2 receipts invalid.
+
+**Drift risk**: Semantic hashes can become too coarse or too broad. Keep them focused on state/frontier/blocker/registry surfaces, not volatile logs. Keep `SUBSTANTIVE_DONE` only as a compatibility alias, not a new primary label.
+
+**Next check**: Run `python3 checks/check_next_action.py`, `python3 checks/check_completion_receipts.py`, and `python3 -m aeros.cli run --until no-progress --dry-run --json` to confirm controller records expose semantic/cycle fields and template receipts remain compatible.
+
+### 2026-06-22 — Mark ActionSpec as Phase 1 shim and add direct invariants check
+
+**Commit(s)**: `pending`
+
+**Action**: Added `checks/check_action_spec.py` and wired it into the harness/profile/manifest control plane. Corrected completion `progress_class` so it is a category (`substantive`) rather than the rendered label (`SUBSTANTIVE_PRODUCED`), while adding `progress_label` for display. Added `docs/design/action_spec_inversion_plan.md` and AEROS-IMPROVE-018 to make the Phase 2 inversion explicit.
+
+**Alignment**: Keeps the ActionSpec work honest. Phase 1 is a useful safety shim, but not the final inversion: command strings still render first and specs are inferred. The backlog now tracks the required next step so `_infer_kind` does not become the resting architecture.
+
+**Non-goal**: Does not invert all next-action producers yet, does not remove command rendering, does not sync to CMPD, and does not make ActionSpec a gate/claim authority.
+
+**Drift risk**: If future work treats Phase 1 as complete, AEROS keeps two string parsers and preserves command-string fragility. Close AEROS-IMPROVE-018 only after producers construct typed ActionSpecs directly and commands become renderings.
+
+**Next check**: Run `python3 checks/check_action_spec.py` and full harness after this edit. Then commit in template before syncing to active projects.
+
+### 2026-06-22 — Implement ActionSpec Phase 2 producer inversion
+
+**Commit(s)**: `pending`
+
+**Action**: Inverted `aeros.runtime.next_action` producers so internal next-action branches construct declared ActionSpecs directly (`producer_mode: declared`) instead of deriving kind/effect from rendered command substrings. `check_next_action.py` now fails if computed next actions use inferred compatibility specs. `action_spec_from_next()` remains only for old/bare NextAction compatibility and marks those specs as `producer_mode: inferred_compat`.
+
+**Alignment**: Removes command-string authority from the next-action producer layer. Commands still render for compatibility, but the typed control semantics now originate in the branch that knows the lane, kind, effect class, and authority boundary.
+
+**Non-goal**: Does not remove command rendering, does not remove the executor allowlist, does not migrate state to SQLite, and does not sync real projects automatically.
+
+**Drift risk**: Future branches could bypass `_next_action()` and construct bare NextAction objects. `check_next_action.py` now protects computed actions, but code review should keep producer declarations mandatory.
+
+**Next check**: Run `python3 checks/check_action_spec.py`, `python3 checks/check_next_action.py`, and full harness; then commit template before syncing CMPD.

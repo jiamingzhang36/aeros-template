@@ -431,14 +431,18 @@ Backfill is the bridge between governance automation and data repair automation.
 
 - Every project must maintain `CURRENT_STATE.md`.
 - At task wrap-up, update only these six fields: `current_goal`, `latest_substantive_artifact`, `current_blocker`, `next_command`, `does_not_prove`, and `last_validation`.
-- Treat `CHECK_PASS`, `ROUTE_READY`, and `SUBSTANTIVE_DONE` as distinct outcome labels.
+- Treat `CHECK_PASS`, `ROUTE_READY`, and `SUBSTANTIVE_PRODUCED` as distinct outcome labels. `SUBSTANTIVE_DONE` is a deprecated compatibility alias only.
 - `CHECK_PASS` means mechanical checks passed; it does not mean research substance is complete.
 - `ROUTE_READY` means a plan, queue, approval packet, or execution packet is ready; it does not mean the routed work has produced evidence.
-- `SUBSTANTIVE_DONE` means a real source snapshot, data artifact, full-text extraction, result, paper edit, or approved decision changed project substance.
+- `SUBSTANTIVE_PRODUCED` means a real source snapshot, data artifact, full-text extraction, result, paper edit, or approved decision changed project substance.
 - Use the weakest honest label in final task summaries.
 - Human approvals and confirmations that span projects belong in `decisions/human_gate_queue.yml` until resolved.
 - Route audits, execution packets, and approval queues must not be reported as data/literature/result progress.
 - Use `python3 -m aeros.cli next` for the deterministic next recommended action. It may suggest a command, packet, queue item, or blocker; it must not execute tasks or approve gates.
+- Every `aeros next` recommendation must carry a typed `ActionSpec`. Treat `ActionSpec.kind`, `ActionSpec.effect_class`, `ActionSpec.capabilities`, and `ActionSpec.requires_decision` as the controller-facing record.
+- The rendered `command` is a compatibility preview for humans and older tools. It is not authority by itself; bounded controllers must validate the `ActionSpec` and then pass any command through the allowlist executor.
+- `ActionSpec.effect_class=task_run`, `human_decision`, or `blocked` must never be silently executed. Real task runs require explicit `--allow-task-runs`; human decisions and blockers require a human gate, receipt, or queue update.
+- Current ActionSpec support has producer inversion: next-action branches must construct typed ActionSpecs directly and carry `producer_mode: declared`. Compatibility inference is only for old/bare NextAction callers. Executor dispatch shrink is tracked separately in `docs/design/action_spec_inversion_plan.md` and AEROS-IMPROVE-019.
 - Follow `harness/rollout_playbook.md` for AEROS upgrades: sync latest template, check lanes, recover receipts, run harness, write rollout report, update `CURRENT_STATE.md`, then commit.
 
 

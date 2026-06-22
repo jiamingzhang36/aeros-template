@@ -84,7 +84,7 @@ entries:
     target_gate: G0
     resolved_at: "2026-06-21"
     resolution_commit: "5b37c42"
-    notes: "`aeros next` is a deterministic projection, not an LLM planner. It preserves CHECK_PASS / ROUTE_READY / SUBSTANTIVE_DONE distinctions and cannot certify research substance."
+    notes: "`aeros next` is a deterministic projection, not an LLM planner. It preserves CHECK_PASS / ROUTE_READY / SUBSTANTIVE_PRODUCED distinctions and cannot certify research substance."
 
   - id: AEROS-IMPROVE-007
     created_at: "2026-06-21"
@@ -211,3 +211,57 @@ entries:
     resolved_at: "2026-06-22"
     resolution_commit: "0c380a0"
     notes: "Validated on CMPD: `aeros next --lane literature` now stops on P013/P016/P030, and `aeros run --until no-progress --dry-run --lane literature` stops with reason human_authority_or_blocker instead of would-running stale discovery."
+  - id: AEROS-IMPROVE-016
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: controller-kernel
+    source: external_architecture_review_plus_user_request
+    issue: "`aeros next` exposed a free-form command string as the main control surface, which risked letting a rendered shell preview become the de facto authority instead of a typed, auditable action object."
+    proposed_fix: "Add typed ActionSpec v0 for deterministic next actions, wire it into `aeros next`, bounded controller records, and check_next_action, and document that command strings are compatibility previews rather than authority."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "This is a kernel-shrink step, not a new research module. It does not migrate state to SQLite, remove existing CLI commands, approve gates, execute task runs without --allow-task-runs, or certify scientific validity."
+  - id: AEROS-IMPROVE-017
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: controller-kernel
+    source: external_architecture_review_plus_user_request
+    issue: "The bounded controller still treated no-progress as mostly file-hash based and did not keep wall-time/provider/cost/action budgets, semantic state hashes, frontier hashes, or action signatures as first-class stop records. Completion receipts also mixed outcome, verification, progress, and authority concepts."
+    proposed_fix: "Make controller safety stops always-on with max-actions, wall-time, provider-call, and cost limits; add semantic_state_hash/frontier_hash/action_signature cycle detection; report primary_stop_reason; and add orthogonal completion receipt fields outcome_kind, contract_status, verification_level, progress_class, and authority_status."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "Implemented compatibly: SUBSTANTIVE_PRODUCED is the preferred label, while SUBSTANTIVE_DONE remains a deprecated runtime/check alias. Existing v2 receipts remain accepted; newly written receipts are version 3 with orthogonal fields."
+  - id: AEROS-IMPROVE-018
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: controller-kernel
+    source: action_spec_wip_review
+    issue: "ActionSpec Phase 1 is still a derived shim: `next_action.to_dict()` infers ActionSpec kind/effect from the rendered command string, so command text remains upstream of typed control semantics."
+    proposed_fix: "Invert producers in Phase 2: each next-action branch must construct ActionSpec directly, render command from the spec, and let the controller dispatch on ActionSpec kind/effect instead of inferring from command substrings."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "Producer inversion implemented: next_action branches now use declared ActionSpecs and check_next_action requires producer_mode=declared for computed actions. Compatibility inference remains only for old/bare NextAction callers."
+  - id: AEROS-IMPROVE-019
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: open
+    priority: medium
+    area: controller-kernel
+    source: action_spec_phase2_followup
+    issue: "After producer inversion, the bounded controller still renders and validates argv through `_command_args()` for execution compatibility. This is safer than inferred specs, but command parsing still exists as an executor guard."
+    proposed_fix: "Shrink `_command_args()` into a final renderer/guard and dispatch real executions from ActionSpec kind/effect once downstream projects have synced."
+    owner: human
+    target_gate: G0
+    notes: "Do not do this as a big-bang change; keep command compatibility until real projects are green on producer-declared ActionSpec."

@@ -1,8 +1,14 @@
-version: 2
+version: 3
 task_id: T000
 generated_at: ""
 completion_mode: agent_run
 declared_outcome: complete
+outcome_kind: complete
+contract_status: failed
+verification_level: failed_attestation
+progress_class: none
+progress_label: CHECK_PASS
+authority_status: no_new_authority
 work_lane: data
 allowed_outputs_expected: []
 actual_outputs:

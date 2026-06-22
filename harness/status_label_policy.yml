@@ -21,7 +21,7 @@ labels:
     must_not_claim:
       - "The routed work has already produced evidence."
       - "Blocked work is complete."
-  SUBSTANTIVE_DONE:
+  SUBSTANTIVE_PRODUCED:
     meaning: A real source snapshot, data artifact, full-text extraction, result, paper edit, or approved decision changed the research substance.
     may_claim:
       - "The specified substantive artifact exists."
@@ -33,4 +33,5 @@ final_response_rule:
   required: true
   instruction: >
     When reporting task outcomes, end with one of CHECK_PASS, ROUTE_READY, or
-    SUBSTANTIVE_DONE. Use the weakest honest label.
+    SUBSTANTIVE_PRODUCED. Use the weakest honest label. SUBSTANTIVE_DONE is a
+    deprecated compatibility alias only.

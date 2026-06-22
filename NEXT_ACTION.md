@@ -9,4 +9,16 @@ stop_condition: Stop after the adoption preview shows the candidate gate, gap pl
 source: project_manifest.yml
 blocked: False
 
-This is a deterministic recommendation. It does not execute tasks, approve gates, or certify research substance.
+## ActionSpec
+
+action_spec_id: AS-template-adopt-idea
+action_spec_kind: adopt_idea
+action_spec_effect_class: local_write_preview
+action_spec_capabilities: ['read_project_state', 'write_candidate_artifact']
+action_spec_requires_decision: True
+action_spec_producer_mode: declared
+action_spec_expected_outputs: ['adoption/', 'decisions/adoption/']
+action_spec_acceptance_checks: []
+action_spec_resource_budget: {'max_provider_calls': '0', 'max_cost_usd': '0'}
+
+This is a deterministic recommendation. The ActionSpec is the typed control record; the command is a compatibility preview. It does not execute tasks, approve gates, or certify research substance.

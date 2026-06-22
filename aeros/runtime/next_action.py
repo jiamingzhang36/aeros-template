@@ -15,11 +15,12 @@ import yaml
 
 from .contract import Contract
 from .controller import build_iterate_plan
+from .action_spec import declared_action_spec
 from .kernel import discover_contracts
 from .stale_triage import triage_item_for_task
 
 
-VALID_LABELS = {"CHECK_PASS", "ROUTE_READY", "SUBSTANTIVE_DONE"}
+VALID_LABELS = {"CHECK_PASS", "ROUTE_READY", "SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}
 LANE_ORDER = ["data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"]
 STAGES = ["discovery", "execution"]
 
@@ -62,9 +63,56 @@ class NextAction:
     stop_condition: str
     source: str = "deterministic"
     blocked: bool = False
+    action_spec: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        data = asdict(self)
+        if data.get("action_spec") is None:
+            from .action_spec import action_spec_from_next
+
+            data["action_spec"] = action_spec_from_next(self).to_dict()
+        return data
+
+
+def _next_action(
+    *,
+    recommended_next_action: str,
+    why_this_next: str,
+    lane: str,
+    status_label: str,
+    command: str,
+    stop_condition: str,
+    spec_kind: str,
+    spec_effect_class: str,
+    source: str = "deterministic",
+    blocked: bool = False,
+    requires_decision: bool | None = None,
+    expected_outputs: tuple[str, ...] | None = None,
+    acceptance_checks: tuple[str, ...] | None = None,
+) -> NextAction:
+    spec = declared_action_spec(
+        kind=spec_kind,
+        effect_class=spec_effect_class,
+        lane=lane,
+        command=command,
+        stop_condition=stop_condition,
+        source=source,
+        blocked=blocked,
+        requires_decision=requires_decision,
+        expected_outputs=expected_outputs,
+        acceptance_checks=acceptance_checks,
+    )
+    return NextAction(
+        recommended_next_action=recommended_next_action,
+        why_this_next=why_this_next,
+        lane=lane,
+        status_label=status_label,
+        command=command,
+        stop_condition=stop_condition,
+        source=source,
+        blocked=blocked,
+        action_spec=spec.to_dict(),
+    )
 
 
 def _read_yaml(path: Path) -> Any:
@@ -172,7 +220,7 @@ def _label_for_contract(contract: Contract) -> str:
         "paper/",
     )):
         if "packet" not in goal and "plan only" not in goal:
-            return "SUBSTANTIVE_DONE"
+            return "SUBSTANTIVE_PRODUCED"
     if "packet" in goal or "plan" in goal or "audit" in goal or "review" in goal:
         return "ROUTE_READY"
     return "CHECK_PASS"
@@ -187,13 +235,15 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
     plan = build_iterate_plan(root, stage, to_next_gate=True, lane=lane)
     if not plan.can_run:
         if plan.reason:
-            return NextAction(
+            return _next_action(
                 recommended_next_action=f"Resolve blocker before running {stage}{'/' + lane if lane else ''}.",
                 why_this_next=plan.reason,
                 lane=lane or "project",
                 status_label="ROUTE_READY",
                 command=f"python3 -m aeros.cli gate packet {plan.target_gate} --stage {stage}",
                 stop_condition="Stop after the packet or blocker record identifies the human decision, credential, source snapshot, or missing prerequisite.",
+                spec_kind="human_decision",
+                spec_effect_class="blocked",
                 blocked=True,
             )
         return None
@@ -207,13 +257,15 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
         # of handing agents a default command that spends provider budget.
         label = "ROUTE_READY"
         if step.action == "blocked":
-            return NextAction(
+            return _next_action(
                 recommended_next_action=f"Escalate blocked task {step.task_id}.",
                 why_this_next=step.stale_reason or "The task contract says this step is blocked.",
                 lane=step.lane or lane or "project",
                 status_label="ROUTE_READY",
                 command=f"python3 -m aeros.cli gate packet {step.gate} --stage {stage}",
                 stop_condition="Stop after the human decision packet or queue item states what approval, credential, source snapshot, or boundary is needed.",
+                spec_kind="human_decision",
+                spec_effect_class="blocked",
                 blocked=True,
             )
         if step.action == "rerun":
@@ -221,7 +273,7 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
             if triage and triage.bucket == "suppress_as_irrelevant":
                 continue
             if triage and triage.bucket == "revalidate_free":
-                return NextAction(
+                return _next_action(
                     recommended_next_action=f"Free revalidate stale task {triage.task_id} before any rerun.",
                     why_this_next=(
                         f"Stale reason: {triage.stale_reason}. {triage.rationale} "
@@ -232,6 +284,8 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                     status_label="CHECK_PASS",
                     command=triage.command,
                     stop_condition="Stop after recover --check passes or reports the first failing check; do not call a provider/API for this stale item first.",
+                    spec_kind="stale_revalidate_free",
+                    spec_effect_class="local_write_preview",
                     source="deterministic_stale_triage",
                     blocked=False,
                 )
@@ -242,7 +296,7 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                     claims = " Impacted claims: unknown."
                 else:
                     claims = ""
-                return NextAction(
+                return _next_action(
                     recommended_next_action=f"Preview high/visible stale rerun path for {triage.task_id}.",
                     why_this_next=(
                         f"Stale reason: {triage.stale_reason}. {triage.rationale} "
@@ -253,6 +307,8 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                     status_label="ROUTE_READY",
                     command=triage.command,
                     stop_condition="Stop after the dry-run plan shows the exact task/check path; require explicit human choice before a provider/API rerun.",
+                    spec_kind="stale_rerun_preview",
+                    spec_effect_class="local_write_preview",
                     source="deterministic_stale_triage",
                     blocked=False,
                 )
@@ -260,7 +316,7 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                 continue
         action_word = "Rerun stale task" if step.action == "rerun" else "Run next task"
         stale = f" Stale reason: {step.stale_reason}." if step.stale_reason else ""
-        return NextAction(
+        return _next_action(
             recommended_next_action=f"{action_word} {step.task_id}.",
             why_this_next=(
                 f"It is the first non-skipped {stage} task in the deterministic plan for lane "
@@ -274,6 +330,8 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                 "Stop when the dry-run previews the allowed-output/check path, or AEROS emits a blocker/decision packet. "
                 "Do not treat route output as substantive progress."
             ),
+            spec_kind="iterate_preview",
+            spec_effect_class="local_write_preview",
         )
     return None
 
@@ -328,7 +386,7 @@ def _literature_next(root: Path) -> NextAction | None:
     fulltext_blockers = _literature_fulltext_blockers(root)
     if fulltext_blockers:
         paper_list = ", ".join(fulltext_blockers)
-        return NextAction(
+        return _next_action(
             recommended_next_action=f"Stop on unresolved literature full-text blockers: {paper_list}.",
             why_this_next=(
                 "The literature lane has explicit blocked_fulltext retrieval records. "
@@ -339,10 +397,12 @@ def _literature_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli literature status",
             stop_condition="Stop here; provide verified full text, connect Zotero/manual attachments, or record a bounded blocker. Do not treat metadata or cache files as full-text evidence.",
             source="discovery/literature/search_log.csv",
+            spec_kind="literature_status",
+            spec_effect_class="blocked",
             blocked=True,
         )
     if not search_count and not papers:
-        return NextAction(
+        return _next_action(
             recommended_next_action="Run a literature discovery search into the registry before claiming literature progress.",
             why_this_next="The literature lane has no search log or paper candidates; full review cannot start until candidate discovery is recorded.",
             lane="literature",
@@ -350,9 +410,11 @@ def _literature_next(root: Path) -> NextAction | None:
             command='python3 -m aeros.cli literature search --source openalex --query "<topic keywords>" --limit 25 --dry-run',
             stop_condition="Stop after candidates are previewed or logged into search_log.csv/paper_registry.csv; do not write synthesis from metadata.",
             source="discovery/literature/search_log.csv",
+            spec_kind="literature_search",
+            spec_effect_class="local_write_preview",
         )
     if papers and not included:
-        return NextAction(
+        return _next_action(
             recommended_next_action="Screen literature candidates by function and stable source before full-text extraction.",
             why_this_next="Paper candidates exist, but none are marked include; this is screening work, not synthesis.",
             lane="literature",
@@ -360,9 +422,11 @@ def _literature_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli literature status",
             stop_condition="Stop when selected papers have screening_decision=include/maybe and citation_audit.md records their verification needs.",
             source="discovery/literature/paper_registry.csv",
+            spec_kind="literature_status",
+            spec_effect_class="read_only",
         )
     if included and not extracted:
-        return NextAction(
+        return _next_action(
             recommended_next_action="Run function-specific full-text extraction for included literature candidates.",
             why_this_next="Included papers exist, but no extraction cards are recorded; bookkeeping cannot support synthesis.",
             lane="literature",
@@ -370,9 +434,11 @@ def _literature_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli next --lane literature --write",
             stop_condition="Stop after LIT-FULL extraction cards cite opened source/date and page/section-bound evidence, or record full_text_unavailable.",
             source="discovery/literature/extraction_cards/",
+            spec_kind="next_action_write",
+            spec_effect_class="local_write",
         )
     if extracted and not synthesized:
-        return NextAction(
+        return _next_action(
             recommended_next_action="Synthesize extracted papers by literature function before paper positioning.",
             why_this_next="Extraction cards exist, but no paper is marked used_in_synthesis; synthesis can now cite full-text evidence.",
             lane="literature",
@@ -380,6 +446,8 @@ def _literature_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli literature status",
             stop_condition="Stop after function-specific synthesis states what each cited paper can and cannot support.",
             source="discovery/literature/synthesis/",
+            spec_kind="literature_status",
+            spec_effect_class="read_only",
         )
     return None
 
@@ -392,7 +460,7 @@ def _data_next(root: Path) -> NextAction | None:
     has_probe_report = (root / "audits/data_probe_report.md").exists()
     has_backfill_queue = (root / "data/backfill/backfill_queue.yml").exists()
     if not inventory_rows and not has_data_state:
-        return NextAction(
+        return _next_action(
             recommended_next_action="Scan project data/source artifacts before doing literature, methods, or writing work.",
             why_this_next="AEROS is data-first: no data inventory or data_state exists, so later research lanes would be ungrounded.",
             lane="data",
@@ -400,9 +468,11 @@ def _data_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli data scan --dry-run",
             stop_condition="Stop after data_state/inventory coverage is previewed or written; do not claim data feasibility yet.",
             source="data/data_state.yml",
+            spec_kind="data_scan",
+            spec_effect_class="local_write_preview",
         )
     if has_data_state and not has_gap_plan:
-        return NextAction(
+        return _next_action(
             recommended_next_action="Derive the data gap plan from the scanned data state.",
             why_this_next="Data state exists, but missing/blocked/runnable gaps are not yet formalized into a queueable plan.",
             lane="data",
@@ -410,9 +480,11 @@ def _data_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli data gaps --dry-run",
             stop_condition="Stop after gaps are classified as runnable, approval-required, missing credential, or missing snapshot.",
             source="data/data_gap_plan.yml",
+            spec_kind="data_gap_plan",
+            spec_effect_class="local_write_preview",
         )
     if (inventory_rows or has_data_state) and not has_probe_report:
-        return NextAction(
+        return _next_action(
             recommended_next_action="Plan a small data probe before full collection or analysis.",
             why_this_next="AEROS should test access/parseability/coverage on a small sample before large backfill or paper-facing results.",
             lane="data",
@@ -420,9 +492,11 @@ def _data_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli data probe plan --dry-run",
             stop_condition="Stop after candidate probes and required approvals are visible; do not treat probe planning as data evidence.",
             source="audits/data_probe_report.md",
+            spec_kind="data_probe_plan",
+            spec_effect_class="local_write_preview",
         )
     if has_gap_plan and not has_backfill_queue:
-        return NextAction(
+        return _next_action(
             recommended_next_action="Generate the data backfill queue from the gap plan.",
             why_this_next="Known data gaps should become explicit runnable or approval-required queue items instead of informal TODOs.",
             lane="data",
@@ -430,6 +504,8 @@ def _data_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli data backfill --dry-run",
             stop_condition="Stop after local-cache-safe versus source-limited items are separated with approval/receipt needs.",
             source="data/backfill/backfill_queue.yml",
+            spec_kind="data_backfill_plan",
+            spec_effect_class="local_write_preview",
         )
     return None
 
@@ -438,7 +514,7 @@ def _analysis_next(root: Path) -> NextAction | None:
     registry_rows = _csv_rows(root / "evidence/result_registry.csv")
     index_rows = _csv_rows(root / "evidence/result_index.csv")
     if registry_rows and not index_rows:
-        return NextAction(
+        return _next_action(
             recommended_next_action="Sync registered results into the result index/provenance layer.",
             why_this_next="Paper-facing results exist in result_registry, but the derived result_index/provenance path is not visible.",
             lane="analysis",
@@ -446,6 +522,8 @@ def _analysis_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli paper-ci sync-result-index --dry-run",
             stop_condition="Stop after the sync preview shows result_index/provenance targets; run for real only when source artifacts exist.",
             source="evidence/result_registry.csv",
+            spec_kind="paper_ci_sync",
+            spec_effect_class="local_write_preview",
         )
     return None
 
@@ -454,7 +532,7 @@ def _claim_next(root: Path) -> NextAction | None:
     graph = root / "evidence/research_graph.yml"
     claim_registry = root / "evidence/claim_registry.md"
     if claim_registry.exists() and not graph.exists():
-        return NextAction(
+        return _next_action(
             recommended_next_action="Build the derived research graph before claim audit.",
             why_this_next="Claim/evidence/result relationships should be observable as a graph before G7-style claim review.",
             lane="claim",
@@ -462,6 +540,8 @@ def _claim_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli graph build --dry-run",
             stop_condition="Stop after impact/support/orphan relationships are visible; do not downgrade or approve claims from graph output.",
             source="evidence/research_graph.yml",
+            spec_kind="graph_build",
+            spec_effect_class="local_write_preview",
         )
     return None
 
@@ -469,7 +549,7 @@ def _claim_next(root: Path) -> NextAction | None:
 def _writing_next(root: Path) -> NextAction | None:
     draft = root / "paper/draft.md"
     if not draft.exists():
-        return NextAction(
+        return _next_action(
             recommended_next_action="Do not draft the paper yet; route through claim and number readiness first.",
             why_this_next="Writing should be claim-bound and number-bound, not a free-standing paper factory output.",
             lane="writing",
@@ -477,6 +557,8 @@ def _writing_next(root: Path) -> NextAction | None:
             command="python3 -m aeros.cli next --lane claim",
             stop_condition="Stop after claim support/limits are visible; draft only bounded prose tied to registered claims and numbers.",
             source="paper/draft.md",
+            spec_kind="writing_route",
+            spec_effect_class="blocked",
             blocked=True,
         )
     return None
@@ -485,7 +567,7 @@ def _writing_next(root: Path) -> NextAction | None:
 def _compliance_next(root: Path) -> NextAction | None:
     manifest = root / "replication/aea_data_package_manifest.yml"
     if not manifest.exists():
-        return NextAction(
+        return _next_action(
             recommended_next_action="Prepare replication/release alignment before public release claims.",
             why_this_next="Compliance/release readiness needs a manifest for data availability, licenses, environment, and reproducibility boundaries.",
             lane="compliance",
@@ -493,6 +575,8 @@ def _compliance_next(root: Path) -> NextAction | None:
             command="python3 checks/run_harness_checks.py --profile lane:compliance --timeout 20",
             stop_condition="Stop after missing replication/compliance artifacts are explicit; do not infer release readiness from analysis success.",
             source="harness/aea_replication_policy.yml",
+            spec_kind="check_profile",
+            spec_effect_class="read_only",
         )
     return None
 
@@ -515,7 +599,7 @@ def _lane_specific_next(root: Path, lane: str) -> NextAction | None:
     return None
 
 def _method_next(root: Path) -> NextAction:
-    return NextAction(
+    return _next_action(
         recommended_next_action="Run method advisory routing before empirical analysis, using econ-specific DiD/IV/RDD/panel rules.",
         why_this_next="Method work needs economics defaults and stop rules, but advisory policies cannot certify identification or approve claims.",
         lane="method",
@@ -523,6 +607,8 @@ def _method_next(root: Path) -> NextAction:
         command="python3 -m aeros.cli skills plan --stage execution",
         stop_condition="Stop after method risks, blocking questions, estimator defaults, and human-confirm fields are recorded; do not run final estimates from advisory alone.",
         source="harness/econ_method_advisory_policy.yml",
+        spec_kind="method_advisory",
+        spec_effect_class="local_write_preview",
     )
 
 def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
@@ -533,7 +619,7 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
         check = failure.get("check", "unknown")
         kind = _check_kind(check)
         if kind == "regression":
-            return NextAction(
+            return _next_action(
                 recommended_next_action=f"Fix the failing regression/process check: {check}.",
                 why_this_next="A recent harness summary reports a process-style red light; this should be repaired before advancing research work.",
                 lane="harness",
@@ -541,8 +627,10 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
                 command=f"python3 {check if check.endswith('.py') else 'checks/' + check + '.py'}",
                 stop_condition="Stop when the specific check passes, then rerun the smallest relevant harness slice.",
                 source=failure.get("summary_path", "harness_summary"),
+                spec_kind="check_profile",
+                spec_effect_class="read_only",
             )
-        return NextAction(
+        return _next_action(
             recommended_next_action=f"Escalate or route the failing research/gap check: {check}.",
             why_this_next="The latest harness red light appears to represent a missing evidence, gate, data, literature, claim, or decision condition rather than a simple regression.",
             lane="project",
@@ -550,12 +638,14 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
             command="python3 -m aeros.cli next --write",
             stop_condition="Stop after the blocker is represented in CURRENT_STATE.md or decisions/human_gate_queue.yml; do not paper over the red light.",
             source=failure.get("summary_path", "harness_summary"),
+            spec_kind="next_action_write",
+            spec_effect_class="blocked",
             blocked=True,
         )
 
     pending = _pending_human_gate_item(root)
     if pending:
-        return NextAction(
+        return _next_action(
             recommended_next_action=f"Resolve pending human gate request for {pending.get('project', 'this project')}.",
             why_this_next=str(pending.get("why_human_needed", "A human decision is pending.")),
             lane="human_gate",
@@ -563,11 +653,13 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
             command="python3 -m aeros.cli gate status",
             stop_condition="Stop after the human approves, blocks, supersedes, or narrows the queued request.",
             source="decisions/human_gate_queue.yml",
+            spec_kind="human_decision",
+            spec_effect_class="blocked",
             blocked=True,
         )
 
     if not _project_has_idea(root):
-        return NextAction(
+        return _next_action(
             recommended_next_action="Adopt or enter a research idea before running lane tasks.",
             why_this_next="No research topic/question is recorded yet, so running data, literature, or writing tasks would be route churn.",
             lane="discovery",
@@ -575,6 +667,8 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
             command='python3 -m aeros.cli adopt --idea "<your research idea>" --dry-run',
             stop_condition="Stop after the adoption preview shows the candidate gate, gap plan, and next discovery route.",
             source="project_manifest.yml",
+            spec_kind="adopt_idea",
+            spec_effect_class="local_write_preview",
         )
 
 
@@ -588,7 +682,7 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
             action = _from_plan(root, stage=stage, lane=lane)
             if action:
                 return action
-        return NextAction(
+        return _next_action(
             recommended_next_action=f"No deterministic next task is currently visible for lane {lane}.",
             why_this_next=(
                 "A lane-specific next-action request must not drift into another lane. "
@@ -599,6 +693,8 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
             command=f"python3 checks/run_harness_checks.py --profile lane:{lane} --timeout 30",
             stop_condition="Stop when the lane-scoped checks pass or report the first concrete blocker.",
             source="deterministic_lane_scope",
+            spec_kind="check_profile",
+            spec_effect_class="read_only",
         )
 
     for preferred_lane in LANE_ORDER:
@@ -615,19 +711,30 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
         if action:
             return action
 
-    return NextAction(
+    return _next_action(
         recommended_next_action="Run a status and harness smoke check; no deterministic next task is currently visible.",
         why_this_next="AEROS found no failing checks, pending human gate item, missing idea, or non-skipped task in the deterministic controller plan.",
         lane="harness",
         status_label="CHECK_PASS",
         command="python3 checks/run_harness_checks.py --profile smoke --timeout 30",
         stop_condition="Stop when the harness passes or reports the first concrete blocker.",
+        spec_kind="check_profile",
+        spec_effect_class="read_only",
     )
 
 
 def format_next_action(action: NextAction) -> str:
     data = action.to_dict()
-    return "\n".join(f"{key}: {value}" for key, value in data.items())
+    lines: list[str] = []
+    for key, value in data.items():
+        if key == "action_spec" and isinstance(value, dict):
+            lines.append(f"action_spec_id: {value.get('id')}")
+            lines.append(f"action_spec_kind: {value.get('kind')}")
+            lines.append(f"action_spec_effect_class: {value.get('effect_class')}")
+            lines.append(f"action_spec_requires_decision: {value.get('requires_decision')}")
+            continue
+        lines.append(f"{key}: {value}")
+    return "\n".join(lines)
 
 
 def next_action_markdown(action: NextAction) -> str:
@@ -644,8 +751,26 @@ def next_action_markdown(action: NextAction) -> str:
         "blocked",
     ]:
         lines.append(f"{key}: {data.get(key)}")
+    spec = data.get("action_spec") or {}
     lines.append("")
-    lines.append("This is a deterministic recommendation. It does not execute tasks, approve gates, or certify research substance.")
+    lines.append("## ActionSpec")
+    for key in [
+        "id",
+        "kind",
+        "effect_class",
+        "capabilities",
+        "requires_decision",
+        "producer_mode",
+        "expected_outputs",
+        "acceptance_checks",
+        "resource_budget",
+    ]:
+        lines.append(f"action_spec_{key}: {spec.get(key)}")
+    lines.append("")
+    lines.append(
+        "This is a deterministic recommendation. The ActionSpec is the typed control record; "
+        "the command is a compatibility preview. It does not execute tasks, approve gates, or certify research substance."
+    )
     return "\n".join(lines)
 
 

@@ -20,6 +20,7 @@ CHECKS = [
     "check_stage_agents.py",
     "check_operating_dashboard.py",
     "check_next_action.py",
+    "check_action_spec.py",
     "check_stale_triage.py",
     "check_context_bundle.py",
     "check_context_graph.py",

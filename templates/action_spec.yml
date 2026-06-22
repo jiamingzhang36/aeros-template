@@ -1,0 +1,35 @@
+# AEROS typed ActionSpec template.
+# This is the controller-facing description of a proposed next action.
+# It is not a gate approval, claim support artifact, or completion receipt.
+
+id: AS-example
+kind: adopt_idea
+lane: discovery
+effect_class: local_write_preview
+capabilities:
+  - read_project_state
+  - write_candidate_artifact
+requires_decision: false
+expected_outputs:
+  - adoption/
+acceptance_checks: []
+command: python3 -m aeros.cli adopt --idea "<your research idea>" --dry-run
+stop_condition: Stop after the adoption preview shows the candidate gate, gap plan, and next discovery route.
+source: deterministic
+risk: bounded deterministic controller action
+idempotency_key: AS-example
+producer_mode: declared
+resource_budget:
+  max_provider_calls: "0"
+  max_cost_usd: "0"
+preconditions:
+  - project root resolved
+  - command parsed only through controller allowlist
+postconditions:
+  - write run record or blocker
+  - do not approve gates or upgrade claims
+does_not_prove:
+  - scientific validity
+  - claim support
+  - gate approval
+  - paper readiness

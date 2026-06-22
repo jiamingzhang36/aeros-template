@@ -12,6 +12,7 @@ import csv
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from aeros.runtime.kernel import find_project_root  # noqa: E402
+from aeros.runtime.action_spec import validate_action_spec  # noqa: E402
 from aeros.runtime.controller_loop import ControllerLoopArgs, _command_args, run_until  # noqa: E402
 from aeros.runtime.next_action import VALID_LABELS, compute_next_action  # noqa: E402
 
@@ -25,12 +26,21 @@ REQUIRED_FIELDS = [
     "stop_condition:",
 ]
 
+ACTION_SPEC_FIELDS = [
+    "action_spec_id:",
+    "action_spec_kind:",
+    "action_spec_effect_class:",
+    "action_spec_requires_decision:",
+    "action_spec_producer_mode:",
+]
+
 
 def _validate_next_action_file(path: Path) -> list[str]:
     if not path.exists():
         return []
     text = path.read_text(encoding="utf-8")
     failures = [f"{path}: missing field {field}" for field in REQUIRED_FIELDS if field not in text]
+    failures.extend(f"{path}: missing ActionSpec field {field}" for field in ACTION_SPEC_FIELDS if field not in text)
     label = ""
     for line in text.splitlines():
         if line.startswith("status_label:"):
@@ -38,8 +48,8 @@ def _validate_next_action_file(path: Path) -> list[str]:
             break
     if label and "|" not in label and label not in VALID_LABELS:
         failures.append(f"{path}: invalid status_label {label!r}")
-    if "SUBSTANTIVE_DONE" in text and "--dry-run" in text:
-        failures.append(f"{path}: SUBSTANTIVE_DONE recommendation must not be paired with a dry-run command")
+    if ("SUBSTANTIVE_PRODUCED" in text or "SUBSTANTIVE_DONE" in text) and "--dry-run" in text:
+        failures.append(f"{path}: substantive-produced recommendation must not be paired with a dry-run command")
     return failures
 
 
@@ -72,6 +82,8 @@ def main() -> int:
 
     action = compute_next_action(root)
     data = action.to_dict()
+    spec = data.get("action_spec") or {}
+    failures.extend(f"computed next action {failure}" for failure in validate_action_spec(spec))
     for key in [
         "recommended_next_action",
         "why_this_next",
@@ -84,15 +96,40 @@ def main() -> int:
             failures.append(f"computed next action missing {key}")
     if data.get("status_label") not in VALID_LABELS:
         failures.append(f"computed next action has invalid status_label {data.get('status_label')!r}")
-    if data.get("status_label") == "SUBSTANTIVE_DONE" and "--dry-run" in str(data.get("command", "")):
-        failures.append("computed next action claims SUBSTANTIVE_DONE candidate while using --dry-run")
+    if data.get("status_label") in {"SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"} and "--dry-run" in str(data.get("command", "")):
+        failures.append("computed next action claims substantive-produced candidate while using --dry-run")
+    if not isinstance(spec, dict) or not spec:
+        failures.append("computed next action missing action_spec")
+    else:
+        if spec.get("command") != data.get("command"):
+            failures.append("computed next action ActionSpec command differs from rendered command")
+        if spec.get("lane") != data.get("lane"):
+            failures.append("computed next action ActionSpec lane differs from rendered lane")
+        if spec.get("producer_mode") != "declared":
+            failures.append(f"computed next action ActionSpec producer_mode is not declared: {spec.get('producer_mode')!r}")
 
     rc, records = run_until(root, ControllerLoopArgs(until="no-progress", dry_run=True, max_steps=2))
     if rc != 0 or not records:
         failures.append("controller run-until dry-run did not produce a safe record")
+    elif not records[0].get("action_spec"):
+        failures.append("controller run-until dry-run did not include an ActionSpec record")
+    else:
+        if (records[0].get("action_spec") or {}).get("producer_mode") != "declared":
+            failures.append("controller run-until dry-run ActionSpec producer_mode is not declared")
+        for key in ("primary_stop_reason", "semantic_progress", "frontier_hash", "action_signature"):
+            if key not in records[0]:
+                failures.append(f"controller run-until dry-run missing {key}")
     rc, max_records = run_until(root, ControllerLoopArgs(until="max-steps", dry_run=True, max_steps=2))
     if rc != 0 or not max_records:
         failures.append("controller run-until max-steps dry-run did not produce a safe record")
+    elif not max_records[0].get("action_spec"):
+        failures.append("controller run-until max-steps dry-run did not include an ActionSpec record")
+    else:
+        if (max_records[0].get("action_spec") or {}).get("producer_mode") != "declared":
+            failures.append("controller run-until max-steps ActionSpec producer_mode is not declared")
+        for key in ("primary_stop_reason", "semantic_progress", "frontier_hash", "action_signature"):
+            if key not in max_records[0]:
+                failures.append(f"controller run-until max-steps dry-run missing {key}")
     unsafe_args, unsafe_reason = _command_args(
         type("Action", (), {"command": "python3 -m aeros.cli iterate --stage discovery", "status_label": "ROUTE_READY"})(),
         ControllerLoopArgs(until="human-gate"),
@@ -102,12 +139,18 @@ def main() -> int:
 
     for lane in ["data", "literature", "method", "analysis", "claim", "writing", "compliance"]:
         lane_action = compute_next_action(root, lane=lane).to_dict()
+        lane_spec = lane_action.get("action_spec") or {}
+        failures.extend(f"lane {lane}: {failure}" for failure in validate_action_spec(lane_spec))
         if lane_action.get("lane") not in {lane, "discovery", "project", "harness", "human_gate"}:
             failures.append(f"lane {lane}: recommendation drifted to {lane_action.get('lane')!r}")
         if lane_action.get("status_label") not in VALID_LABELS:
             failures.append(f"lane {lane}: invalid status_label {lane_action.get('status_label')!r}")
-        if lane_action.get("status_label") == "SUBSTANTIVE_DONE" and "--dry-run" in str(lane_action.get("command", "")):
-            failures.append(f"lane {lane}: SUBSTANTIVE_DONE recommendation must not be dry-run")
+        if lane_action.get("status_label") in {"SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"} and "--dry-run" in str(lane_action.get("command", "")):
+            failures.append(f"lane {lane}: substantive-produced recommendation must not be dry-run")
+        if isinstance(lane_spec, dict) and lane_spec.get("command") != lane_action.get("command"):
+            failures.append(f"lane {lane}: ActionSpec command differs from rendered command")
+        if isinstance(lane_spec, dict) and lane_spec.get("producer_mode") != "declared":
+            failures.append(f"lane {lane}: ActionSpec producer_mode is not declared: {lane_spec.get('producer_mode')!r}")
 
     blocked_fulltext_ids = _blocked_fulltext_ids(root)
     if blocked_fulltext_ids:

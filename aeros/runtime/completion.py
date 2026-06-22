@@ -175,13 +175,23 @@ def write_completion_receipt(
         failures.append("open issues remain")
 
     verdict = "fail" if failures else "pass"
+    progress_class = "substantive" if substantive_outputs else "none"
+    progress_label = "SUBSTANTIVE_PRODUCED" if substantive_outputs else "CHECK_PASS"
+    verification_level = "checks_passed_with_artifact_hashes" if verdict == "pass" else "failed_attestation"
+    authority_status = "human_decision_required" if human_decision_needed else "no_new_authority"
     payload = {
-        "version": 2,
+        "version": 3,
         "task_id": contract.task_id,
         "generated_at": _now(),
         "completion_mode": mode,
         "claimed_status": "passed",
         "declared_outcome": "complete",
+        "outcome_kind": "complete",
+        "contract_status": "passed" if verdict == "pass" else "failed",
+        "verification_level": verification_level,
+        "progress_class": progress_class,
+        "progress_label": progress_label,
+        "authority_status": authority_status,
         "work_lane": contract.work_lane,
         "contract_path": _rel(project_root, contract.path) if contract.path else "",
         "automation_class": contract.automation_class,
@@ -251,6 +261,19 @@ def validate_completion_receipts(project_root: Path, contracts: dict[str, tuple[
             failures.append(f"{task_id}: completion receipt is legacy version <2; rerun recover --check or revalidate")
         if payload.get("declared_outcome") != "complete":
             failures.append(f"{task_id}: completion receipt declared_outcome is not complete")
+        if int(payload.get("version") or 1) >= 3:
+            if payload.get("outcome_kind") != "complete":
+                failures.append(f"{task_id}: completion receipt outcome_kind is not complete")
+            if payload.get("contract_status") != "passed":
+                failures.append(f"{task_id}: completion receipt contract_status is not passed")
+            if payload.get("verification_level") not in {"checks_passed_with_artifact_hashes", "checks_passed"}:
+                failures.append(f"{task_id}: completion receipt verification_level is not sufficient")
+            if payload.get("progress_class") != "substantive":
+                failures.append(f"{task_id}: completion receipt progress_class is not substantive")
+            if payload.get("progress_label") not in {"SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}:
+                failures.append(f"{task_id}: completion receipt progress_label is not SUBSTANTIVE_PRODUCED")
+            if not payload.get("authority_status"):
+                failures.append(f"{task_id}: completion receipt authority_status missing")
         if payload.get("work_lane") != contract.work_lane:
             failures.append(f"{task_id}: completion receipt work_lane does not match contract")
         if not _same_check_set(list(payload.get("checks_required") or []), list(contract.checks)):

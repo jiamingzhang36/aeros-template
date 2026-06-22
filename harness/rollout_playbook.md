@@ -18,7 +18,7 @@ Rollout status labels:
 
 - `CHECK_PASS`: sync/checks completed mechanically.
 - `ROUTE_READY`: rollout blockers or human approvals are queued.
-- `SUBSTANTIVE_DONE`: the rollout changed a real project artifact, recovered a task, or validated a substantive artifact.
+- `SUBSTANTIVE_PRODUCED`: the rollout changed a real project artifact, recovered a task, or validated a substantive artifact.
 
 Rules:
 

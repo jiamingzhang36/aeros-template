@@ -36,8 +36,8 @@ def main() -> int:
                 if key not in bundle:
                     failures.append(f"context bundle missing key: {key}")
             next_action = bundle.get("next_action") or {}
-            if next_action.get("status_label") == "SUBSTANTIVE_DONE" and not bundle.get("latest_substantive_artifact"):
-                failures.append("context bundle cannot imply SUBSTANTIVE_DONE without latest_substantive_artifact")
+            if next_action.get("status_label") in {"SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"} and not bundle.get("latest_substantive_artifact"):
+                failures.append("context bundle cannot imply substantive production without latest_substantive_artifact")
             for marker in ["recommended_next_action", "status_label", "context_stale", "stop_rule", "does_not_prove"]:
                 if marker not in rendered:
                     failures.append(f"rendered context missing marker: {marker}")
