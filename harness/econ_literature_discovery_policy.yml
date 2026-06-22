@@ -71,7 +71,43 @@ hard_boundaries:
   - Full-text extraction cards remain the minimum unit for synthesis support.
   - Zotero PDF/fulltext availability is a route to extraction, not extraction completion.
   - In `paper_registry.csv`, `full_text_available=yes` means locally readable/indexed text, not merely a PDF attachment; PDF-only items stay in the fulltext-ready queue until parsed or OCRed.
+  - OA metadata, DOI landing pages, repository locators, and PDF URLs are not full text until fetched content passes content-type and target-paper identity verification.
+  - Candidate full-text URLs must remain `candidate_url_unverified` / `needs_verification` until they are shown not to be CAPTCHA, Cloudflare/security challenge, login wall, 404, SPA shell, or unrelated cache content.
+  - Local cache files may not be used for extraction unless their title/DOI/author evidence matches the target registry row; otherwise classify as `cache_mismatch`.
   - Adapter output may generate a queue; it may not certify a gap.
+
+fulltext_candidate_verification:
+  role: route_integrity_not_literature_review
+  allowed_ready_availability:
+    - indexed_fulltext
+    - pdf_attachment_only
+    - candidate_url_unverified
+  blocker_reasons:
+    - metadata_only
+    - closed_oa
+    - security_challenge
+    - login_required
+    - captcha
+    - spa_shell
+    - not_pdf
+    - empty_response
+    - cache_mismatch
+    - doi_mismatch
+    - title_mismatch
+    - pdf_attachment_only
+    - needs_ocr
+    - manual_pdf_required
+  cannot_support:
+    - full_text_extraction_card
+    - literature_synthesis
+    - gap_claims
+    - method_claims
+    - claim_support
+  next_action_rule: >
+    If a URL or local file is only metadata/OA/cache-derived, classify it as a
+    route candidate or blocker. Do not write an extraction card until fetched
+    content is readable and matched to the target paper by DOI, title, author,
+    or a human-reviewed receipt.
 
 
 citation_faithfulness:

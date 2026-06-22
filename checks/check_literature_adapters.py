@@ -28,9 +28,9 @@ SNOWBALL_COLUMNS = ["queued_at", "source_paper_id", "related_locator", "relation
 FULLTEXT_READY_COLUMNS = ["queued_at", "paper_id", "zotero_item_key", "zotero_attachment_key", "title", "availability", "indexed_fulltext_chars", "pdf_path_or_url", "status", "next_action", "notes"]
 MISSING_FULLTEXT_COLUMNS = ["queued_at", "paper_id", "zotero_item_key", "title", "reason", "status", "next_action", "notes"]
 ALLOWED_SNOWBALL_STATUSES = {"candidate", "screened", "imported", "excluded", "deferred"}
-ALLOWED_READY_STATUSES = {"ready_for_extraction", "extracted", "deferred"}
+ALLOWED_READY_STATUSES = {"ready_for_extraction", "needs_verification", "extracted", "deferred"}
 ALLOWED_MISSING_STATUSES = {"missing_fulltext", "resolved", "unavailable", "deferred"}
-ALLOWED_ZOTERO_AVAILABILITY = {"indexed_fulltext", "pdf_attachment_only"}
+ALLOWED_FULLTEXT_AVAILABILITY = {"indexed_fulltext", "pdf_attachment_only", "candidate_url_unverified"}
 
 
 def _header(path: Path) -> list[str]:
@@ -56,7 +56,19 @@ def main() -> int:
 
     if ADAPTER.exists():
         text = ADAPTER.read_text(encoding="utf-8")
-        for marker in ["OpenAlex", "Zotero", "ROUTE_READY", "does_not_prove", "citation_snowball_queue.csv", "fulltext_ready_queue.csv", "missing_fulltext_queue.csv"]:
+        for marker in [
+            "OpenAlex",
+            "Zotero",
+            "ROUTE_READY",
+            "does_not_prove",
+            "citation_snowball_queue.csv",
+            "fulltext_ready_queue.csv",
+            "missing_fulltext_queue.csv",
+            "candidate_url_unverified",
+            "security_challenge",
+            "cache_mismatch",
+            "verify_fulltext_candidate_content",
+        ]:
             if marker not in text:
                 failures.append(f"{ADAPTER}: missing adapter boundary marker {marker!r}")
     if CLI.exists():
@@ -99,8 +111,17 @@ def main() -> int:
         if status and status not in ALLOWED_READY_STATUSES:
             failures.append(f"{FULLTEXT_READY}: invalid status {status!r}")
         availability = row.get("availability", "").strip()
-        if availability and availability not in ALLOWED_ZOTERO_AVAILABILITY:
+        if availability and availability not in ALLOWED_FULLTEXT_AVAILABILITY:
             failures.append(f"{FULLTEXT_READY}: invalid availability {availability!r}")
+        if availability == "candidate_url_unverified" and status != "needs_verification":
+            failures.append(f"{FULLTEXT_READY}: candidate_url_unverified rows must stay needs_verification")
+        if availability == "pdf_attachment_only" and "ocr" not in row.get("notes", "").lower() and "parse" not in row.get("notes", "").lower():
+            failures.append(f"{FULLTEXT_READY}: pdf_attachment_only rows must mention parse/OCR before extraction")
+        if availability == "candidate_url_unverified":
+            note = row.get("notes", "").lower() + " " + row.get("next_action", "").lower()
+            for marker in ["verification", "metadata"]:
+                if marker not in note:
+                    failures.append(f"{FULLTEXT_READY}: candidate URL rows must state {marker} boundary")
         forbidden_notes = ["supports claims", "proves claim", "synthesis complete", "extraction complete"]
         note = row.get("notes", "").lower()
         if row.get("status", "").strip() == "ready_for_extraction" and any(term in note for term in forbidden_notes):
@@ -144,6 +165,36 @@ def main() -> int:
         adapter._zotero_api_get = original_get
     if info.get("availability") != "indexed_fulltext" or info.get("indexed_fulltext_chars") != "12":
         failures.append(f"_zotero_attachment_info indexed fixture mismatch: {info!r}")
+
+    cloudflare = adapter.verify_fulltext_candidate_content(
+        "<html><title>Just a moment...</title>Cloudflare checking your browser</html>",
+        content_type="text/html",
+        expected_title="Target economics paper",
+        expected_doi="10.1234/example",
+    )
+    if cloudflare.get("verdict") != "blocked" or cloudflare.get("blocker_reason") != "security_challenge":
+        failures.append(f"Cloudflare/security challenge fixture mismatch: {cloudflare!r}")
+    shell = adapter.verify_fulltext_candidate_content(
+        "<html><div id='app'></div><script src='bundle.js'></script></html>",
+        content_type="text/html",
+        expected_title="Target economics paper",
+    )
+    if shell.get("verdict") != "blocked" or shell.get("blocker_reason") != "spa_shell":
+        failures.append(f"SPA shell fixture mismatch: {shell!r}")
+    article = adapter.verify_fulltext_candidate_content(
+        """
+        <html><body><h1>SNAP work requirements increase mental health care use</h1>
+        DOI: 10.1234/snap.2024. This article contains a long readable body.
+        The study examines administrative burden, benefit access, labor supply,
+        and health care utilization with enough repeated text to exceed the
+        verifier length threshold for an article-like HTML document.
+        """ + (" evidence" * 400) + "</body></html>",
+        content_type="text/html",
+        expected_title="SNAP work requirements increase mental health care use",
+        expected_doi="10.1234/snap.2024",
+    )
+    if article.get("verdict") != "verified_article_html" or article.get("matched_by") not in {"doi", "title"}:
+        failures.append(f"article HTML verifier fixture mismatch: {article!r}")
 
     if CITATION_AUDIT.exists():
         audit = CITATION_AUDIT.read_text(encoding="utf-8")

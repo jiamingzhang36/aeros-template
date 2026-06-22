@@ -166,6 +166,33 @@ regression to everything-high.
 
 ## 2026-06-20
 
+### 2026-06-22 — Add literature full-text candidate verification semantics
+
+**Commit(s)**: `pending`
+
+**Action**: Added deterministic route/blocker semantics for candidate full-text
+sources. OpenAlex/manual PDF URLs now enter the full-text queue as
+`candidate_url_unverified` with `needs_verification` rather than being treated
+as readable full text. Added content verification helpers for common false
+positives such as Cloudflare/security challenge pages, login/CAPTCHA pages,
+short SPA shells, non-PDF responses, and title/DOI mismatches. Expanded adapter
+checks and literature policy so local cache/OA metadata cannot certify full-text
+execution.
+
+**Alignment**: Turns the CMPD retrieval failure into a template-level guardrail:
+AEROS may find routes, but it must not confuse a route with target-paper text.
+
+**Non-goal**: Does not bypass publisher access, fetch protected pages, OCR PDFs,
+write extraction cards, certify citation faithfulness, synthesize literature,
+support claims, or approve gates.
+
+**Drift risk**: More candidates may remain in `needs_verification` or
+`missing_fulltext` instead of appearing ready. This is intentional; it prevents
+registry green lights without readable target-paper evidence.
+
+**Next check**: Re-run on CMPD and confirm P013/P016/P030 are classified as
+blocked or needs-verification without creating extraction cards or claim support.
+
 ### 2026-06-22 — Tighten Zotero full-text availability semantics
 
 **Commit(s)**: `5fe6eb8`

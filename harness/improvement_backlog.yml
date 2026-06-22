@@ -169,3 +169,17 @@ entries:
     owner: human
     target_gate: G0
     notes: "Found 2026-06-22 attempting item-1 sync of stale-triage v3 into CMPD. Surgical decision (owner-chosen): reverted CMPD to clean pre-sync state (green, literature WIP untouched); v3 lives in the template, validated read-only against CMPD's real data. The suppress-command no-op sentinel bug (commit 7321492) was found via this same first-sync attempt."
+  - id: AEROS-IMPROVE-013
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: literature-fulltext
+    source: real_project_validation_cmpd
+    issue: "CMPD targeted retrieval showed that OA metadata, repository locators, DOI pages, and local cache files can look like full-text routes while actually returning Cloudflare/security challenge HTML, SPA shells, 404/login pages, or unrelated cached PDFs."
+    proposed_fix: "Add deterministic full-text candidate verification semantics: candidate URLs enter `candidate_url_unverified` / `needs_verification`, PDF-only attachments remain parse/OCR routes, blocker reasons are typed, and adapter checks require content/identity verification before extraction or synthesis."
+    owner: human
+    target_gate: G1
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "Template fix only. It prevents metadata/OA/cache routes from being reported as readable target-paper text; it does not fetch publisher pages, bypass access controls, OCR PDFs, write extraction cards, or complete the CMPD literature review."

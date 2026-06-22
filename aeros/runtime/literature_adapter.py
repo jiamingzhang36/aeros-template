@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 from pathlib import Path
+import re
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus
@@ -99,6 +100,29 @@ ALLOWED_FUNCTIONS = {
     "theory-mechanism",
 }
 
+FULLTEXT_CANDIDATE_AVAILABILITY = {
+    "indexed_fulltext",
+    "pdf_attachment_only",
+    "candidate_url_unverified",
+}
+
+FULLTEXT_BLOCKER_REASONS = {
+    "metadata_only",
+    "closed_oa",
+    "security_challenge",
+    "login_required",
+    "captcha",
+    "spa_shell",
+    "not_pdf",
+    "empty_response",
+    "cache_mismatch",
+    "doi_mismatch",
+    "title_mismatch",
+    "pdf_attachment_only",
+    "needs_ocr",
+    "manual_pdf_required",
+}
+
 
 @dataclass(frozen=True)
 class LiteratureSearchArgs:
@@ -142,6 +166,160 @@ def _append_rows(path: Path, columns: list[str], rows: list[dict[str, Any]]) -> 
 
 def _norm(value: str) -> str:
     return " ".join(str(value or "").strip().lower().split())
+
+
+def _identity_tokenize(value: str) -> set[str]:
+    stopwords = {
+        "a", "an", "and", "are", "as", "at", "by", "for", "from", "in",
+        "is", "of", "on", "or", "the", "to", "with",
+    }
+    return {
+        token
+        for token in re.findall(r"[a-z0-9]+", str(value or "").lower())
+        if len(token) >= 4 and token not in stopwords
+    }
+
+
+def _doi_in_text(doi: str, text: str) -> bool:
+    doi_norm = str(doi or "").lower().replace("https://doi.org/", "").replace("http://doi.org/", "").strip()
+    if not doi_norm:
+        return False
+    return doi_norm in str(text or "").lower()
+
+
+def _title_match_score(title: str, text: str) -> float:
+    tokens = _identity_tokenize(title)
+    if not tokens:
+        return 0.0
+    haystack = _identity_tokenize(text)
+    return len(tokens & haystack) / max(len(tokens), 1)
+
+
+def verify_fulltext_candidate_content(
+    body: bytes | str,
+    *,
+    content_type: str = "",
+    expected_title: str = "",
+    expected_doi: str = "",
+    source_url: str = "",
+) -> dict[str, str]:
+    """Classify fetched full-text candidate content without certifying review.
+
+    This is an integrity helper for literature adapters/fetchers. It does not
+    download anything and it does not write extraction cards. Its job is to stop
+    metadata/OA/cache routes from being mistaken for readable target-paper text.
+    """
+    raw = body.encode("utf-8", errors="ignore") if isinstance(body, str) else (body or b"")
+    content_type_l = str(content_type or "").lower()
+    text = raw[:200_000].decode("utf-8", errors="ignore")
+    text_l = text.lower()
+    notes: list[str] = []
+
+    if not raw or len(raw) < 64:
+        return {
+            "verdict": "blocked",
+            "content_kind": "empty",
+            "blocker_reason": "empty_response",
+            "matched_by": "",
+            "notes": "empty or tiny response; cannot be treated as full text",
+        }
+
+    security_markers = {
+        "just a moment": "security_challenge",
+        "cloudflare": "security_challenge",
+        "__cf_chl": "security_challenge",
+        "checking your browser": "security_challenge",
+        "captcha": "captcha",
+        "access denied": "login_required",
+        "sign in": "login_required",
+        "log in": "login_required",
+        "institutional login": "login_required",
+        "404 not found": "not_pdf",
+        "page not found": "not_pdf",
+    }
+    for marker, reason in security_markers.items():
+        if marker in text_l:
+            return {
+                "verdict": "blocked",
+                "content_kind": "html",
+                "blocker_reason": reason,
+                "matched_by": "",
+                "notes": f"response contains blocker marker {marker!r}",
+            }
+
+    is_pdf = raw.startswith(b"%PDF") or "application/pdf" in content_type_l
+    if is_pdf:
+        if not raw.startswith(b"%PDF"):
+            return {
+                "verdict": "blocked",
+                "content_kind": "html",
+                "blocker_reason": "not_pdf",
+                "matched_by": "",
+                "notes": "content-type suggested PDF but response did not start with PDF magic bytes",
+            }
+        matched_by = ""
+        if expected_doi and _doi_in_text(expected_doi, text):
+            matched_by = "doi"
+        elif expected_title and _title_match_score(expected_title, text) >= 0.6:
+            matched_by = "title"
+        if not matched_by and (expected_title or expected_doi):
+            notes.append("PDF bytes verified, but title/DOI identity still requires parsed/OCR text before extraction")
+            verdict = "needs_identity_check"
+        else:
+            verdict = "verified_pdf"
+            notes.append("PDF bytes verified; still requires full-text extraction card before synthesis")
+        return {
+            "verdict": verdict,
+            "content_kind": "pdf",
+            "blocker_reason": "",
+            "matched_by": matched_by,
+            "notes": "; ".join(notes),
+        }
+
+    looks_html = "<html" in text_l or "<!doctype html" in text_l or "text/html" in content_type_l
+    if looks_html and len(text_l) < 1500 and not _doi_in_text(expected_doi, text) and _title_match_score(expected_title, text) < 0.4:
+        return {
+            "verdict": "blocked",
+            "content_kind": "html",
+            "blocker_reason": "spa_shell",
+            "matched_by": "",
+            "notes": "short HTML shell without target-paper identity markers",
+        }
+
+    matched_by = ""
+    if expected_doi and _doi_in_text(expected_doi, text):
+        matched_by = "doi"
+    elif expected_title and _title_match_score(expected_title, text) >= 0.6:
+        matched_by = "title"
+
+    if (expected_title or expected_doi) and not matched_by:
+        reason = "doi_mismatch" if expected_doi else "title_mismatch"
+        if expected_title and expected_doi:
+            reason = "title_mismatch"
+        return {
+            "verdict": "blocked",
+            "content_kind": "html" if looks_html else "text",
+            "blocker_reason": reason,
+            "matched_by": "",
+            "notes": "candidate content did not match expected title/DOI; treat as cache/source mismatch until reviewed",
+        }
+
+    if len(text_l) < 1500:
+        return {
+            "verdict": "blocked",
+            "content_kind": "html" if looks_html else "text",
+            "blocker_reason": "spa_shell",
+            "matched_by": matched_by,
+            "notes": "response is too short to serve as article full text",
+        }
+
+    return {
+        "verdict": "verified_article_html" if matched_by else "needs_identity_check",
+        "content_kind": "html" if looks_html else "text",
+        "blocker_reason": "",
+        "matched_by": matched_by,
+        "notes": "candidate text is readable but still requires full-text extraction card before synthesis",
+    }
 
 
 def _next_paper_id(existing: list[dict[str, str]]) -> str:
@@ -220,7 +398,6 @@ def _zotero_api_get(base_url: str, path: str) -> Any:
 
 
 def _year_from_date(raw: str) -> str:
-    import re
     match = re.search(r"\b(18|19|20|21)\d{2}\b", str(raw or ""))
     return match.group(0) if match else ""
 
@@ -449,6 +626,31 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
                     "next_action": "locate PDF/full text or mark full_text_unavailable after review",
                     "notes": "metadata candidate only; cannot support synthesis",
                 })
+        elif candidate.get("pdf_url"):
+            fulltext_ready_rows.append({
+                "queued_at": now,
+                "paper_id": paper_id,
+                "zotero_item_key": "",
+                "zotero_attachment_key": "",
+                "title": candidate.get("title", ""),
+                "availability": "candidate_url_unverified",
+                "indexed_fulltext_chars": "0",
+                "pdf_path_or_url": candidate.get("pdf_url", ""),
+                "status": "needs_verification",
+                "next_action": "fetch candidate URL and run full-text content/identity verification before extraction",
+                "notes": "ROUTE_READY only; OA metadata/PDF URL is unverified and may be security_challenge, login_required, SPA shell, wrong PDF, or cache_mismatch",
+            })
+        else:
+            missing_fulltext_rows.append({
+                "queued_at": now,
+                "paper_id": paper_id,
+                "zotero_item_key": "",
+                "title": candidate.get("title", ""),
+                "reason": "metadata_only",
+                "status": "missing_fulltext",
+                "next_action": "locate PDF/full text, use Zotero/manual recovery, or mark unavailable after review",
+                "notes": "metadata candidate only; cannot support synthesis",
+            })
         for locator in related[:10]:
             snowball_rows.append({
                 "queued_at": now,
@@ -476,9 +678,8 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
         print(f"would log search in {search_path.relative_to(root)}")
         print(f"would add {len(new_rows)} new paper candidate(s) to {registry_path.relative_to(root)}")
         print(f"would queue {len(snowball_rows)} citation-neighborhood candidate(s) in {snowball_path.relative_to(root)}")
-        if source == "zotero":
-            print(f"would queue {len(fulltext_ready_rows)} full-text/PDF-ready item(s) in {fulltext_ready_path.relative_to(root)}")
-            print(f"would queue {len(missing_fulltext_rows)} missing-fulltext item(s) in {missing_fulltext_path.relative_to(root)}")
+        print(f"would queue {len(fulltext_ready_rows)} full-text/PDF-verification item(s) in {fulltext_ready_path.relative_to(root)}")
+        print(f"would queue {len(missing_fulltext_rows)} missing-fulltext item(s) in {missing_fulltext_path.relative_to(root)}")
         for row in new_rows[:10]:
             print(f"  - {row['paper_id']} {row['year']} {row['title'][:120]}")
         return 0
@@ -495,9 +696,8 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
     print(f"logged search -> {search_path.relative_to(root)}")
     print(f"added {len(new_rows)} paper candidate(s) -> {registry_path.relative_to(root)}")
     print(f"queued {len(snowball_rows)} citation-neighborhood candidate(s) -> {snowball_path.relative_to(root)}")
-    if source == "zotero":
-        print(f"queued {len(fulltext_ready_rows)} full-text/PDF-ready item(s) -> {fulltext_ready_path.relative_to(root)}")
-        print(f"queued {len(missing_fulltext_rows)} missing-fulltext item(s) -> {missing_fulltext_path.relative_to(root)}")
+    print(f"queued {len(fulltext_ready_rows)} full-text/PDF-verification item(s) -> {fulltext_ready_path.relative_to(root)}")
+    print(f"queued {len(missing_fulltext_rows)} missing-fulltext item(s) -> {missing_fulltext_path.relative_to(root)}")
     print("status_label: ROUTE_READY")
     print("does_not_prove: full-text review, extraction-card completion, synthesis, gap support, claim support, or gate approval")
     return 0
