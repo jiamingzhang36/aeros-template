@@ -531,6 +531,27 @@ def _cmd_state_global(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_reconcile(args: argparse.Namespace) -> int:
+    from .runtime.reconcile import format_reconcile_report, run_reconcile, write_reconcile_report
+
+    root = _project_root()
+    report = run_reconcile(
+        root,
+        dry_run=args.dry_run,
+        timeout_seconds=args.timeout,
+        skip_result_index=args.skip_result_index,
+        skip_provenance=args.skip_provenance,
+        skip_graph=args.skip_graph,
+        skip_state=args.skip_state,
+        include_context=args.include_context,
+    )
+    print(format_reconcile_report(report))
+    if not args.dry_run and not args.no_report:
+        path = write_reconcile_report(root, report)
+        print(f"wrote reconcile report: {path.relative_to(root)}")
+    return 0 if report.ok else 1
+
+
 def _cmd_gate_status(args: argparse.Namespace) -> int:
     root = _project_root()
     state = load_state(root)
@@ -1457,6 +1478,28 @@ def main(argv: list[str] | None = None) -> int:
     stale_triage.add_argument("--write", action="store_true", help="write outputs/context/stale_triage.md and .json")
     stale_triage.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     stale_triage.set_defaults(func=_cmd_stale)
+
+    reconcile = sub.add_parser(
+        "reconcile",
+        help="sync derived provenance/graph/state indexes after a real pipeline run",
+    )
+    reconcile.add_argument("--dry-run", action="store_true",
+                           help="show the reconcile plan without writing derived indexes")
+    reconcile.add_argument("--timeout", type=int, default=120,
+                           help="per-step timeout in seconds")
+    reconcile.add_argument("--skip-result-index", action="store_true",
+                           help="do not derive result_index from result_registry")
+    reconcile.add_argument("--skip-provenance", action="store_true",
+                           help="do not run provenance sync")
+    reconcile.add_argument("--skip-graph", action="store_true",
+                           help="do not rebuild evidence/research_graph.yml")
+    reconcile.add_argument("--skip-state", action="store_true",
+                           help="do not rebuild aeros/state/global_state.yml")
+    reconcile.add_argument("--include-context", action="store_true",
+                           help="also refresh CONTEXT_BUNDLE.md and outputs/context/context_bundle.json")
+    reconcile.add_argument("--no-report", action="store_true",
+                           help="do not write outputs/logs/aeros_reconcile_*.md")
+    reconcile.set_defaults(func=_cmd_reconcile)
 
     state_parser = sub.add_parser("state", help="inspect or clean runtime state")
     state_sub = state_parser.add_subparsers(dest="state_command", required=True)

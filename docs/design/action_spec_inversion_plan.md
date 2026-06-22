@@ -46,6 +46,10 @@ Remaining follow-up:
 - Shrink `_command_args()` further into a final argv renderer/guard.
 - Dispatch real executions on `ActionSpec.kind` and `effect_class` instead of
   command parsing when enough downstream projects have synced.
+- Retire `action_spec_from_next()` / `_infer_kind()` once template and active
+  downstream projects report `producer_mode: declared` in normal next-action and
+  bounded-controller output. Until then, inferred specs are legacy compatibility
+  only and should not appear in fresh controller records.
 
 ## Non-goals
 

@@ -96,6 +96,7 @@ CHECKS = [
     "check_goal_mode_data_progress.py",
     "check_completion_receipts.py",
     "check_noop_runs.py",
+    "check_reconcile.py",
     "check_pipeline_runs.py",
     "check_replication_package.py",
     "check_aea_replication_alignment.py",

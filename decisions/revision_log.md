@@ -328,3 +328,25 @@ Use this file to track template or project-level changes that alter workflow, ev
 - checks:
   - Not run in this edit pass unless explicitly requested.
 - notes: `_infer_kind()` remains only as inferred-compat fallback for old/bare NextAction callers. Executor argv parsing is still present for compatibility and is tracked separately as AEROS-IMPROVE-019.
+
+## REV031 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: pipeline reconciliation / runtime environment
+- summary: Added `aeros reconcile` as a low-authority post-pipeline derived-sync command and made pipeline run checks honor delegated command/runtime Python configuration.
+- files:
+  - aeros/runtime/reconcile.py
+  - aeros/cli.py
+  - checks/check_reconcile.py
+  - checks/check_pipeline_runs.py
+  - checks/run_harness_checks.py
+  - harness/check_profiles.yml
+  - project_manifest.yml
+  - aeros/runtime/init_project.py
+  - AGENTS.md
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - Not run in this edit pass unless explicitly requested.
+- notes: Reconcile refreshes derived projections only. It does not approve gates, recover tasks, upgrade claims, validate scientific correctness, or install project dependencies.

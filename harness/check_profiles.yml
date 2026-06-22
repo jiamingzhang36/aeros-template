@@ -15,6 +15,7 @@ profiles:
       - check_context_bundle.py
       - check_context_graph.py
       - check_cockpit.py
+      - check_reconcile.py
       - check_harness_profiles.py
       - check_operating_dashboard.py
       - check_work_lanes.py

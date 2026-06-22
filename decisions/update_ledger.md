@@ -982,3 +982,46 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 **Drift risk**: Future branches could bypass `_next_action()` and construct bare NextAction objects. `check_next_action.py` now protects computed actions, but code review should keep producer declarations mandatory.
 
 **Next check**: Run `python3 checks/check_action_spec.py`, `python3 checks/check_next_action.py`, and full harness; then commit template before syncing CMPD.
+
+### 2026-06-22 — Add ActionSpec inferred-compat retirement trigger
+
+**Commit(s)**: `pending`
+
+**Action**: Added AEROS-IMPROVE-020 and documented the retirement trigger for `action_spec_from_next()` / `_infer_kind()`. The inferred compatibility path remains allowed only for old/bare NextAction callers and should be removed once template and active downstream projects report `producer_mode: declared` in normal next-action and bounded-controller output.
+
+**Alignment**: Prevents the old command-string parser from becoming permanent architecture after producer inversion. This keeps Phase 2 honest without forcing a risky immediate deletion while downstream projects are still syncing.
+
+**Non-goal**: Does not remove `_infer_kind()` today, does not change executor dispatch, and does not sync CMPD or other projects.
+
+**Drift risk**: If no retirement trigger is enforced, inferred_compat may remain dormant-but-maintained debt. The trigger should be checked after downstream projects are green on declared specs.
+
+**Next check**: After each framework sync, confirm `check_next_action.py` and `aeros run --until no-progress --dry-run --json` report `producer_mode: declared` in normal controller output.
+
+### 2026-06-22 — Add post-pipeline reconciliation command and runtime-aware pipeline check
+
+**Commit(s)**: `pending`
+
+**Action**: Added `aeros reconcile` as a deterministic, low-authority post-pipeline
+sync command. It can refresh result-index/provenance/research-graph/global-state
+projections and write an `outputs/logs/aeros_reconcile_*.md` report that states
+what reconciliation does not prove. Updated `check_pipeline_runs.py` so delegated
+pipeline run mode honors `automation.pipeline.command` and
+`automation.pipeline.runtime.python` (or `AEROS_PIPELINE_PYTHON`) instead of
+silently falling back to the current interpreter/master-script path.
+
+**Alignment**: Turns the real CMPD friction into a repeatable control-plane step:
+pipeline output changes trigger derived-index sync through one auditable command
+instead of three remembered manual commands, while keeping claim/gate authority
+separate.
+
+**Non-goal**: Does not run the research pipeline, recover stale tasks, approve gates,
+upgrade claims, validate scientific correctness, install dependencies, or guarantee
+cross-machine environment reproducibility.
+
+**Drift risk**: Reconcile could be mistaken for evidence validation. Mitigation:
+the command/report/check all label `does_not_prove`, and AGENTS.md says reconcile is
+a projection refresh only.
+
+**Next check**: On CMPD after the next real pipeline run, run `python3 -m aeros.cli
+reconcile`, then full harness, and confirm no manual provenance/graph/state sync is
+needed.

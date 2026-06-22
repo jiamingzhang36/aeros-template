@@ -141,7 +141,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-21"
-    resolution_commit: "pending"
+    resolution_commit: "1376748"
     notes: "Implemented as `aeros stale triage --dry-run` and consumed by `aeros next`. It is conservative: suppress only when no frontier/claim path and output fingerprint unchanged; claim-bound stale paths are high-impact review items."
   - id: AEROS-IMPROVE-011
     created_at: "2026-06-21"
@@ -195,7 +195,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "1376748"
     notes: "The loop is a controller over existing authority, not a new planner. It does not approve gates, upgrade claims, certify identification, release outputs, or turn route readiness into substantive progress. `--until max-steps` is a step-count guard, not a dollar budget guard."
   - id: AEROS-IMPROVE-015
     created_at: "2026-06-22"
@@ -223,7 +223,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
-    resolution_commit: "pending"
+    resolution_commit: "1376748"
     notes: "This is a kernel-shrink step, not a new research module. It does not migrate state to SQLite, remove existing CLI commands, approve gates, execute task runs without --allow-task-runs, or certify scientific validity."
   - id: AEROS-IMPROVE-017
     created_at: "2026-06-22"
@@ -265,3 +265,43 @@ entries:
     owner: human
     target_gate: G0
     notes: "Do not do this as a big-bang change; keep command compatibility until real projects are green on producer-declared ActionSpec."
+  - id: AEROS-IMPROVE-020
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: open
+    priority: medium
+    area: controller-kernel
+    source: action_spec_phase2_review
+    issue: "`action_spec_from_next()` / `_infer_kind()` remain as an inferred compatibility path after producer inversion. This is acceptable for old/bare NextAction callers, but it should not become permanent string-parser debt."
+    proposed_fix: "Retire the inferred_compat path once all synced downstream projects report computed and controller ActionSpecs with producer_mode=declared. After retirement, remove `_infer_kind()` or confine it to an explicit legacy artifact migrator."
+    owner: human
+    target_gate: G0
+    notes: "Retirement trigger: template plus active downstream projects, including CMPD, pass `check_next_action.py` and `aeros run --until ... --dry-run --json` with producer_mode=declared and no inferred_compat records in normal controller output."
+  - id: AEROS-IMPROVE-021
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: pipeline-reconciliation
+    source: real_project_validation_cmpd
+    issue: "CMPD real pipeline regenerated registered outputs and correctly tripped provenance checks, but recovery required the human/agent to remember three manual derived-sync commands: `aeros provenance sync`, `aeros graph build`, and `aeros state global`."
+    proposed_fix: "Add a low-authority `aeros reconcile` command that deterministically runs post-pipeline derived sync steps, writes a bounded report, and labels what reconciliation does not prove."
+    owner: human
+    target_gate: G6
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "`aeros reconcile` is a projection refresh, not evidence validation. It does not approve gates, recover stale tasks, upgrade claims, or certify scientific correctness."
+  - id: AEROS-IMPROVE-022
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: medium
+    area: pipeline-environment
+    source: real_project_validation_cmpd
+    issue: "Pipeline smoke/run behavior could drift from the project-declared runtime: template checks displayed automation.pipeline.command, while run mode still fell back to the current interpreter and generic master script path."
+    proposed_fix: "Make check_pipeline_runs honor `automation.pipeline.runtime.python` and delegated `automation.pipeline.command` in run mode, with AEROS_PIPELINE_PYTHON as an override."
+    owner: human
+    target_gate: G6
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "This makes environment expectations explicit. It does not install dependencies, choose conda environments automatically, or prove the delegated pipeline is reproducible on another machine."

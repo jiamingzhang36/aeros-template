@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shlex
 import selectors
 import signal
 import subprocess
@@ -46,7 +47,46 @@ def _terminate_process(proc: subprocess.Popen[str]) -> None:
         proc.wait()
 
 
-def _run_streaming(cmd: list[str], timeout_seconds: int) -> int:
+def _command_list(raw_command: object) -> list[str]:
+    if isinstance(raw_command, list):
+        return [str(part) for part in raw_command if str(part)]
+    if isinstance(raw_command, str) and raw_command.strip():
+        return shlex.split(raw_command)
+    return []
+
+
+def _load_pipeline() -> dict:
+    manifest = yaml.safe_load(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else {}
+    pipeline = ((manifest or {}).get("automation", {}) or {}).get("pipeline", {}) or {}
+    return pipeline if isinstance(pipeline, dict) else {}
+
+
+def _pipeline_python(pipeline: dict) -> str:
+    runtime = pipeline.get("runtime") or {}
+    if not isinstance(runtime, dict):
+        runtime = {}
+    return (
+        os.getenv("AEROS_PIPELINE_PYTHON", "").strip()
+        or str(runtime.get("python") or "").strip()
+        or str(pipeline.get("python") or "").strip()
+    )
+
+
+def _resolve_pipeline_command(pipeline: dict) -> list[str]:
+    cmd = _command_list(pipeline.get("command", []))
+    runtime_python = _pipeline_python(pipeline)
+    if runtime_python and cmd:
+        first = Path(cmd[0]).name
+        if first in {"python", "python3"}:
+            cmd[0] = runtime_python
+    return cmd
+
+
+def _display_command(cmd: list[str]) -> str:
+    return shlex.join(cmd)
+
+
+def _run_streaming(cmd: list[str], timeout_seconds: int, cwd: Path | None = None) -> int:
     started = time.monotonic()
     env = os.environ.copy()
     env["PYTHONUNBUFFERED"] = "1"
@@ -57,6 +97,7 @@ def _run_streaming(cmd: list[str], timeout_seconds: int) -> int:
         text=True,
         bufsize=1,
         env=env,
+        cwd=str(cwd) if cwd else None,
         start_new_session=True,
         # Unattended: a pipeline script that reads stdin must not block the check.
         stdin=subprocess.DEVNULL,
@@ -103,13 +144,15 @@ def _smoke_check() -> int:
         print("FAIL: pipeline master script failed syntax check (1)")
         return 1
 
-    manifest = yaml.safe_load(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else {}
-    pipeline = ((manifest or {}).get("automation", {}) or {}).get("pipeline", {}) or {}
-    command = pipeline.get("command", [])
+    pipeline = _load_pipeline()
+    command = _resolve_pipeline_command(pipeline)
     cwd = pipeline.get("cwd", ".")
+    runtime_python = _pipeline_python(pipeline)
     print("SMOKE: pipeline master script exists and compiles")
     if command:
-        print(f"SMOKE: configured pipeline cwd={cwd} command={' '.join(command)}")
+        print(f"SMOKE: configured pipeline cwd={cwd} command={_display_command(command)}")
+        if runtime_python:
+            print(f"SMOKE: configured pipeline python={runtime_python}")
     else:
         print("SMOKE: no delegated pipeline command configured")
     print("PASS: pipeline smoke check passed")
@@ -140,6 +183,26 @@ def main() -> int:
 
     if args.mode == "smoke":
         return _smoke_check()
+
+    pipeline = _load_pipeline()
+    delegated = _resolve_pipeline_command(pipeline)
+    cwd = Path(str(pipeline.get("cwd") or "."))
+    if delegated:
+        if not cwd.exists() or not cwd.is_dir():
+            print(f"FAIL: configured pipeline cwd does not exist: {cwd}")
+            return 1
+        timeout_label = "off" if timeout_seconds == 0 else f"{timeout_seconds}s"
+        print(
+            f"Running delegated pipeline: cwd={cwd} command={_display_command(delegated)} "
+            f"(timeout: {timeout_label})",
+            flush=True,
+        )
+        returncode = _run_streaming(delegated, timeout_seconds, cwd=cwd)
+        if returncode != 0:
+            print(f"FAIL: delegated pipeline returned exit code {returncode}", flush=True)
+            return returncode
+        print("PASS: delegated pipeline ran successfully", flush=True)
+        return 0
 
     if not MASTER_SCRIPT.exists():
         print(f"FAIL: missing master script {MASTER_SCRIPT}")

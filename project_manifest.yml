@@ -87,6 +87,8 @@ automation:
     - code/99_make_all.py
     - --mode
     - smoke
+    runtime:
+      python: python3
     key_outputs: []
     notes: Template placeholder. Replace with the instantiated project pipeline command.
 gate_exit_criteria:
@@ -404,6 +406,7 @@ checks:
   work_lanes: checks/check_work_lanes.py
   completion_receipts: checks/check_completion_receipts.py
   noop_runs: checks/check_noop_runs.py
+  reconcile: checks/check_reconcile.py
   pipeline_runs: checks/check_pipeline_runs.py
   replication_package: checks/check_replication_package.py
   task_automation_policy: checks/check_task_automation_policy.py

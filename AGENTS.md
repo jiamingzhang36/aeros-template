@@ -372,6 +372,7 @@ AEROS should become stricter by closing transitions, not by adding unlimited lay
 AEROS maintains a derived global state index so local artifacts do not become disconnected partial truths. The global state is an index, not an authority.
 
 - Use `aeros state global` to rebuild `aeros/state/global_state.yml` after data probes, backfill queue updates, result registration, claim registry changes, or action receipt updates.
+- After a real pipeline run, result artifact regeneration, or registered output hash change, run `aeros reconcile` before claiming the project is harness-clean. Reconcile may refresh result-index/provenance/research-graph/global-state projections, but it does not approve gates, recover tasks, upgrade claims, or validate scientific correctness.
 - `aeros/state/global_state.yml` must remain derived from existing registries, receipts, probes, and provenance. Do not edit it to create facts.
 - Probe evidence establishes collection feasibility only. It cannot directly support final claims.
 - Action receipts classify progress. They cannot support empirical claims.

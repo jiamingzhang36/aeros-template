@@ -107,6 +107,8 @@ automation:
   pipeline:
     cwd: "."
     command: []
+    runtime:
+      python: "python3"
     key_outputs: []
 """,
     "harness/econ_method_advisory_policy.yml": """version: "0.1"
@@ -160,10 +162,11 @@ final_response_rule:
 2. Run `tools/sync_aeros_latest.zsh <project_path>`.
 3. Run `python3 checks/check_work_lanes.py`.
 4. Recover or revalidate old completion receipts.
-5. Run `python3 checks/run_harness_checks.py --timeout 30`.
-6. Write a rollout report in `agent_runs/`.
-7. Update `CURRENT_STATE.md`.
-8. Commit the rollout.
+5. Run `python3 -m aeros.cli reconcile --dry-run` to confirm post-pipeline derived sync wiring.
+6. Run `python3 checks/run_harness_checks.py --timeout 30`.
+7. Write a rollout report in `agent_runs/`.
+8. Update `CURRENT_STATE.md`.
+9. Commit the rollout.
 """,
     "decisions/human_gate_queue.yml": """version: "0.1"
 policy: AEROS-HUMAN-GATE-QUEUE-001
