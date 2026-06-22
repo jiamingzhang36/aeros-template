@@ -455,10 +455,12 @@ Backfill is the bridge between governance automation and data repair automation.
 
 - Start non-trivial project work with `python3 -m aeros.cli cockpit --lane <lane>` or `python3 -m aeros.cli context --brief`; do not rely on long chat memory as the source of project state.
 - Use `python3 -m aeros.cli next --lane <lane>` to choose the next deterministic action; if it returns a blocker, stop instead of switching lanes silently.
+- Use `python3 -m aeros.cli run --until human-gate --dry-run` to preview the bounded controller loop. Real controller task execution requires explicit `--allow-task-runs`; the loop must stop at human authority, blockers, no-progress, or budget limits.
 - Use `python3 -m aeros.cli check --profile smoke` for small-step validation and lane profiles (`lane:data`, `lane:literature`, `lane:method`, `lane:claim`, `lane:writing`, `lane:compliance`) for focused validation.
 - Full harness remains the release/internal-control layer. A smoke or lane profile reduces latency; it does not weaken gates, prove substantive progress, or replace full release checks.
 - If `aeros context --stale` reports stale context, regenerate with `aeros cockpit --write` or `aeros context --write` before continuing from saved context artifacts.
 - Treat `outputs/context/context_graph.yml` as a navigation graph only. It must not support claims, approve gates, mark tasks stale, or replace `evidence/research_graph.yml`.
+- AEROS may autonomously move until it encounters authority, but it must not manufacture a paper. The bounded controller consumes deterministic `aeros next` output, records stop reasons, and does not approve gates, upgrade claims, certify identification, or release artifacts.
 
 ## Skill Layer Rules
 

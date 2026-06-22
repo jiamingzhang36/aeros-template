@@ -166,6 +166,33 @@ regression to everything-high.
 
 ## 2026-06-20
 
+### 2026-06-22 — Add bounded deterministic controller loop
+
+**Commit(s)**: `pending`
+
+**Action**: Added `aeros run --until human-gate|blocked|no-progress|budget`
+as a bounded controller over the existing deterministic `aeros next`
+projection. The loop executes only allowlisted safe preview/check commands by
+default, refuses placeholders and shell syntax, stops at blockers/human
+authority/no-progress/budget, and requires explicit `--allow-task-runs` before
+turning iterate dry-runs into real task runs.
+
+**Alignment**: Implements the new north star: AEROS may autonomously move until
+it encounters authority, but it must not manufacture a paper or silently cross
+human judgment boundaries.
+
+**Non-goal**: Does not create an LLM planner, approve gates, upgrade claims,
+certify identification, release artifacts, spend provider/API budget by default,
+or turn route readiness into substantive progress.
+
+**Drift risk**: The first version is intentionally conservative and may stop too
+early when the next action contains placeholders or non-allowlisted commands.
+That is preferable to silent cost, authority, or lane drift.
+
+**Next check**: Run on CMPD in dry-run mode, then try one non-substantive
+no-progress loop and confirm it stops instead of continuing to repair dashboards
+or write packets indefinitely.
+
 ### 2026-06-22 — Add literature full-text candidate verification semantics
 
 **Commit(s)**: `bb0db72`

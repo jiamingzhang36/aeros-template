@@ -29,6 +29,7 @@ from .runtime.adoption import AdoptionArgs, run_adoption
 from .runtime.checks import run_checks
 from .runtime.collection import collect_prompt_grid, resolve_config
 from .runtime.contract import load_contract
+from .runtime.controller_loop import ControllerLoopArgs, format_run_until, run_until, run_until_json
 from .runtime.context_bundle import build_context_bundle, format_context_bundle, write_context_bundle
 from .runtime.cockpit import build_cockpit, format_cockpit, write_cockpit
 from .runtime.controller import run_iteration
@@ -74,6 +75,23 @@ def _display_rel(path: str | Path, root: Path) -> str:
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
+    if getattr(args, "until", ""):
+        root = _project_root()
+        rc, records = run_until(root, ControllerLoopArgs(
+            until=args.until,
+            lane=args.lane or "",
+            max_steps=args.max_steps,
+            no_progress_limit=args.no_progress_limit,
+            dry_run=args.dry_run,
+            allow_task_runs=args.allow_task_runs,
+            task_timeout=args.task_timeout,
+            max_retries=args.max_retries,
+        ))
+        print(run_until_json(records) if args.json else format_run_until(records))
+        return rc
+    if not args.contract:
+        print("FAIL: provide a task contract, or use `aeros run --until human-gate --dry-run`")
+        return 2
     return run_task(args.contract, dry_run=args.dry_run,
                     max_retries_override=args.max_retries,
                     task_timeout_override=args.task_timeout)
@@ -1183,10 +1201,22 @@ def main(argv: list[str] | None = None) -> int:
     adopt.add_argument("--no-deep", action="store_true", help="disable Codex CLI advisory synthesis")
     adopt.set_defaults(func=_cmd_adopt)
 
-    run = sub.add_parser("run", help="run a single task contract through the agent loop")
-    run.add_argument("contract", help="path to a task contract .yml")
+    run = sub.add_parser("run", help="run a single task contract or bounded controller loop")
+    run.add_argument("contract", nargs="?", help="path to a task contract .yml")
+    run.add_argument("--until", default="", choices=["", "human-gate", "blocked", "no-progress", "budget"],
+                     help="run the bounded deterministic controller until this stop condition")
+    run.add_argument("--lane", default="",
+                     choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"],
+                     help="prefer one lane when using --until")
+    run.add_argument("--max-steps", type=int, default=3,
+                     help="maximum controller steps when using --until")
+    run.add_argument("--no-progress-limit", type=int, default=1,
+                     help="stop after this many non-substantive controller steps")
+    run.add_argument("--allow-task-runs", action="store_true",
+                     help="allow controller to turn iterate dry-runs into real task runs")
+    run.add_argument("--json", action="store_true", help="emit controller records as JSON when using --until")
     run.add_argument("--dry-run", action="store_true",
-                     help="print the agent prompt and planned checks; do not call the agent")
+                     help="print the agent prompt/planned checks, or preview controller action when using --until")
     run.add_argument("--max-retries", type=int, default=None,
                      help="override the contract's retry_policy.max_retries")
     run.add_argument("--task-timeout", type=int, default=None,

@@ -11,6 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from aeros.runtime.kernel import find_project_root  # noqa: E402
+from aeros.runtime.controller_loop import ControllerLoopArgs, _command_args, run_until  # noqa: E402
 from aeros.runtime.next_action import VALID_LABELS, compute_next_action  # noqa: E402
 
 
@@ -67,6 +68,16 @@ def main() -> int:
         failures.append(f"computed next action has invalid status_label {data.get('status_label')!r}")
     if data.get("status_label") == "SUBSTANTIVE_DONE" and "--dry-run" in str(data.get("command", "")):
         failures.append("computed next action claims SUBSTANTIVE_DONE candidate while using --dry-run")
+
+    rc, records = run_until(root, ControllerLoopArgs(until="no-progress", dry_run=True, max_steps=2))
+    if rc != 0 or not records:
+        failures.append("controller run-until dry-run did not produce a safe record")
+    unsafe_args, unsafe_reason = _command_args(
+        type("Action", (), {"command": "python3 -m aeros.cli iterate --stage discovery", "status_label": "ROUTE_READY"})(),
+        ControllerLoopArgs(until="human-gate"),
+    )
+    if unsafe_args or "allow-task-runs" not in unsafe_reason:
+        failures.append("controller must reject real iterate commands without --allow-task-runs")
 
     for lane in ["data", "literature", "method", "analysis", "claim", "writing", "compliance"]:
         lane_action = compute_next_action(root, lane=lane).to_dict()
