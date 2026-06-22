@@ -985,7 +985,7 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 
 ### 2026-06-22 — Add ActionSpec inferred-compat retirement trigger
 
-**Commit(s)**: `pending`
+**Commit(s)**: `aff9ec9`
 
 **Action**: Added AEROS-IMPROVE-020 and documented the retirement trigger for `action_spec_from_next()` / `_infer_kind()`. The inferred compatibility path remains allowed only for old/bare NextAction callers and should be removed once template and active downstream projects report `producer_mode: declared` in normal next-action and bounded-controller output.
 
@@ -999,7 +999,7 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 
 ### 2026-06-22 — Add post-pipeline reconciliation command and runtime-aware pipeline check
 
-**Commit(s)**: `pending`
+**Commit(s)**: `aff9ec9`
 
 **Action**: Added `aeros reconcile` as a deterministic, low-authority post-pipeline
 sync command. It can refresh result-index/provenance/research-graph/global-state
@@ -1028,7 +1028,7 @@ needed.
 
 ### 2026-06-22 — Add session scope guard for chat-driven lane drift
 
-**Commit(s)**: `pending`
+**Commit(s)**: `849632f`
 
 **Action**: Added `aeros session start/status/audit`, `SESSION_CONTRACT.yml`
 template, `harness/session_scope.yml`, and `check_session_scope.py`. A session

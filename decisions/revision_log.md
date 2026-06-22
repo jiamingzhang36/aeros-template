@@ -331,7 +331,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV031 - 2026-06-22 00:00 +0800
 
-- commit: pending
+- commit: aff9ec9
 - change_type: pipeline reconciliation / runtime environment
 - summary: Added `aeros reconcile` as a low-authority post-pipeline derived-sync command and made pipeline run checks honor delegated command/runtime Python configuration.
 - files:
@@ -353,7 +353,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV032 - 2026-06-22 00:00 +0800
 
-- commit: pending
+- commit: 849632f
 - change_type: conversation guard / lane scope
 - summary: Added session scope guard so chat-driven work can declare one active lane/objective and audit changed files for off-scope drift.
 - files:
