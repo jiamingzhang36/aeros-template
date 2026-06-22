@@ -168,7 +168,7 @@ regression to everything-high.
 
 ### 2026-06-22 — Add Zotero literature full-text queues
 
-**Commit(s)**: `pending`
+**Commit(s)**: `170b042`
 
 **Action**: Added `zotero` as a local-library literature adapter. A Zotero search
 can now register candidate papers, inspect local PDF/fulltext attachment
