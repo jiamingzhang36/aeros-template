@@ -15,6 +15,19 @@ adapters:
       - gap_claims
       - method_claims
       - findings_claims
+  zotero:
+    role: local_library_metadata_pdf_and_indexed_fulltext_route
+    default_output:
+      - discovery/literature/search_log.csv
+      - discovery/literature/paper_registry.csv
+      - discovery/literature/fulltext_ready_queue.csv
+      - discovery/literature/missing_fulltext_queue.csv
+    cannot_support:
+      - literature_synthesis_without_extraction_cards
+      - gap_claims
+      - method_claims
+      - findings_claims
+      - claim_support_without_full_text_extraction
   citec_repec:
     role: economics_citation_graph_candidate_source
     default_output:
@@ -46,6 +59,8 @@ required_artifacts_if_used:
   - discovery/literature/paper_registry.csv
   - discovery/literature/citation_audit.md
   - discovery/literature/citation_snowball_queue.csv
+  - discovery/literature/fulltext_ready_queue.csv
+  - discovery/literature/missing_fulltext_queue.csv
 optional_artifacts_if_used:
   - discovery/literature/citation_graph_edges.csv
   - discovery/literature/preprint_resolution_log.csv
@@ -54,6 +69,7 @@ hard_boundaries:
   - Metadata and citation graph discovery are not literature review completion.
   - Working-paper resolution is an advisory candidate until a human or receipt confirms the identity.
   - Full-text extraction cards remain the minimum unit for synthesis support.
+  - Zotero PDF/fulltext availability is a route to extraction, not extraction completion.
   - Adapter output may generate a queue; it may not certify a gap.
 
 

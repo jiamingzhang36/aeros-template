@@ -166,6 +166,32 @@ regression to everything-high.
 
 ## 2026-06-20
 
+### 2026-06-22 — Add Zotero literature full-text queues
+
+**Commit(s)**: `pending`
+
+**Action**: Added `zotero` as a local-library literature adapter. A Zotero search
+can now register candidate papers, inspect local PDF/fulltext attachment
+availability, route items with Zotero PDFs/indexed full text into
+`discovery/literature/fulltext_ready_queue.csv`, and route items without detected
+PDF attachments into `discovery/literature/missing_fulltext_queue.csv`.
+
+**Alignment**: Connects the literature lane to the user's real library while
+preserving AEROS's evidence boundary: local full-text availability becomes the
+next executable route to extraction, not a completed literature review.
+
+**Non-goal**: Does not bypass publisher access, OCR scanned PDFs, write
+substantive extraction cards, certify citation faithfulness, produce synthesis,
+support claims, or approve gates.
+
+**Drift risk**: Agents could confuse "PDF found" with "paper read." The queues,
+registry status, and checks keep Zotero output at ROUTE_READY until a real
+full-text extraction card is written.
+
+**Next check**: Run `aeros literature search --source zotero --query <topic>
+--dry-run` on a real project, then import a small batch and confirm ready/missing
+queues match actual Zotero attachments.
+
 ### 2026-06-21 — Tighten stale impact scopes
 
 **Commit(s)**: `196f37a`

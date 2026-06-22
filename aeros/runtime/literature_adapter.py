@@ -13,6 +13,7 @@ import hashlib
 import json
 from pathlib import Path
 from typing import Any
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus
 from urllib.request import Request, urlopen
 
@@ -63,7 +64,32 @@ SNOWBALL_COLUMNS = [
     "notes",
 ]
 
-ALLOWED_SOURCES = {"openalex", "manual"}
+FULLTEXT_READY_COLUMNS = [
+    "queued_at",
+    "paper_id",
+    "zotero_item_key",
+    "zotero_attachment_key",
+    "title",
+    "availability",
+    "indexed_fulltext_chars",
+    "pdf_path_or_url",
+    "status",
+    "next_action",
+    "notes",
+]
+
+MISSING_FULLTEXT_COLUMNS = [
+    "queued_at",
+    "paper_id",
+    "zotero_item_key",
+    "title",
+    "reason",
+    "status",
+    "next_action",
+    "notes",
+]
+
+ALLOWED_SOURCES = {"openalex", "manual", "zotero"}
 ALLOWED_FUNCTIONS = {
     "idea-inspiring",
     "gap-verification",
@@ -87,6 +113,7 @@ class LiteratureSearchArgs:
     doi: str = ""
     url: str = ""
     pdf_url: str = ""
+    zotero_base_url: str = "http://127.0.0.1:23119"
 
 
 def _utc_now() -> str:
@@ -178,6 +205,122 @@ def _openalex_search(query: str, limit: int) -> list[tuple[dict[str, str], list[
     return [_openalex_work_to_candidate(work) for work in payload.get("results") or []]
 
 
+def _zotero_api_get(base_url: str, path: str) -> Any:
+    url = base_url.rstrip("/") + (path if path.startswith("/") else "/" + path)
+    request = Request(url, headers={"Zotero-API-Version": "3"})
+    try:
+        with urlopen(request, timeout=10) as response:  # noqa: S310 - local Zotero API
+            return json.loads(response.read().decode("utf-8") or "null")
+    except HTTPError as exc:
+        raise RuntimeError(f"Zotero local API request failed: status={exc.code} path={path}") from exc
+    except URLError as exc:
+        raise RuntimeError(
+            "Zotero local API is not reachable. Open Zotero Desktop and enable the local API first."
+        ) from exc
+
+
+def _year_from_date(raw: str) -> str:
+    for token in str(raw or "").replace("/", "-").split("-"):
+        if len(token) >= 4 and token[:4].isdigit():
+            return token[:4]
+    return ""
+
+
+def _zotero_creators(data: dict[str, Any]) -> str:
+    names: list[str] = []
+    for creator in data.get("creators") or []:
+        name = creator.get("name") or " ".join(
+            part for part in [creator.get("firstName"), creator.get("lastName")] if part
+        )
+        if name:
+            names.append(name)
+    return "; ".join(names)
+
+
+def _zotero_file_url(base_url: str, attachment_key: str) -> str:
+    try:
+        value = _zotero_api_get(base_url, f"/api/users/0/items/{quote_plus(attachment_key)}/file/view/url")
+    except Exception:
+        return ""
+    return str(value or "")
+
+
+def _zotero_fulltext_chars(base_url: str, attachment_key: str) -> int:
+    try:
+        value = _zotero_api_get(base_url, f"/api/users/0/items/{quote_plus(attachment_key)}/fulltext")
+    except Exception:
+        return 0
+    if isinstance(value, dict):
+        return len(str(value.get("content") or ""))
+    return len(str(value or ""))
+
+
+def _zotero_attachment_info(base_url: str, item_key: str) -> dict[str, str]:
+    try:
+        children = _zotero_api_get(base_url, f"/api/users/0/items/{quote_plus(item_key)}/children")
+    except Exception:
+        children = []
+    best: dict[str, str] = {
+        "attachment_key": "",
+        "availability": "missing_pdf_attachment",
+        "indexed_fulltext_chars": "0",
+        "pdf_path_or_url": "",
+    }
+    for child in children or []:
+        data = child.get("data", child)
+        key = str(child.get("key") or data.get("key") or "")
+        content_type = str(data.get("contentType") or "").lower()
+        title = str(data.get("title") or "").lower()
+        if data.get("itemType") != "attachment":
+            continue
+        if "pdf" not in content_type and ".pdf" not in title and "pdf" not in title:
+            continue
+        chars = _zotero_fulltext_chars(base_url, key) if key else 0
+        file_url = _zotero_file_url(base_url, key) if key else ""
+        availability = "indexed_fulltext" if chars > 0 else "pdf_attachment_only"
+        return {
+            "attachment_key": key,
+            "availability": availability,
+            "indexed_fulltext_chars": str(chars),
+            "pdf_path_or_url": file_url,
+        }
+    return best
+
+
+def _zotero_search(query: str, limit: int, base_url: str) -> list[tuple[dict[str, str], list[str]]]:
+    if not query.strip():
+        raise ValueError("Zotero search requires --query")
+    safe_limit = max(1, min(int(limit or 20), 50))
+    params = f"q={quote_plus(query)}&limit={safe_limit}&sort=title&direction=asc"
+    rows = _zotero_api_get(base_url, f"/api/users/0/items/top?{params}")
+    candidates: list[tuple[dict[str, str], list[str]]] = []
+    for item in rows or []:
+        data = item.get("data", item)
+        item_key = str(item.get("key") or data.get("key") or "")
+        attachment = _zotero_attachment_info(base_url, item_key) if item_key else {}
+        title = str(data.get("title") or "").strip()
+        authors = _zotero_creators(data)
+        year = _year_from_date(str(data.get("date") or ""))
+        doi = str(data.get("DOI") or data.get("doi") or "").strip()
+        url = str(data.get("url") or "").strip() or (f"zotero://select/items/{item_key}" if item_key else "")
+        pdf_url = str(attachment.get("pdf_path_or_url") or "")
+        candidates.append(({
+            "title": title,
+            "authors": authors,
+            "year": year,
+            "source": "zotero",
+            "doi": doi,
+            "url": url,
+            "pdf_url": pdf_url,
+            "_zotero_item_key": item_key,
+            "_zotero_attachment_key": str(attachment.get("attachment_key") or ""),
+            "_zotero_availability": str(attachment.get("availability") or "missing_pdf_attachment"),
+            "_zotero_fulltext_chars": str(attachment.get("indexed_fulltext_chars") or "0"),
+            "_zotero_pdf_path_or_url": pdf_url,
+        }, []))
+    return candidates
+
+
 def _manual_candidate(args: LiteratureSearchArgs) -> list[tuple[dict[str, str], list[str]]]:
     if not args.title.strip() and not args.doi.strip() and not args.url.strip():
         raise ValueError("manual literature import requires --title, --doi, or --url")
@@ -236,17 +379,23 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
         if not args.query.strip():
             raise ValueError("OpenAlex search requires --query")
         raw_candidates = _openalex_search(args.query, args.limit)
+    elif source == "zotero":
+        raw_candidates = _zotero_search(args.query, args.limit, args.zotero_base_url)
     else:
         raw_candidates = _manual_candidate(args)
 
     registry_path = root / "discovery/literature/paper_registry.csv"
     search_path = root / "discovery/literature/search_log.csv"
     snowball_path = root / "discovery/literature/citation_snowball_queue.csv"
+    fulltext_ready_path = root / "discovery/literature/fulltext_ready_queue.csv"
+    missing_fulltext_path = root / "discovery/literature/missing_fulltext_queue.csv"
     existing = _read_csv(registry_path, PAPER_REGISTRY_COLUMNS)
     seen = {_candidate_key(row) for row in existing}
 
     new_rows: list[dict[str, str]] = []
     snowball_rows: list[dict[str, str]] = []
+    fulltext_ready_rows: list[dict[str, str]] = []
+    missing_fulltext_rows: list[dict[str, str]] = []
     next_id = _next_paper_id(existing)
     next_num = int(next_id[1:])
     now = _utc_now()
@@ -265,7 +414,7 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
             "secondary_functions": "",
             "reading_depth": "not_read",
             "status": "discovered",
-            "full_text_available": "no",
+            "full_text_available": "yes" if candidate.get("_zotero_attachment_key") else "no",
             "opened_source": "",
             "opened_date": "",
             "evidence_basis": "none",
@@ -275,6 +424,32 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
             "notes": "metadata discovery only; requires screening and full-text extraction before synthesis",
         }
         new_rows.append(row)
+        if source == "zotero":
+            if candidate.get("_zotero_attachment_key"):
+                fulltext_ready_rows.append({
+                    "queued_at": now,
+                    "paper_id": paper_id,
+                    "zotero_item_key": candidate.get("_zotero_item_key", ""),
+                    "zotero_attachment_key": candidate.get("_zotero_attachment_key", ""),
+                    "title": candidate.get("title", ""),
+                    "availability": candidate.get("_zotero_availability", ""),
+                    "indexed_fulltext_chars": candidate.get("_zotero_fulltext_chars", "0"),
+                    "pdf_path_or_url": candidate.get("_zotero_pdf_path_or_url", ""),
+                    "status": "ready_for_extraction",
+                    "next_action": "open Zotero PDF/fulltext and write a full-text extraction card before synthesis",
+                    "notes": "ROUTE_READY only; full text availability is not extraction, synthesis evidence, or gate approval",
+                })
+            else:
+                missing_fulltext_rows.append({
+                    "queued_at": now,
+                    "paper_id": paper_id,
+                    "zotero_item_key": candidate.get("_zotero_item_key", ""),
+                    "title": candidate.get("title", ""),
+                    "reason": "no Zotero PDF attachment detected",
+                    "status": "missing_fulltext",
+                    "next_action": "locate PDF/full text or mark full_text_unavailable after review",
+                    "notes": "metadata candidate only; cannot support synthesis",
+                })
         for locator in related[:10]:
             snowball_rows.append({
                 "queued_at": now,
@@ -294,14 +469,17 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
         "results_found": len(raw_candidates),
         "useful_results": len(new_rows),
         "not_useful_results": max(len(raw_candidates) - len(new_rows), 0),
-        "follow_up": "screen candidates, then obtain full text and extraction cards before synthesis",
-        "notes": "ROUTE_READY only; metadata/citation discovery is not literature review completion",
+        "follow_up": "screen candidates, then obtain/read full text and write extraction cards before synthesis",
+        "notes": "ROUTE_READY only; metadata/Zotero PDF availability is not literature review completion",
     }
 
     if args.dry_run:
         print(f"would log search in {search_path.relative_to(root)}")
         print(f"would add {len(new_rows)} new paper candidate(s) to {registry_path.relative_to(root)}")
         print(f"would queue {len(snowball_rows)} citation-neighborhood candidate(s) in {snowball_path.relative_to(root)}")
+        if source == "zotero":
+            print(f"would queue {len(fulltext_ready_rows)} full-text/PDF-ready item(s) in {fulltext_ready_path.relative_to(root)}")
+            print(f"would queue {len(missing_fulltext_rows)} missing-fulltext item(s) in {missing_fulltext_path.relative_to(root)}")
         for row in new_rows[:10]:
             print(f"  - {row['paper_id']} {row['year']} {row['title'][:120]}")
         return 0
@@ -311,9 +489,16 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
         _append_rows(registry_path, PAPER_REGISTRY_COLUMNS, new_rows)
     if snowball_rows:
         _append_rows(snowball_path, SNOWBALL_COLUMNS, snowball_rows)
+    if fulltext_ready_rows:
+        _append_rows(fulltext_ready_path, FULLTEXT_READY_COLUMNS, fulltext_ready_rows)
+    if missing_fulltext_rows:
+        _append_rows(missing_fulltext_path, MISSING_FULLTEXT_COLUMNS, missing_fulltext_rows)
     print(f"logged search -> {search_path.relative_to(root)}")
     print(f"added {len(new_rows)} paper candidate(s) -> {registry_path.relative_to(root)}")
     print(f"queued {len(snowball_rows)} citation-neighborhood candidate(s) -> {snowball_path.relative_to(root)}")
+    if source == "zotero":
+        print(f"queued {len(fulltext_ready_rows)} full-text/PDF-ready item(s) -> {fulltext_ready_path.relative_to(root)}")
+        print(f"queued {len(missing_fulltext_rows)} missing-fulltext item(s) -> {missing_fulltext_path.relative_to(root)}")
     print("status_label: ROUTE_READY")
-    print("does_not_prove: full-text review, synthesis, gap support, claim support, or gate approval")
+    print("does_not_prove: full-text review, extraction-card completion, synthesis, gap support, claim support, or gate approval")
     return 0

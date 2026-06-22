@@ -14,12 +14,19 @@ POLICY = ROOT / "harness/econ_literature_discovery_policy.yml"
 SEARCH_LOG = ROOT / "discovery/literature/search_log.csv"
 REGISTRY = ROOT / "discovery/literature/paper_registry.csv"
 SNOWBALL = ROOT / "discovery/literature/citation_snowball_queue.csv"
+FULLTEXT_READY = ROOT / "discovery/literature/fulltext_ready_queue.csv"
+MISSING_FULLTEXT = ROOT / "discovery/literature/missing_fulltext_queue.csv"
 CITATION_AUDIT = ROOT / "discovery/literature/citation_audit.md"
 
 SEARCH_COLUMNS = ["date", "agent", "source", "search_query", "results_found", "useful_results", "not_useful_results", "follow_up", "notes"]
 REGISTRY_COLUMNS = ["paper_id", "citation_key", "title", "authors", "year", "source", "doi", "url", "pdf_url", "primary_function", "secondary_functions", "reading_depth", "status", "full_text_available", "opened_source", "opened_date", "evidence_basis", "screening_decision", "extraction_card", "used_in_synthesis", "notes"]
 SNOWBALL_COLUMNS = ["queued_at", "source_paper_id", "related_locator", "relation", "source", "status", "notes"]
+FULLTEXT_READY_COLUMNS = ["queued_at", "paper_id", "zotero_item_key", "zotero_attachment_key", "title", "availability", "indexed_fulltext_chars", "pdf_path_or_url", "status", "next_action", "notes"]
+MISSING_FULLTEXT_COLUMNS = ["queued_at", "paper_id", "zotero_item_key", "title", "reason", "status", "next_action", "notes"]
 ALLOWED_SNOWBALL_STATUSES = {"candidate", "screened", "imported", "excluded", "deferred"}
+ALLOWED_READY_STATUSES = {"ready_for_extraction", "extracted", "deferred"}
+ALLOWED_MISSING_STATUSES = {"missing_fulltext", "resolved", "unavailable", "deferred"}
+ALLOWED_ZOTERO_AVAILABILITY = {"indexed_fulltext", "pdf_attachment_only"}
 
 
 def _header(path: Path) -> list[str]:
@@ -39,24 +46,33 @@ def _rows(path: Path) -> list[dict[str, str]]:
 
 def main() -> int:
     failures: list[str] = []
-    for path in [ADAPTER, CLI, POLICY, SEARCH_LOG, REGISTRY, SNOWBALL, CITATION_AUDIT]:
+    for path in [ADAPTER, CLI, POLICY, SEARCH_LOG, REGISTRY, SNOWBALL, FULLTEXT_READY, MISSING_FULLTEXT, CITATION_AUDIT]:
         if not path.exists():
             failures.append(f"missing {path}")
 
     if ADAPTER.exists():
         text = ADAPTER.read_text(encoding="utf-8")
-        for marker in ["OpenAlex", "ROUTE_READY", "does_not_prove", "citation_snowball_queue.csv"]:
+        for marker in ["OpenAlex", "Zotero", "ROUTE_READY", "does_not_prove", "citation_snowball_queue.csv", "fulltext_ready_queue.csv", "missing_fulltext_queue.csv"]:
             if marker not in text:
                 failures.append(f"{ADAPTER}: missing adapter boundary marker {marker!r}")
-    if CLI.exists() and "literature" not in CLI.read_text(encoding="utf-8"):
-        failures.append(f"{CLI}: missing literature subcommand wiring")
+    if CLI.exists():
+        cli_text = CLI.read_text(encoding="utf-8")
+        for marker in ["literature", "zotero", "zotero-base-url"]:
+            if marker not in cli_text:
+                failures.append(f"{CLI}: missing literature/Zotero subcommand wiring marker {marker!r}")
     if POLICY.exists():
         policy = POLICY.read_text(encoding="utf-8")
         for marker in ["citation_faithfulness", "CiteCheck", "HalluCiteChecker", "DeepSciVerify"]:
             if marker not in policy:
                 failures.append(f"{POLICY}: missing {marker}")
 
-    for path, required in [(SEARCH_LOG, SEARCH_COLUMNS), (REGISTRY, REGISTRY_COLUMNS), (SNOWBALL, SNOWBALL_COLUMNS)]:
+    for path, required in [
+        (SEARCH_LOG, SEARCH_COLUMNS),
+        (REGISTRY, REGISTRY_COLUMNS),
+        (SNOWBALL, SNOWBALL_COLUMNS),
+        (FULLTEXT_READY, FULLTEXT_READY_COLUMNS),
+        (MISSING_FULLTEXT, MISSING_FULLTEXT_COLUMNS),
+    ]:
         header = _header(path)
         missing = [column for column in required if column not in header]
         if missing:
@@ -71,6 +87,27 @@ def main() -> int:
         source_pid = row.get("source_paper_id", "").strip()
         if source_pid and source_pid not in ids:
             failures.append(f"{SNOWBALL}: source_paper_id {source_pid!r} not in paper registry")
+    for row in _rows(FULLTEXT_READY):
+        paper_id = row.get("paper_id", "").strip()
+        if paper_id and paper_id not in ids:
+            failures.append(f"{FULLTEXT_READY}: paper_id {paper_id!r} not in paper registry")
+        status = row.get("status", "").strip()
+        if status and status not in ALLOWED_READY_STATUSES:
+            failures.append(f"{FULLTEXT_READY}: invalid status {status!r}")
+        availability = row.get("availability", "").strip()
+        if availability and availability not in ALLOWED_ZOTERO_AVAILABILITY:
+            failures.append(f"{FULLTEXT_READY}: invalid availability {availability!r}")
+        forbidden_notes = ["supports claims", "proves claim", "synthesis complete", "extraction complete"]
+        note = row.get("notes", "").lower()
+        if row.get("status", "").strip() == "ready_for_extraction" and any(term in note for term in forbidden_notes):
+            failures.append(f"{FULLTEXT_READY}: ready queue must not claim completed evidence")
+    for row in _rows(MISSING_FULLTEXT):
+        paper_id = row.get("paper_id", "").strip()
+        if paper_id and paper_id not in ids:
+            failures.append(f"{MISSING_FULLTEXT}: paper_id {paper_id!r} not in paper registry")
+        status = row.get("status", "").strip()
+        if status and status not in ALLOWED_MISSING_STATUSES:
+            failures.append(f"{MISSING_FULLTEXT}: invalid status {status!r}")
 
     if CITATION_AUDIT.exists():
         audit = CITATION_AUDIT.read_text(encoding="utf-8")

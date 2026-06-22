@@ -72,6 +72,8 @@ for T in "${TARGETS[@]}"; do
   [ -f "$T/discovery/literature/paper_registry.csv" ] || rsync -a "$SRC/discovery/literature/paper_registry.csv" "$T/discovery/literature/paper_registry.csv"
   [ -f "$T/discovery/literature/citation_audit.md" ] || rsync -a "$SRC/discovery/literature/citation_audit.md" "$T/discovery/literature/citation_audit.md"
   [ -f "$T/discovery/literature/citation_snowball_queue.csv" ] || rsync -a "$SRC/discovery/literature/citation_snowball_queue.csv" "$T/discovery/literature/citation_snowball_queue.csv"
+  [ -f "$T/discovery/literature/fulltext_ready_queue.csv" ] || rsync -a "$SRC/discovery/literature/fulltext_ready_queue.csv" "$T/discovery/literature/fulltext_ready_queue.csv"
+  [ -f "$T/discovery/literature/missing_fulltext_queue.csv" ] || rsync -a "$SRC/discovery/literature/missing_fulltext_queue.csv" "$T/discovery/literature/missing_fulltext_queue.csv"
   [ -f "$SRC/execution/AGENTS.md" ] && rsync -a "$SRC/execution/AGENTS.md" "$T/execution/AGENTS.md"
   [ -f "$SRC/tasks/TEMPLATE_task.md" ] && rsync -a "$SRC/tasks/TEMPLATE_task.md" "$T/tasks/TEMPLATE_task.md"
   SYNCED+=("$T")

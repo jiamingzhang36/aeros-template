@@ -200,6 +200,8 @@ layers:
     - discovery/literature/paper_registry.csv
     - discovery/literature/citation_audit.md
     - discovery/literature/citation_snowball_queue.csv
+    - discovery/literature/fulltext_ready_queue.csv
+    - discovery/literature/missing_fulltext_queue.csv
     - discovery/data_inventory.csv
     - data/data_state.yml
     - data/data_gap_plan.yml

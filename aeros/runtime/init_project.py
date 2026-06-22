@@ -210,6 +210,10 @@ gate_decisions: []
 """,
     "discovery/literature/citation_snowball_queue.csv": """queued_at,source_paper_id,related_locator,relation,source,status,notes
 """,
+    "discovery/literature/fulltext_ready_queue.csv": """queued_at,paper_id,zotero_item_key,zotero_attachment_key,title,availability,indexed_fulltext_chars,pdf_path_or_url,status,next_action,notes
+""",
+    "discovery/literature/missing_fulltext_queue.csv": """queued_at,paper_id,zotero_item_key,title,reason,status,next_action,notes
+""",
     "discovery/anchor.yml": """# Research anchor: 4 components, set ONCE at intake and then frozen (anti-drift).
 # Set status: locked once decided; after that it is a protected file.
 anchor:

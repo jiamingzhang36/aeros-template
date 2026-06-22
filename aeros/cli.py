@@ -894,6 +894,7 @@ def _cmd_literature(args: argparse.Namespace) -> int:
                 doi=args.doi or "",
                 url=args.url or "",
                 pdf_url=args.pdf_url or "",
+                zotero_base_url=args.zotero_base_url or "http://127.0.0.1:23119",
             ))
         except Exception as exc:  # noqa: BLE001
             print(f"FAIL: literature adapter failed: {exc}")
@@ -1252,8 +1253,8 @@ def main(argv: list[str] | None = None) -> int:
     literature_status = literature_sub.add_parser("status", help="show literature discovery/extraction counts")
     literature_status.set_defaults(func=_cmd_literature)
     literature_search = literature_sub.add_parser("search", help="search/import literature metadata into registry/queues")
-    literature_search.add_argument("--source", required=True, choices=["openalex", "manual"], help="metadata source adapter")
-    literature_search.add_argument("--query", default="", help="search query for source adapters such as OpenAlex")
+    literature_search.add_argument("--source", required=True, choices=["openalex", "manual", "zotero"], help="metadata source adapter")
+    literature_search.add_argument("--query", default="", help="search query for source adapters such as OpenAlex or Zotero")
     literature_search.add_argument("--limit", type=int, default=20, help="maximum candidates to fetch/import")
     literature_search.add_argument("--primary-function", default="idea-inspiring", choices=["idea-inspiring", "gap-verification", "method-identification", "data-measurement", "background-institutional", "theory-mechanism"], help="initial literature function label for candidates")
     literature_search.add_argument("--title", default="", help="manual import title")
@@ -1262,6 +1263,7 @@ def main(argv: list[str] | None = None) -> int:
     literature_search.add_argument("--doi", default="", help="manual import DOI")
     literature_search.add_argument("--url", default="", help="manual import URL/OpenAlex ID")
     literature_search.add_argument("--pdf-url", default="", help="manual import PDF URL")
+    literature_search.add_argument("--zotero-base-url", default="http://127.0.0.1:23119", help="Zotero local API base URL")
     literature_search.add_argument("--dry-run", action="store_true", help="preview registry/search-log changes without writing")
     literature_search.set_defaults(func=_cmd_literature)
 
