@@ -168,7 +168,7 @@ regression to everything-high.
 
 ### 2026-06-22 — Add literature full-text candidate verification semantics
 
-**Commit(s)**: `pending`
+**Commit(s)**: `bb0db72`
 
 **Action**: Added deterministic route/blocker semantics for candidate full-text
 sources. OpenAlex/manual PDF URLs now enter the full-text queue as
