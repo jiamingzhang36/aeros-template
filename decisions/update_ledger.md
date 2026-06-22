@@ -929,7 +929,7 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 
 ### 2026-06-22 — Add typed ActionSpec v0 for next-action control
 
-**Commit(s)**: `pending`
+**Commit(s)**: `1376748`
 
 **Action**: Added a typed `ActionSpec` runtime model and wired it into `aeros next`, `aeros run --until`, `checks/check_next_action.py`, templates, and AGENTS. `aeros next` still renders a command for human convenience, but the typed ActionSpec now records the action kind, effect class, capabilities, decision requirement, expected outputs, acceptance checks, and zero-cost/resource boundary.
 
@@ -943,7 +943,7 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 
 ### 2026-06-22 — Tighten controller budgets, semantic progress, and completion fields
 
-**Commit(s)**: `pending`
+**Commit(s)**: `1376748`
 
 **Action**: Extended the bounded controller with always-on resource/safety accounting: max actions, wall-time seconds, provider-call budget, cost budget, semantic state hashes, frontier hashes, action signatures, cycle detection, semantic progress flags, and `primary_stop_reason`. Updated completion receipts to write orthogonal fields: `outcome_kind`, `contract_status`, `verification_level`, `progress_class`, and `authority_status`. Renamed the preferred substantive outcome label from `SUBSTANTIVE_DONE` to `SUBSTANTIVE_PRODUCED` while preserving `SUBSTANTIVE_DONE` as a deprecated compatibility alias in runtime/check code.
 
@@ -957,7 +957,7 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 
 ### 2026-06-22 — Mark ActionSpec as Phase 1 shim and add direct invariants check
 
-**Commit(s)**: `pending`
+**Commit(s)**: `1376748`
 
 **Action**: Added `checks/check_action_spec.py` and wired it into the harness/profile/manifest control plane. Corrected completion `progress_class` so it is a category (`substantive`) rather than the rendered label (`SUBSTANTIVE_PRODUCED`), while adding `progress_label` for display. Added `docs/design/action_spec_inversion_plan.md` and AEROS-IMPROVE-018 to make the Phase 2 inversion explicit.
 
@@ -971,7 +971,7 @@ that the gate is not being satisfied by hollow `(checked)` tags without numbers.
 
 ### 2026-06-22 — Implement ActionSpec Phase 2 producer inversion
 
-**Commit(s)**: `pending`
+**Commit(s)**: `1376748`
 
 **Action**: Inverted `aeros.runtime.next_action` producers so internal next-action branches construct declared ActionSpecs directly (`producer_mode: declared`) instead of deriving kind/effect from rendered command substrings. `check_next_action.py` now fails if computed next actions use inferred compatibility specs. `action_spec_from_next()` remains only for old/bare NextAction compatibility and marks those specs as `producer_mode: inferred_compat`.
 

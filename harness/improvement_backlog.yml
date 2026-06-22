@@ -98,7 +98,7 @@ entries:
     owner: human
     target_gate: G1
     resolved_at: "2026-06-21"
-    resolution_commit: "pending"
+    resolution_commit: "1376748"
     notes: "OpenAlex/manual are implemented adapters; Semantic Scholar/CrossRef/RePEc remain registered candidates until deterministic ingestion is added."
 
   - id: AEROS-IMPROVE-008
@@ -113,7 +113,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-21"
-    resolution_commit: "pending"
+    resolution_commit: "1376748"
     notes: "Inspired by context engineering patterns: write/select/compress/isolate, repo-scoped memory graphs, context-as-tool, and task-aware pruning."
   - id: AEROS-IMPROVE-009
     created_at: "2026-06-21"
@@ -127,7 +127,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-21"
-    resolution_commit: "pending"
+    resolution_commit: "1376748"
     notes: "This is an efficiency/view layer only. It does not reduce full harness obligations, approve gates, certify claims, or turn route readiness into substantive progress."
   - id: AEROS-IMPROVE-010
     created_at: "2026-06-21"

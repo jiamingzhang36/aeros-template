@@ -43,7 +43,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV025 - 2026-06-16 00:00 +0800
 
-- commit: pending
+- commit: 1376748
 - change_type: event sourcing / derived-only audit
 - summary: Added content-addressed event primitives, deterministic replay, preregistration happens-before checks, a derived-vs-asserted attack surface audit, and CLI event append/replay commands.
 - files:
@@ -64,7 +64,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV024 - 2026-06-16 00:00 +0800
 
-- commit: pending
+- commit: 1376748
 - change_type: architecture semantic correction
 - summary: Clarified AEROS v0.5 responsibility boundaries: execution logs work, integrity rejects process fraud/formal illegality, the epistemic compiler emits claim ceilings and allowed language, and human gates make judgment calls.
 - files:
@@ -79,7 +79,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV023 - 2026-06-16 00:00 +0800
 
-- commit: pending
+- commit: 1376748
 - change_type: typed artifact graph / evidence admissibility
 - summary: Added the v0.5 typed artifact graph kernel, evidence type lattice, admissibility matrix, estimand cards, negative result ledger, and checks for artifact admissibility, estimands, and failed/abandoned spec visibility.
 - files:
@@ -100,7 +100,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV022 - 2026-06-16 00:00 +0800
 
-- commit: pending
+- commit: 1376748
 - change_type: analytical provenance / identification integrity
 - summary: Added an analysis integrity policy, preanalysis/specification templates, spec-run ledger checks, Toulmin claim-card schema checks, identification gate checks, and a circuit-breaker meta-monitor to close the analytical provenance gap.
 - files:
