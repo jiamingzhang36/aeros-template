@@ -83,7 +83,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-21"
-    resolution_commit: "pending"
+    resolution_commit: "5b37c42"
     notes: "`aeros next` is a deterministic projection, not an LLM planner. It preserves CHECK_PASS / ROUTE_READY / SUBSTANTIVE_DONE distinctions and cannot certify research substance."
 
   - id: AEROS-IMPROVE-007

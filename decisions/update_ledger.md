@@ -168,7 +168,7 @@ regression to everything-high.
 
 ### 2026-06-22 — Add bounded deterministic controller loop
 
-**Commit(s)**: `pending`
+**Commit(s)**: `5b37c42`
 
 **Action**: Added `aeros run --until human-gate|blocked|no-progress|budget`
 as a bounded controller over the existing deterministic `aeros next`
