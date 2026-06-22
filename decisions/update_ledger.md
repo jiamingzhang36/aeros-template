@@ -43,7 +43,7 @@ items) cannot recur silently.
 
 ### 2026-06-22 - Implement Phase 2 of graph-propagated claim impact (depth-1 propagation + cap)
 
-**Commit(s)**: `6ac6748`
+**Commit(s)**: `6ac6748`, `f1508c9` (IMPROVE-011 resolution_commit backfill)
 
 **Action**: Implemented Phase 2 of the v3 design. Added
 `_propagate_descendant_claims` (a stale task whose own outputs resolve to `none`
