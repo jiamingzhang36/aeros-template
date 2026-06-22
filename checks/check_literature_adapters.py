@@ -8,6 +8,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path.cwd()
+sys.path.insert(0, str(ROOT))
+
+from aeros.runtime import literature_adapter as adapter  # noqa: E402
+
 ADAPTER = ROOT / "aeros/runtime/literature_adapter.py"
 CLI = ROOT / "aeros/cli.py"
 POLICY = ROOT / "harness/econ_literature_discovery_policy.yml"
@@ -108,6 +112,38 @@ def main() -> int:
         status = row.get("status", "").strip()
         if status and status not in ALLOWED_MISSING_STATUSES:
             failures.append(f"{MISSING_FULLTEXT}: invalid status {status!r}")
+
+    if adapter._year_from_date("Spring 2024") != "2024":
+        failures.append("_year_from_date must parse season/non-ISO dates")
+    if adapter._year_from_date("2023-11-05") != "2023":
+        failures.append("_year_from_date must parse ISO-like dates")
+    creators = adapter._zotero_creators({
+        "creators": [
+            {"firstName": "Ada", "lastName": "Lovelace"},
+            {"name": "Research Collective"},
+        ]
+    })
+    if creators != "Ada Lovelace; Research Collective":
+        failures.append(f"_zotero_creators fixture mismatch: {creators!r}")
+    original_get = adapter._zotero_api_get
+    try:
+        def fake_get(_base_url: str, path: str):  # noqa: ANN001
+            if path.endswith("/children"):
+                return [
+                    {"key": "NOTE1", "data": {"itemType": "note", "title": "not a pdf"}},
+                    {"key": "PDF1", "data": {"itemType": "attachment", "title": "paper.pdf", "contentType": "application/pdf"}},
+                ]
+            if path.endswith("/fulltext"):
+                return {"content": "indexed text"}
+            if path.endswith("/file/view/url"):
+                return "file:///tmp/paper.pdf"
+            return {}
+        adapter._zotero_api_get = fake_get
+        info = adapter._zotero_attachment_info("http://127.0.0.1:23119", "ITEM1")
+    finally:
+        adapter._zotero_api_get = original_get
+    if info.get("availability") != "indexed_fulltext" or info.get("indexed_fulltext_chars") != "12":
+        failures.append(f"_zotero_attachment_info indexed fixture mismatch: {info!r}")
 
     if CITATION_AUDIT.exists():
         audit = CITATION_AUDIT.read_text(encoding="utf-8")

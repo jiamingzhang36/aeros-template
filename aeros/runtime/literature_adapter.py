@@ -220,10 +220,9 @@ def _zotero_api_get(base_url: str, path: str) -> Any:
 
 
 def _year_from_date(raw: str) -> str:
-    for token in str(raw or "").replace("/", "-").split("-"):
-        if len(token) >= 4 and token[:4].isdigit():
-            return token[:4]
-    return ""
+    import re
+    match = re.search(r"\b(18|19|20|21)\d{2}\b", str(raw or ""))
+    return match.group(0) if match else ""
 
 
 def _zotero_creators(data: dict[str, Any]) -> str:
@@ -414,7 +413,7 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
             "secondary_functions": "",
             "reading_depth": "not_read",
             "status": "discovered",
-            "full_text_available": "yes" if candidate.get("_zotero_attachment_key") else "no",
+            "full_text_available": "yes" if int(candidate.get("_zotero_fulltext_chars") or "0") > 0 else "no",
             "opened_source": "",
             "opened_date": "",
             "evidence_basis": "none",
@@ -437,7 +436,7 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
                     "pdf_path_or_url": candidate.get("_zotero_pdf_path_or_url", ""),
                     "status": "ready_for_extraction",
                     "next_action": "open Zotero PDF/fulltext and write a full-text extraction card before synthesis",
-                    "notes": "ROUTE_READY only; full text availability is not extraction, synthesis evidence, or gate approval",
+                    "notes": "ROUTE_READY only; indexed_fulltext means text is locally readable, pdf_attachment_only means PDF must still be parsed/OCRed before extraction",
                 })
             else:
                 missing_fulltext_rows.append({

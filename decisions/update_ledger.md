@@ -166,6 +166,31 @@ regression to everything-high.
 
 ## 2026-06-20
 
+### 2026-06-22 — Tighten Zotero full-text availability semantics
+
+**Commit(s)**: `pending`
+
+**Action**: Refined the Zotero literature adapter so
+`paper_registry.full_text_available=yes` is reserved for locally indexed/readable
+text (`indexed_fulltext_chars > 0`). Zotero PDF attachments without indexed text
+remain actionable in `fulltext_ready_queue.csv` as `pdf_attachment_only`, but do
+not become registry-level full text. Added deterministic parser fixtures for
+non-ISO dates, creator normalization, and attachment/fulltext classification.
+
+**Alignment**: Keeps AEROS honest about literature execution: having a PDF is a
+route to reading, not evidence that the paper text is readable or extracted.
+
+**Non-goal**: Does not parse PDFs, OCR scanned attachments, write extraction
+cards, produce synthesis, certify citation faithfulness, or support claims.
+
+**Drift risk**: The stricter meaning may leave more rows at `full_text_available=no`
+even when a PDF exists. That is intentional; the ready queue preserves the action
+path without overstating evidence.
+
+**Next check**: On a real project with Zotero PDFs, confirm indexed PDFs enter
+`full_text_available=yes`, while scanned/PDF-only attachments remain
+`pdf_attachment_only` until parsed/OCRed.
+
 ### 2026-06-22 — Add Zotero literature full-text queues
 
 **Commit(s)**: `170b042`

@@ -70,6 +70,7 @@ hard_boundaries:
   - Working-paper resolution is an advisory candidate until a human or receipt confirms the identity.
   - Full-text extraction cards remain the minimum unit for synthesis support.
   - Zotero PDF/fulltext availability is a route to extraction, not extraction completion.
+  - In `paper_registry.csv`, `full_text_available=yes` means locally readable/indexed text, not merely a PDF attachment; PDF-only items stay in the fulltext-ready queue until parsed or OCRed.
   - Adapter output may generate a queue; it may not certify a gap.
 
 
