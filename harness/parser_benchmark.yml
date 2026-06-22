@@ -1,0 +1,34 @@
+version: "0.1"
+policy: AEROS-PARSER-BENCHMARK-001
+principle: >
+  Parser quality must be measured by page-addressable EvidenceUnit production,
+  not by whether a PDF/HTML file merely parses without crashing.
+candidate_parsers:
+  primary: docling
+  fallback: mineru
+  hard_scan_benchmark: olmocr
+corpus_buckets:
+  - bucket: econ_pdf
+    target_count: 50
+  - bucket: scanned_pdf
+    target_count: 10
+  - bucket: tables
+    target_count: 10
+  - bucket: appendix_formula
+    target_count: 10
+  - bucket: policy_report
+    target_count: 10
+  - bucket: html_working_paper
+    target_count: 10
+metrics:
+  - page_addressability
+  - table_recovery
+  - citation_reference_recovery
+  - identity_match
+  - false_fulltext_rate
+  - parse_cost
+  - parse_latency
+  - human_correction_minutes
+non_goals:
+  - "Does not install or run parser adapters."
+  - "Does not treat OCR/parser success as full-text review."

@@ -6,6 +6,8 @@ the recommendation is the best scientific choice.
 """
 from __future__ import annotations
 
+import json
+import subprocess
 import sys
 from pathlib import Path
 import csv
@@ -107,6 +109,36 @@ def main() -> int:
             failures.append("computed next action ActionSpec lane differs from rendered lane")
         if spec.get("producer_mode") != "declared":
             failures.append(f"computed next action ActionSpec producer_mode is not declared: {spec.get('producer_mode')!r}")
+
+    next_json = subprocess.run(
+        [sys.executable, "-m", "aeros.cli", "next", "--json"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    if next_json.returncode != 0:
+        failures.append(f"aeros next --json failed with exit {next_json.returncode}: {next_json.stderr.strip()}")
+    else:
+        try:
+            next_json_data = json.loads(next_json.stdout)
+        except json.JSONDecodeError as exc:
+            failures.append(f"aeros next --json did not emit JSON: {exc}")
+            next_json_data = {}
+        next_json_spec = next_json_data.get("action_spec") if isinstance(next_json_data, dict) else None
+        if not isinstance(next_json_spec, dict) or not next_json_spec:
+            failures.append("aeros next --json missing action_spec")
+        else:
+            failures.extend(f"aeros next --json {failure}" for failure in validate_action_spec(next_json_spec))
+            if next_json_spec.get("producer_mode") != "declared":
+                failures.append(
+                    f"aeros next --json ActionSpec producer_mode is not declared: {next_json_spec.get('producer_mode')!r}"
+                )
+            if next_json_spec.get("command") != next_json_data.get("command"):
+                failures.append("aeros next --json ActionSpec command differs from rendered command")
+            if next_json_spec.get("lane") != next_json_data.get("lane"):
+                failures.append("aeros next --json ActionSpec lane differs from rendered lane")
 
     rc, records = run_until(root, ControllerLoopArgs(until="no-progress", dry_run=True, max_steps=2))
     if rc != 0 or not records:

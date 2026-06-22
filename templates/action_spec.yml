@@ -19,15 +19,29 @@ source: deterministic
 risk: bounded deterministic controller action
 idempotency_key: AS-example
 producer_mode: declared
+runtime_profile: smoke
 resource_budget:
   max_provider_calls: "0"
   max_cost_usd: "0"
+authority_boundary:
+  claim: none
+  release: none
+  credentials: none
+  human_decision_required: "false"
+  effect_class: local_write_preview
 preconditions:
   - project root resolved
   - command parsed only through controller allowlist
+semantic_progress_predicate:
+  - route_ready:adoption_preview
+post_run_hooks:
+  - session_scope
 postconditions:
   - write run record or blocker
   - do not approve gates or upgrade claims
+reversal_policy:
+  reversible: true
+  cleanup_handler: remove_candidate_artifacts
 does_not_prove:
   - scientific validity
   - claim support

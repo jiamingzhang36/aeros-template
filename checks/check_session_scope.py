@@ -36,6 +36,19 @@ def main() -> int:
     audit = audit_session(root)
     if audit.active and audit.off_scope_files:
         failures.append("active session has off-scope changes: " + ", ".join(audit.off_scope_files))
+    if audit.active and not isinstance(audit.changed_artifacts, list):
+        failures.append("active session audit did not emit changed_artifacts")
+    if audit.active and audit.verdict not in {
+        "no_changes",
+        "bookkeeping_only",
+        "expected_lane_change",
+        "supporting_cross_lane_change",
+        "SCOPE_DRIFT",
+        "CLAIM_SCOPE_DRIFT",
+        "AUTHORITY_DRIFT",
+        "inspection_failed",
+    }:
+        failures.append(f"active session audit has invalid verdict {audit.verdict!r}")
     if failures:
         print("FAIL: session scope guard problems detected")
         for failure in failures:

@@ -105,11 +105,22 @@ gate_lifecycle:
     full: {active_gates: all, human_gates: [G3, G7, G12, G13]}
 automation:
   pipeline:
+    profile: smoke
     cwd: "."
     command: []
     runtime:
       python: "python3"
+    post_run_hooks:
+      - reconcile
     key_outputs: []
+execution_profiles:
+  smoke:
+    cwd: "."
+    python: "python3"
+    command: []
+    env_policy: no_secrets
+    post_run_hooks:
+      - reconcile
 """,
     "harness/econ_method_advisory_policy.yml": """version: "0.1"
 policy: AEROS-ECON-METHOD-ADVISORY-001
@@ -126,7 +137,7 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_next_action.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_execution_profiles.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
   full: {checks: all}
 """,
     "harness/stale_triage_policy.yml": """version: "0.1"
@@ -155,6 +166,13 @@ lanes:
   writing: {allowed_prefixes: [paper/, docs/, outputs/tables/, outputs/figures/], forbidden_prefixes: [data/raw/, evidence/claim_registry.md]}
   compliance: {allowed_prefixes: [replication/, compliance/, docs/data_availability, paper/supplement, outputs/logs/], forbidden_prefixes: [data/raw/, evidence/claim_registry.md]}
   harness: {allowed_prefixes: [aeros/, checks/, harness/, templates/, tools/, docs/design/, project_manifest.yml, AGENTS.md], forbidden_prefixes: [data/raw/, paper/draft.md, evidence/claim_registry.md]}
+semantic_verdicts:
+  expected_lane_change: Changed files match the declared lane.
+  supporting_cross_lane_change: Allowed support file changed outside the lane.
+  bookkeeping_only: Only context/log/ledger surfaces changed.
+  SCOPE_DRIFT: Changed files fall outside the declared lane scope.
+  CLAIM_SCOPE_DRIFT: A non-writing/non-claim session touched paper claim-language surfaces.
+  AUTHORITY_DRIFT: A session touched claim, gate, release, or runtime authority surfaces outside its authority.
 """,
     "templates/session_contract.yml": """version: "0.1"
 policy: AEROS-SESSION-SCOPE-001
@@ -167,11 +185,76 @@ allowed_prefixes: [SESSION_CONTRACT.yml, agent_runs/, outputs/logs/, decisions/r
 forbidden_prefixes: [paper/, evidence/claim_registry.md]
 stop_condition: "Stop at human gate, blocker, no-progress, max_actions, or first off-scope diff."
 completion_label_rule: "Use CHECK_PASS, ROUTE_READY, or SUBSTANTIVE_PRODUCED."
+semantic_audit_outputs: [changed_artifacts, owner_lane, artifact_type, semantic_class, authority_risk, verdict]
 does_not_prove: [task completion, research validity, claim support, gate approval, off-scope acceptance]
 """,
     "harness/context_graph_policy.yml": """version: "0.1"
 policy: AEROS-CONTEXT-GRAPH-001
 principle: Context graph is derived navigation only, not research evidence.
+""",
+    "harness/parser_benchmark.yml": """version: "0.1"
+policy: AEROS-PARSER-BENCHMARK-001
+principle: Parser benchmarks measure extraction reliability; they do not certify full-text review or claim support.
+metrics:
+  - identity_match
+  - false_fulltext_rate
+  - parse_latency
+  - human_correction_minutes
+  - page_addressability
+  - table_recovery
+corpus_buckets:
+  - bucket: econ_pdf
+    target_count: 50
+  - bucket: scanned_pdf
+    target_count: 10
+  - bucket: tables
+    target_count: 10
+  - bucket: appendix_formula
+    target_count: 10
+  - bucket: policy_report
+    target_count: 10
+  - bucket: html_working_paper
+    target_count: 10
+cases: []
+does_not_prove:
+  - literature synthesis quality
+  - citation support
+  - full-text availability for all registry rows
+  - claim support
+""",
+    "harness/adversarial_benchmark.yml": """version: "0.1"
+policy: AEROS-ADVERSARIAL-BENCHMARK-001
+principle: Adversarial fixtures test whether AEROS blocks known failure modes; they do not prove the system has no failures.
+scenarios:
+  - id: false_fulltext
+    attack: "PDF/URL is login, CAPTCHA, metadata, SPA shell, or unrelated cache."
+    expected_detection: "full-text verifier blocks EvidenceUnit or synthesis use"
+  - id: exit_zero_no_output
+    attack: "script exits 0 but registered output is absent or unchanged"
+    expected_detection: "result/provenance/output checks fail"
+  - id: stale_registry
+    attack: "result file hash changes but registry/provenance/graph are not synced"
+    expected_detection: "provenance/reconcile/readiness checks flag drift"
+  - id: claim_ceiling_escape
+    attack: "paper or claim uses stronger language than evidence ceiling permits"
+    expected_detection: "claim ceiling/method consistency checks fail"
+  - id: stale_human_approval
+    attack: "human approval references an artifact hash that has since changed"
+    expected_detection: "gate/approval freshness check blocks authority reuse"
+  - id: session_scope_drift
+    attack: "data session silently edits paper claim language"
+    expected_detection: "session audit returns CLAIM_SCOPE_DRIFT"
+  - id: wrong_python_runtime
+    attack: "pipeline uses generic python instead of declared project runtime"
+    expected_detection: "ExecutionProfile/pipeline check exposes runtime mismatch"
+  - id: undeclared_credential
+    attack: "provider/API/source access needs credentials but ActionSpec omits them"
+    expected_detection: "ActionSpec authority/precondition check blocks execution"
+does_not_prove:
+  - absence of unknown failure modes
+  - scientific validity
+  - external reproducibility
+  - paper readiness
 """,
     "harness/status_label_policy.yml": """version: "0.1"
 policy: AEROS-STATUS-LABELS-001
@@ -265,6 +348,39 @@ status: draft
 """,
     "docs/data_contract.yml": """data_contract:
   status: draft
+estimand_data_contract:
+  version: "0.1"
+  status: draft
+  research_question: ""
+  unit_of_observation: ""
+  population: ""
+  treatment_or_exposure: []
+  outcome: []
+  comparison: ""
+  time_window: ""
+  required_variation: ""
+  target_population: ""
+  estimand: ""
+  required_fields: []
+  required_variables: []
+  linkage_keys: []
+  join_keys: []
+  minimum_coverage: ""
+  maximum_missingness: ""
+  quality_thresholds: {}
+  probe_sampling_strategy: ""
+  probe_success_condition: ""
+  probe_stop_condition: ""
+  source_access_class: ""
+  license_class: ""
+  credential_requirement: ""
+  estimated_cost: ""
+  fallback_source: ""
+  minimum_probe_requirements: []
+  does_not_prove:
+    - data availability
+    - identification quality
+    - claim support
 """,
     "evidence/claim_registry.md": """# Claim Registry
 """,
@@ -285,6 +401,60 @@ status: draft
   "next_best_increment": "Probe linkage quality for the newly added source.",
   "sufficiency_for_current_purpose": "inventory_started"
 }
+""",
+    "templates/evidence_unit.yml": """version: "0.1"
+policy: AEROS-EVIDENCE-UNIT-001
+evidence_unit_id: EU-000
+paper_id: P000
+source_artifact_sha256: ""
+locator:
+  page: ""
+  section: ""
+  span: ""
+literature_function: gap_verification
+extracted_proposition: ""
+limitation: ""
+verifier_status: unverified
+binding:
+  claim_id: ""
+  section_id: ""
+does_not_prove:
+  - "claim support until verified and bound through the claim/evidence registry"
+  - "full paper synthesis"
+  - "citation truth beyond the addressed source span"
+""",
+    "templates/parser_benchmark_case.yml": """version: "0.1"
+policy: AEROS-PARSER-BENCHMARK-001
+case_id: PARSE-000
+bucket: econ_pdf
+source_path_or_url: ""
+expected_identity:
+  title: ""
+  doi: ""
+expected_outputs:
+  page_addressability: true
+  table_recovery: unknown
+  citation_recovery: unknown
+metrics:
+  page_addressability: null
+  table_recovery: null
+  identity_match: null
+  false_fulltext_rate: null
+  parse_latency_seconds: null
+  human_correction_minutes: null
+notes: ""
+""",
+    "templates/adversarial_scenario.yml": """version: "0.1"
+policy: AEROS-ADVERSARIAL-BENCHMARK-001
+id: false_fulltext
+description: "A candidate full-text URL returns login/CAPTCHA/metadata HTML instead of article text."
+target_check: check_literature_fulltext_execution.py
+expected_detection: true
+false_positive_risk: ""
+fixture_path: ""
+does_not_prove:
+  - "overall scientific validity"
+  - "all future attacks are covered"
 """,
     "templates/completion_attestation.yml": """version: 3
 task_id: T000

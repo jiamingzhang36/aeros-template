@@ -1,0 +1,20 @@
+version: "0.1"
+policy: AEROS-PARSER-BENCHMARK-001
+case_id: PARSE-000
+bucket: econ_pdf
+source_path_or_url: ""
+expected_identity:
+  title: ""
+  doi: ""
+expected_outputs:
+  page_addressability: true
+  table_recovery: unknown
+  citation_recovery: unknown
+metrics:
+  page_addressability: null
+  table_recovery: null
+  identity_match: null
+  false_fulltext_rate: null
+  parse_latency_seconds: null
+  human_correction_minutes: null
+notes: ""

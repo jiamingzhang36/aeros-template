@@ -252,11 +252,13 @@ Lane rules:
 - Stay in the active lane for the whole run unless the human explicitly asks to switch lanes.
 - Before a chat-driven work burst that may edit files, prefer starting a scoped session with `aeros session start --lane <lane> --objective "..."`.
 - If a session is active, stay inside `SESSION_CONTRACT.yml` until the stop condition or run `aeros session audit`.
-- Off-scope changes reported by `aeros session audit` are `SCOPE_DRIFT`. Do not call the work complete until the drift is reverted, explicitly human-approved, or moved into `harness/improvement_backlog.yml` as deferred work.
+- Off-scope changes reported by `aeros session audit` are `SCOPE_DRIFT`, `CLAIM_SCOPE_DRIFT`, or `AUTHORITY_DRIFT`. Do not call the work complete until the drift is reverted, explicitly human-approved, or moved into `harness/improvement_backlog.yml` as deferred work.
 - A session scope is a guardrail, not authority. It cannot approve gates, upgrade claims, or turn route/check work into `SUBSTANTIVE_PRODUCED`.
 - If the active lane is blocked, stop with a blocker/source-discovery/action receipt. Do not silently move to another lane.
 - Data lane completion requires a data/source/probe artifact or an honest blocker; task scaffolding and receipts alone do not count.
+- Data probes should be interpreted against `estimand_data_contract` in `docs/data_contract.yml` whenever an estimand, target population, unit, exposure, outcome, time window, or linkage key is known. A draft EstimandDataContract is a constraint surface, not evidence that data exists or identification is valid.
 - Literature lane completion requires full-text extraction or function-specific synthesis; registry cleanup alone is bookkeeping.
+- Literature extraction should produce page/section/span-addressable EvidenceUnit records or extraction-card equivalents before synthesis. EvidenceUnit records are admissibility units; they do not by themselves prove a literature gap, method claim, or empirical claim.
 - Analysis lane completion requires runnable protocol/pipeline/result/validation artifacts; it does not upgrade claims.
 - Claim lane completion constrains or audits claim language; it does not collect data or rewrite the paper as final prose.
 - Writing lane completion edits bounded prose tied to registered claims and numbers; it does not strengthen claims.
@@ -377,6 +379,10 @@ AEROS maintains a derived global state index so local artifacts do not become di
 
 - Use `aeros state global` to rebuild `aeros/state/global_state.yml` after data probes, backfill queue updates, result registration, claim registry changes, or action receipt updates.
 - After a real pipeline run, result artifact regeneration, or registered output hash change, run `aeros reconcile` before claiming the project is harness-clean. Reconcile may refresh result-index/provenance/research-graph/global-state projections, but it does not approve gates, recover tasks, upgrade claims, or validate scientific correctness.
+- Prefer declaring pipeline runtimes through `execution_profiles` in `project_manifest.yml`. Checks, ActionSpecs, receipts, and pipeline runners should reference the profile instead of inventing per-check Python/conda/runtime logic.
+- If an ExecutionProfile declares `post_run_hooks: [reconcile]`, a successful pipeline/action run may refresh derived projections automatically. Treat that as index freshness only, not evidence validation.
+- Use `aeros readiness` as a derived view of lane readiness and blockers. A readiness vector is a cockpit projection, not gate approval, paper readiness, or claim support.
+- Parser and adversarial benchmarks are evaluation scaffolds. They measure whether known failure modes are detected and whether parsing outputs are usable; they do not prove absence of unknown failures, full-text review quality, scientific validity, or external reproducibility.
 - `aeros/state/global_state.yml` must remain derived from existing registries, receipts, probes, and provenance. Do not edit it to create facts.
 - Probe evidence establishes collection feasibility only. It cannot directly support final claims.
 - Action receipts classify progress. They cannot support empirical claims.

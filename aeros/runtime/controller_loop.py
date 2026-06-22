@@ -183,6 +183,23 @@ def _estimated_cost_usd(spec_data: dict[str, Any]) -> float:
         return 0.0
 
 
+def _run_post_run_hooks(root: Path, spec_data: dict[str, Any], timeout_seconds: int) -> str:
+    hooks = spec_data.get("post_run_hooks") or []
+    if not isinstance(hooks, list):
+        return "post_run_hooks_malformed"
+    if "reconcile" in hooks:
+        from .reconcile import run_reconcile
+        report = run_reconcile(root, timeout_seconds=max(timeout_seconds, 1))
+        if not report.ok:
+            return "post_run_hook_failed: reconcile"
+    if "session_scope" in hooks or "check:lane_scope" in hooks:
+        from .session_guard import audit_session
+        audit = audit_session(root)
+        if audit.active and not audit.ok:
+            return "post_run_hook_failed: session_scope_drift"
+    return ""
+
+
 def _has_placeholder(command: str) -> bool:
     placeholders = [
         "<your research idea>",
@@ -490,6 +507,11 @@ def run_until(root: Path, args: ControllerLoopArgs) -> tuple[int, list[dict[str,
         ))
         if proc.returncode != 0:
             return proc.returncode, records
+        hook_failure = _run_post_run_hooks(root, spec_data, remaining_wall_time)
+        if hook_failure:
+            records[-1]["primary_stop_reason"] = hook_failure
+            records[-1]["reason"] = hook_failure
+            return 1, records
 
         if semantic_progress:
             no_progress_count = 0

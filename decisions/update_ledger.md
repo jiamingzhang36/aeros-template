@@ -1051,3 +1051,81 @@ project audits show false positives/negatives.
 **Next check**: In CMPD or the next active project, start a data session, make one
 allowed data edit and one intentionally off-scope paper edit, then confirm
 `aeros session audit` reports only the paper edit as `SCOPE_DRIFT`.
+
+### 2026-06-22 — Consolidate runtime contracts with ExecutionProfile and semantic scope audit
+
+**Commit(s)**: `pending`
+
+**Action**: Added `ExecutionProfile` v1 and wired pipeline checks to resolve a
+named profile from `project_manifest.yml`. Extended ActionSpec with runtime profile,
+authority boundary, semantic progress predicates, post-run hooks, and reversal
+policy. Successful delegated pipeline runs and controller task-run hooks can now
+run low-authority reconcile automatically. Session scope audit now emits semantic
+artifact classifications and verdicts (`SCOPE_DRIFT`, `CLAIM_SCOPE_DRIFT`,
+`AUTHORITY_DRIFT`) rather than only a path allowlist pass/fail.
+
+**Alignment**: Moves AEROS from "more commands to remember" toward contract-bound
+runtime semantics. Reconcile and session guard remain user-callable repair/debug
+tools, but normal execution can attach them as hooks to typed actions/profiles.
+
+**Non-goal**: Does not migrate canonical state to SQLite, add new lanes, introduce
+parser adapters, run external providers, approve gates, upgrade claims, or certify
+scientific validity.
+
+**Drift risk**: Post-run hooks could be mistaken for evidence validation, and semantic
+scope labels can become too broad. Mitigation: hooks are low-authority, `does_not_prove`
+boundaries remain explicit, and session verdicts distinguish authority drift from
+ordinary support changes.
+
+**Next check**: In a real project, run one pipeline through an ExecutionProfile with
+`post_run_hooks: [reconcile]`, then start a data session and confirm a paper/claim edit
+is labeled `CLAIM_SCOPE_DRIFT` or `AUTHORITY_DRIFT`.
+
+### 2026-06-22 — Add second-batch research contract scaffolds
+
+**Commit(s)**: `pending`
+
+**Action**: Added lightweight scaffolds and checks for EstimandDataContract,
+EvidenceUnit, parser benchmark, adversarial benchmark, and readiness vector.
+Added `aeros readiness` as a derived cockpit projection and wired the new checks
+into the manifest and relevant check profiles.
+
+**Alignment**: Implements the second batch as contract/projection infrastructure,
+not another authority layer. EstimandDataContract constrains data feasibility
+questions, EvidenceUnit makes literature evidence addressable, benchmarks test
+known failure modes, and readiness gives a compact lane-level view.
+
+**Non-goal**: Does not certify data availability, identification quality,
+full-text synthesis, parser correctness outside fixtures, absence of unknown
+failure modes, claim support, gate approval, paper readiness, or public release.
+
+**Drift risk**: These concepts can become bureaucratic if treated as required
+paperwork before they are needed. Keep them minimal, derived/advisory by default,
+and promote only project-specific workflows that prove useful in real projects.
+
+**Next check**: Run the five new checks plus `python3 -m aeros.cli readiness` on
+the template, then pressure-test on one real project before expanding their
+schemas.
+
+### 2026-06-22 — Expose ActionSpec through `aeros next --json`
+
+**Commit(s)**: `pending`
+
+**Action**: Added `--json` to `aeros next` so the primary next-action producer
+emits the full `NextAction.to_dict()` payload, including the declared
+`ActionSpec`. Added `action_spec_producer_mode` to the human text view and
+extended `check_next_action.py` to exercise `aeros next --json` through the CLI.
+
+**Alignment**: Keeps ActionSpec as the machine-consumable control object instead
+of hiding it behind a rendered command string. This closes the inconsistency
+where `aeros run --json` exposed typed contracts but `aeros next` did not.
+
+**Non-goal**: Does not change execution dispatch, approve gates, run tasks,
+remove inferred compatibility for old callers, or certify the scientific value
+of the recommended action.
+
+**Drift risk**: Future output fields could diverge between human and JSON views.
+Keep `check_next_action.py` exercising the CLI JSON path directly.
+
+**Next check**: Run `python3 checks/check_next_action.py` and
+`python3 -m aeros.cli next --json`.

@@ -116,3 +116,10 @@ non_goals:
   - "Does not revert off-scope files automatically."
   - "Does not approve cross-lane work; it only surfaces drift."
   - "Does not certify research substance or gate completion."
+semantic_verdicts:
+  expected_lane_change: "Changed files match the declared lane."
+  supporting_cross_lane_change: "Allowed support file changed outside the lane; review but not automatically drift."
+  bookkeeping_only: "Only context/log/ledger surfaces changed."
+  SCOPE_DRIFT: "Changed files fall outside the declared lane scope."
+  CLAIM_SCOPE_DRIFT: "A non-writing/non-claim session touched paper claim-language surfaces."
+  AUTHORITY_DRIFT: "A session touched claim, gate, release, or runtime authority surfaces outside its authority."

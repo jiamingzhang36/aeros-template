@@ -434,7 +434,10 @@ def _cmd_context(args: argparse.Namespace) -> int:
 def _cmd_next(args: argparse.Namespace) -> int:
     root = _project_root()
     action = compute_next_action(root, lane=args.lane or "")
-    print(format_next_action(action))
+    if args.json:
+        print(json.dumps(action.to_dict(), indent=2, ensure_ascii=False))
+    else:
+        print(format_next_action(action))
     if args.write:
         path = write_next_action(root, action)
         print(f"wrote {path.relative_to(root)}")
@@ -563,6 +566,18 @@ def _cmd_state_global(args: argparse.Namespace) -> int:
     print(f"datasets: {len(payload.get('datasets', {}))}")
     print(f"claims: {payload.get('claims', {}).get('count', 0)}")
     print(f"results: {payload.get('results', {}).get('rows', 0)}")
+    return 0
+
+
+def _cmd_readiness(args: argparse.Namespace) -> int:
+    from .runtime.readiness import build_readiness_vector, format_readiness_vector
+
+    root = _project_root()
+    vector = build_readiness_vector(root)
+    if args.json:
+        print(json.dumps(vector, indent=2, ensure_ascii=False))
+    else:
+        print(format_readiness_vector(vector))
     return 0
 
 
@@ -1313,6 +1328,9 @@ def main(argv: list[str] | None = None) -> int:
     roadmap = sub.add_parser("roadmap", help="show compressed 5-milestone roadmap")
     roadmap.set_defaults(func=_cmd_roadmap)
 
+    readiness = sub.add_parser("readiness", help="show derived project readiness vector")
+    readiness.add_argument("--json", action="store_true", help="emit machine-readable readiness JSON")
+    readiness.set_defaults(func=_cmd_readiness)
 
     context_p = sub.add_parser("context", help="show a compact source-anchored context bundle")
     context_p.add_argument("--lane", default="project", choices=["project", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"], help="context lane to focus")
@@ -1334,6 +1352,7 @@ def main(argv: list[str] | None = None) -> int:
                         choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"],
                         help="prefer the next action for one work lane")
     next_p.add_argument("--write", action="store_true", help="write NEXT_ACTION.md")
+    next_p.add_argument("--json", action="store_true", help="emit machine-readable next action with full ActionSpec")
     next_p.set_defaults(func=_cmd_next)
 
     session = sub.add_parser("session", help="start/status/audit a lane-scoped chat session")

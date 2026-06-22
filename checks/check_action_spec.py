@@ -93,6 +93,10 @@ def main() -> int:
     )
     if declared.producer_mode != "declared":
         failures.append("declared ActionSpec producer_mode is not declared")
+    if not declared.authority_boundary:
+        failures.append("declared ActionSpec missing authority_boundary")
+    if declared.post_run_hooks:
+        failures.append("read-only declared ActionSpec should not add post-run hooks by default")
     if validate_action_spec(declared):
         failures.append("declared ActionSpec should validate cleanly")
 

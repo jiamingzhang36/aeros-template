@@ -1,0 +1,20 @@
+version: "0.1"
+policy: AEROS-EVIDENCE-UNIT-001
+evidence_unit_id: EU-000
+paper_id: P000
+source_artifact_sha256: ""
+locator:
+  page: ""
+  section: ""
+  span: ""
+literature_function: gap_verification
+extracted_proposition: ""
+limitation: ""
+verifier_status: unverified
+binding:
+  claim_id: ""
+  section_id: ""
+does_not_prove:
+  - "claim support until verified and bound through the claim/evidence registry"
+  - "full paper synthesis"
+  - "citation truth beyond the addressed source span"

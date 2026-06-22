@@ -39,11 +39,15 @@ class SessionAudit:
     changed_files: list[str]
     allowed_files: list[str]
     off_scope_files: list[str]
+    changed_artifacts: list[dict[str, str]]
+    verdict: str
     issues: list[str]
 
     @property
     def ok(self) -> bool:
-        return not self.issues and not self.off_scope_files
+        if not self.active:
+            return True
+        return not self.issues and self.verdict in {"no_changes", "bookkeeping_only", "expected_lane_change", "supporting_cross_lane_change"}
 
 
 def _now() -> str:
@@ -205,10 +209,95 @@ def _matches(rel: str, prefixes: list[str]) -> bool:
     return any(rel == prefix.rstrip("/") or rel.startswith(prefix) for prefix in prefixes)
 
 
+def _classify_artifact(rel: str, active_lane: str, allowed: bool, forbidden: bool) -> dict[str, str]:
+    if rel.startswith(("aeros/", "checks/", "harness/", "templates/", "tools/")) or rel in {"AGENTS.md", "project_manifest.yml"}:
+        owner_lane = "aeros-dev"
+        artifact_type = "harness_control"
+    elif rel.startswith(("data/", "docs/data")) or rel.startswith("discovery/data"):
+        owner_lane = "data"
+        artifact_type = "data_artifact"
+    elif rel.startswith("discovery/literature/") or rel.startswith("docs/related_work"):
+        owner_lane = "literature"
+        artifact_type = "literature_artifact"
+    elif rel.startswith(("code/04_analysis/", "code/05_robustness/", "code/06_tables/", "code/07_figures/", "outputs/tables/", "outputs/figures/", "outputs/model_outputs/")):
+        owner_lane = "analysis"
+        artifact_type = "analysis_artifact"
+    elif rel.startswith("paper/"):
+        owner_lane = "paper"
+        artifact_type = "paper_artifact"
+    elif rel.startswith("replication/") or rel.startswith("compliance/") or "data_availability" in rel:
+        owner_lane = "compliance"
+        artifact_type = "compliance_artifact"
+    elif rel.startswith("evidence/claim_registry"):
+        owner_lane = "claim"
+        artifact_type = "claim_registry"
+    elif rel.startswith("evidence/") or rel.startswith("outputs/.provenance/"):
+        owner_lane = "claim"
+        artifact_type = "evidence_or_result_artifact"
+    elif rel.startswith(("agent_runs/", "outputs/logs/", "outputs/context/", "decisions/revision_log.md", "decisions/update_ledger.md")) or rel in {"SESSION_CONTRACT.yml", "CURRENT_STATE.md", "NEXT_ACTION.md", "CONTEXT_BUNDLE.md"}:
+        owner_lane = "bookkeeping"
+        artifact_type = "bookkeeping"
+    elif rel.startswith("decisions/"):
+        owner_lane = "authority"
+        artifact_type = "decision_artifact"
+    else:
+        owner_lane = "unknown"
+        artifact_type = "unknown"
+
+    authority_risk = "none"
+    semantic_class = "expected_lane_change" if allowed else "scope_drift"
+    if artifact_type == "bookkeeping":
+        semantic_class = "bookkeeping_only" if allowed else "scope_drift"
+    if owner_lane not in {active_lane, "bookkeeping"} and allowed:
+        semantic_class = "supporting_cross_lane_change"
+    if forbidden:
+        semantic_class = "scope_drift"
+    if artifact_type in {"claim_registry"}:
+        authority_risk = "claim"
+        semantic_class = "authority_drift" if active_lane != "claim" else semantic_class
+    elif artifact_type == "decision_artifact":
+        authority_risk = "gate_or_decision"
+        semantic_class = "authority_drift"
+    elif artifact_type == "paper_artifact" and active_lane not in {"writing", "harness"}:
+        authority_risk = "claim_language"
+        semantic_class = "claim_scope_drift"
+    elif owner_lane == "aeros-dev" and active_lane != "harness":
+        authority_risk = "runtime"
+        semantic_class = "authority_drift"
+
+    return {
+        "path": rel,
+        "owner_lane": owner_lane,
+        "artifact_type": artifact_type,
+        "semantic_class": semantic_class,
+        "authority_risk": authority_risk,
+        "allowed_by_session_scope": str(bool(allowed and not forbidden)).lower(),
+    }
+
+
+def _verdict(changed_artifacts: list[dict[str, str]], issues: list[str]) -> str:
+    if issues:
+        return "inspection_failed"
+    if not changed_artifacts:
+        return "no_changes"
+    classes = {item["semantic_class"] for item in changed_artifacts}
+    if "authority_drift" in classes:
+        return "AUTHORITY_DRIFT"
+    if "claim_scope_drift" in classes:
+        return "CLAIM_SCOPE_DRIFT"
+    if "scope_drift" in classes:
+        return "SCOPE_DRIFT"
+    if classes == {"bookkeeping_only"}:
+        return "bookkeeping_only"
+    if "supporting_cross_lane_change" in classes:
+        return "supporting_cross_lane_change"
+    return "expected_lane_change"
+
+
 def audit_session(project_root: Path) -> SessionAudit:
     session = load_session(project_root)
     if not session or not session.get("active", False):
-        return SessionAudit(False, "", "", [], [], [], [])
+        return SessionAudit(False, "", "", [], [], [], [], "inactive", [])
     lane = str(session.get("active_lane") or "")
     objective = str(session.get("objective") or "")
     allowed = [str(p) for p in session.get("allowed_prefixes") or [] if str(p)]
@@ -216,14 +305,18 @@ def audit_session(project_root: Path) -> SessionAudit:
     changed, issues = _git_changed_files(project_root)
     allowed_files: list[str] = []
     off_scope: list[str] = []
+    changed_artifacts: list[dict[str, str]] = []
     for rel in changed:
-        if _matches(rel, forbidden):
+        forbidden_match = _matches(rel, forbidden)
+        allowed_match = _matches(rel, allowed)
+        if forbidden_match:
             off_scope.append(rel)
-        elif _matches(rel, allowed):
+        elif allowed_match:
             allowed_files.append(rel)
         else:
             off_scope.append(rel)
-    return SessionAudit(True, lane, objective, changed, allowed_files, off_scope, issues)
+        changed_artifacts.append(_classify_artifact(rel, lane, allowed_match, forbidden_match))
+    return SessionAudit(True, lane, objective, changed, allowed_files, off_scope, changed_artifacts, _verdict(changed_artifacts, issues), issues)
 
 
 def format_session_status(session: dict[str, Any]) -> str:
@@ -254,6 +347,8 @@ def format_audit(audit: SessionAudit, *, as_json: bool = False) -> str:
             "changed_files": audit.changed_files,
             "allowed_files": audit.allowed_files,
             "off_scope_files": audit.off_scope_files,
+            "changed_artifacts": audit.changed_artifacts,
+            "verdict": audit.verdict,
             "issues": audit.issues,
             "ok": audit.ok,
         }, indent=2, ensure_ascii=False) + "\n"
@@ -264,10 +359,24 @@ def format_audit(audit: SessionAudit, *, as_json: bool = False) -> str:
         "",
         f"lane: {audit.lane}",
         f"objective: {audit.objective}",
-        f"status: {'PASS' if audit.ok else 'SCOPE_DRIFT'}",
+        f"status: {'PASS' if audit.ok else audit.verdict}",
+        f"verdict: {audit.verdict}",
+        "",
+        "changed_artifacts:",
+    ]
+    if audit.changed_artifacts:
+        for item in audit.changed_artifacts:
+            lines.append(
+                f"- {item['path']} "
+                f"(owner_lane={item['owner_lane']}, type={item['artifact_type']}, "
+                f"class={item['semantic_class']}, authority_risk={item['authority_risk']})"
+            )
+    else:
+        lines.append("- none")
+    lines.extend([
         "",
         "allowed_changed_files:",
-    ]
+    ])
     lines.extend([f"- {rel}" for rel in audit.allowed_files] or ["- none"])
     lines.append("")
     lines.append("off_scope_files:")

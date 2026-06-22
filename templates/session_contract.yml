@@ -19,6 +19,13 @@ forbidden_prefixes:
   - evidence/claim_registry.md
 stop_condition: "Stop at human gate, blocker, no-progress, max_actions, or first off-scope diff."
 completion_label_rule: "Use CHECK_PASS, ROUTE_READY, or SUBSTANTIVE_PRODUCED."
+semantic_audit_outputs:
+  - changed_artifacts
+  - owner_lane
+  - artifact_type
+  - semantic_class
+  - authority_risk
+  - verdict
 does_not_prove:
   - "that any task is complete"
   - "that any research artifact is valid"

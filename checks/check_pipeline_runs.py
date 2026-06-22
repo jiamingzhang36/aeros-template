@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import argparse
 import os
-import shlex
 import selectors
 import signal
 import subprocess
@@ -13,11 +12,13 @@ import sys
 import time
 from pathlib import Path
 
-import yaml
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from aeros.runtime.execution_profile import display_command, resolve_execution_profile, resolved_command  # noqa: E402
+from aeros.runtime.reconcile import run_reconcile  # noqa: E402
 
 
 MASTER_SCRIPT = Path("code/99_make_all.py")
-MANIFEST = Path("project_manifest.yml")
 
 
 def _normalize_timeout(raw_timeout: str | int | None) -> int:
@@ -45,45 +46,6 @@ def _terminate_process(proc: subprocess.Popen[str]) -> None:
         except (AttributeError, ProcessLookupError, PermissionError):
             proc.kill()
         proc.wait()
-
-
-def _command_list(raw_command: object) -> list[str]:
-    if isinstance(raw_command, list):
-        return [str(part) for part in raw_command if str(part)]
-    if isinstance(raw_command, str) and raw_command.strip():
-        return shlex.split(raw_command)
-    return []
-
-
-def _load_pipeline() -> dict:
-    manifest = yaml.safe_load(MANIFEST.read_text(encoding="utf-8")) if MANIFEST.exists() else {}
-    pipeline = ((manifest or {}).get("automation", {}) or {}).get("pipeline", {}) or {}
-    return pipeline if isinstance(pipeline, dict) else {}
-
-
-def _pipeline_python(pipeline: dict) -> str:
-    runtime = pipeline.get("runtime") or {}
-    if not isinstance(runtime, dict):
-        runtime = {}
-    return (
-        os.getenv("AEROS_PIPELINE_PYTHON", "").strip()
-        or str(runtime.get("python") or "").strip()
-        or str(pipeline.get("python") or "").strip()
-    )
-
-
-def _resolve_pipeline_command(pipeline: dict) -> list[str]:
-    cmd = _command_list(pipeline.get("command", []))
-    runtime_python = _pipeline_python(pipeline)
-    if runtime_python and cmd:
-        first = Path(cmd[0]).name
-        if first in {"python", "python3"}:
-            cmd[0] = runtime_python
-    return cmd
-
-
-def _display_command(cmd: list[str]) -> str:
-    return shlex.join(cmd)
 
 
 def _run_streaming(cmd: list[str], timeout_seconds: int, cwd: Path | None = None) -> int:
@@ -144,15 +106,15 @@ def _smoke_check() -> int:
         print("FAIL: pipeline master script failed syntax check (1)")
         return 1
 
-    pipeline = _load_pipeline()
-    command = _resolve_pipeline_command(pipeline)
-    cwd = pipeline.get("cwd", ".")
-    runtime_python = _pipeline_python(pipeline)
+    profile = resolve_execution_profile(Path.cwd())
+    command = resolved_command(profile)
+    cwd = profile.cwd
     print("SMOKE: pipeline master script exists and compiles")
     if command:
-        print(f"SMOKE: configured pipeline cwd={cwd} command={_display_command(command)}")
-        if runtime_python:
-            print(f"SMOKE: configured pipeline python={runtime_python}")
+        print(f"SMOKE: execution_profile={profile.name} cwd={cwd} command={display_command(command)}")
+        print(f"SMOKE: configured pipeline python={profile.python}")
+        if profile.post_run_hooks:
+            print(f"SMOKE: post_run_hooks={','.join(profile.post_run_hooks)}")
     else:
         print("SMOKE: no delegated pipeline command configured")
     print("PASS: pipeline smoke check passed")
@@ -184,16 +146,16 @@ def main() -> int:
     if args.mode == "smoke":
         return _smoke_check()
 
-    pipeline = _load_pipeline()
-    delegated = _resolve_pipeline_command(pipeline)
-    cwd = Path(str(pipeline.get("cwd") or "."))
+    profile = resolve_execution_profile(Path.cwd())
+    delegated = resolved_command(profile)
+    cwd = Path(str(profile.cwd or "."))
     if delegated:
         if not cwd.exists() or not cwd.is_dir():
             print(f"FAIL: configured pipeline cwd does not exist: {cwd}")
             return 1
         timeout_label = "off" if timeout_seconds == 0 else f"{timeout_seconds}s"
         print(
-            f"Running delegated pipeline: cwd={cwd} command={_display_command(delegated)} "
+            f"Running delegated pipeline: profile={profile.name} cwd={cwd} command={display_command(delegated)} "
             f"(timeout: {timeout_label})",
             flush=True,
         )
@@ -201,6 +163,12 @@ def main() -> int:
         if returncode != 0:
             print(f"FAIL: delegated pipeline returned exit code {returncode}", flush=True)
             return returncode
+        if "reconcile" in profile.post_run_hooks:
+            report = run_reconcile(Path.cwd(), timeout_seconds=max(timeout_seconds, 1))
+            if not report.ok:
+                print("FAIL: post-run reconcile hook failed", flush=True)
+                return 1
+            print("POST-RUN: reconcile hook passed", flush=True)
         print("PASS: delegated pipeline ran successfully", flush=True)
         return 0
 

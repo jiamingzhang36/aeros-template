@@ -35,3 +35,32 @@ privacy:
   contains_personal_data: "unknown"
   contains_confidential_data: "unknown"
   sharing_restrictions: ""
+
+estimand_data_contract:
+  version: "0.1"
+  status: "draft"
+  research_question: ""
+  unit_of_observation: ""
+  population: ""
+  treatment_or_exposure: []
+  outcome: []
+  comparison: ""
+  time_window: ""
+  required_variation: ""
+  required_variables: []
+  join_keys: []
+  minimum_coverage: ""
+  maximum_missingness: ""
+  quality_thresholds: {}
+  probe_sampling_strategy: ""
+  probe_success_condition: ""
+  probe_stop_condition: ""
+  source_access_class: ""
+  license_class: ""
+  credential_requirement: ""
+  estimated_cost: ""
+  fallback_source: ""
+  does_not_prove:
+    - "data availability"
+    - "identification validity"
+    - "claim support"

@@ -319,3 +319,45 @@ entries:
     resolved_at: "2026-06-22"
     resolution_commit: "pending"
     notes: "This reuses existing lanes/status labels rather than adding a new planning authority. It does not revert files automatically, approve cross-lane work, or certify research substance."
+  - id: AEROS-IMPROVE-024
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: contract-runtime
+    source: external_architecture_review_plus_user_request
+    issue: "AEROS was becoming command-rich: reconcile, runtime-aware pipeline checks, and session guard existed as useful commands, but their semantics were not yet pulled into typed runtime contracts."
+    proposed_fix: "Add ExecutionProfile v1, ActionSpec authority/progress/hook fields, automatic reconcile post-run hooks, and semantic session-scope audit verdicts so the new features become contract-bound rather than extra ceremony."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "This is consolidation, not a new research module. It does not migrate to SQLite, add parser adapters, create new lanes, or make AEROS decide scientific truth."
+  - id: AEROS-IMPROVE-025
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: research-contracts
+    source: user_request_second_batch
+    issue: "The next architecture layer needed concrete but lightweight hooks for EstimandDataContract, EvidenceUnit, parser benchmarks, adversarial benchmarks, and readiness vectors without turning them into new authority layers."
+    proposed_fix: "Add minimal templates, checks, manifest/profile wiring, and `aeros readiness` projection for these concepts while keeping them derived/advisory unless a later gated workflow promotes them."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "This is scaffolding and validation plumbing only. It does not certify data availability, full-text synthesis, scientific validity, claim support, or paper/release readiness."
+  - id: AEROS-IMPROVE-026
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: action-spec
+    source: behavioral_review
+    issue: "`aeros next` computed a declared ActionSpec internally, but the primary next-action producer did not expose it through a machine-readable CLI surface."
+    proposed_fix: "Add `aeros next --json` that emits `NextAction.to_dict()` with the full ActionSpec, surface `producer_mode` in the human view, and add a check assertion that the JSON ActionSpec validates and has `producer_mode: declared`."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "This closes the contract-surface inconsistency. It does not change controller execution, approve gates, or remove the legacy inferred compatibility path."

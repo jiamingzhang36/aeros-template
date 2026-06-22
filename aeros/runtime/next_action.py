@@ -732,6 +732,7 @@ def format_next_action(action: NextAction) -> str:
             lines.append(f"action_spec_kind: {value.get('kind')}")
             lines.append(f"action_spec_effect_class: {value.get('effect_class')}")
             lines.append(f"action_spec_requires_decision: {value.get('requires_decision')}")
+            lines.append(f"action_spec_producer_mode: {value.get('producer_mode')}")
             continue
         lines.append(f"{key}: {value}")
     return "\n".join(lines)

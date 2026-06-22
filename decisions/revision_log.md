@@ -373,3 +373,101 @@ Use this file to track template or project-level changes that alter workflow, ev
 - checks:
   - Not run in this edit pass unless explicitly requested.
 - notes: Session scope guard reports `SCOPE_DRIFT` but does not revert files, approve cross-lane work, certify research validity, or replace human judgment.
+
+## REV033 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: contract runtime consolidation
+- summary: Added ExecutionProfile v1, ActionSpec authority/progress/hook fields, automatic reconcile post-run hooks, and semantic session-scope audit verdicts.
+- files:
+  - aeros/runtime/execution_profile.py
+  - aeros/runtime/action_spec.py
+  - aeros/runtime/controller_loop.py
+  - aeros/runtime/session_guard.py
+  - checks/check_execution_profiles.py
+  - checks/check_pipeline_runs.py
+  - checks/check_action_spec.py
+  - checks/check_session_scope.py
+  - checks/run_harness_checks.py
+  - templates/action_spec.yml
+  - templates/session_contract.yml
+  - harness/session_scope.yml
+  - harness/check_profiles.yml
+  - project_manifest.yml
+  - aeros/runtime/init_project.py
+  - AGENTS.md
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - `python -m py_compile aeros/runtime/readiness.py aeros/runtime/init_project.py aeros/cli.py checks/check_readiness_vector.py checks/check_estimand_data_contract.py checks/check_evidence_units.py checks/check_parser_benchmark.py checks/check_adversarial_benchmark.py checks/check_execution_profiles.py`
+  - `python checks/check_execution_profiles.py`
+  - `python checks/check_action_spec.py`
+  - `python checks/check_session_scope.py`
+  - `python checks/check_pipeline_runs.py --mode smoke`
+  - `python -m aeros.cli check --profile smoke --timeout 20`
+- notes: This consolidates existing controls into typed contracts. It does not add a new research lane, migrate state to a database, approve gates, upgrade claims, or certify scientific validity.
+
+## REV034 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: research contracts / readiness projection
+- summary: Added second-batch lightweight scaffolds for EstimandDataContract, EvidenceUnit, parser benchmark, adversarial benchmark, and readiness vector.
+- files:
+  - aeros/runtime/readiness.py
+  - aeros/cli.py
+  - checks/check_readiness_vector.py
+  - checks/check_estimand_data_contract.py
+  - checks/check_evidence_units.py
+  - checks/check_parser_benchmark.py
+  - checks/check_adversarial_benchmark.py
+  - checks/run_harness_checks.py
+  - templates/evidence_unit.yml
+  - templates/parser_benchmark_case.yml
+  - templates/adversarial_scenario.yml
+  - harness/parser_benchmark.yml
+  - harness/adversarial_benchmark.yml
+  - harness/check_profiles.yml
+  - project_manifest.yml
+  - docs/data_contract.yml
+  - aeros/runtime/init_project.py
+  - AGENTS.md
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - `python -m py_compile aeros/runtime/readiness.py aeros/runtime/init_project.py aeros/cli.py checks/check_readiness_vector.py checks/check_estimand_data_contract.py checks/check_evidence_units.py checks/check_parser_benchmark.py checks/check_adversarial_benchmark.py checks/check_execution_profiles.py`
+  - `python checks/check_readiness_vector.py`
+  - `python checks/check_estimand_data_contract.py`
+  - `python checks/check_evidence_units.py`
+  - `python checks/check_parser_benchmark.py`
+  - `python checks/check_adversarial_benchmark.py`
+  - `python checks/check_harness_profiles.py`
+  - `python -m aeros.cli readiness`
+  - `python -m aeros.cli check --profile smoke --timeout 20`
+  - `python -m aeros.cli init /private/tmp/aeros_second_batch_init_check --force`
+  - `cd /private/tmp/aeros_second_batch_init_check && python /Users/jiamingzhang/aeros-template/checks/check_estimand_data_contract.py`
+  - `cd /private/tmp/aeros_second_batch_init_check && python /Users/jiamingzhang/aeros-template/checks/check_parser_benchmark.py`
+  - `cd /private/tmp/aeros_second_batch_init_check && python /Users/jiamingzhang/aeros-template/checks/check_adversarial_benchmark.py`
+  - `cd /private/tmp/aeros_second_batch_init_check && python /Users/jiamingzhang/aeros-template/checks/check_readiness_vector.py`
+- notes: This is scaffolding and deterministic checking only. It does not prove data availability, full-text review quality, parser correctness outside fixtures, scientific validity, claim support, gate approval, or release readiness.
+
+## REV035 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: action-spec / machine-readable next action
+- summary: Added `aeros next --json` so the primary next-action producer exposes the full declared ActionSpec, and extended `check_next_action.py` to exercise the CLI JSON surface.
+- files:
+  - aeros/cli.py
+  - aeros/runtime/next_action.py
+  - checks/check_next_action.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - `python -m py_compile aeros/cli.py aeros/runtime/next_action.py checks/check_next_action.py`
+  - `python -m aeros.cli next --json`
+  - `python -m aeros.cli next`
+  - `python checks/check_next_action.py`
+  - `python -m aeros.cli check --profile smoke --timeout 20`
+- notes: This is a contract-surface fix. It does not change execution dispatch, approve gates, run task commands, remove legacy inferred compatibility, or certify recommendation quality.

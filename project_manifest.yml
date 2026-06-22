@@ -81,6 +81,7 @@ automation:
     timeout_seconds: 120
     rate_limit_seconds: 0.0
   pipeline:
+    profile: smoke
     cwd: .
     command:
     - python3
@@ -89,8 +90,22 @@ automation:
     - smoke
     runtime:
       python: python3
+    post_run_hooks:
+    - reconcile
     key_outputs: []
     notes: Template placeholder. Replace with the instantiated project pipeline command.
+execution_profiles:
+  smoke:
+    cwd: .
+    python: python3
+    command:
+    - python3
+    - code/99_make_all.py
+    - --mode
+    - smoke
+    env_policy: no_secrets
+    post_run_hooks:
+    - reconcile
 gate_exit_criteria:
   G1:
     requires:
@@ -317,6 +332,12 @@ default_task_policy:
 checks:
   stale_triage: checks/check_stale_triage.py
   session_scope: checks/check_session_scope.py
+  execution_profiles: checks/check_execution_profiles.py
+  readiness_vector: checks/check_readiness_vector.py
+  estimand_data_contract: checks/check_estimand_data_contract.py
+  evidence_units: checks/check_evidence_units.py
+  parser_benchmark: checks/check_parser_benchmark.py
+  adversarial_benchmark: checks/check_adversarial_benchmark.py
   harness_profiles: checks/check_harness_profiles.py
   cockpit: checks/check_cockpit.py
   context_graph: checks/check_context_graph.py

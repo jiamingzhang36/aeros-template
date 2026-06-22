@@ -38,9 +38,14 @@ class ActionSpec:
     risk: str = ""
     idempotency_key: str = ""
     producer_mode: str = "declared"
+    runtime_profile: str = ""
     resource_budget: dict[str, str] = field(default_factory=dict)
+    authority_boundary: dict[str, str] = field(default_factory=dict)
     preconditions: tuple[str, ...] = ()
+    semantic_progress_predicate: tuple[str, ...] = ()
+    post_run_hooks: tuple[str, ...] = ()
     postconditions: tuple[str, ...] = ()
+    reversal_policy: dict[str, str | bool] = field(default_factory=dict)
     does_not_prove: tuple[str, ...] = (
         "scientific validity",
         "claim support",
@@ -55,6 +60,8 @@ class ActionSpec:
             "expected_outputs",
             "acceptance_checks",
             "preconditions",
+            "semantic_progress_predicate",
+            "post_run_hooks",
             "postconditions",
             "does_not_prove",
         ):
@@ -177,6 +184,39 @@ def _acceptance_checks_for(kind: str) -> tuple[str, ...]:
     return mapping.get(kind, ())
 
 
+def _default_authority_boundary(effect_class: str, requires_decision: bool) -> dict[str, str]:
+    return {
+        "claim": "none",
+        "release": "none",
+        "credentials": "none",
+        "human_decision_required": str(bool(requires_decision)).lower(),
+        "effect_class": effect_class,
+    }
+
+
+def _semantic_progress_for(kind: str, effect_class: str) -> tuple[str, ...]:
+    if effect_class == "task_run":
+        return ("contract_status:met", "artifact_contract_met")
+    mapping = {
+        "literature_search": ("registry_delta:literature_candidate",),
+        "graph_build": ("projection_fresh:research_graph",),
+        "paper_ci_sync": ("projection_fresh:result_index", "projection_fresh:provenance"),
+        "data_scan": ("artifact_contract_met:data_inventory",),
+        "data_gap_plan": ("route_ready:data_gap_plan",),
+        "data_probe_plan": ("artifact_contract_met:data_probe",),
+        "data_backfill_plan": ("route_ready:backfill_queue",),
+    }
+    return mapping.get(kind, ())
+
+
+def _post_run_hooks_for(kind: str, effect_class: str) -> tuple[str, ...]:
+    if effect_class == "task_run":
+        return ("reconcile", "session_scope")
+    if kind in {"paper_ci_sync"}:
+        return ("reconcile",)
+    return ()
+
+
 def action_spec_from_next(action: Any) -> ActionSpec:
     command = str(getattr(action, "command", "") or "")
     lane = str(getattr(action, "lane", "") or "project")
@@ -210,9 +250,14 @@ def action_spec_from_next(action: Any) -> ActionSpec:
         risk=risk,
         idempotency_key=_stable_id(kind, lane, command, source),
         producer_mode="inferred_compat",
+        runtime_profile="",
         resource_budget=budget,
+        authority_boundary=_default_authority_boundary(effect_class, requires_decision),
         preconditions=("project root resolved", "command parsed only through controller allowlist"),
+        semantic_progress_predicate=_semantic_progress_for(kind, effect_class),
+        post_run_hooks=_post_run_hooks_for(kind, effect_class),
         postconditions=("write run record or blocker", "do not approve gates or upgrade claims"),
+        reversal_policy={"reversible": effect_class in {"read_only", "local_write_preview"}, "cleanup_handler": "manual_review"},
     )
 
 
@@ -230,8 +275,13 @@ def declared_action_spec(
     expected_outputs: tuple[str, ...] | None = None,
     acceptance_checks: tuple[str, ...] | None = None,
     risk: str = "",
+    runtime_profile: str = "",
+    authority_boundary: dict[str, str] | None = None,
     preconditions: tuple[str, ...] | None = None,
+    semantic_progress_predicate: tuple[str, ...] | None = None,
+    post_run_hooks: tuple[str, ...] | None = None,
     postconditions: tuple[str, ...] | None = None,
+    reversal_policy: dict[str, str | bool] | None = None,
 ) -> ActionSpec:
     """Build an ActionSpec from producer-known semantics.
 
@@ -264,9 +314,14 @@ def declared_action_spec(
         risk=risk or ("requires human authority or missing input" if requires_decision else "bounded deterministic controller action"),
         idempotency_key=_stable_id(kind, lane, command, source),
         producer_mode="declared",
+        runtime_profile=runtime_profile,
         resource_budget=budget,
+        authority_boundary=authority_boundary or _default_authority_boundary(effect_class, bool(requires_decision)),
         preconditions=preconditions or ("project root resolved", "command rendered from declared ActionSpec"),
+        semantic_progress_predicate=semantic_progress_predicate if semantic_progress_predicate is not None else _semantic_progress_for(kind, effect_class),
+        post_run_hooks=post_run_hooks if post_run_hooks is not None else _post_run_hooks_for(kind, effect_class),
         postconditions=postconditions or ("write run record or blocker", "do not approve gates or upgrade claims"),
+        reversal_policy=reversal_policy or {"reversible": effect_class in {"read_only", "local_write_preview"}, "cleanup_handler": "manual_review"},
     )
 
 
@@ -286,4 +341,9 @@ def validate_action_spec(spec: ActionSpec | dict[str, Any]) -> list[str]:
         failures.append("ActionSpec must require a decision for task_run/human_decision/blocked effects")
     if data.get("effect_class") == "read_only" and data.get("expected_outputs"):
         failures.append("read_only ActionSpec must not declare expected_outputs")
+    boundary = data.get("authority_boundary")
+    if not isinstance(boundary, dict) or not boundary:
+        failures.append("ActionSpec must declare authority_boundary")
+    if data.get("post_run_hooks") and not isinstance(data.get("post_run_hooks"), list):
+        failures.append("ActionSpec post_run_hooks must be a list")
     return failures
