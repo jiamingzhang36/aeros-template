@@ -19,7 +19,7 @@ from typing import Any
 from .next_action import NextAction, compute_next_action
 
 
-UNTIL_CHOICES = {"human-gate", "blocked", "no-progress", "budget"}
+UNTIL_CHOICES = {"human-gate", "blocked", "no-progress", "max-steps"}
 LANE_CHOICES = {"", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"}
 
 SUBSTANTIVE_ROOTS = [
@@ -188,12 +188,13 @@ def _command_args(action: NextAction, args: ControllerLoopArgs) -> tuple[list[st
 
 
 def _step_record(step: int, action: NextAction, *, status: str, reason: str = "", rc: int | None = None,
-                 substantive_changed: bool = False) -> dict[str, Any]:
+                 artifact_changed: bool = False, substantive_changed: bool = False) -> dict[str, Any]:
     return {
         "step": step,
         "status": status,
         "reason": reason,
         "return_code": rc,
+        "artifact_changed": artifact_changed,
         "substantive_changed": substantive_changed,
         "action": action.to_dict(),
     }
@@ -230,25 +231,27 @@ def run_until(root: Path, args: ControllerLoopArgs) -> tuple[int, list[dict[str,
         before = _substantive_snapshot(root)
         proc = subprocess.run(command_args, cwd=root, text=True)  # noqa: S603 - argv-only allowlisted commands
         after = _substantive_snapshot(root)
-        substantive_changed = before != after and action.status_label == "SUBSTANTIVE_DONE"
+        artifact_changed = before != after
+        substantive_changed = artifact_changed and action.status_label == "SUBSTANTIVE_DONE"
         records.append(_step_record(
             step,
             action,
             status="ran",
             rc=proc.returncode,
+            artifact_changed=artifact_changed,
             substantive_changed=substantive_changed,
         ))
         if proc.returncode != 0:
             return proc.returncode, records
 
-        if substantive_changed:
+        if artifact_changed:
             no_progress_count = 0
         else:
             no_progress_count += 1
 
         if until == "no-progress" and no_progress_count >= no_progress_limit:
             return 0, records
-        if until == "budget" and step >= max_steps:
+        if until == "max-steps" and step >= max_steps:
             return 0, records
         if until == "blocked":
             continue
@@ -274,6 +277,7 @@ def format_run_until(records: list[dict[str, Any]]) -> str:
         lines.append(f"  command: {action.get('command')}")
         if record.get("return_code") is not None:
             lines.append(f"  return_code: {record.get('return_code')}")
+        lines.append(f"  artifact_changed: {record.get('artifact_changed')}")
         lines.append(f"  substantive_changed: {record.get('substantive_changed')}")
     lines.append("does_not_prove: controller execution does not approve gates, upgrade claims, certify identification, or prove paper readiness")
     return "\n".join(lines)

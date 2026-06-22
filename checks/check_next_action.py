@@ -90,6 +90,9 @@ def main() -> int:
     rc, records = run_until(root, ControllerLoopArgs(until="no-progress", dry_run=True, max_steps=2))
     if rc != 0 or not records:
         failures.append("controller run-until dry-run did not produce a safe record")
+    rc, max_records = run_until(root, ControllerLoopArgs(until="max-steps", dry_run=True, max_steps=2))
+    if rc != 0 or not max_records:
+        failures.append("controller run-until max-steps dry-run did not produce a safe record")
     unsafe_args, unsafe_reason = _command_args(
         type("Action", (), {"command": "python3 -m aeros.cli iterate --stage discovery", "status_label": "ROUTE_READY"})(),
         ControllerLoopArgs(until="human-gate"),

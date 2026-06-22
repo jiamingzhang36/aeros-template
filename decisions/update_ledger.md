@@ -193,15 +193,37 @@ regression to everything-high.
 
 ## 2026-06-20
 
+### 2026-06-22 — Tighten bounded controller stop semantics
+
+**Commit(s)**: `pending`
+
+**Action**: Tightened the bounded controller mental model. Renamed the misleading
+`--until budget` stop to `--until max-steps`, clarified that this is a step-count
+guard rather than a dollar budget guard, and split controller records into
+`artifact_changed` and `substantive_changed` so real artifact movement under a
+non-substantive label does not get counted as pure no-progress.
+
+**Alignment**: Keeps `aeros run --until` conservative while making the control
+surface say exactly what it does.
+
+**Non-goal**: Does not implement real dollar-budget accounting, provider-cost
+stopping, or broader autonomous task execution.
+
+**Drift risk**: Existing notes or scripts using `--until budget` need to switch
+to `--until max-steps`.
+
+**Next check**: Run controller dry-runs and full harness; later wire real dollar
+budget stops to provider/cost accounting if needed.
+
 ### 2026-06-22 — Add bounded deterministic controller loop
 
 **Commit(s)**: `5b37c42`
 
-**Action**: Added `aeros run --until human-gate|blocked|no-progress|budget`
+**Action**: Added `aeros run --until human-gate|blocked|no-progress|max-steps`
 as a bounded controller over the existing deterministic `aeros next`
 projection. The loop executes only allowlisted safe preview/check commands by
 default, refuses placeholders and shell syntax, stops at blockers/human
-authority/no-progress/budget, and requires explicit `--allow-task-runs` before
+authority/no-progress/max-steps, and requires explicit `--allow-task-runs` before
 turning iterate dry-runs into real task runs.
 
 **Alignment**: Implements the new north star: AEROS may autonomously move until

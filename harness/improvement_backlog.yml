@@ -164,11 +164,11 @@ entries:
     priority: medium
     area: sync
     source: real_project_validation_cmpd
-    issue: "Syncing the current framework into a long-running project (CMPD, last synced before the next_action/cockpit/context_bundle/stale_triage feature family) fails 6 harness checks: next_action, skill-invocation receipt, citation_audit faithfulness columns, literature search_log schema, and compliance gate. Cause is sync-induced drift -- newer/stricter checks vs the project's older artifacts -- NOT the v3 stale-triage. A clean 'v3-only' partial landing is also not possible: stale_triage interlocks with cli.py's `stale`/`next` subcommands and next_action.py, so cherry-picking yields either inert files or reverse-edits."
-    proposed_fix: "For the deferred CMPD full upgrade: (1) migrate CMPD's literature artifacts to the new schemas (search_log columns; citation_audit faithfulness columns) -- coordinate with the parallel literature agent to avoid collision; (2) satisfy/scope check_next_action, check_compliance_gate, and the skill-invocation receipt check; (3) then sync the whole framework forward as one coherent version. Consider extending harness/check_scope.yml template_only/project scoping (AEROS-IMPROVE-004 family) so a first sync degrades gracefully instead of failing 6 checks at once."
+    issue: "CMPD has now been upgraded/green/pushed, so the remaining problem is not that CMPD is unsynced; it is the framework-side graceful-degradation gap when newer/stricter template checks meet older project artifacts."
+    proposed_fix: "Add or refine project-scoped check migration/graceful-degradation behavior so first syncs classify old schemas as migration-required instead of creating a confusing wall of red checks."
     owner: human
     target_gate: G0
-    notes: "Found 2026-06-22 attempting item-1 sync of stale-triage v3 into CMPD. Surgical decision (owner-chosen): reverted CMPD to clean pre-sync state (green, literature WIP untouched); v3 lives in the template, validated read-only against CMPD's real data. The suppress-command no-op sentinel bug (commit 7321492) was found via this same first-sync attempt."
+    notes: "CMPD upgrade is no longer the open work. Keep this item open only for the framework-side graceful-degradation/migration UX mitigation."
   - id: AEROS-IMPROVE-013
     created_at: "2026-06-22"
     updated_at: "2026-06-22"
@@ -191,12 +191,12 @@ entries:
     area: controller-loop
     source: external_architecture_review_plus_user_observation
     issue: "AEROS could recommend the next action with `aeros next`, but still required the human to manually say continue after each safe step; this left goal-mode work prone to empty loops or chat-driven pushing."
-    proposed_fix: "Add a bounded deterministic `aeros run --until ...` controller loop that consumes `aeros next`, executes only allowlisted safe preview/check commands by default, requires explicit `--allow-task-runs` for real iterate/task execution, and stops at human authority, blockers, no-progress, or budget limits."
+    proposed_fix: "Add a bounded deterministic `aeros run --until ...` controller loop that consumes `aeros next`, executes only allowlisted safe preview/check commands by default, requires explicit `--allow-task-runs` for real iterate/task execution, and stops at human authority, blockers, no-progress, or max-step limits."
     owner: human
     target_gate: G0
     resolved_at: "2026-06-22"
     resolution_commit: "pending"
-    notes: "The loop is a controller over existing authority, not a new planner. It does not approve gates, upgrade claims, certify identification, release outputs, or turn route readiness into substantive progress."
+    notes: "The loop is a controller over existing authority, not a new planner. It does not approve gates, upgrade claims, certify identification, release outputs, or turn route readiness into substantive progress. `--until max-steps` is a step-count guard, not a dollar budget guard."
   - id: AEROS-IMPROVE-015
     created_at: "2026-06-22"
     updated_at: "2026-06-22"

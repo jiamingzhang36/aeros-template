@@ -1203,7 +1203,7 @@ def main(argv: list[str] | None = None) -> int:
 
     run = sub.add_parser("run", help="run a single task contract or bounded controller loop")
     run.add_argument("contract", nargs="?", help="path to a task contract .yml")
-    run.add_argument("--until", default="", choices=["", "human-gate", "blocked", "no-progress", "budget"],
+    run.add_argument("--until", default="", choices=["", "human-gate", "blocked", "no-progress", "max-steps"],
                      help="run the bounded deterministic controller until this stop condition")
     run.add_argument("--lane", default="",
                      choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"],
