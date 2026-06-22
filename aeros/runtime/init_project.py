@@ -232,6 +232,8 @@ scenarios:
   - id: exit_zero_no_output
     attack: "script exits 0 but registered output is absent or unchanged"
     expected_detection: "result/provenance/output checks fail"
+    executable_fixture: tests/adversarial/exit_zero_no_output.py
+    detection_check: checks/check_noop_runs.py
   - id: stale_registry
     attack: "result file hash changes but registry/provenance/graph are not synced"
     expected_detection: "provenance/reconcile/readiness checks flag drift"
@@ -456,6 +458,26 @@ does_not_prove:
   - "overall scientific validity"
   - "all future attacks are covered"
 """,
+    "tests/adversarial/exit_zero_no_output.py": '''#!/usr/bin/env python3
+"""Adversarial fixture: exits successfully while producing no declared output."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--declared-output", required=True)
+    args = parser.parse_args()
+    Path(args.declared_output)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''',
     "templates/completion_attestation.yml": """version: 3
 task_id: T000
 generated_at: ""

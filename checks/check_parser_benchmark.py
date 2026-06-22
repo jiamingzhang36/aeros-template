@@ -31,7 +31,7 @@ def main() -> int:
         for failure in failures:
             print(f"- {failure}")
         return 1
-    print("PASS: parser benchmark scaffold is valid")
+    print("PASS: scaffold_only parser benchmark scaffold is valid (no parser fixtures executed)")
     return 0
 
 

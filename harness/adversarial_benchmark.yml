@@ -22,6 +22,8 @@ scenarios:
   - id: exit_zero_no_output
     attack: "script exits 0 but registered output is absent or unchanged"
     expected_detection: "result/provenance/output checks fail"
+    executable_fixture: tests/adversarial/exit_zero_no_output.py
+    detection_check: checks/check_noop_runs.py
   - id: stale_registry
     attack: "result file hash changes but registry/provenance/graph are not synced"
     expected_detection: "provenance/reconcile/readiness checks flag drift"

@@ -1,15 +1,25 @@
 #!/usr/bin/env python3
-"""Validate adversarial benchmark scaffold."""
+"""Validate and exercise the adversarial benchmark scaffold.
+
+Most scenarios are still named fixtures only. The `exit_zero_no_output` scenario
+is executable: it creates a temporary project state where a task is marked
+passed after a command exits 0 without producing its declared output, then
+confirms AEROS detects the no-op completion.
+"""
 
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 import sys
+import tempfile
 
 import yaml
 
 
 PATH = Path("harness/adversarial_benchmark.yml")
+FIXTURE = Path("tests/adversarial/exit_zero_no_output.py")
+NOOP_CHECK = Path("checks/check_noop_runs.py")
 REQUIRED = {
     "false_fulltext",
     "exit_zero_no_output",
@@ -22,23 +32,130 @@ REQUIRED = {
 }
 
 
+def _write_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+
+
+def _resolve_project_or_template(root: Path, rel: Path) -> Path:
+    project_path = root / rel
+    if project_path.exists():
+        return project_path
+    if rel.parts and rel.parts[0] == "checks":
+        sibling = Path(__file__).resolve().parent / rel.name
+        if sibling.exists():
+            return sibling
+    if rel.parts and rel.parts[0] == "tests":
+        template_root = Path(__file__).resolve().parent.parent
+        candidate = template_root / rel
+        if candidate.exists():
+            return candidate
+    return project_path
+
+
+def _exercise_exit_zero_no_output(root: Path) -> list[str]:
+    failures: list[str] = []
+    fixture_path = _resolve_project_or_template(root, FIXTURE)
+    noop_check_path = _resolve_project_or_template(root, NOOP_CHECK)
+    if not fixture_path.exists():
+        return [f"missing executable fixture {FIXTURE}"]
+    if not noop_check_path.exists():
+        return [f"missing detection check {NOOP_CHECK}"]
+
+    with tempfile.TemporaryDirectory(prefix="aeros_adv_noop_") as tmp_name:
+        tmp = Path(tmp_name)
+        task_id = "ADV_exit_zero_no_output"
+        declared_output = tmp / "outputs" / "missing.csv"
+        _write_text(
+            tmp / "tasks" / "discovery" / f"{task_id}.yml",
+            f"""task_id: {task_id}
+stage: discovery
+gate: G0
+work_lane: data
+goal: "Adversarial fixture: command exits 0 but declared output is absent."
+allowed_outputs:
+  - outputs/missing.csv
+checks: []
+""",
+        )
+        _write_text(
+            tmp / "aeros_state.yml",
+            f"""current_stage: discovery
+current_gate: G0
+gate_status: open
+candidate_stage: discovery
+candidate_gate: G0
+tasks:
+  {task_id}:
+    status: passed
+gate_history: []
+candidate_gate_history: []
+gate_decisions: []
+""",
+        )
+        fixture_run = subprocess.run(
+            [
+                sys.executable,
+                str(fixture_path.resolve()),
+                "--declared-output",
+                str(declared_output),
+            ],
+            cwd=tmp,
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+        if fixture_run.returncode != 0:
+            failures.append(f"exit_zero_no_output fixture did not exit 0: {fixture_run.stderr.strip()}")
+        if declared_output.exists():
+            failures.append("exit_zero_no_output fixture unexpectedly created the declared output")
+
+        detection = subprocess.run(
+            [sys.executable, str(noop_check_path.resolve())],
+            cwd=tmp,
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+        output = f"{detection.stdout}\n{detection.stderr}"
+        if detection.returncode == 0:
+            failures.append("exit_zero_no_output was not detected by check_noop_runs.py")
+        if task_id not in output:
+            failures.append("check_noop_runs.py did not identify the adversarial task id")
+    return failures
+
+
 def main() -> int:
+    root = Path.cwd()
     if not PATH.exists():
         print(f"FAIL: missing {PATH}")
         return 1
     data = yaml.safe_load(PATH.read_text(encoding="utf-8")) or {}
-    scenarios = {
-        str(item.get("id"))
-        for item in data.get("scenarios", [])
+    scenario_rows = [
+        item for item in data.get("scenarios", [])
         if isinstance(item, dict) and item.get("id")
-    }
+    ]
+    scenarios = {str(item.get("id")) for item in scenario_rows}
+    failures: list[str] = []
     missing = REQUIRED - scenarios
     if missing:
-        print("FAIL: adversarial benchmark missing scenarios:")
         for item in sorted(missing):
-            print(f"- {item}")
+            failures.append(f"missing scenario {item}")
+    exit_zero = next((item for item in scenario_rows if item.get("id") == "exit_zero_no_output"), {})
+    if exit_zero.get("executable_fixture") != str(FIXTURE):
+        failures.append("exit_zero_no_output missing executable_fixture wiring")
+    if exit_zero.get("detection_check") != str(NOOP_CHECK):
+        failures.append("exit_zero_no_output missing detection_check wiring")
+    failures.extend(_exercise_exit_zero_no_output(root))
+
+    if failures:
+        print("FAIL: adversarial benchmark problems detected:")
+        for failure in failures:
+            print(f"- {failure}")
         return 1
-    print("PASS: adversarial benchmark scaffold is valid")
+    print("PASS: adversarial benchmark scaffold is valid; executable fixture exit_zero_no_output detected")
     return 0
 
 

@@ -1129,3 +1129,31 @@ Keep `check_next_action.py` exercising the CLI JSON path directly.
 
 **Next check**: Run `python3 checks/check_next_action.py` and
 `python3 -m aeros.cli next --json`.
+
+### 2026-06-22 — Add first executable adversarial benchmark slice
+
+**Commit(s)**: `pending`
+
+**Action**: Converted `exit_zero_no_output` from a named adversarial scenario
+into an executable fixture. The benchmark now runs a script that exits 0 without
+creating its declared output, builds a temporary project state that falsely marks
+the task passed, and requires `check_noop_runs.py` to detect the false
+completion. Also labeled draft EstimandDataContract and parser benchmark checks
+as `scaffold_only` when no real evidence/parser fixtures are active.
+
+**Alignment**: Moves the second-batch benchmark layer from pure schema validation
+toward real detection-rate evidence, while keeping the scope intentionally small.
+This directly addresses the scaffold-green risk without adding a seventh
+horizontal module.
+
+**Non-goal**: Does not execute all adversarial scenarios, prove absence of unknown
+failures, validate parser quality, certify data availability, bind CMPD C1 to an
+estimand contract, approve gates, or certify claim support.
+
+**Drift risk**: One fixture can be mistaken for a complete adversarial benchmark.
+Keep remaining scenarios visibly scaffold-only until each has an executable
+fixture and detection assertion.
+
+**Next check**: Run `python3 checks/check_adversarial_benchmark.py` and smoke
+profile; then add a real EstimandDataContract vertical slice in a project before
+expanding more scaffolds.

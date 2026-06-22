@@ -471,3 +471,28 @@ Use this file to track template or project-level changes that alter workflow, ev
   - `python checks/check_next_action.py`
   - `python -m aeros.cli check --profile smoke --timeout 20`
 - notes: This is a contract-surface fix. It does not change execution dispatch, approve gates, run task commands, remove legacy inferred compatibility, or certify recommendation quality.
+
+## REV036 - 2026-06-22 00:00 +0800
+
+- commit: pending
+- change_type: adversarial benchmark / executable fixture
+- summary: Added the first executable adversarial benchmark slice for `exit_zero_no_output` and labeled draft/parser scaffold-only checks honestly.
+- files:
+  - checks/check_adversarial_benchmark.py
+  - tests/adversarial/exit_zero_no_output.py
+  - harness/adversarial_benchmark.yml
+  - aeros/runtime/init_project.py
+  - checks/check_estimand_data_contract.py
+  - checks/check_parser_benchmark.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - `python -m py_compile checks/check_adversarial_benchmark.py tests/adversarial/exit_zero_no_output.py aeros/runtime/init_project.py checks/check_estimand_data_contract.py checks/check_parser_benchmark.py`
+  - `python checks/check_adversarial_benchmark.py`
+  - `python checks/check_estimand_data_contract.py`
+  - `python checks/check_parser_benchmark.py`
+  - `python -m aeros.cli check --profile smoke --timeout 20`
+  - `python -m aeros.cli init /private/tmp/aeros_adversarial_init_check --force`
+  - `cd /private/tmp/aeros_adversarial_init_check && python /Users/jiamingzhang/aeros-template/checks/check_adversarial_benchmark.py`
+- notes: This makes one benchmark scenario behavioral, not merely named. Other adversarial scenarios, parser benchmark cases, and project-specific EstimandDataContracts remain scaffold-only until real fixtures or evidence-bound contracts are added.

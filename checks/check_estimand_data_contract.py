@@ -66,7 +66,10 @@ def main() -> int:
         for failure in failures:
             print(f"- {failure}")
         return 1
-    print("PASS: EstimandDataContract scaffold is valid")
+    if status == "draft":
+        print("PASS: scaffold_only EstimandDataContract scaffold is valid (draft, not evidence-bound)")
+    else:
+        print("PASS: EstimandDataContract is valid")
     return 0
 
 
