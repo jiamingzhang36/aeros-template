@@ -17,6 +17,34 @@ How to read this ledger:
 
 ## 2026-06-22
 
+### 2026-06-22 - Record CMPD first-sync drift; defer full framework upgrade (IMPROVE-012)
+
+**Commit(s)**: `pending`
+
+**Action**: Attempted to sync stale-triage v3 into CMPD. The forward-only sync brings
+the whole recent feature family (next_action/cockpit/context_bundle/stale_triage) and
+its stricter checks; 6 harness checks failed in CMPD — sync-induced drift (newer checks
+vs CMPD's older literature/compliance artifacts), NOT the v3 fix. A clean "v3-only"
+landing is impossible (stale_triage interlocks with cli `stale`/`next` + next_action).
+Owner chose the surgical path: reverted CMPD to its clean, green pre-sync state
+(literature fulltext_cache WIP untouched, no collision with the parallel agent) and
+logged AEROS-IMPROVE-012 for the deliberate full upgrade. v3 stays in the template,
+validated read-only against CMPD's real data.
+
+**Alignment**: Honors forward-only-whole-version propagation — refuses a frankenversion
+partial sync — and keeps the running project green. The drift is now a tracked,
+informed task rather than a surprise.
+
+**Non-goal**: Does not land v3 live in CMPD; that needs the full upgrade (artifact
+migration + check scoping), coordinated with the literature agent.
+
+**Drift risk**: The longer CMPD lags the template, the larger the eventual upgrade.
+Mitigation noted in IMPROVE-012: extend check_scope.yml so a first sync degrades
+gracefully (AEROS-IMPROVE-004 family).
+
+**Next check**: On the CMPD full upgrade, migrate search_log/citation_audit schemas and
+satisfy next_action/compliance/skill-receipt before syncing the whole framework.
+
 ### 2026-06-22 - Fix suppressed stale-triage command to a clean no-op sentinel
 
 **Commit(s)**: `7321492`

@@ -157,3 +157,15 @@ entries:
     resolved_at: "2026-06-22"
     resolution_commit: "6ac6748"
     notes: "Phase 1 (registrar production edge) + Phase 2 (depth-1 descendant propagation with over-attribution cap) both IMPLEMENTED in stale_triage.py and tested in check_stale_triage.py. Validated read-only on CMPD: T004_main_execution -> specific_claims [C1,C2,C3,C4]; T003b inherits via Phase 2 but downgrades to broad registry_unknown (covers all claims); all other ancestors stay none (no flood). Depth-1 bound + all-active->registry_unknown cap prevent over-attribution; impact_propagated_from records the source for auditability."
+  - id: AEROS-IMPROVE-012
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: open
+    priority: medium
+    area: sync
+    source: real_project_validation_cmpd
+    issue: "Syncing the current framework into a long-running project (CMPD, last synced before the next_action/cockpit/context_bundle/stale_triage feature family) fails 6 harness checks: next_action, skill-invocation receipt, citation_audit faithfulness columns, literature search_log schema, and compliance gate. Cause is sync-induced drift -- newer/stricter checks vs the project's older artifacts -- NOT the v3 stale-triage. A clean 'v3-only' partial landing is also not possible: stale_triage interlocks with cli.py's `stale`/`next` subcommands and next_action.py, so cherry-picking yields either inert files or reverse-edits."
+    proposed_fix: "For the deferred CMPD full upgrade: (1) migrate CMPD's literature artifacts to the new schemas (search_log columns; citation_audit faithfulness columns) -- coordinate with the parallel literature agent to avoid collision; (2) satisfy/scope check_next_action, check_compliance_gate, and the skill-invocation receipt check; (3) then sync the whole framework forward as one coherent version. Consider extending harness/check_scope.yml template_only/project scoping (AEROS-IMPROVE-004 family) so a first sync degrades gracefully instead of failing 6 checks at once."
+    owner: human
+    target_gate: G0
+    notes: "Found 2026-06-22 attempting item-1 sync of stale-triage v3 into CMPD. Surgical decision (owner-chosen): reverted CMPD to clean pre-sync state (green, literature WIP untouched); v3 lives in the template, validated read-only against CMPD's real data. The suppress-command no-op sentinel bug (commit 7321492) was found via this same first-sync attempt."
