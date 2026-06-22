@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-22 - Fix suppressed stale-triage command to a clean no-op sentinel
 
-**Commit(s)**: `pending`
+**Commit(s)**: `7321492`
 
 **Action**: Surfaced by the first sync of the v2/v3 stale-triage into CMPD: real
 suppressed stale items made `check_stale_triage` fail because `_classify` emitted a
