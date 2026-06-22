@@ -127,6 +127,16 @@ def main() -> int:
     )
     if bucket != "revalidate_free" or "recover" not in command or "--check" not in command:
         failures.append("volatile-only output changes must route to recover --check")
+    bucket, _level, command = _classify(
+        output_changed=False,
+        volatile_only_outputs=False,
+        frontier_connected=False,
+        claim_bound=False,
+        impacted_claims=[],
+        impact_scope="none",
+    )
+    if bucket != "suppress_as_irrelevant" or command.lower() != "no action":
+        failures.append(f"suppressed item command must be the no-op sentinel, got {command!r}")
     for marker in ["STALE_TRIAGE", "does_not_prove", "does not run agents"]:
         if marker not in rendered:
             failures.append(f"rendered stale triage missing {marker!r}")

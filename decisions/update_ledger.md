@@ -17,6 +17,30 @@ How to read this ledger:
 
 ## 2026-06-22
 
+### 2026-06-22 - Fix suppressed stale-triage command to a clean no-op sentinel
+
+**Commit(s)**: `pending`
+
+**Action**: Surfaced by the first sync of the v2/v3 stale-triage into CMPD: real
+suppressed stale items made `check_stale_triage` fail because `_classify` emitted a
+full explanatory sentence as the `command` for `suppress_as_irrelevant`, while the
+check (correctly) expects a no-op sentinel `"No action"`. Changed the suppress
+branch to return `"No action"` (the explanation already lives in `rationale`) and
+added a `_classify` suppress-branch test so this is caught in the template, which has
+no real suppressed items.
+
+**Alignment**: Keeps the deterministic triage contract honest — a suppressed item's
+command must be a verifiable no-op, not prose that could be mistaken for an action.
+
+**Non-goal**: No behavior change to bucketing/impact; purely the command-field
+sentinel + a regression test.
+
+**Drift risk**: Low. The rationale still carries the full suppression explanation.
+
+**Next check**: Template checks only exercise 0-item triage; this test now covers
+the suppress branch directly so the gap (only visible on a project with suppressed
+items) cannot recur silently.
+
 ### 2026-06-22 - Implement Phase 2 of graph-propagated claim impact (depth-1 propagation + cap)
 
 **Commit(s)**: `6ac6748`

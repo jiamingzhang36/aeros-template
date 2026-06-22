@@ -373,10 +373,11 @@ def _classify(
             "python3 -m aeros.cli recover {task_id} --check",
         )
     if not frontier_connected and not effective_output_changed:
+        # Clean no-op sentinel; the full explanation lives in the rationale field.
         return (
             "suppress_as_irrelevant",
             "low",
-            "No action: stale task is disconnected from the current frontier and allowed-output fingerprint is unchanged.",
+            "No action",
         )
     if not effective_output_changed:
         level = "high" if high_impact else "medium"
