@@ -197,3 +197,17 @@ entries:
     resolved_at: "2026-06-22"
     resolution_commit: "pending"
     notes: "The loop is a controller over existing authority, not a new planner. It does not approve gates, upgrade claims, certify identification, release outputs, or turn route readiness into substantive progress."
+  - id: AEROS-IMPROVE-015
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: controller-loop
+    source: real_project_validation_cmpd
+    issue: "After syncing the controller-loop template into CMPD, `aeros run --until no-progress --dry-run --lane literature` stopped after one dry-run step but routed to a stale D001b framework-search preview instead of the explicit P013/P016/P030 full-text blockers; the same sync also let lane-specific next-action requests for data/claim drift back to literature."
+    proposed_fix: "Make `aeros next --lane literature` detect `blocked_fulltext` records in `discovery/literature/search_log.csv` and return a blocked literature action naming the paper IDs; restore lane-scoped fallback so explicit non-literature lane requests cannot drift into another lane; add check_next_action coverage for blocked_fulltext routing."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "pending"
+    notes: "Validated on CMPD: `aeros next --lane literature` now stops on P013/P016/P030, and `aeros run --until no-progress --dry-run --lane literature` stops with reason human_authority_or_blocker instead of would-running stale discovery."

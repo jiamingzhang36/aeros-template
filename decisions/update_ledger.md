@@ -17,6 +17,33 @@ How to read this ledger:
 
 ## 2026-06-22
 
+### 2026-06-22 - Make controller stop on literature full-text blockers (IMPROVE-015)
+
+**Commit(s)**: `pending`
+
+**Action**: CMPD validation showed that the new bounded controller stopped after one
+no-progress dry-run step, but the literature lane route still preferred a stale
+D001b framework-search preview over explicit P013/P016/P030 full-text blockers.
+The same sync revealed lane-specific next-action drift for data/claim requests.
+Added deterministic blocked-fulltext detection from `discovery/literature/search_log.csv`,
+restored lane-scoped fallback, and expanded `check_next_action` so blocked full-text
+records must produce a blocked literature next-action that names the paper IDs.
+
+**Alignment**: Keeps controller automation bounded around the real lane blocker
+instead of manufacturing progress through stale previews.
+
+**Non-goal**: Does not fetch PDFs, bypass publisher controls, write extraction cards,
+or resolve the blocked papers. It only routes the controller honestly.
+
+**Drift risk**: Over-prioritizing blockers could hide useful synthesis work from
+already-extracted papers. Mitigation: the blocker is explicit and requires human
+resolution/waiver before the lane proceeds.
+
+**Next check**: On CMPD or another adopted project, rerun
+`python3 -m aeros.cli run --until no-progress --dry-run --lane literature` after a
+manual/Zotero full-text blocker is resolved and confirm the lane advances to the next
+bounded literature step.
+
 ### 2026-06-22 - Record CMPD first-sync drift; defer full framework upgrade (IMPROVE-012)
 
 **Commit(s)**: `8f32bb6`

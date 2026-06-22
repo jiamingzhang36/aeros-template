@@ -287,6 +287,36 @@ def _csv_rows(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def _paper_ids_from_text(text: str) -> list[str]:
+    ids: list[str] = []
+    cleaned = "".join(ch if ch.isalnum() else " " for ch in text)
+    for token in cleaned.split():
+        if len(token) == 4 and token.startswith("P") and token[1:].isdigit() and token not in ids:
+            ids.append(token)
+    return ids
+
+
+def _literature_fulltext_blockers(root: Path) -> list[str]:
+    blockers: list[str] = []
+    for row in _csv_rows(root / "discovery/literature/search_log.csv"):
+        if str(row.get("follow_up", "")).strip() != "blocked_fulltext":
+            continue
+        text = " ".join(str(value) for value in row.values())
+        for paper_id in _paper_ids_from_text(text):
+            if paper_id not in blockers:
+                blockers.append(paper_id)
+
+    for row in _csv_rows(root / "discovery/literature/missing_fulltext_queue.csv"):
+        status = str(row.get("status", "")).lower()
+        reason = str(row.get("reason", "")).lower()
+        if "blocked" not in status and "blocked" not in reason:
+            continue
+        paper_id = str(row.get("paper_id", "")).strip()
+        if paper_id and paper_id not in blockers:
+            blockers.append(paper_id)
+    return sorted(blockers)
+
+
 def _literature_next(root: Path) -> NextAction | None:
     registry = _csv_rows(root / "discovery/literature/paper_registry.csv")
     searches = _csv_rows(root / "discovery/literature/search_log.csv")
@@ -295,6 +325,22 @@ def _literature_next(root: Path) -> NextAction | None:
     included = [row for row in papers if row.get("screening_decision", "").strip() == "include"]
     extracted = [row for row in papers if row.get("extraction_card", "").strip() == "yes"]
     synthesized = [row for row in papers if row.get("used_in_synthesis", "").strip() == "yes"]
+    fulltext_blockers = _literature_fulltext_blockers(root)
+    if fulltext_blockers:
+        paper_list = ", ".join(fulltext_blockers)
+        return NextAction(
+            recommended_next_action=f"Stop on unresolved literature full-text blockers: {paper_list}.",
+            why_this_next=(
+                "The literature lane has explicit blocked_fulltext retrieval records. "
+                "Do not rerun stale literature discovery or synthesize from abstract-only rows until these blockers are resolved, waived, or queued for manual/Zotero/institutional PDF intake."
+            ),
+            lane="literature",
+            status_label="ROUTE_READY",
+            command="python3 -m aeros.cli literature status",
+            stop_condition="Stop here; provide verified full text, connect Zotero/manual attachments, or record a bounded blocker. Do not treat metadata or cache files as full-text evidence.",
+            source="discovery/literature/search_log.csv",
+            blocked=True,
+        )
     if not search_count and not papers:
         return NextAction(
             recommended_next_action="Run a literature discovery search into the registry before claiming literature progress.",
@@ -542,6 +588,18 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
             action = _from_plan(root, stage=stage, lane=lane)
             if action:
                 return action
+        return NextAction(
+            recommended_next_action=f"No deterministic next task is currently visible for lane {lane}.",
+            why_this_next=(
+                "A lane-specific next-action request must not drift into another lane. "
+                "Run the lane harness/profile or choose a different lane explicitly."
+            ),
+            lane=lane,
+            status_label="CHECK_PASS",
+            command=f"python3 checks/run_harness_checks.py --profile lane:{lane} --timeout 30",
+            stop_condition="Stop when the lane-scoped checks pass or report the first concrete blocker.",
+            source="deterministic_lane_scope",
+        )
 
     for preferred_lane in LANE_ORDER:
         action = _lane_specific_next(root, preferred_lane)

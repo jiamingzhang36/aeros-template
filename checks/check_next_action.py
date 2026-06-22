@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
+import csv
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from aeros.runtime.kernel import find_project_root  # noqa: E402
@@ -40,6 +41,23 @@ def _validate_next_action_file(path: Path) -> list[str]:
     if "SUBSTANTIVE_DONE" in text and "--dry-run" in text:
         failures.append(f"{path}: SUBSTANTIVE_DONE recommendation must not be paired with a dry-run command")
     return failures
+
+
+def _blocked_fulltext_ids(root: Path) -> list[str]:
+    path = root / "discovery/literature/search_log.csv"
+    if not path.exists():
+        return []
+    ids: list[str] = []
+    with path.open(newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            if str(row.get("follow_up", "")).strip() != "blocked_fulltext":
+                continue
+            text = " ".join(str(value) for value in row.values())
+            cleaned = "".join(ch if ch.isalnum() else " " for ch in text)
+            for token in cleaned.split():
+                if len(token) == 4 and token.startswith("P") and token[1:].isdigit() and token not in ids:
+                    ids.append(token)
+    return sorted(ids)
 
 
 def main() -> int:
@@ -87,6 +105,16 @@ def main() -> int:
             failures.append(f"lane {lane}: invalid status_label {lane_action.get('status_label')!r}")
         if lane_action.get("status_label") == "SUBSTANTIVE_DONE" and "--dry-run" in str(lane_action.get("command", "")):
             failures.append(f"lane {lane}: SUBSTANTIVE_DONE recommendation must not be dry-run")
+
+    blocked_fulltext_ids = _blocked_fulltext_ids(root)
+    if blocked_fulltext_ids:
+        literature_action = compute_next_action(root, lane="literature").to_dict()
+        text = " ".join(str(value) for value in literature_action.values())
+        if not literature_action.get("blocked"):
+            failures.append("lane literature: blocked_fulltext records must produce a blocked next-action")
+        missing = [paper_id for paper_id in blocked_fulltext_ids if paper_id not in text]
+        if missing:
+            failures.append(f"lane literature: blocked full-text ids missing from recommendation: {', '.join(missing)}")
 
     failures.extend(_validate_next_action_file(root / "NEXT_ACTION.md"))
 
