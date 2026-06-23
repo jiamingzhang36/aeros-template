@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-23 - SQLite journal as derived index
 
-**Commit(s)**: pending
+**Commit(s)**: `1b02dbc`
 
 **Action**: Add `aeros journal build` and a SQLite journal runtime that projects
 artifacts, results, provenance, EvidenceUnit/ResultAdmission records, and events into
