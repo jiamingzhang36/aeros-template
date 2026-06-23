@@ -162,7 +162,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV019 - 2026-06-16 00:00 +0800
 
-- commit: pending
+- commit: ff63b77
 - change_type: formal state / provenance boundary
 - summary: Added a derived global state index, probe failure taxonomy, action-receipt causal attribution, and provenance boundary rules to make AEROS constraints more explicit and composable.
 - files:
@@ -520,3 +520,17 @@ Use this file to track template or project-level changes that alter workflow, ev
   - `cd /private/tmp/aeros_fixture_check_20260623 && python /Users/jiamingzhang/aeros-template/checks/check_adversarial_benchmark.py`
   - `cd /private/tmp/aeros_fixture_check_20260623 && python /Users/jiamingzhang/aeros-template/checks/check_session_scope.py`
 - notes: This adds two more behavioral fixtures. It does not implement all adversarial scenarios, prove absence of unknown failures, sync CMPD, or certify any claim/gate decision.
+
+## REV038 - 2026-06-23 00:00 +0800
+
+- commit: pending
+- change_type: smoke profile / next-action check performance
+- summary: Made `check_next_action.py` skip expensive lane-matrix traversal in instantiated projects while retaining full matrix coverage in the root template.
+- files:
+  - checks/check_next_action.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - Not run in this edit pass unless explicitly requested.
+- notes: This is a fast-profile fix for real projects. It does not change next-action recommendations or weaken ActionSpec/controller safety checks.

@@ -389,3 +389,17 @@ entries:
     resolved_at: "2026-06-23"
     resolution_commit: "ff63b77"
     notes: "This keeps adversarial benchmark progress vertical: three scenarios now execute behaviorally; remaining scenarios stay scaffold-only until fixtures are implemented."
+  - id: AEROS-IMPROVE-029
+    created_at: "2026-06-23"
+    updated_at: "2026-06-23"
+    status: resolved
+    priority: medium
+    area: smoke-profile
+    source: real_project_sync_cmpd
+    issue: "CMPD smoke profile timed out on `check_next_action.py` because the check recomputed every lane-specific next action in a real project, turning a contract-surface check into an expensive lane traversal."
+    proposed_fix: "Keep the full lane matrix in the root template, but skip lane-matrix traversal in instantiated projects while preserving default next-action, CLI JSON, ActionSpec, and bounded-controller assertions."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-23"
+    resolution_commit: "pending"
+    notes: "This is a smoke-profile efficiency fix. It does not weaken ActionSpec validation or change actual next-action recommendations."

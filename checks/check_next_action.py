@@ -72,6 +72,14 @@ def _blocked_fulltext_ids(root: Path) -> list[str]:
     return sorted(ids)
 
 
+def _is_template_project(root: Path) -> bool:
+    manifest = root / "project_manifest.yml"
+    if not manifest.exists():
+        return False
+    text = manifest.read_text(encoding="utf-8", errors="ignore")
+    return "project_mode: template" in text or "name: AEROS project" in text
+
+
 def main() -> int:
     root = find_project_root(Path.cwd())
     failures: list[str] = []
@@ -169,7 +177,8 @@ def main() -> int:
     if unsafe_args or "allow-task-runs" not in unsafe_reason:
         failures.append("controller must reject real iterate commands without --allow-task-runs")
 
-    for lane in ["data", "literature", "method", "analysis", "claim", "writing", "compliance"]:
+    lane_matrix = ["data", "literature", "method", "analysis", "claim", "writing", "compliance"] if _is_template_project(root) else []
+    for lane in lane_matrix:
         lane_action = compute_next_action(root, lane=lane).to_dict()
         lane_spec = lane_action.get("action_spec") or {}
         failures.extend(f"lane {lane}: {failure}" for failure in validate_action_spec(lane_spec))

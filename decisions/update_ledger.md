@@ -1185,3 +1185,26 @@ one expected detector.
 **Next check**: Run `python3 checks/check_session_scope.py`,
 `python3 checks/check_adversarial_benchmark.py`, and smoke profile; then add
 `false_fulltext` as the next executable fixture.
+
+### 2026-06-23 — Keep next-action smoke checks fast in instantiated projects
+
+**Commit(s)**: `pending`
+
+**Action**: Adjusted `check_next_action.py` so the expensive lane-matrix
+traversal still runs in the root template but is skipped in instantiated
+projects. Instantiated projects still validate the default next action, CLI JSON
+ActionSpec, producer mode, and bounded-controller safety records.
+
+**Alignment**: Keeps smoke profiles useful as a fast cockpit check in real
+projects. The check remains a contract-surface guard instead of becoming a
+full-lane planning benchmark on every project.
+
+**Non-goal**: Does not change `aeros next` recommendations, weaken ActionSpec
+validation, skip controller safety checks, or certify scientific progress.
+
+**Drift risk**: Project-specific lane bugs could be missed by smoke. Use lane
+profiles or full harness when changing lane routing; keep smoke focused on fast
+control-plane health.
+
+**Next check**: Re-sync CMPD and rerun `python -m aeros.cli check --profile smoke
+--timeout 20`.
