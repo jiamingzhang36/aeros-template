@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-23 - Evidence admission boundary and parser false-fulltext fixtures
 
-**Commit(s)**: pending
+**Commit(s)**: `459264c`
 
 **Action**: Deepen the first deferred architecture slice without expanding authority:
 upgrade `check_evidence_units.py` from optional-directory validation to an executable
