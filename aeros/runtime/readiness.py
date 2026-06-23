@@ -41,6 +41,27 @@ def build_readiness_vector(project_root: Path) -> dict[str, Any]:
         if str(row.get("evidence_basis", "")).strip() in {"full_text", "extraction_card"}
         and str(row.get("extraction_card", "")).strip().lower() == "yes"
     ]
+    literature_blockers = [
+        row for row in paper_rows
+        if str(row.get("status", "")).strip().lower() in {"blocked_fulltext", "blocked", "retrieval_blocked"}
+        or "blocked_fulltext" in str(row.get("notes", "")).strip().lower()
+        or "remains abstract_only" in str(row.get("notes", "")).strip().lower()
+    ]
+    abstract_only_rows = [
+        row for row in paper_rows
+        if str(row.get("status", "")).strip().lower() == "abstract_only"
+        or str(row.get("evidence_basis", "")).strip().lower() == "abstract"
+    ]
+    if not paper_rows:
+        literature_status = "metadata_or_queue"
+    elif literature_blockers:
+        literature_status = "fulltext_partial_blocked" if fulltext_rows else "blocked_fulltext"
+    elif abstract_only_rows:
+        literature_status = "partial_extraction"
+    elif fulltext_rows:
+        literature_status = "fulltext_verified"
+    else:
+        literature_status = "metadata_or_queue"
     data_status = "contract_draft"
     if data_contract.get("status") in {"locked", "active"}:
         data_status = "contract_ready"
@@ -60,7 +81,7 @@ def build_readiness_vector(project_root: Path) -> dict[str, Any]:
         ],
         "readiness": {
             "data": data_status,
-            "literature": "fulltext_verified" if fulltext_rows else "metadata_or_queue",
+            "literature": literature_status,
             "analysis": "results_registered" if result_rows else "not_ready",
             "claims": "registry_present" if claim_registry.exists() else "candidate_only",
             "paper": "draft_present" if paper_draft.exists() else "not_started",
@@ -70,6 +91,8 @@ def build_readiness_vector(project_root: Path) -> dict[str, Any]:
         "counts": {
             "literature_registry_rows": len(paper_rows),
             "verified_fulltext_rows": len(fulltext_rows),
+            "literature_blocker_rows": len(literature_blockers),
+            "abstract_only_rows": len(abstract_only_rows),
             "result_index_rows": len(result_rows),
         },
     }

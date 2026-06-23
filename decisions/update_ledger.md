@@ -17,6 +17,29 @@ How to read this ledger:
 
 ## 2026-06-23
 
+### 2026-06-23 - Real-project acid-test repairs
+
+**Commit(s)**: `pending`
+
+**Action**: Fix two CMPD acid-test findings: allow controller-safe
+`aeros recover <task> --check` commands so stale free revalidation can actually
+run, and make readiness surface literature full-text blockers instead of marking
+a project `fulltext_verified` when only some registry rows have extraction cards.
+
+**Alignment**: Reduces human pushes and false readiness by making the deterministic
+next action executable and preserving unresolved literature blockers in the
+paper-readiness report.
+
+**Non-goal**: Does not fetch missing full text, write extraction cards, upgrade
+claims, approve gates, or mark the paper ready.
+
+**Drift risk**: Controller-safe recover could grow too broad. Mitigation: only
+`recover --check` is allowed; recover without checks remains refused.
+
+**Next check**: Re-run CMPD `aeros run --until no-progress --dry-run --lane data`
+and paper-readiness JSON to confirm recover is no longer refused and literature
+blockers appear.
+
 ### 2026-06-23 - ExecutionEnvelope deterministic `aeros run` enforcement
 
 **Commit(s)**: `41aec3c`

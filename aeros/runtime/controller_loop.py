@@ -56,6 +56,7 @@ SAFE_AEROS_COMMANDS = {
     "data",
     "adopt",
     "iterate",
+    "recover",
 }
 
 NO_WRITE_AEROS_COMMANDS = {"status", "check"}
@@ -275,6 +276,11 @@ def _command_args(action: NextAction, args: ControllerLoopArgs) -> tuple[list[st
         if dry_run_command:
             return parts, ""
         return [], "real iterate/task runs require --allow-task-runs"
+
+    if aeros_command == "recover":
+        if "--check" in parts:
+            return parts, ""
+        return [], "recover without --check is not controller-safe"
 
     if _is_read_only_aeros_command(parts):
         return parts, ""
