@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-23 - Preserve project update ledgers during framework sync
 
-**Commit(s)**: pending
+**Commit(s)**: `e06f2c7`
 
 **Action**: Fix `tools/sync_aeros_latest.zsh` so downstream projects keep their own
 `decisions/update_ledger.md` once it exists. Template sync still seeds the file for
