@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-23 - AgentEnvelope audit mode
 
-**Commit(s)**: `pending`
+**Commit(s)**: `a2bc1ef`
 
 **Action**: Add AgentEnvelope audit mode for provider-backed agent tasks. The
 runtime snapshots project writes around each agent call and blocks task
