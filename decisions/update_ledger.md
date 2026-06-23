@@ -1256,3 +1256,23 @@ approve gates, run pipelines, or certify downstream project health.
 manager.
 
 **Next check**: Re-run sync on a real project and then run its smoke profile.
+
+### 2026-06-23 — Sync parser benchmark fixtures into projects
+
+**Commit(s)**: `pending`
+
+**Action**: Updated `tools/sync_aeros_latest.zsh` to create and copy
+`tests/parser/` alongside `tests/adversarial/` so parser benchmark fixtures added
+in the template are available in instantiated projects.
+
+**Alignment**: Closes the CMPD rollout gap where the parser benchmark contract was
+synced but its local HTML fixture was not, causing a project-side targeted check
+failure despite template smoke passing.
+
+**Non-goal**: Does not run parser adapters, certify parser quality, change project
+research content, approve gates, or weaken project checks.
+
+**Drift risk**: Any future fixture directory must be added to sync deliberately;
+otherwise checks can reference template-only files.
+
+**Next check**: Re-sync CMPD and rerun `checks/check_parser_benchmark.py`.

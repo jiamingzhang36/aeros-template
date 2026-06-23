@@ -47,7 +47,7 @@ for T in "${TARGETS[@]}"; do
   rsync -a "$SRC/checks/" "$T/checks/"
   rsync -a "$SRC/harness/" "$T/harness/"
   rsync -a "$SRC/examples/" "$T/examples/"
-  mkdir -p "$T/docs" "$T/templates" "$T/tests/adversarial" "$T/decisions"
+  mkdir -p "$T/docs" "$T/templates" "$T/tests/adversarial" "$T/tests/parser" "$T/decisions"
   if [ ! -f "$T/CURRENT_STATE.md" ]; then
     rsync -a "$SRC/templates/CURRENT_STATE.md" "$T/CURRENT_STATE.md"
   fi
@@ -61,6 +61,7 @@ for T in "${TARGETS[@]}"; do
   fi
   [ -d "$SRC/templates" ] && rsync -a "$SRC/templates/" "$T/templates/"
   [ -d "$SRC/tests/adversarial" ] && rsync -a "$SRC/tests/adversarial/" "$T/tests/adversarial/"
+  [ -d "$SRC/tests/parser" ] && rsync -a "$SRC/tests/parser/" "$T/tests/parser/"
   mkdir -p "$T/agent_runs"
   rsync -a "$SRC/agent_runs/TEMPLATE_agent_run_report.md" "$T/agent_runs/TEMPLATE_agent_run_report.md"
   rsync -a "$SRC/agent_runs/TEMPLATE_critic_report.md" "$T/agent_runs/TEMPLATE_critic_report.md"
