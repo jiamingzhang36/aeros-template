@@ -25,6 +25,7 @@ profiles:
       - check_context_graph.py
       - check_cockpit.py
       - check_reconcile.py
+      - check_sqlite_journal.py
       - check_approval_freshness.py
       - check_harness_profiles.py
       - check_operating_dashboard.py

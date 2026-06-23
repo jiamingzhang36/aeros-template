@@ -348,6 +348,7 @@ checks:
   derived_vs_asserted_audit: checks/check_derived_vs_asserted_audit.py
   preanalysis_happens_before: checks/check_preanalysis_happens_before.py
   event_log_replay: checks/check_event_log_replay.py
+  sqlite_journal: checks/check_sqlite_journal.py
   evidence_delta_log: checks/check_evidence_delta_log.py
   negative_result_ledger: checks/check_negative_result_ledger.py
   estimand_cards: checks/check_estimand_cards.py

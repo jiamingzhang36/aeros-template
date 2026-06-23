@@ -1,0 +1,18 @@
+version: "0.1"
+policy: AEROS-SQLITE-JOURNAL-001
+principle: >
+  The SQLite journal is a derived index over Git-tracked files. It may speed up
+  queries and joins, but it must never become the source of truth for claims,
+  gates, releases, or human admissions.
+authority: derived_index_only
+default_path: outputs/journal/aeros_journal.sqlite
+rules:
+  - "Dry-run must not write a database."
+  - "Journal build must not mutate source files."
+  - "Journal metadata must mark authority=derived_index_only."
+  - "Deleting and rebuilding the journal must be safe."
+does_not_prove:
+  - "scientific truth"
+  - "claim support"
+  - "gate approval"
+  - "paper readiness"

@@ -463,6 +463,21 @@ def _cmd_claim_vector(args: argparse.Namespace) -> int:
     raise SystemExit(f"unknown claim-vector command: {args.claim_vector_command}")
 
 
+def _cmd_journal(args: argparse.Namespace) -> int:
+    from .runtime.sqlite_journal import build_sqlite_journal, format_journal_report
+
+    root = _project_root()
+    if args.journal_command == "build":
+        output = Path(args.output) if args.output else None
+        report = build_sqlite_journal(root, output, dry_run=args.dry_run)
+        if args.json:
+            print(json.dumps(report.to_dict(), indent=2, ensure_ascii=False))
+        else:
+            print(format_journal_report(report))
+        return 0
+    raise SystemExit(f"unknown journal command: {args.journal_command}")
+
+
 
 def _cmd_stale(args: argparse.Namespace) -> int:
     root = _project_root()
@@ -1599,6 +1614,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     claim_vector_compile.add_argument("--json", action="store_true", help="emit machine-readable ClaimVector JSON")
     claim_vector_compile.set_defaults(func=_cmd_claim_vector)
+
+    journal = sub.add_parser("journal", help="build derived SQLite journal indexes")
+    journal_sub = journal.add_subparsers(dest="journal_command", required=True)
+    journal_build = journal_sub.add_parser("build", help="build disposable SQLite journal from source files")
+    journal_build.add_argument("--output", default="", help="output sqlite path; default outputs/journal/aeros_journal.sqlite")
+    journal_build.add_argument("--dry-run", action="store_true", help="summarize source counts without writing sqlite")
+    journal_build.add_argument("--json", action="store_true", help="emit machine-readable journal build report")
+    journal_build.set_defaults(func=_cmd_journal)
 
     reconcile = sub.add_parser(
         "reconcile",

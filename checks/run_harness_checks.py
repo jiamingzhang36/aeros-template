@@ -57,6 +57,7 @@ CHECKS = [
     "check_data_probe.py",
     "check_global_state.py",
     "check_event_log_replay.py",
+    "check_sqlite_journal.py",
     "check_evidence_delta_log.py",
     "check_data_backfill_queue.py",
     "check_anchor.py",

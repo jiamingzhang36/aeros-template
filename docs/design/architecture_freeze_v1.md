@@ -94,6 +94,10 @@ silently overwrite human admission, claim, or release judgments. EvidenceUnit
 and ResultAdmission v1 fixtures now enforce this separation mechanically, but
 they remain admission-boundary controls rather than claim-support certification.
 
+SQLite journal v1 is allowed only as a disposable derived index over source
+files. It may speed up queries and joins, but Git-tracked files remain the
+source of truth and the journal must mark `authority=derived_index_only`.
+
 Parser benchmarking is deferred to a larger golden corpus after runtime
 enforcement is working. Existing parser fixtures, including false-fulltext
 negative cases, remain smoke tests for boundary behavior rather than

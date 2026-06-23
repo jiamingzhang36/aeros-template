@@ -17,6 +17,28 @@ How to read this ledger:
 
 ## 2026-06-23
 
+### 2026-06-23 - SQLite journal as derived index
+
+**Commit(s)**: pending
+
+**Action**: Add `aeros journal build` and a SQLite journal runtime that projects
+artifacts, results, provenance, EvidenceUnit/ResultAdmission records, and events into
+`outputs/journal/aeros_journal.sqlite`. The journal marks `authority=derived_index_only`
+and can be dry-run without writing.
+
+**Alignment**: Adds query efficiency without creating a second truth source. Git files
+remain authoritative; SQLite is disposable and rebuildable.
+
+**Non-goal**: Does not migrate runtime state to SQLite, certify claims, approve gates,
+or replace project files.
+
+**Drift risk**: Users may treat the database as authoritative. Mitigation:
+policy/check enforce derived-index-only metadata and source-file immutability during
+build.
+
+**Next check**: In a real project, build the journal after reconcile and verify the
+database can be deleted/rebuilt without changing source files or claim status.
+
 ### 2026-06-23 - Preserve project update ledgers during framework sync
 
 **Commit(s)**: `e06f2c7`
