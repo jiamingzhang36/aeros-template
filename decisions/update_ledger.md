@@ -1211,7 +1211,7 @@ control-plane health.
 
 ### 2026-06-23 — Execute remaining adversarial/parser benchmark slices
 
-**Commit(s)**: `pending`
+**Commit(s)**: `c5db397`
 
 **Action**: Converted `false_fulltext`, `claim_ceiling_escape`, and
 `stale_human_approval` from named adversarial scenarios into executable fixtures.
