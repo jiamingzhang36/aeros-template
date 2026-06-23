@@ -1,0 +1,28 @@
+version: "0.1"
+policy: AEROS-PAPER-READINESS-001
+authority: report_only
+paper_ready_verdict: not_asserted
+principle: >
+  Paper-readiness automation may aggregate readiness signals and generate a
+  human review packet, but it must not approve paper readiness, upgrade claims,
+  approve gates, or authorize release.
+allowed_outputs:
+  - decisions/paper_readiness/*_report.md
+required_fields:
+  - authority_status
+  - paper_ready_verdict
+  - required_human_gate
+  - blockers
+  - human_actions
+must_not:
+  - must not approve paper readiness
+  - must not modify evidence/claim_registry.md
+  - must not modify paper/draft.md
+  - must not modify decisions/decision_log.csv
+  - must not modify runtime gate status
+does_not_prove:
+  - paper readiness
+  - scientific truth
+  - claim support
+  - gate approval
+  - release approval

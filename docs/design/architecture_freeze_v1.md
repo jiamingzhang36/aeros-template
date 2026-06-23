@@ -73,7 +73,7 @@ The architecture-freeze baseline pauses:
 - new agent roles;
 - new parser deep integrations;
 - automatic prompt self-evolution;
-- automatic paper-ready judgment;
+- automatic paper-ready judgment while allowing non-authoritative readiness reports;
 - automatic claim upgrade;
 - automatic claim upgrade without a human gate;
 - automatic release approval.
@@ -90,6 +90,11 @@ identification inputs, but it must not write the claim registry, certify
 scientific truth, approve gates, or turn absence of a violation into support.
 Claim-upgrade automation may generate recommendation packets, but the registry
 change remains a human-gated authority event.
+
+Paper-readiness automation may generate a report-only packet from the derived
+readiness vector, but the required output verdict is `not_asserted`. Human
+review remains the only authority for deciding whether a paper package is ready
+for submission or release.
 
 Automatic reconcile is deferred until ResultRecord and ResultAdmission are
 semantically separated. Machine refresh may update machine facts; it must not

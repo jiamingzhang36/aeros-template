@@ -502,6 +502,27 @@ def _cmd_claim_upgrade(args: argparse.Namespace) -> int:
     raise SystemExit(f"unknown claim-upgrade command: {args.claim_upgrade_command}")
 
 
+def _cmd_paper_readiness(args: argparse.Namespace) -> int:
+    from .runtime.paper_readiness import (
+        assess_paper_readiness,
+        format_paper_readiness_report,
+        write_paper_readiness_report,
+    )
+
+    root = _project_root()
+    if args.paper_readiness_command == "report":
+        report = assess_paper_readiness(root)
+        if args.json:
+            print(json.dumps(report.to_dict(), indent=2, ensure_ascii=False))
+        else:
+            print(format_paper_readiness_report(report))
+        if args.write:
+            path = write_paper_readiness_report(root, report)
+            print(f"wrote {path.relative_to(root)}")
+        return 0
+    raise SystemExit(f"unknown paper-readiness command: {args.paper_readiness_command}")
+
+
 
 def _cmd_stale(args: argparse.Namespace) -> int:
     root = _project_root()
@@ -1650,6 +1671,13 @@ def main(argv: list[str] | None = None) -> int:
     claim_upgrade_review.add_argument("--write", action="store_true", help="write decisions/claim_upgrade/<claim>_upgrade_review.md")
     claim_upgrade_review.add_argument("--json", action="store_true", help="emit machine-readable review JSON")
     claim_upgrade_review.set_defaults(func=_cmd_claim_upgrade)
+
+    paper_readiness = sub.add_parser("paper-readiness", help="generate human-gated paper-readiness report packets")
+    paper_readiness_sub = paper_readiness.add_subparsers(dest="paper_readiness_command", required=True)
+    paper_readiness_report = paper_readiness_sub.add_parser("report", help="aggregate readiness signals for human paper review")
+    paper_readiness_report.add_argument("--write", action="store_true", help="write decisions/paper_readiness/paper_readiness_report.md")
+    paper_readiness_report.add_argument("--json", action="store_true", help="emit machine-readable paper-readiness report JSON")
+    paper_readiness_report.set_defaults(func=_cmd_paper_readiness)
 
     journal = sub.add_parser("journal", help="build derived SQLite journal indexes")
     journal_sub = journal.add_subparsers(dest="journal_command", required=True)

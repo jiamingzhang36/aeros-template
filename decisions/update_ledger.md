@@ -17,6 +17,27 @@ How to read this ledger:
 
 ## 2026-06-23
 
+### 2026-06-23 - Paper-readiness report-only packet
+
+**Commit(s)**: `pending`
+
+**Action**: Add `aeros paper-readiness report` to aggregate the derived readiness
+vector into a human review packet with `authority_status=report_only` and
+`paper_ready_verdict=not_asserted`.
+
+**Alignment**: Converts scattered paper/package readiness signals into an
+actionable human review packet without granting the runtime authority to declare
+submission readiness.
+
+**Non-goal**: Does not mark paper-ready, approve release, modify paper text,
+upgrade claims, or approve gates.
+
+**Drift risk**: Users may confuse a readiness report with an approval. Mitigation:
+policy/check/CLI require `not_asserted`, `report_only`, and `required_human_gate`.
+
+**Next check**: Run on CMPD after sync and confirm it identifies true blockers
+without changing paper, claim registry, decision log, or runtime state.
+
 ### 2026-06-23 - Human-gated claim-upgrade recommendation
 
 **Commit(s)**: `a4ed72e`
