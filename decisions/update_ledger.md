@@ -1188,7 +1188,7 @@ one expected detector.
 
 ### 2026-06-23 — Keep next-action smoke checks fast in instantiated projects
 
-**Commit(s)**: `pending`
+**Commit(s)**: `f20331f`
 
 **Action**: Adjusted `check_next_action.py` so the expensive lane-matrix
 traversal still runs in the root template but is skipped in instantiated
@@ -1208,3 +1208,51 @@ control-plane health.
 
 **Next check**: Re-sync CMPD and rerun `python -m aeros.cli check --profile smoke
 --timeout 20`.
+
+### 2026-06-23 — Execute remaining adversarial/parser benchmark slices
+
+**Commit(s)**: `pending`
+
+**Action**: Converted `false_fulltext`, `claim_ceiling_escape`, and
+`stale_human_approval` from named adversarial scenarios into executable fixtures.
+Added `check_approval_freshness.py` as a narrow opt-in guard for artifact-bound
+human approvals, and changed the parser benchmark from scaffold-only to a local
+HTML working-paper fixture that must recover title, DOI, and table text.
+
+**Alignment**: Finishes the first adversarial-benchmark vertical slice set without
+adding a broad new lane. Each fixture has a concrete detector: fake full text is
+blocked by the literature verifier, over-claiming is caught by the claim-ceiling
+check, stale approvals are caught by artifact hash binding, stale registry is
+caught by provenance, and parser quality is no longer an empty schema check.
+
+**Non-goal**: Does not prove full parser quality, run external PDF/OCR adapters,
+approve human gates, certify claim truth, validate scientific identification, or
+guarantee that unknown adversarial failures are detected.
+
+**Drift risk**: Synthetic fixtures can become too easy. Keep future benchmark
+growth tied to real-project failures such as false full-text pages, stale
+registered outputs, and stale approval reuse.
+
+**Next check**: Run adversarial/parser/approval checks in the template, sync into
+CMPD, run CMPD smoke, and add a real CMPD C1 EstimandDataContract vertical slice.
+
+### 2026-06-23 — Make sync postprocessors use the configured project Python
+
+**Commit(s)**: `a264cfe`
+
+**Action**: Updated `tools/sync_aeros_latest.zsh` so post-sync YAML/Python
+postprocessors run with `AEROS_SYNC_PYTHON`, defaulting to the local Anaconda
+Python when available before falling back to `python3`.
+
+**Alignment**: Fixes a real CMPD rollout failure where system `python3` lacked
+PyYAML. This keeps template-to-project sync deterministic across the same local
+runtime used by AEROS checks.
+
+**Non-goal**: Does not install dependencies, change project research artifacts,
+approve gates, run pipelines, or certify downstream project health.
+
+**Drift risk**: Projects with a different Python layout may need to set
+`AEROS_SYNC_PYTHON` explicitly. The script remains a sync helper, not a package
+manager.
+
+**Next check**: Re-run sync on a real project and then run its smoke profile.

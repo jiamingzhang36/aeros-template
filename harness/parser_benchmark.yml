@@ -20,6 +20,14 @@ corpus_buckets:
     target_count: 10
   - bucket: html_working_paper
     target_count: 10
+fixture_cases:
+  - id: html_working_paper_synthetic
+    bucket: html_working_paper
+    path: tests/parser/html_working_paper_case.html
+    expected_title: "Adversarial Parser Benchmark Working Paper"
+    expected_doi: "10.0000/aeros.parser.fixture"
+    expected_table_text: "state estimate CA 0.42"
+    min_chars: 180
 metrics:
   - page_addressability
   - table_recovery

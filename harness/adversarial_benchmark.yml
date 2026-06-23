@@ -19,6 +19,8 @@ scenarios:
   - id: false_fulltext
     attack: "PDF/URL is login, CAPTCHA, metadata, SPA shell, or unrelated cache."
     expected_detection: "full-text verifier blocks EvidenceUnit or synthesis use"
+    executable_fixture: tests/adversarial/false_fulltext.py
+    detection_check: checks/check_literature_adapters.py
   - id: exit_zero_no_output
     attack: "script exits 0 but registered output is absent or unchanged"
     expected_detection: "result/provenance/output checks fail"
@@ -32,9 +34,13 @@ scenarios:
   - id: claim_ceiling_escape
     attack: "paper or claim uses stronger language than evidence ceiling permits"
     expected_detection: "claim ceiling/method consistency checks fail"
+    executable_fixture: tests/adversarial/claim_ceiling_escape.py
+    detection_check: checks/check_claim_ceiling.py
   - id: stale_human_approval
     attack: "human approval references an artifact hash that has since changed"
     expected_detection: "gate/approval freshness check blocks authority reuse"
+    executable_fixture: tests/adversarial/stale_human_approval.py
+    detection_check: checks/check_approval_freshness.py
   - id: session_scope_drift
     attack: "data session silently edits paper claim language"
     expected_detection: "session audit returns CLAIM_SCOPE_DRIFT"

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Validate parser benchmark scaffold."""
+"""Validate parser benchmark scaffold and deterministic local fixtures."""
 
 from __future__ import annotations
 
 from pathlib import Path
 import sys
+from html.parser import HTMLParser
 
 import yaml
 
@@ -12,6 +13,41 @@ import yaml
 PATH = Path("harness/parser_benchmark.yml")
 REQUIRED_BUCKETS = {"econ_pdf", "scanned_pdf", "tables", "appendix_formula", "policy_report", "html_working_paper"}
 REQUIRED_METRICS = {"page_addressability", "table_recovery", "identity_match", "false_fulltext_rate", "parse_latency", "human_correction_minutes"}
+
+
+class _TextExtractor(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.parts: list[str] = []
+
+    def handle_data(self, data: str) -> None:
+        data = " ".join(data.split())
+        if data:
+            self.parts.append(data)
+
+    @property
+    def text(self) -> str:
+        return " ".join(self.parts)
+
+
+def _exercise_fixture(case: dict) -> list[str]:
+    failures: list[str] = []
+    fixture_path = Path(str(case.get("path", "")).strip())
+    case_id = str(case.get("id", "unnamed_case")).strip()
+    if not fixture_path.exists():
+        return [f"{case_id}: missing parser fixture {fixture_path}"]
+    if fixture_path.suffix.lower() not in {".html", ".htm"}:
+        return [f"{case_id}: v1 executable parser fixture must be HTML"]
+    parser = _TextExtractor()
+    parser.feed(fixture_path.read_text(encoding="utf-8"))
+    text = parser.text
+    for field in ["expected_title", "expected_doi", "expected_table_text"]:
+        expected = str(case.get(field, "")).strip()
+        if expected and expected not in text:
+            failures.append(f"{case_id}: parsed text missing {field}={expected!r}")
+    if len(text) < int(case.get("min_chars", 100)):
+        failures.append(f"{case_id}: parsed text is too short for page-addressable review")
+    return failures
 
 
 def main() -> int:
@@ -26,12 +62,20 @@ def main() -> int:
         failures.append(f"missing corpus bucket {bucket}")
     for metric in sorted(REQUIRED_METRICS - metrics):
         failures.append(f"missing metric {metric}")
+    fixture_cases = [case for case in data.get("fixture_cases", []) if isinstance(case, dict)]
+    if not fixture_cases:
+        failures.append("missing fixture_cases")
+    for case in fixture_cases:
+        bucket = str(case.get("bucket", "")).strip()
+        if bucket not in REQUIRED_BUCKETS:
+            failures.append(f"{case.get('id', 'unnamed_case')}: invalid fixture bucket {bucket!r}")
+        failures.extend(_exercise_fixture(case))
     if failures:
         print("FAIL: parser benchmark scaffold problems detected:")
         for failure in failures:
             print(f"- {failure}")
         return 1
-    print("PASS: scaffold_only parser benchmark scaffold is valid (no parser fixtures executed)")
+    print(f"PASS: parser benchmark scaffold is valid ({len(fixture_cases)} local fixture(s) executed)")
     return 0
 
 

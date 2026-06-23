@@ -19,6 +19,7 @@ profiles:
       - check_context_graph.py
       - check_cockpit.py
       - check_reconcile.py
+      - check_approval_freshness.py
       - check_harness_profiles.py
       - check_operating_dashboard.py
       - check_work_lanes.py
@@ -91,6 +92,7 @@ profiles:
       - check_replication_package.py
       - check_data_availability_present.py
       - check_compliance_gate.py
+      - check_approval_freshness.py
   full:
     description: "Complete internal harness."
     checks: all
