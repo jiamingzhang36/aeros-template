@@ -205,6 +205,7 @@ REQUIRED_FILES = [
     "harness/claim_vector_policy.yml",
     "harness/claim_upgrade_policy.yml",
     "harness/paper_readiness_policy.yml",
+    "harness/run_envelope_policy.yml",
     "harness/status_label_policy.yml",
     "harness/context_budget.yml",
     "harness/context_graph_policy.yml",

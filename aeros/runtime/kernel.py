@@ -17,6 +17,7 @@ from .agent import build_prompt, run_agent
 from .checks import format_feedback, run_checks
 from .completion import write_completion_receipt, validate_completion_receipts
 from .contract import Contract, load_contract
+from .execution_envelope import ExecutionEnvelope, execute_in_isolated_worktree
 from .report import AttemptRecord, RunRecord, write_run_report
 from .skill_receipt import write_skill_invocation_receipt
 from .work_lane import lane_matches, normalize_lane
@@ -687,6 +688,35 @@ def _escalate(project_root: Path, contract: Contract, feedback: str) -> Path:
     return path
 
 
+def _contract_envelope(contract: "Contract") -> ExecutionEnvelope:
+    allowed = tuple(str(path).strip() for path in contract.allowed_outputs if str(path).strip())
+    deny = (
+        "data/raw/",
+        "decisions/approvals/",
+        "aeros/state/",
+    )
+    return ExecutionEnvelope(
+        read_roots=(".",),
+        write_roots=allowed,
+        deny_roots=deny,
+        expected_outputs=allowed,
+        runtime_profile="task-local-isolated-worktree",
+    )
+
+
+def _envelope_feedback(result) -> str:
+    parts = [f"ExecutionEnvelope blocked deterministic command: {result.message}"]
+    if result.return_code:
+        parts.append(f"return_code={result.return_code}")
+    if result.denied_writes:
+        parts.append("denied_writes=" + ", ".join(result.denied_writes))
+    if result.undeclared_writes:
+        parts.append("undeclared_writes=" + ", ".join(result.undeclared_writes))
+    if result.missing_expected_outputs:
+        parts.append("missing_expected_outputs=" + ", ".join(result.missing_expected_outputs))
+    return "\n".join(parts)
+
+
 def _run_deterministic_task(contract: "Contract", project_root: Path,
                              state: dict, dry_run: bool,
                              task_timeout_override: int | None = None) -> int:
@@ -702,26 +732,27 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
         print(f"[kernel] DRY RUN: deterministic task {contract.task_id}")
         print(f"[kernel]   command: {command}")
         print(f"[kernel]   checks : {contract.checks}")
+        print(f"[kernel]   envelope: isolated worktree; allowed outputs={contract.allowed_outputs}")
         return 0
 
     if contract.run_command:
-        cwd = (project_root / contract.run_cwd).resolve()
-        print(f"[kernel] deterministic command: {' '.join(contract.run_command)}")
-        result = subprocess.run(
+        print(f"[kernel] deterministic command under ExecutionEnvelope: {' '.join(contract.run_command)}")
+        result = execute_in_isolated_worktree(
+            project_root,
             contract.run_command,
-            cwd=str(cwd),
-            timeout=task_timeout_override or contract.timeout_seconds,
-            check=False,
-            # Unattended runner: a probe script that reads stdin must not block.
-            stdin=subprocess.DEVNULL,
+            _contract_envelope(contract),
+            timeout_seconds=task_timeout_override or contract.timeout_seconds,
+            cwd_rel=contract.run_cwd,
         )
-        if result.returncode != 0:
-            feedback = f"Deterministic command failed with exit code {result.returncode}"
+        if not result.ok:
+            feedback = _envelope_feedback(result)
             path = _escalate(project_root, contract, feedback)
             state_mod.set_status(state, contract.task_id, "escalated")
             state_mod.save_state(project_root, state)
             print(f"[kernel] task {contract.task_id} ESCALATED -> {path}")
             return 2
+        print("[kernel]   envelope accepted outputs: "
+              f"{', '.join(result.accepted_outputs) or '(none)'}")
 
     from .checks import run_checks, format_feedback
     passed, results = run_checks(project_root, contract.checks)

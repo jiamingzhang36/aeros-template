@@ -107,6 +107,7 @@ def execute_in_isolated_worktree(
     envelope: ExecutionEnvelope,
     *,
     timeout_seconds: int = 30,
+    cwd_rel: str = ".",
 ) -> ExecutionEnvelopeResult:
     root = root.resolve()
     if not (root / ".git").exists():
@@ -130,7 +131,12 @@ def execute_in_isolated_worktree(
         try:
             env = dict(os.environ)
             env["PYTHONDONTWRITEBYTECODE"] = "1"
-            proc = subprocess.run(argv, cwd=worktree, text=True, capture_output=True, timeout=timeout_seconds, check=False, env=env)
+            run_cwd = (worktree / cwd_rel).resolve()
+            try:
+                run_cwd.relative_to(worktree.resolve())
+            except ValueError:
+                return ExecutionEnvelopeResult(False, 1, message=f"run cwd escapes worktree: {cwd_rel}")
+            proc = subprocess.run(argv, cwd=run_cwd, text=True, capture_output=True, timeout=timeout_seconds, check=False, env=env)
             return_code = proc.returncode
             observed = _status_paths(worktree)
             denied = tuple(path for path in observed if _under(path, envelope.deny_roots))

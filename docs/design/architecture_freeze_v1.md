@@ -83,6 +83,10 @@ The architecture-freeze baseline pauses:
 ExecutionEnvelope must be real confinement, not a declarative YAML promise. The
 first implementation must run in an isolated worktree or equivalent isolated
 workspace and must verify that observed writes are a subset of declared writes.
+`aeros run` deterministic local commands (`run.command` with zero agent calls)
+now execute through this isolated worktree path. LLM/provider-backed task runs
+remain policy-gated but are not claimed as fully sandboxed until provider-side
+isolated execution exists.
 
 ClaimVector v1 is allowed only as an advisory language-boundary compiler. It
 may derive allowed and forbidden claim language from evidence/admission/

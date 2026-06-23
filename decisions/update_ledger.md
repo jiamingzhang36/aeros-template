@@ -17,6 +17,28 @@ How to read this ledger:
 
 ## 2026-06-23
 
+### 2026-06-23 - ExecutionEnvelope deterministic `aeros run` enforcement
+
+**Commit(s)**: `pending`
+
+**Action**: Route deterministic `aeros run` commands (`run.command` with
+`max_agent_calls: 0`) through isolated-worktree ExecutionEnvelope enforcement,
+copying back only declared `allowed_outputs` and blocking denied/undeclared
+writes. Extend `check_execution_envelope.py` with a real `aeros run` fixture.
+
+**Alignment**: Turns the ActionSpec/ExecutionEnvelope boundary from a declaration
+into an enforced runtime constraint for the safest class of task execution.
+
+**Non-goal**: Does not claim full LLM-agent sandboxing, scientific validity,
+claim support, gate approval, or safe provider/network behavior.
+
+**Drift risk**: Users may read "run envelope" as full sandbox coverage. Mitigation:
+policy and freeze doc split deterministic local runs from provider-backed agent
+tasks.
+
+**Next check**: Sync to CMPD and run a deterministic smoke task to confirm declared
+outputs are accepted while denied roots remain protected.
+
 ### 2026-06-23 - Paper-readiness report-only packet
 
 **Commit(s)**: `7ed4027`

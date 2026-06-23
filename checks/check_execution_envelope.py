@@ -38,7 +38,52 @@ def _repo() -> Path:
     _write(tmp / "scripts/good.py", "from pathlib import Path\nPath('outputs/envelope/allowed.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/allowed.txt').write_text('allowed\\n')\n")
     _write(tmp / "scripts/bad.py", "from pathlib import Path\nPath('outputs/envelope/bad.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/bad.txt').write_text('bad\\n')\nPath('paper/draft.md').parent.mkdir(parents=True, exist_ok=True)\nPath('paper/draft.md').write_text('denied\\n')\n")
     _write(tmp / "scripts/undeclared.py", "from pathlib import Path\nPath('outputs/other.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/other.txt').write_text('undeclared\\n')\n")
+    _write(tmp / "scripts/run_good_task.py", "from pathlib import Path\nPath('outputs/enveloped/from_run.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/enveloped/from_run.txt').write_text('run allowed\\n')\n")
+    _write(tmp / "scripts/run_bad_task.py", "from pathlib import Path\nPath('outputs/enveloped/from_bad.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/enveloped/from_bad.txt').write_text('run bad\\n')\nPath('data/raw/secret.csv').parent.mkdir(parents=True, exist_ok=True)\nPath('data/raw/secret.csv').write_text('denied\\n')\n")
     _write(tmp / "checks/check_fixture_read_only.py", "from pathlib import Path\nassert Path('scripts/good.py').exists()\nprint('PASS: fixture read-only check')\n")
+    _write(tmp / "checks/check_env_good.py", "from pathlib import Path\nassert Path('outputs/enveloped/from_run.txt').exists()\nprint('PASS: env good output exists')\n")
+    _write(tmp / "tasks/execution/T_ENV_GOOD.yml", f"""task_id: T_ENV_GOOD
+stage: execution
+gate: G4
+goal: Run a deterministic envelope fixture.
+inputs:
+- scripts/run_good_task.py
+allowed_outputs:
+- outputs/enveloped/from_run.txt
+checks:
+- check_env_good.py
+run:
+  command:
+  - {sys.executable}
+  - scripts/run_good_task.py
+  cwd: .
+retry_policy:
+  max_retries: 0
+budget:
+  max_agent_calls: 0
+  max_dollars: 0.0
+""")
+    _write(tmp / "tasks/execution/T_ENV_BAD.yml", f"""task_id: T_ENV_BAD
+stage: execution
+gate: G4
+goal: Try to write a denied path from a deterministic task.
+inputs:
+- scripts/run_bad_task.py
+allowed_outputs:
+- outputs/enveloped/from_bad.txt
+checks:
+- check_env_good.py
+run:
+  command:
+  - {sys.executable}
+  - scripts/run_bad_task.py
+  cwd: .
+retry_policy:
+  max_retries: 0
+budget:
+  max_agent_calls: 0
+  max_dollars: 0.0
+""")
     _run(tmp, ["git", "add", "."])
     _run(tmp, ["git", "commit", "-m", "fixture"])
     return tmp
@@ -125,6 +170,32 @@ def main() -> int:
     )
     if not any("read_only" in item for item in validate_action_spec(invalid)):
         failures.append("read_only ActionSpec with expected_outputs was not rejected")
+
+    env_run = subprocess.run(
+        [sys.executable, "-m", "aeros.cli", "run", "tasks/execution/T_ENV_GOOD.yml"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    if env_run.returncode != 0:
+        failures.append(f"aeros run deterministic envelope fixture failed: {env_run.stderr or env_run.stdout}")
+    if not (repo / "outputs/enveloped/from_run.txt").exists():
+        failures.append("aeros run did not copy declared deterministic task output back to main repo")
+
+    denied_run = subprocess.run(
+        [sys.executable, "-m", "aeros.cli", "run", "tasks/execution/T_ENV_BAD.yml"],
+        cwd=repo,
+        capture_output=True,
+        text=True,
+        timeout=60,
+        check=False,
+    )
+    if denied_run.returncode == 0:
+        failures.append("aeros run deterministic denied-write fixture unexpectedly passed")
+    if (repo / "data/raw/secret.csv").exists() or (repo / "outputs/enveloped/from_bad.txt").exists():
+        failures.append("aeros run deterministic denied-write fixture polluted the main repo")
 
     if failures:
         print("FAIL: ExecutionEnvelope problems detected:")
