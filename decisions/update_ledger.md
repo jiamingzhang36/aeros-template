@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-23 - ClaimVector advisory compiler and envelope coverage v2
 
-**Commit(s)**: pending
+**Commit(s)**: `66c2e43`
 
 **Action**: Add a ClaimVector v1 compiler that emits advisory allowed/forbidden
 claim language and human-review recommendations without writing the claim registry.
