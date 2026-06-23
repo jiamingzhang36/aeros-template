@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-23 - ExecutionEnvelope deterministic `aeros run` enforcement
 
-**Commit(s)**: `pending`
+**Commit(s)**: `41aec3c`
 
 **Action**: Route deterministic `aeros run` commands (`run.command` with
 `max_agent_calls: 0`) through isolated-worktree ExecutionEnvelope enforcement,
