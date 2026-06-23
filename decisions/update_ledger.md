@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-23 - Real-project acid-test repairs
 
-**Commit(s)**: `pending`
+**Commit(s)**: `6eb91a5`
 
 **Action**: Fix two CMPD acid-test findings: allow controller-safe
 `aeros recover <task> --check` commands so stale free revalidation can actually
