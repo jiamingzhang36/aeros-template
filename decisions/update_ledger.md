@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-23 - Paper-readiness report-only packet
 
-**Commit(s)**: `pending`
+**Commit(s)**: `7ed4027`
 
 **Action**: Add `aeros paper-readiness report` to aggregate the derived readiness
 vector into a human review packet with `authority_status=report_only` and
