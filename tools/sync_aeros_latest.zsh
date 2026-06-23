@@ -16,6 +16,14 @@
 # named `.aeros_sync_keep_agents` in that project's root.
 set -euo pipefail
 SRC="/Users/jiamingzhang/aeros-template"
+AEROS_SYNC_PYTHON="${AEROS_SYNC_PYTHON:-}"
+if [ -z "$AEROS_SYNC_PYTHON" ]; then
+  if [ -x "/Users/jiamingzhang/opt/anaconda3/bin/python" ]; then
+    AEROS_SYNC_PYTHON="/Users/jiamingzhang/opt/anaconda3/bin/python"
+  else
+    AEROS_SYNC_PYTHON="python3"
+  fi
+fi
 
 if [ "$#" -eq 0 ]; then
   print -u2 "usage: tools/sync_aeros_latest.zsh <project_path> [<project_path> ...]"
@@ -89,7 +97,7 @@ export AEROS_SYNC_TARGETS="${(F)SYNCED}"
 
 # Post-process 1: propagate task skill metadata (allowed/recommended skills) from
 # the template's task contracts into each project's matching task_id files.
-python3 - <<'PY'
+"$AEROS_SYNC_PYTHON" - <<'PY'
 import os
 from pathlib import Path
 import yaml
@@ -167,7 +175,7 @@ PY
 
 # Post-process 2: ensure each project's manifest wires the required framework
 # files and checks.
-python3 - <<'PYMANIFEST'
+"$AEROS_SYNC_PYTHON" - <<'PYMANIFEST'
 import os
 from pathlib import Path
 
