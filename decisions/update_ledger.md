@@ -15,6 +15,74 @@ How to read this ledger:
 - `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
 - `Next check`: what should be watched in the next real project run.
 
+## 2026-06-23
+
+### 2026-06-23 - Architecture freeze baseline
+
+**Commit(s)**: `b0aa2e7`
+
+**Action**: Add `docs/design/architecture_freeze_v1.md` and a narrow freeze-doc
+check so AEROS has a named freeze baseline before further runtime hardening. The
+document fixes the 5-layer authority model, feature-admission rule, do-not-expand
+list, and sequencing constraints for ExecutionEnvelope, ClaimVector, and
+ResultRecord/ResultAdmission separation.
+
+**Alignment**: Turns "stop adding surface area" into an auditable architecture
+contract rather than a chat preference.
+
+**Non-goal**: Does not remove existing lanes, checks, gates, registries, or project
+artifacts. It freezes expansion policy; it does not certify research quality.
+
+**Drift risk**: Freeze docs can become decorative if not checked. Mitigation:
+`check_architecture_freeze.py` enforces the required clauses and smoke profile runs it.
+
+**Next check**: During the next requested feature, verify it explicitly satisfies the
+feature-admission rule before implementation.
+
+### 2026-06-23 - Orthogonal progress-domain semantics
+
+**Commit(s)**: `6bb6bb4`
+
+**Action**: Add `progress_domain: research|runtime|governance` beside the existing
+`progress_class`, introduce the user-facing `DECISION_RECORDED` label, and update
+completion policies/templates so runtime engineering, research routing, and governance
+decisions no longer collapse into one "substantive progress" bucket.
+
+**Alignment**: Reduces fake-progress confusion: a framework artifact can be
+runtime/substantive, a data contract can be research/routing, and an approval can be
+governance/decision without pretending any of them produced research evidence.
+
+**Non-goal**: Does not automatically reclassify old project receipts or certify that
+human decisions were scientifically correct.
+
+**Drift risk**: More labels can become bureaucracy. Mitigation: keep the domain
+three-way and require checks to validate only the orthogonal semantics, not create new
+lane systems.
+
+**Next check**: On the next real project rollout, confirm completion receipts with
+framework sync, route packet, and human decision examples render distinct labels.
+
+### 2026-06-23 - ExecutionEnvelope isolated-worktree slice
+
+**Commit(s)**: `2032081`
+
+**Action**: Add a minimal `ExecutionEnvelope` runtime and adversarial check that runs a
+safe local action in an isolated git worktree, copies back only declared outputs, and
+fails if an action writes denied or undeclared paths.
+
+**Alignment**: Makes ActionSpec boundaries enforceable for one vertical slice instead
+of leaving read/write authority as YAML-only intent.
+
+**Non-goal**: Does not route all `aeros run` actions through envelopes, sandbox
+network/API access, or certify scientific validity of outputs.
+
+**Drift risk**: A partial envelope could be mistaken for universal sandboxing.
+Mitigation: the check and freeze doc call it a v1 safe/local slice only; broader
+admission requires explicit runtime profiles.
+
+**Next check**: After downstream projects sync, pick one low-risk local action and
+route it through the envelope path before broadening executor coverage.
+
 ## 2026-06-22
 
 ### 2026-06-22 - Make controller stop on literature full-text blockers (IMPROVE-015)
