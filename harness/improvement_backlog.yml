@@ -387,5 +387,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-23"
-    resolution_commit: "pending"
+    resolution_commit: "ff63b77"
     notes: "This keeps adversarial benchmark progress vertical: three scenarios now execute behaviorally; remaining scenarios stay scaffold-only until fixtures are implemented."

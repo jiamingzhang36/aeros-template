@@ -143,7 +143,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV020 - 2026-06-16 00:00 +0800
 
-- commit: pending
+- commit: ff63b77
 - change_type: state machine constraints / exception hardening
 - summary: Added invariants, legal state transitions, a source-type probe matrix, scoped exception validation, and a source-card template so AEROS v0.3 can behave like a constrained research CI rather than a growing checklist.
 - files:

@@ -1160,7 +1160,7 @@ expanding more scaffolds.
 
 ### 2026-06-23 — Add stale-registry and session-scope adversarial fixtures
 
-**Commit(s)**: `pending`
+**Commit(s)**: `ff63b77`
 
 **Action**: Added an executable `stale_registry` fixture that mutates a registered
 result artifact after provenance is recorded and requires `check_provenance.py`
