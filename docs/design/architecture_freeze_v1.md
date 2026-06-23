@@ -88,6 +88,12 @@ now execute through this isolated worktree path. LLM/provider-backed task runs
 remain policy-gated but are not claimed as fully sandboxed until provider-side
 isolated execution exists.
 
+AgentEnvelope v1 adds audit-mode enforcement for provider-backed agent tasks:
+after each agent call, AEROS blocks task acceptance if observed writes are
+outside declared `allowed_outputs` or denied roots. This is not full sandboxing;
+it is a visibility and fail-closed layer until agent execution can be moved into
+provider-side isolated workspaces.
+
 ClaimVector v1 is allowed only as an advisory language-boundary compiler. It
 may derive allowed and forbidden claim language from evidence/admission/
 identification inputs, but it must not write the claim registry, certify

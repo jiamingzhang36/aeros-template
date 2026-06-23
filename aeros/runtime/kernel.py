@@ -14,6 +14,13 @@ from . import critic as critic_mod
 from . import identity
 from . import state as state_mod
 from .agent import build_prompt, run_agent
+from .agent_envelope import (
+    audit_agent_writes,
+    format_agent_envelope_audit,
+    load_agent_envelope_policy,
+    snapshot_agent_envelope,
+    write_agent_envelope_audit,
+)
 from .checks import format_feedback, run_checks
 from .completion import write_completion_receipt, validate_completion_receipts
 from .contract import Contract, load_contract
@@ -872,9 +879,14 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
         print(f"[kernel] attempt {attempt + 1}/{max_retries + 1}: invoking agent "
               f"(spent ${run_cost:.4f}/{contract.max_dollars:.2f}, call cap ${call_cap:.2f})...")
 
+        agent_policy = load_agent_envelope_policy(project_root)
+        agent_snapshot = snapshot_agent_envelope(project_root)
         result = run_agent(prompt, project_root,
                            timeout=task_timeout_override or contract.timeout_seconds,
                            max_budget_usd=call_cap)
+        agent_audit = None
+        if str(agent_policy.get("mode") or "audit") != "off":
+            agent_audit = audit_agent_writes(project_root, contract, agent_snapshot, policy=agent_policy)
         # Account for spend regardless of outcome (a failed call can still cost).
         run_calls += 1
         run_cost += result.cost_usd
@@ -885,6 +897,19 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
         if result.cost_usd:
             print(f"[kernel]   call cost ${result.cost_usd:.4f} "
                   f"({result.input_tokens} in / {result.output_tokens} out)")
+
+        if agent_audit is not None and not agent_audit.ok and bool(agent_policy.get("block_on_violation", True)):
+            audit_path = write_agent_envelope_audit(project_root, agent_audit)
+            feedback = format_agent_envelope_audit(agent_audit)
+            print(f"[kernel] agent envelope violation -> {audit_path.relative_to(project_root)}")
+            attempts_log.append(AttemptRecord(
+                attempt=attempt + 1,
+                agent_ok=result.ok,
+                agent_error="",
+                checks=[],
+                feedback=feedback,
+            ))
+            continue
 
         if not result.ok:
             print(f"[kernel] agent error: {result.error}")

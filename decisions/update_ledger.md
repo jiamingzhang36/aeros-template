@@ -17,6 +17,27 @@ How to read this ledger:
 
 ## 2026-06-23
 
+### 2026-06-23 - AgentEnvelope audit mode
+
+**Commit(s)**: `pending`
+
+**Action**: Add AgentEnvelope audit mode for provider-backed agent tasks. The
+runtime snapshots project writes around each agent call and blocks task
+acceptance when denied or undeclared writes are observed, writing an audit record
+under `agent_runs/agent_envelope_audits/` on violation.
+
+**Alignment**: Makes LLM/provider task side effects visible and fail-closed
+without pretending that provider agents are fully sandboxed.
+
+**Non-goal**: Does not provide full LLM-agent sandboxing, safe network/provider
+behavior, claim support, gate approval, or automatic rollback.
+
+**Drift risk**: Audit mode can be mistaken for confinement. Mitigation: policy,
+freeze doc, and check all state that this is audit/visibility, not full sandbox.
+
+**Next check**: Run on a real provider-backed project task in audit mode and
+confirm allowed outputs pass while denied/undeclared writes escalate.
+
 ### 2026-06-23 - Real-project acid-test repairs
 
 **Commit(s)**: `6eb91a5`
