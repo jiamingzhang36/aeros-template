@@ -1259,7 +1259,7 @@ manager.
 
 ### 2026-06-23 — Sync parser benchmark fixtures into projects
 
-**Commit(s)**: `pending`
+**Commit(s)**: `ebe5d8e`
 
 **Action**: Updated `tools/sync_aeros_latest.zsh` to create and copy
 `tests/parser/` alongside `tests/adversarial/` so parser benchmark fixtures added
