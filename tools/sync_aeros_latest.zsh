@@ -47,7 +47,7 @@ for T in "${TARGETS[@]}"; do
   rsync -a "$SRC/checks/" "$T/checks/"
   rsync -a "$SRC/harness/" "$T/harness/"
   rsync -a "$SRC/examples/" "$T/examples/"
-  mkdir -p "$T/docs" "$T/templates" "$T/tests/adversarial" "$T/tests/parser" "$T/decisions"
+  mkdir -p "$T/docs" "$T/docs/design" "$T/templates" "$T/tests/adversarial" "$T/tests/parser" "$T/decisions"
   if [ ! -f "$T/CURRENT_STATE.md" ]; then
     rsync -a "$SRC/templates/CURRENT_STATE.md" "$T/CURRENT_STATE.md"
   fi
@@ -55,6 +55,7 @@ for T in "${TARGETS[@]}"; do
     rsync -a "$SRC/templates/CONTEXT_BUNDLE.md" "$T/CONTEXT_BUNDLE.md"
   fi
   [ -f "$SRC/docs/architecture_v0_5.md" ] && rsync -a "$SRC/docs/architecture_v0_5.md" "$T/docs/architecture_v0_5.md"
+  [ -f "$SRC/docs/design/architecture_freeze_v1.md" ] && rsync -a "$SRC/docs/design/architecture_freeze_v1.md" "$T/docs/design/architecture_freeze_v1.md"
   [ -f "$SRC/decisions/update_ledger.md" ] && rsync -a "$SRC/decisions/update_ledger.md" "$T/decisions/update_ledger.md"
   if [ ! -f "$T/decisions/human_gate_queue.yml" ]; then
     rsync -a "$SRC/decisions/human_gate_queue.yml" "$T/decisions/human_gate_queue.yml"
@@ -231,9 +232,13 @@ REQUIRED_FILES = [
     "decisions/update_ledger.md",
     "decisions/human_gate_queue.yml",
     "docs/architecture_v0_5.md",
+    "docs/design/architecture_freeze_v1.md",
 ]
 
 CHECKS = {
+    "architecture_freeze": "checks/check_architecture_freeze.py",
+    "progress_semantics": "checks/check_progress_semantics.py",
+    "execution_envelope": "checks/check_execution_envelope.py",
     "operating_dashboard": "checks/check_operating_dashboard.py",
     "next_action": "checks/check_next_action.py",
     "stale_triage": "checks/check_stale_triage.py",

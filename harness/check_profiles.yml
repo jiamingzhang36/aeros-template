@@ -10,7 +10,10 @@ profiles:
     description: "Fast cockpit/context/next/lane/schema checks for every small step."
     checks:
       - check_next_action.py
+      - check_architecture_freeze.py
       - check_action_spec.py
+      - check_execution_envelope.py
+      - check_progress_semantics.py
       - check_session_scope.py
       - check_execution_profiles.py
       - check_readiness_vector.py

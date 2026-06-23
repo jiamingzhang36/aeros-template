@@ -45,6 +45,7 @@ class ActionSpec:
     semantic_progress_predicate: tuple[str, ...] = ()
     post_run_hooks: tuple[str, ...] = ()
     postconditions: tuple[str, ...] = ()
+    execution_envelope: dict[str, Any] = field(default_factory=dict)
     reversal_policy: dict[str, str | bool] = field(default_factory=dict)
     does_not_prove: tuple[str, ...] = (
         "scientific validity",
@@ -282,6 +283,7 @@ def declared_action_spec(
     post_run_hooks: tuple[str, ...] | None = None,
     postconditions: tuple[str, ...] | None = None,
     reversal_policy: dict[str, str | bool] | None = None,
+    execution_envelope: dict[str, Any] | None = None,
 ) -> ActionSpec:
     """Build an ActionSpec from producer-known semantics.
 
@@ -321,6 +323,7 @@ def declared_action_spec(
         semantic_progress_predicate=semantic_progress_predicate if semantic_progress_predicate is not None else _semantic_progress_for(kind, effect_class),
         post_run_hooks=post_run_hooks if post_run_hooks is not None else _post_run_hooks_for(kind, effect_class),
         postconditions=postconditions or ("write run record or blocker", "do not approve gates or upgrade claims"),
+        execution_envelope=execution_envelope or {},
         reversal_policy=reversal_policy or {"reversible": effect_class in {"read_only", "local_write_preview"}, "cleanup_handler": "manual_review"},
     )
 
@@ -346,4 +349,6 @@ def validate_action_spec(spec: ActionSpec | dict[str, Any]) -> list[str]:
         failures.append("ActionSpec must declare authority_boundary")
     if data.get("post_run_hooks") and not isinstance(data.get("post_run_hooks"), list):
         failures.append("ActionSpec post_run_hooks must be a list")
+    if data.get("execution_envelope") and not isinstance(data.get("execution_envelope"), dict):
+        failures.append("ActionSpec execution_envelope must be a mapping when present")
     return failures

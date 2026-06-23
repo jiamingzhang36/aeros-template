@@ -18,10 +18,13 @@ import yaml
 
 CHECKS = [
     "check_stage_agents.py",
+    "check_architecture_freeze.py",
     "check_operating_dashboard.py",
     "check_session_scope.py",
     "check_next_action.py",
     "check_action_spec.py",
+    "check_execution_envelope.py",
+    "check_progress_semantics.py",
     "check_execution_profiles.py",
     "check_readiness_vector.py",
     "check_estimand_data_contract.py",

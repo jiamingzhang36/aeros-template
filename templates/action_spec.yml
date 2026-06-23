@@ -39,6 +39,19 @@ post_run_hooks:
 postconditions:
   - write run record or blocker
   - do not approve gates or upgrade claims
+execution_envelope:
+  read_roots:
+    - .
+  write_roots:
+    - adoption/
+    - decisions/adoption/
+  deny_roots:
+    - paper/
+    - evidence/claim_registry.md
+    - decisions/approvals/
+  expected_outputs:
+    - adoption/
+  runtime_profile: local-safe
 reversal_policy:
   reversible: true
   cleanup_handler: remove_candidate_artifacts
