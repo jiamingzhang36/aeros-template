@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-23 - Human-gated claim-upgrade recommendation
 
-**Commit(s)**: pending
+**Commit(s)**: `a4ed72e`
 
 **Action**: Add `aeros claim-upgrade review` to generate a recommendation-only review
 from ClaimVector inputs, optionally writing a decision packet under
