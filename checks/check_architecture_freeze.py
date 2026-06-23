@@ -15,7 +15,7 @@ REQUIRED_MARKERS = [
     "Do-not-expand list",
     "ExecutionEnvelope must be real confinement",
     "observed writes are a subset of declared writes",
-    "ClaimVector is deferred",
+    "ClaimVector v1 is allowed only as an advisory language-boundary compiler",
     "Automatic reconcile is deferred until ResultRecord and ResultAdmission",
     "control_plane_action_ratio",
 ]

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import os
 import shutil
+import shlex
 import subprocess
 import tempfile
 from pathlib import Path
@@ -126,7 +128,9 @@ def execute_in_isolated_worktree(
         message = ""
         cleanup_ok = False
         try:
-            proc = subprocess.run(argv, cwd=worktree, text=True, capture_output=True, timeout=timeout_seconds, check=False)
+            env = dict(os.environ)
+            env["PYTHONDONTWRITEBYTECODE"] = "1"
+            proc = subprocess.run(argv, cwd=worktree, text=True, capture_output=True, timeout=timeout_seconds, check=False, env=env)
             return_code = proc.returncode
             observed = _status_paths(worktree)
             denied = tuple(path for path in observed if _under(path, envelope.deny_roots))
@@ -162,3 +166,47 @@ def execute_in_isolated_worktree(
         worktree_removed=cleanup_ok,
         message=message,
     )
+
+
+def default_envelope_for_action_spec(spec: Any) -> ExecutionEnvelope:
+    data = spec.to_dict() if hasattr(spec, "to_dict") else dict(spec)
+    if data.get("execution_envelope"):
+        return envelope_from_dict(data.get("execution_envelope"))
+    effect = str(data.get("effect_class", "")).strip()
+    expected = tuple(str(x) for x in data.get("expected_outputs") or [] if str(x).strip())
+    deny = (
+        "paper/",
+        "evidence/claim_registry.md",
+        "decisions/approvals/",
+        "data/raw/",
+        "aeros/state/",
+    )
+    if effect == "read_only":
+        return ExecutionEnvelope(read_roots=(".",), write_roots=(), deny_roots=deny, expected_outputs=())
+    if effect in {"local_write", "local_write_preview"}:
+        write_roots = tuple(sorted({path if path.endswith("/") else str(Path(path).parent) + "/" for path in expected if path}))
+        return ExecutionEnvelope(read_roots=(".",), write_roots=write_roots, deny_roots=deny, expected_outputs=expected)
+    return ExecutionEnvelope(read_roots=(".",), write_roots=(), deny_roots=deny, expected_outputs=())
+
+
+def execute_action_spec_in_isolated_worktree(
+    root: Path,
+    spec: Any,
+    *,
+    timeout_seconds: int = 30,
+) -> ExecutionEnvelopeResult:
+    data = spec.to_dict() if hasattr(spec, "to_dict") else dict(spec)
+    effect = str(data.get("effect_class", "")).strip()
+    if effect not in {"read_only", "local_write", "local_write_preview"}:
+        return ExecutionEnvelopeResult(False, 1, message=f"unsupported envelope effect_class: {effect}")
+    command = str(data.get("command", "")).strip()
+    if not command:
+        return ExecutionEnvelopeResult(False, 1, message="ActionSpec has no command")
+    if any(token in command for token in ["|", "&&", "||", ";", ">", "<", "$("]):
+        return ExecutionEnvelopeResult(False, 1, message="ActionSpec command is not envelope-safe argv")
+    try:
+        argv = shlex.split(command)
+    except ValueError as exc:
+        return ExecutionEnvelopeResult(False, 1, message=f"cannot parse ActionSpec command: {exc}")
+    envelope = default_envelope_for_action_spec(data)
+    return execute_in_isolated_worktree(root, argv, envelope, timeout_seconds=timeout_seconds)

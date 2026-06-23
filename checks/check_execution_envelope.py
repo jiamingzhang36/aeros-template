@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -12,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from aeros.runtime.action_spec import declared_action_spec, validate_action_spec  # noqa: E402
-from aeros.runtime.execution_envelope import ExecutionEnvelope, execute_in_isolated_worktree  # noqa: E402
+from aeros.runtime.execution_envelope import ExecutionEnvelope, execute_action_spec_in_isolated_worktree, execute_in_isolated_worktree  # noqa: E402
 
 
 def _run(cwd: Path, args: list[str]) -> None:
@@ -31,6 +32,9 @@ def _repo() -> Path:
     _run(tmp, ["git", "init"])
     _run(tmp, ["git", "config", "user.email", "aeros@example.test"])
     _run(tmp, ["git", "config", "user.name", "aeros-test"])
+    shutil.copytree(ROOT / "aeros", tmp / "aeros", ignore=shutil.ignore_patterns("__pycache__"))
+    if (ROOT / "project_manifest.yml").exists():
+        shutil.copy2(ROOT / "project_manifest.yml", tmp / "project_manifest.yml")
     _write(tmp / "scripts/good.py", "from pathlib import Path\nPath('outputs/envelope/allowed.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/allowed.txt').write_text('allowed\\n')\n")
     _write(tmp / "scripts/bad.py", "from pathlib import Path\nPath('outputs/envelope/bad.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/bad.txt').write_text('bad\\n')\nPath('paper/draft.md').parent.mkdir(parents=True, exist_ok=True)\nPath('paper/draft.md').write_text('denied\\n')\n")
     _write(tmp / "scripts/undeclared.py", "from pathlib import Path\nPath('outputs/other.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/other.txt').write_text('undeclared\\n')\n")
@@ -96,6 +100,20 @@ def main() -> int:
         failures.append(f"read-only safe check wrote files: {read_only.observed_writes}")
     if read_only.accepted_outputs:
         failures.append(f"read-only safe check copied outputs: {read_only.accepted_outputs}")
+
+    next_spec = declared_action_spec(
+        kind="next_action_preview",
+        effect_class="read_only",
+        lane="harness",
+        command=f"{sys.executable} -m aeros.cli next --json",
+        stop_condition="stop after emitting JSON",
+        capabilities=("read_project_state",),
+    )
+    next_result = execute_action_spec_in_isolated_worktree(repo, next_spec, timeout_seconds=30)
+    if not next_result.ok:
+        failures.append(f"real read-only ActionSpec did not pass under envelope: {next_result}")
+    if next_result.observed_writes:
+        failures.append(f"real read-only ActionSpec wrote files: {next_result.observed_writes}")
 
     invalid = declared_action_spec(
         kind="bad_read_only",

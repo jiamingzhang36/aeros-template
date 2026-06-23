@@ -83,10 +83,10 @@ ExecutionEnvelope must be real confinement, not a declarative YAML promise. The
 first implementation must run in an isolated worktree or equivalent isolated
 workspace and must verify that observed writes are a subset of declared writes.
 
-ClaimVector is deferred. When introduced, it must be human-asserted per axis and
-machine-policed only for violations. The machine may refuse a requested claim
-axis, but it must not certify scientific truth or turn absence of a violation
-into support.
+ClaimVector v1 is allowed only as an advisory language-boundary compiler. It
+may derive allowed and forbidden claim language from evidence/admission/
+identification inputs, but it must not write the claim registry, certify
+scientific truth, approve gates, or turn absence of a violation into support.
 
 Automatic reconcile is deferred until ResultRecord and ResultAdmission are
 semantically separated. Machine refresh may update machine facts; it must not

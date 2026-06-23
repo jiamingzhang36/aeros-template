@@ -444,6 +444,25 @@ def _cmd_next(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_claim_vector(args: argparse.Namespace) -> int:
+    from .runtime.claim_vector import compile_claim_vector, format_claim_vector
+
+    if args.claim_vector_command == "compile":
+        vector = compile_claim_vector(
+            claim_id=args.claim_id,
+            evidence_status=args.evidence_status,
+            identification_level=args.identification_level,
+            result_admission_status=args.result_admission_status,
+            validation_status=args.validation_status,
+        )
+        if args.json:
+            print(json.dumps(vector.to_dict(), indent=2, ensure_ascii=False))
+        else:
+            print(format_claim_vector(vector))
+        return 0
+    raise SystemExit(f"unknown claim-vector command: {args.claim_vector_command}")
+
+
 
 def _cmd_stale(args: argparse.Namespace) -> int:
     root = _project_root()
@@ -1549,6 +1568,37 @@ def main(argv: list[str] | None = None) -> int:
     stale_triage.add_argument("--write", action="store_true", help="write outputs/context/stale_triage.md and .json")
     stale_triage.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     stale_triage.set_defaults(func=_cmd_stale)
+
+    claim_vector = sub.add_parser("claim-vector", help="compile advisory claim language boundaries")
+    claim_vector_sub = claim_vector.add_subparsers(dest="claim_vector_command", required=True)
+    claim_vector_compile = claim_vector_sub.add_parser("compile", help="compile allowed/forbidden claim language")
+    claim_vector_compile.add_argument("--claim-id", required=True, help="claim id or candidate claim id")
+    claim_vector_compile.add_argument(
+        "--evidence-status",
+        default="none",
+        choices=["none", "candidate_support", "admitted_support", "contradicts"],
+        help="current evidence status",
+    )
+    claim_vector_compile.add_argument(
+        "--identification-level",
+        default="none",
+        choices=["none", "descriptive", "associational", "causal"],
+        help="current identification level",
+    )
+    claim_vector_compile.add_argument(
+        "--result-admission-status",
+        default="not_admitted",
+        choices=["not_admitted", "needs_review", "human_admitted", "rejected"],
+        help="ResultAdmission status",
+    )
+    claim_vector_compile.add_argument(
+        "--validation-status",
+        default="unvalidated",
+        choices=["unvalidated", "validated", "robust"],
+        help="validation/robustness status",
+    )
+    claim_vector_compile.add_argument("--json", action="store_true", help="emit machine-readable ClaimVector JSON")
+    claim_vector_compile.set_defaults(func=_cmd_claim_vector)
 
     reconcile = sub.add_parser(
         "reconcile",

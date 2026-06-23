@@ -1,0 +1,20 @@
+claim_id: C000
+evidence_status: candidate_support
+identification_level: associational
+result_admission_status: needs_review
+validation_status: unvalidated
+authority_status: advisory_only
+claim_ceiling: candidate_only
+allowed_language:
+  - "candidate evidence may suggest"
+forbidden_language:
+  - "causes"
+  - "effect"
+  - "impact"
+upgrade_recommendation: "request ResultAdmission and human claim review before any upgrade"
+required_human_gate: true
+does_not_prove:
+  - "scientific truth"
+  - "claim support"
+  - "gate approval"
+  - "paper readiness"

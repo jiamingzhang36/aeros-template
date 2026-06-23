@@ -17,6 +17,30 @@ How to read this ledger:
 
 ## 2026-06-23
 
+### 2026-06-23 - ClaimVector advisory compiler and envelope coverage v2
+
+**Commit(s)**: pending
+
+**Action**: Add a ClaimVector v1 compiler that emits advisory allowed/forbidden
+claim language and human-review recommendations without writing the claim registry.
+Extend ExecutionEnvelope coverage with an ActionSpec-level executor path and a real
+read-only `aeros next --json` envelope check.
+
+**Alignment**: Advances the deferred claim-boundary and runtime-confinement work
+without granting machines new authority: ClaimVector constrains language, and
+ExecutionEnvelope broadens safe command coverage.
+
+**Non-goal**: Does not automatically upgrade claims, certify paper readiness, replace
+human gates, introduce SQLite as truth, or route all `aeros run` actions through the
+envelope.
+
+**Drift risk**: ClaimVector could be mistaken for claim adjudication. Mitigation:
+policy/check/CLI all emit `advisory_only`, require human gate, and verify the claim
+registry is not modified.
+
+**Next check**: On a real project, run `aeros claim-vector compile` for one ambiguous
+claim and confirm it changes only the recommended language boundary, not claim status.
+
 ### 2026-06-23 - Evidence admission boundary and parser false-fulltext fixtures
 
 **Commit(s)**: `459264c`
