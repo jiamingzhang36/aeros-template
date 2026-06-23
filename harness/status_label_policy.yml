@@ -29,9 +29,17 @@ labels:
     must_not_claim:
       - "Scientific validity beyond the registered evidence."
       - "Human gate approval unless an approval artifact exists."
+  DECISION_RECORDED:
+    meaning: A human decision or approval artifact was recorded as governance authority, but it is not research-substantive output by itself.
+    may_claim:
+      - "A decision was recorded."
+      - "The decision can authorize a bounded next step if fresh."
+    must_not_claim:
+      - "Data, literature, results, or paper content changed."
+      - "Scientific validity or claim support was proven."
 final_response_rule:
   required: true
   instruction: >
-    When reporting task outcomes, end with one of CHECK_PASS, ROUTE_READY, or
-    SUBSTANTIVE_PRODUCED. Use the weakest honest label. SUBSTANTIVE_DONE is a
-    deprecated compatibility alias only.
+    When reporting task outcomes, end with one of CHECK_PASS, ROUTE_READY,
+    SUBSTANTIVE_PRODUCED, or DECISION_RECORDED. Use the weakest honest label.
+    SUBSTANTIVE_DONE is a deprecated compatibility alias only.

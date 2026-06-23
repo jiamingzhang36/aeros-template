@@ -12,6 +12,7 @@ import yaml
 from .contract import Contract
 
 RECEIPT_DIR = Path("agent_runs/completion_receipts")
+PROGRESS_DOMAINS = {"research", "runtime", "governance"}
 
 
 @dataclass(frozen=True)
@@ -127,6 +128,16 @@ def _same_check_set(left: list[str], right: list[str]) -> bool:
     return sorted(_check_key(item) for item in left) == sorted(_check_key(item) for item in right)
 
 
+def progress_domain_for(work_lane: str, *, authority_status: str = "") -> str:
+    lane = str(work_lane or "").strip().lower()
+    authority = str(authority_status or "").strip().lower()
+    if authority in {"human_decision_recorded", "human_decision_required"}:
+        return "governance"
+    if lane in {"harness", "runtime"}:
+        return "runtime"
+    return "research"
+
+
 def write_completion_receipt(
     project_root: Path,
     contract: Contract,
@@ -179,8 +190,9 @@ def write_completion_receipt(
     progress_label = "SUBSTANTIVE_PRODUCED" if substantive_outputs else "CHECK_PASS"
     verification_level = "checks_passed_with_artifact_hashes" if verdict == "pass" else "failed_attestation"
     authority_status = "human_decision_required" if human_decision_needed else "no_new_authority"
+    progress_domain = progress_domain_for(contract.work_lane, authority_status=authority_status)
     payload = {
-        "version": 3,
+        "version": 4,
         "task_id": contract.task_id,
         "generated_at": _now(),
         "completion_mode": mode,
@@ -189,6 +201,7 @@ def write_completion_receipt(
         "outcome_kind": "complete",
         "contract_status": "passed" if verdict == "pass" else "failed",
         "verification_level": verification_level,
+        "progress_domain": progress_domain,
         "progress_class": progress_class,
         "progress_label": progress_label,
         "authority_status": authority_status,
@@ -274,6 +287,9 @@ def validate_completion_receipts(project_root: Path, contracts: dict[str, tuple[
                 failures.append(f"{task_id}: completion receipt progress_label is not SUBSTANTIVE_PRODUCED")
             if not payload.get("authority_status"):
                 failures.append(f"{task_id}: completion receipt authority_status missing")
+        if int(payload.get("version") or 1) >= 4:
+            if payload.get("progress_domain") not in PROGRESS_DOMAINS:
+                failures.append(f"{task_id}: completion receipt progress_domain is invalid")
         if payload.get("work_lane") != contract.work_lane:
             failures.append(f"{task_id}: completion receipt work_lane does not match contract")
         if not _same_check_set(list(payload.get("checks_required") or []), list(contract.checks)):

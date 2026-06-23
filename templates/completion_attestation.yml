@@ -6,6 +6,7 @@ declared_outcome: complete
 outcome_kind: complete
 contract_status: failed
 verification_level: failed_attestation
+progress_domain: research
 progress_class: none
 progress_label: CHECK_PASS
 authority_status: no_new_authority
