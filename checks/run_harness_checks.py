@@ -71,6 +71,7 @@ CHECKS = [
     "check_claim_registry.py",
     "check_claim_toulmin_schema.py",
     "check_claim_vector.py",
+    "check_claim_upgrade.py",
     "check_claim_ceiling.py",
     "check_claim_method_consistency.py",
     "check_identification_gate.py",

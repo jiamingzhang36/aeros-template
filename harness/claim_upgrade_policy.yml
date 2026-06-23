@@ -1,0 +1,14 @@
+version: "0.1"
+policy: AEROS-CLAIM-UPGRADE-001
+principle: >
+  Claim-upgrade automation may generate a recommendation packet, but it is
+  recommendation_only. It must not mutate claim_registry or approve a gate.
+rules:
+  - "must not mutate claim_registry"
+  - "any upgrade requires human gate approval"
+  - "recommendation_only output is not supported claim status"
+does_not_prove:
+  - "scientific truth"
+  - "claim support"
+  - "gate approval"
+  - "paper readiness"

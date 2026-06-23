@@ -17,6 +17,27 @@ How to read this ledger:
 
 ## 2026-06-23
 
+### 2026-06-23 - Human-gated claim-upgrade recommendation
+
+**Commit(s)**: pending
+
+**Action**: Add `aeros claim-upgrade review` to generate a recommendation-only review
+from ClaimVector inputs, optionally writing a decision packet under
+`decisions/claim_upgrade/`, while checks verify `evidence/claim_registry.md` is not
+modified.
+
+**Alignment**: Automates the boring review step while preserving the authority boundary
+that claim upgrades require human gate approval.
+
+**Non-goal**: Does not automatically upgrade claims, modify the claim registry, approve
+gates, certify scientific truth, or mark paper-ready.
+
+**Drift risk**: Users may confuse recommendation packets with approval. Mitigation:
+the policy/check/CLI emit `recommendation_only` and require human gate.
+
+**Next check**: Run this on one real ambiguous CMPD claim and confirm it creates only a
+review packet, not a registry mutation.
+
 ### 2026-06-23 - SQLite journal as derived index
 
 **Commit(s)**: `1b02dbc`

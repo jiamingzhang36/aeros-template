@@ -75,6 +75,7 @@ The architecture-freeze baseline pauses:
 - automatic prompt self-evolution;
 - automatic paper-ready judgment;
 - automatic claim upgrade;
+- automatic claim upgrade without a human gate;
 - automatic release approval.
 
 ## Sequencing constraints
@@ -87,6 +88,8 @@ ClaimVector v1 is allowed only as an advisory language-boundary compiler. It
 may derive allowed and forbidden claim language from evidence/admission/
 identification inputs, but it must not write the claim registry, certify
 scientific truth, approve gates, or turn absence of a violation into support.
+Claim-upgrade automation may generate recommendation packets, but the registry
+change remains a human-gated authority event.
 
 Automatic reconcile is deferred until ResultRecord and ResultAdmission are
 semantically separated. Machine refresh may update machine facts; it must not

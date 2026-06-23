@@ -478,6 +478,30 @@ def _cmd_journal(args: argparse.Namespace) -> int:
     raise SystemExit(f"unknown journal command: {args.journal_command}")
 
 
+def _cmd_claim_upgrade(args: argparse.Namespace) -> int:
+    from .runtime.claim_upgrade import format_claim_upgrade_review, review_claim_upgrade, write_claim_upgrade_review
+
+    root = _project_root()
+    if args.claim_upgrade_command == "review":
+        review = review_claim_upgrade(
+            root,
+            claim_id=args.claim_id,
+            evidence_status=args.evidence_status,
+            identification_level=args.identification_level,
+            result_admission_status=args.result_admission_status,
+            validation_status=args.validation_status,
+        )
+        if args.json:
+            print(json.dumps(review.to_dict(), indent=2, ensure_ascii=False))
+        else:
+            print(format_claim_upgrade_review(review))
+        if args.write:
+            path = write_claim_upgrade_review(root, review)
+            print(f"wrote {path.relative_to(root)}")
+        return 0
+    raise SystemExit(f"unknown claim-upgrade command: {args.claim_upgrade_command}")
+
+
 
 def _cmd_stale(args: argparse.Namespace) -> int:
     root = _project_root()
@@ -1614,6 +1638,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     claim_vector_compile.add_argument("--json", action="store_true", help="emit machine-readable ClaimVector JSON")
     claim_vector_compile.set_defaults(func=_cmd_claim_vector)
+
+    claim_upgrade = sub.add_parser("claim-upgrade", help="generate human-gated claim upgrade review packets")
+    claim_upgrade_sub = claim_upgrade.add_subparsers(dest="claim_upgrade_command", required=True)
+    claim_upgrade_review = claim_upgrade_sub.add_parser("review", help="review whether a claim may be proposed for human upgrade")
+    claim_upgrade_review.add_argument("--claim-id", required=True, help="claim id or candidate claim id")
+    claim_upgrade_review.add_argument("--evidence-status", default="none", choices=["none", "candidate_support", "admitted_support", "contradicts"])
+    claim_upgrade_review.add_argument("--identification-level", default="none", choices=["none", "descriptive", "associational", "causal"])
+    claim_upgrade_review.add_argument("--result-admission-status", default="not_admitted", choices=["not_admitted", "needs_review", "human_admitted", "rejected"])
+    claim_upgrade_review.add_argument("--validation-status", default="unvalidated", choices=["unvalidated", "validated", "robust"])
+    claim_upgrade_review.add_argument("--write", action="store_true", help="write decisions/claim_upgrade/<claim>_upgrade_review.md")
+    claim_upgrade_review.add_argument("--json", action="store_true", help="emit machine-readable review JSON")
+    claim_upgrade_review.set_defaults(func=_cmd_claim_upgrade)
 
     journal = sub.add_parser("journal", help="build derived SQLite journal indexes")
     journal_sub = journal.add_subparsers(dest="journal_command", required=True)

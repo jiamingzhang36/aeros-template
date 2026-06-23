@@ -360,6 +360,7 @@ checks:
   identification_gate: checks/check_identification_gate.py
   claim_toulmin_schema: checks/check_claim_toulmin_schema.py
   claim_vector: checks/check_claim_vector.py
+  claim_upgrade: checks/check_claim_upgrade.py
   analysis_ledger: checks/check_analysis_ledger.py
   correction_ledger: checks/check_correction_ledger.py
   improvement_backlog: checks/check_improvement_backlog.py
