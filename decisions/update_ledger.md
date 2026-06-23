@@ -17,6 +17,33 @@ How to read this ledger:
 
 ## 2026-06-23
 
+### 2026-06-23 - Evidence admission boundary and parser false-fulltext fixtures
+
+**Commit(s)**: pending
+
+**Action**: Deepen the first deferred architecture slice without expanding authority:
+upgrade `check_evidence_units.py` from optional-directory validation to an executable
+EvidenceUnit/ResultAdmission fixture check, add policy/templates for the machine-fact
+vs human-admission split, add false-fulltext parser fixtures for Cloudflare/security
+and SPA-shell pages, and extend ExecutionEnvelope to run a real read-only check action
+without declared writes.
+
+**Alignment**: Tightens the path from parsed artifact to admitted evidence while
+preserving the central AEROS rule: machine facts can be generated and checked, but
+human admission and claim upgrades remain separate authority events.
+
+**Non-goal**: Does not certify parser quality, admit any real project evidence,
+upgrade claims, create a SQLite truth source, or make all `aeros run` actions use
+ExecutionEnvelope.
+
+**Drift risk**: EvidenceUnit could become a new registry burden or parser benchmark
+could be mistaken for full-text review. Mitigation: fixtures are explicit smoke
+tests; ResultAdmission is required before claim use; false-fulltext cases are negative
+boundary tests only.
+
+**Next check**: Sync to one real project and confirm literature/data lanes can produce
+candidate EvidenceUnit records without changing claim status or gate status.
+
 ### 2026-06-23 - Architecture freeze baseline
 
 **Commit(s)**: `b0aa2e7`

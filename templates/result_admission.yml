@@ -1,0 +1,13 @@
+result_admission_id: RA-TEMPLATE-001
+result_id: R000
+admitted_evidence_units:
+  - EU-TEMPLATE-001
+admission_status: needs_review
+authority: human_gate_required
+claim_effect: none
+limitations:
+  - "No claim support until human_admitted with decision_ref and claim registry update."
+does_not_prove:
+  - "scientific truth"
+  - "claim support"
+  - "paper readiness"

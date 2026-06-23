@@ -34,6 +34,7 @@ def _repo() -> Path:
     _write(tmp / "scripts/good.py", "from pathlib import Path\nPath('outputs/envelope/allowed.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/allowed.txt').write_text('allowed\\n')\n")
     _write(tmp / "scripts/bad.py", "from pathlib import Path\nPath('outputs/envelope/bad.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/bad.txt').write_text('bad\\n')\nPath('paper/draft.md').parent.mkdir(parents=True, exist_ok=True)\nPath('paper/draft.md').write_text('denied\\n')\n")
     _write(tmp / "scripts/undeclared.py", "from pathlib import Path\nPath('outputs/other.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/other.txt').write_text('undeclared\\n')\n")
+    _write(tmp / "checks/check_fixture_read_only.py", "from pathlib import Path\nassert Path('scripts/good.py').exists()\nprint('PASS: fixture read-only check')\n")
     _run(tmp, ["git", "add", "."])
     _run(tmp, ["git", "commit", "-m", "fixture"])
     return tmp
@@ -80,6 +81,21 @@ def main() -> int:
         failures.append(f"undeclared write not reported: {undeclared.undeclared_writes}")
     if (repo / "outputs/other.txt").exists():
         failures.append("undeclared run polluted the main repo")
+
+    read_only_env = ExecutionEnvelope(
+        read_roots=(".",),
+        write_roots=(),
+        deny_roots=("paper/", "evidence/claim_registry.md"),
+        expected_outputs=(),
+        runtime_profile="local-safe-readonly",
+    )
+    read_only = execute_in_isolated_worktree(repo, [sys.executable, "checks/check_fixture_read_only.py"], read_only_env)
+    if not read_only.ok:
+        failures.append(f"read-only safe check did not pass under envelope: {read_only}")
+    if read_only.observed_writes:
+        failures.append(f"read-only safe check wrote files: {read_only.observed_writes}")
+    if read_only.accepted_outputs:
+        failures.append(f"read-only safe check copied outputs: {read_only.accepted_outputs}")
 
     invalid = declared_action_spec(
         kind="bad_read_only",

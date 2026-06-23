@@ -1,0 +1,27 @@
+version: "0.1"
+policy: AEROS-EVIDENCE-UNIT-001
+principle: >
+  EvidenceUnit records are machine facts with locator and hash lineage.
+  ResultAdmission records are human admission judgments. A parser, OCR step,
+  result registry row, or extraction card may create an EvidenceUnit, but it
+  must not silently become claim support. This policy enforces no automatic
+  claim upgrade from machine extraction or result admission alone.
+progression:
+  - evidence_unit
+  - result_admission
+  - claim_registry_update
+rules:
+  machine_facts:
+    - "EvidenceUnit must carry source_artifact_sha256 and a page/section/span/row/cell locator."
+    - "EvidenceUnit may be parsed/hash_verified/locator_verified, but it cannot self-admit."
+  human_admission:
+    - "ResultAdmission with human_admitted status requires approved_by, approved_at, and decision_ref."
+    - "Non-admitted ResultAdmission records must not carry approval metadata."
+  no_automatic_claim_upgrade:
+    - "no automatic claim upgrade"
+    - "ResultAdmission may produce candidate_support, but supported claim status still requires the claim registry and gate process."
+does_not_prove:
+  - "scientific truth"
+  - "identification quality"
+  - "claim support"
+  - "paper readiness"

@@ -1,20 +1,19 @@
-version: "0.1"
-policy: AEROS-EVIDENCE-UNIT-001
-evidence_unit_id: EU-000
-paper_id: P000
-source_artifact_sha256: ""
+evidence_unit_id: EU-TEMPLATE-001
+unit_type: literature_extract
+source_artifact: discovery/literature/extraction_cards/P000.md
+source_artifact_sha256: "<sha256>"
 locator:
-  page: ""
-  section: ""
-  span: ""
-literature_function: gap_verification
-extracted_proposition: ""
-limitation: ""
-verifier_status: unverified
-binding:
-  claim_id: ""
-  section_id: ""
+  page: "<page>"
+  section: "<section>"
+  span: "<quoted or paraphrased span locator>"
+evidence_function: gap_verification
+extracted_assertion: "<machine-extracted proposition>"
+limits:
+  - "Machine extraction only; requires human admission before claim use."
+machine_status: parsed
+admission_status: not_admitted
+claim_effect: none
 does_not_prove:
-  - "claim support until verified and bound through the claim/evidence registry"
-  - "full paper synthesis"
-  - "citation truth beyond the addressed source span"
+  - "scientific truth"
+  - "claim support"
+  - "gate approval"

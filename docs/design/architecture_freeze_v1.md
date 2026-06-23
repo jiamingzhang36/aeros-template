@@ -90,10 +90,14 @@ into support.
 
 Automatic reconcile is deferred until ResultRecord and ResultAdmission are
 semantically separated. Machine refresh may update machine facts; it must not
-silently overwrite human admission, claim, or release judgments.
+silently overwrite human admission, claim, or release judgments. EvidenceUnit
+and ResultAdmission v1 fixtures now enforce this separation mechanically, but
+they remain admission-boundary controls rather than claim-support certification.
 
-Parser benchmarking is deferred to a golden corpus after runtime enforcement is
-working. Existing parser fixtures remain smoke tests, not parser-quality proof.
+Parser benchmarking is deferred to a larger golden corpus after runtime
+enforcement is working. Existing parser fixtures, including false-fulltext
+negative cases, remain smoke tests for boundary behavior rather than
+parser-quality proof.
 
 ## Baseline metrics
 

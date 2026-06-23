@@ -41,6 +41,17 @@ def _exercise_fixture(case: dict) -> list[str]:
     parser = _TextExtractor()
     parser.feed(fixture_path.read_text(encoding="utf-8"))
     text = parser.text
+    if case.get("should_be_rejected"):
+        for marker in case.get("expected_negative_markers") or []:
+            marker = str(marker).strip()
+            if marker and marker not in text:
+                failures.append(f"{case_id}: parsed negative fixture missing marker {marker!r}")
+        forbidden = str(case.get("forbidden_target_title", "")).strip()
+        if forbidden and forbidden in text:
+            failures.append(f"{case_id}: false-fulltext fixture contains forbidden target title")
+        if len(text) < int(case.get("min_chars", 20)):
+            failures.append(f"{case_id}: negative fixture text is too short to classify")
+        return failures
     for field in ["expected_title", "expected_doi", "expected_table_text"]:
         expected = str(case.get(field, "")).strip()
         if expected and expected not in text:

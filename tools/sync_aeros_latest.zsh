@@ -47,7 +47,7 @@ for T in "${TARGETS[@]}"; do
   rsync -a "$SRC/checks/" "$T/checks/"
   rsync -a "$SRC/harness/" "$T/harness/"
   rsync -a "$SRC/examples/" "$T/examples/"
-  mkdir -p "$T/docs" "$T/docs/design" "$T/templates" "$T/tests/adversarial" "$T/tests/parser" "$T/decisions"
+  mkdir -p "$T/docs" "$T/docs/design" "$T/templates" "$T/tests/adversarial" "$T/tests/parser" "$T/tests/evidence_units" "$T/decisions"
   if [ ! -f "$T/CURRENT_STATE.md" ]; then
     rsync -a "$SRC/templates/CURRENT_STATE.md" "$T/CURRENT_STATE.md"
   fi
@@ -63,6 +63,7 @@ for T in "${TARGETS[@]}"; do
   [ -d "$SRC/templates" ] && rsync -a "$SRC/templates/" "$T/templates/"
   [ -d "$SRC/tests/adversarial" ] && rsync -a "$SRC/tests/adversarial/" "$T/tests/adversarial/"
   [ -d "$SRC/tests/parser" ] && rsync -a "$SRC/tests/parser/" "$T/tests/parser/"
+  [ -d "$SRC/tests/evidence_units" ] && rsync -a "$SRC/tests/evidence_units/" "$T/tests/evidence_units/"
   mkdir -p "$T/agent_runs"
   rsync -a "$SRC/agent_runs/TEMPLATE_agent_run_report.md" "$T/agent_runs/TEMPLATE_agent_run_report.md"
   rsync -a "$SRC/agent_runs/TEMPLATE_critic_report.md" "$T/agent_runs/TEMPLATE_critic_report.md"
@@ -197,6 +198,7 @@ REQUIRED_FILES = [
     "harness/econ_method_advisory_policy.yml",
     "harness/aea_replication_policy.yml",
     "harness/completion_attestation_policy.yml",
+    "harness/evidence_unit_policy.yml",
     "harness/status_label_policy.yml",
     "harness/context_budget.yml",
     "harness/context_graph_policy.yml",
@@ -226,6 +228,8 @@ REQUIRED_FILES = [
     "templates/aea_data_package_manifest.yml",
     "templates/evidence_delta_record.json",
     "templates/completion_attestation.yml",
+    "templates/evidence_unit.yml",
+    "templates/result_admission.yml",
     "templates/CURRENT_STATE.md",
     "templates/NEXT_ACTION.md",
     "templates/update_ledger_entry.md",
@@ -239,6 +243,8 @@ CHECKS = {
     "architecture_freeze": "checks/check_architecture_freeze.py",
     "progress_semantics": "checks/check_progress_semantics.py",
     "execution_envelope": "checks/check_execution_envelope.py",
+    "evidence_units": "checks/check_evidence_units.py",
+    "parser_benchmark": "checks/check_parser_benchmark.py",
     "operating_dashboard": "checks/check_operating_dashboard.py",
     "next_action": "checks/check_next_action.py",
     "stale_triage": "checks/check_stale_triage.py",

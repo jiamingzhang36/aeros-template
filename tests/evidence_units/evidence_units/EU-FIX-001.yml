@@ -1,0 +1,19 @@
+evidence_unit_id: EU-FIX-001
+unit_type: literature_extract
+source_artifact: tests/parser/html_working_paper_case.html
+source_artifact_sha256: fixture-not-a-real-paper-hash
+locator:
+  page: 1
+  section: Abstract
+  span: "state estimate CA 0.42"
+evidence_function: gap_verification
+extracted_assertion: "The fixture reports a synthetic table cell for parser addressability."
+limits:
+  - "Synthetic fixture only; not admissible research evidence."
+machine_status: locator_verified
+admission_status: not_admitted
+claim_effect: none
+does_not_prove:
+  - "scientific truth"
+  - "claim support"
+  - "gate approval"

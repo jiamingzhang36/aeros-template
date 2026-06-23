@@ -14,6 +14,8 @@ profiles:
       - check_action_spec.py
       - check_execution_envelope.py
       - check_progress_semantics.py
+      - check_evidence_units.py
+      - check_parser_benchmark.py
       - check_session_scope.py
       - check_execution_profiles.py
       - check_readiness_vector.py

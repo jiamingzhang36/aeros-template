@@ -109,8 +109,8 @@ def execute_in_isolated_worktree(
     root = root.resolve()
     if not (root / ".git").exists():
         return ExecutionEnvelopeResult(False, 1, message="root is not a git repository")
-    if not envelope.write_roots:
-        return ExecutionEnvelopeResult(False, 1, message="envelope declares no write_roots")
+    if not envelope.write_roots and envelope.expected_outputs:
+        return ExecutionEnvelopeResult(False, 1, message="read-only envelope must not declare expected outputs")
 
     with tempfile.TemporaryDirectory(prefix="aeros_envelope_") as tmp_name:
         worktree = Path(tmp_name) / "worktree"
@@ -141,8 +141,8 @@ def execute_in_isolated_worktree(
             elif missing:
                 message = "expected outputs missing"
             else:
-                accepted = _copy_back(worktree, root, observed)
-                message = "accepted declared writes"
+                accepted = _copy_back(worktree, root, observed) if envelope.write_roots else ()
+                message = "accepted declared writes" if envelope.write_roots else "read-only action completed"
         except subprocess.TimeoutExpired:
             return_code = 124
             observed = _status_paths(worktree)

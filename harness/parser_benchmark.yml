@@ -28,6 +28,24 @@ fixture_cases:
     expected_doi: "10.0000/aeros.parser.fixture"
     expected_table_text: "state estimate CA 0.42"
     min_chars: 180
+  - id: false_fulltext_cloudflare_challenge
+    bucket: html_working_paper
+    path: tests/parser/false_fulltext_cloudflare.html
+    should_be_rejected: true
+    expected_negative_markers:
+      - "Checking if the site connection is secure"
+      - "Enable JavaScript and cookies"
+    forbidden_target_title: "Target Economics Article"
+    min_chars: 80
+  - id: false_fulltext_spa_shell
+    bucket: html_working_paper
+    path: tests/parser/false_fulltext_spa_shell.html
+    should_be_rejected: true
+    expected_negative_markers:
+      - "You need to enable JavaScript to run this app"
+      - "root"
+    forbidden_target_title: "Target Economics Article"
+    min_chars: 50
 metrics:
   - page_addressability
   - table_recovery
