@@ -17,6 +17,27 @@ How to read this ledger:
 
 ## 2026-06-23
 
+### 2026-06-23 - Preserve project update ledgers during framework sync
+
+**Commit(s)**: pending
+
+**Action**: Fix `tools/sync_aeros_latest.zsh` so downstream projects keep their own
+`decisions/update_ledger.md` once it exists. Template sync still seeds the file for
+new projects, but it no longer overwrites project-specific commit tracking.
+
+**Alignment**: Prevents framework rollout from erasing the very audit trail that
+guards against drift and fake completion.
+
+**Non-goal**: Does not merge template and project ledgers automatically or repair old
+project ledger gaps by itself.
+
+**Drift risk**: Existing projects may miss new template ledger examples. Mitigation:
+ledger structure is enforced by `check_update_ledger.py`; framework changes remain in
+git history and revision logs.
+
+**Next check**: Re-sync CMPD and confirm its project-specific ledger entry survives
+while smoke remains green.
+
 ### 2026-06-23 - ClaimVector advisory compiler and envelope coverage v2
 
 **Commit(s)**: `66c2e43`

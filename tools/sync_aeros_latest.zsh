@@ -56,7 +56,9 @@ for T in "${TARGETS[@]}"; do
   fi
   [ -f "$SRC/docs/architecture_v0_5.md" ] && rsync -a "$SRC/docs/architecture_v0_5.md" "$T/docs/architecture_v0_5.md"
   [ -f "$SRC/docs/design/architecture_freeze_v1.md" ] && rsync -a "$SRC/docs/design/architecture_freeze_v1.md" "$T/docs/design/architecture_freeze_v1.md"
-  [ -f "$SRC/decisions/update_ledger.md" ] && rsync -a "$SRC/decisions/update_ledger.md" "$T/decisions/update_ledger.md"
+  if [ ! -f "$T/decisions/update_ledger.md" ]; then
+    [ -f "$SRC/decisions/update_ledger.md" ] && rsync -a "$SRC/decisions/update_ledger.md" "$T/decisions/update_ledger.md"
+  fi
   if [ ! -f "$T/decisions/human_gate_queue.yml" ]; then
     rsync -a "$SRC/decisions/human_gate_queue.yml" "$T/decisions/human_gate_queue.yml"
   fi
