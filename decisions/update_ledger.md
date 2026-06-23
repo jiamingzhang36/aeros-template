@@ -1157,3 +1157,31 @@ fixture and detection assertion.
 **Next check**: Run `python3 checks/check_adversarial_benchmark.py` and smoke
 profile; then add a real EstimandDataContract vertical slice in a project before
 expanding more scaffolds.
+
+### 2026-06-23 — Add stale-registry and session-scope adversarial fixtures
+
+**Commit(s)**: `pending`
+
+**Action**: Added an executable `stale_registry` fixture that mutates a registered
+result artifact after provenance is recorded and requires `check_provenance.py`
+to detect the sha256 mismatch. Extended `check_session_scope.py` with semantic
+fixtures that create temporary git projects, start a data session, modify
+`paper/draft.md` and `evidence/claim_registry.md`, and require
+`CLAIM_SCOPE_DRIFT` / `AUTHORITY_DRIFT` verdicts.
+
+**Alignment**: Continues the vertical-slice correction: adversarial scenarios now
+prove concrete detector behavior rather than merely listing failure names. It
+also proves the session guard's semantic drift labels are behavioral, not just
+taxonomy strings.
+
+**Non-goal**: Does not implement all adversarial scenarios, sync real projects,
+prove absence of unknown failures, decide claim validity, or replace human gate
+judgment.
+
+**Drift risk**: Fixture checks can become brittle if they rely on incidental git
+output or broad path rules. Keep each fixture small, deterministic, and tied to
+one expected detector.
+
+**Next check**: Run `python3 checks/check_session_scope.py`,
+`python3 checks/check_adversarial_benchmark.py`, and smoke profile; then add
+`false_fulltext` as the next executable fixture.

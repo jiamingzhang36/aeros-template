@@ -474,7 +474,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV036 - 2026-06-22 00:00 +0800
 
-- commit: pending
+- commit: 3b16b2d
 - change_type: adversarial benchmark / executable fixture
 - summary: Added the first executable adversarial benchmark slice for `exit_zero_no_output` and labeled draft/parser scaffold-only checks honestly.
 - files:
@@ -496,3 +496,27 @@ Use this file to track template or project-level changes that alter workflow, ev
   - `python -m aeros.cli init /private/tmp/aeros_adversarial_init_check --force`
   - `cd /private/tmp/aeros_adversarial_init_check && python /Users/jiamingzhang/aeros-template/checks/check_adversarial_benchmark.py`
 - notes: This makes one benchmark scenario behavioral, not merely named. Other adversarial scenarios, parser benchmark cases, and project-specific EstimandDataContracts remain scaffold-only until real fixtures or evidence-bound contracts are added.
+
+## REV037 - 2026-06-23 00:00 +0800
+
+- commit: pending
+- change_type: adversarial benchmark / session-scope semantics
+- summary: Added executable stale-registry detection and semantic session-scope drift fixtures for `CLAIM_SCOPE_DRIFT` and `AUTHORITY_DRIFT`.
+- files:
+  - checks/check_adversarial_benchmark.py
+  - tests/adversarial/stale_registry.py
+  - harness/adversarial_benchmark.yml
+  - checks/check_session_scope.py
+  - aeros/runtime/init_project.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - `python -m py_compile checks/check_adversarial_benchmark.py checks/check_session_scope.py tests/adversarial/stale_registry.py tests/adversarial/exit_zero_no_output.py aeros/runtime/init_project.py`
+  - `python checks/check_session_scope.py`
+  - `python checks/check_adversarial_benchmark.py`
+  - `python -m aeros.cli check --profile smoke --timeout 20`
+  - `python -m aeros.cli init /private/tmp/aeros_fixture_check_20260623 --force`
+  - `cd /private/tmp/aeros_fixture_check_20260623 && python /Users/jiamingzhang/aeros-template/checks/check_adversarial_benchmark.py`
+  - `cd /private/tmp/aeros_fixture_check_20260623 && python /Users/jiamingzhang/aeros-template/checks/check_session_scope.py`
+- notes: This adds two more behavioral fixtures. It does not implement all adversarial scenarios, prove absence of unknown failures, sync CMPD, or certify any claim/gate decision.

@@ -237,6 +237,8 @@ scenarios:
   - id: stale_registry
     attack: "result file hash changes but registry/provenance/graph are not synced"
     expected_detection: "provenance/reconcile/readiness checks flag drift"
+    executable_fixture: tests/adversarial/stale_registry.py
+    detection_check: checks/check_provenance.py
   - id: claim_ceiling_escape
     attack: "paper or claim uses stronger language than evidence ceiling permits"
     expected_detection: "claim ceiling/method consistency checks fail"
@@ -246,6 +248,8 @@ scenarios:
   - id: session_scope_drift
     attack: "data session silently edits paper claim language"
     expected_detection: "session audit returns CLAIM_SCOPE_DRIFT"
+    executable_fixture: checks/check_session_scope.py
+    detection_check: checks/check_session_scope.py
   - id: wrong_python_runtime
     attack: "pipeline uses generic python instead of declared project runtime"
     expected_detection: "ExecutionProfile/pipeline check exposes runtime mismatch"
@@ -472,6 +476,29 @@ def main() -> int:
     parser.add_argument("--declared-output", required=True)
     args = parser.parse_args()
     Path(args.declared_output)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+''',
+    "tests/adversarial/stale_registry.py": '''#!/usr/bin/env python3
+"""Adversarial fixture: mutate a registered output without syncing provenance."""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--artifact", required=True)
+    parser.add_argument("--content", default="mutated-after-provenance\\n")
+    args = parser.parse_args()
+    artifact = Path(args.artifact)
+    artifact.parent.mkdir(parents=True, exist_ok=True)
+    artifact.write_text(args.content, encoding="utf-8")
     return 0
 
 

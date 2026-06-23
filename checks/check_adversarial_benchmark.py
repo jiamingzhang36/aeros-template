@@ -10,6 +10,8 @@ confirms AEROS detects the no-op completion.
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
+import json
 import subprocess
 import sys
 import tempfile
@@ -18,8 +20,10 @@ import yaml
 
 
 PATH = Path("harness/adversarial_benchmark.yml")
-FIXTURE = Path("tests/adversarial/exit_zero_no_output.py")
+EXIT_ZERO_FIXTURE = Path("tests/adversarial/exit_zero_no_output.py")
+STALE_REGISTRY_FIXTURE = Path("tests/adversarial/stale_registry.py")
 NOOP_CHECK = Path("checks/check_noop_runs.py")
+PROVENANCE_CHECK = Path("checks/check_provenance.py")
 REQUIRED = {
     "false_fulltext",
     "exit_zero_no_output",
@@ -35,6 +39,14 @@ REQUIRED = {
 def _write_text(path: Path, text: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def _sha256(path: Path) -> str:
+    hasher = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(8192), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
 
 
 def _resolve_project_or_template(root: Path, rel: Path) -> Path:
@@ -55,10 +67,10 @@ def _resolve_project_or_template(root: Path, rel: Path) -> Path:
 
 def _exercise_exit_zero_no_output(root: Path) -> list[str]:
     failures: list[str] = []
-    fixture_path = _resolve_project_or_template(root, FIXTURE)
+    fixture_path = _resolve_project_or_template(root, EXIT_ZERO_FIXTURE)
     noop_check_path = _resolve_project_or_template(root, NOOP_CHECK)
     if not fixture_path.exists():
-        return [f"missing executable fixture {FIXTURE}"]
+        return [f"missing executable fixture {EXIT_ZERO_FIXTURE}"]
     if not noop_check_path.exists():
         return [f"missing detection check {NOOP_CHECK}"]
 
@@ -127,6 +139,70 @@ gate_decisions: []
     return failures
 
 
+def _exercise_stale_registry(root: Path) -> list[str]:
+    failures: list[str] = []
+    fixture_path = _resolve_project_or_template(root, STALE_REGISTRY_FIXTURE)
+    provenance_check_path = _resolve_project_or_template(root, PROVENANCE_CHECK)
+    if not fixture_path.exists():
+        return [f"missing executable fixture {STALE_REGISTRY_FIXTURE}"]
+    if not provenance_check_path.exists():
+        return [f"missing detection check {PROVENANCE_CHECK}"]
+
+    with tempfile.TemporaryDirectory(prefix="aeros_adv_stale_registry_") as tmp_name:
+        tmp = Path(tmp_name)
+        result_id = "R_ADV_STALE_001"
+        artifact = tmp / "outputs" / "tables" / "stale.csv"
+        _write_text(artifact, "before\n")
+        _write_text(
+            tmp / "evidence" / "result_index.csv",
+            "result_id,path,script_or_source,created_date,linked_claims\n"
+            f"{result_id},outputs/tables/stale.csv,tests/adversarial/stale_registry.py,2026-06-23,\n",
+        )
+        _write_text(
+            tmp / "outputs" / ".provenance" / f"{result_id}.json",
+            json.dumps(
+                {
+                    "result_id": result_id,
+                    "output_path": "outputs/tables/stale.csv",
+                    "created_at": "2026-06-23T00:00:00+00:00",
+                    "script_or_source": "tests/adversarial/stale_registry.py",
+                    "sha256": _sha256(artifact),
+                },
+                indent=2,
+            )
+            + "\n",
+        )
+        fixture_run = subprocess.run(
+            [
+                sys.executable,
+                str(fixture_path.resolve()),
+                "--artifact",
+                str(artifact),
+            ],
+            cwd=tmp,
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+        if fixture_run.returncode != 0:
+            failures.append(f"stale_registry fixture did not exit 0: {fixture_run.stderr.strip()}")
+        detection = subprocess.run(
+            [sys.executable, str(provenance_check_path.resolve())],
+            cwd=tmp,
+            capture_output=True,
+            text=True,
+            timeout=20,
+            check=False,
+        )
+        output = f"{detection.stdout}\n{detection.stderr}"
+        if detection.returncode == 0:
+            failures.append("stale_registry was not detected by check_provenance.py")
+        if result_id not in output or "sha256 mismatch" not in output:
+            failures.append("check_provenance.py did not identify the stale registry sha256 mismatch")
+    return failures
+
+
 def main() -> int:
     root = Path.cwd()
     if not PATH.exists():
@@ -144,18 +220,27 @@ def main() -> int:
         for item in sorted(missing):
             failures.append(f"missing scenario {item}")
     exit_zero = next((item for item in scenario_rows if item.get("id") == "exit_zero_no_output"), {})
-    if exit_zero.get("executable_fixture") != str(FIXTURE):
+    if exit_zero.get("executable_fixture") != str(EXIT_ZERO_FIXTURE):
         failures.append("exit_zero_no_output missing executable_fixture wiring")
     if exit_zero.get("detection_check") != str(NOOP_CHECK):
         failures.append("exit_zero_no_output missing detection_check wiring")
+    stale_registry = next((item for item in scenario_rows if item.get("id") == "stale_registry"), {})
+    if stale_registry.get("executable_fixture") != str(STALE_REGISTRY_FIXTURE):
+        failures.append("stale_registry missing executable_fixture wiring")
+    if stale_registry.get("detection_check") != str(PROVENANCE_CHECK):
+        failures.append("stale_registry missing detection_check wiring")
     failures.extend(_exercise_exit_zero_no_output(root))
+    failures.extend(_exercise_stale_registry(root))
 
     if failures:
         print("FAIL: adversarial benchmark problems detected:")
         for failure in failures:
             print(f"- {failure}")
         return 1
-    print("PASS: adversarial benchmark scaffold is valid; executable fixture exit_zero_no_output detected")
+    print(
+        "PASS: adversarial benchmark scaffold is valid; executable fixtures "
+        "exit_zero_no_output and stale_registry detected"
+    )
     return 0
 
 

@@ -375,3 +375,17 @@ entries:
     resolved_at: "2026-06-22"
     resolution_commit: "3b16b2d"
     notes: "This starts adversarial execution with one fixture. Other scenarios remain scaffold-only until fixtures are added; parser and EstimandDataContract checks now label scaffold-only states explicitly."
+  - id: AEROS-IMPROVE-028
+    created_at: "2026-06-23"
+    updated_at: "2026-06-23"
+    status: resolved
+    priority: high
+    area: adversarial-benchmark
+    source: user_requested_vertical_slices
+    issue: "Session-scope drift and stale-registry scenarios were still named adversarial cases without executable fixtures proving AEROS can detect them."
+    proposed_fix: "Add executable `stale_registry` fixture that mutates a result artifact after provenance is recorded, require `check_provenance.py` to detect the hash mismatch, and add session-scope semantic fixtures that force `CLAIM_SCOPE_DRIFT` and `AUTHORITY_DRIFT` in temporary git projects."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-23"
+    resolution_commit: "pending"
+    notes: "This keeps adversarial benchmark progress vertical: three scenarios now execute behaviorally; remaining scenarios stay scaffold-only until fixtures are implemented."
