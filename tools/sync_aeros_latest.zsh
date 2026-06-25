@@ -305,11 +305,22 @@ def ensure_manifest_wiring(path: Path) -> bool:
                 lines = text.splitlines(keepends=True)
                 out = []
                 inserted = False
-                for line in lines:
+                for i, line in enumerate(lines):
                     out.append(line)
                     if not inserted and line.strip() == "required_files:":
-                        indent = line[: len(line) - len(line.lstrip())] + "  "
-                        out.append(f"{indent}- {required}\n")
+                        key_indent = line[: len(line) - len(line.lstrip())]
+                        # Match the EXISTING list-item indentation, not a hardcoded
+                        # key+2. A manifest whose items sit at the key's own indent
+                        # would otherwise get a mismatched insert and break YAML.
+                        item_indent = key_indent + "  "
+                        for nxt in lines[i + 1:]:
+                            s = nxt.strip()
+                            if not s:
+                                continue
+                            if s.startswith("- "):
+                                item_indent = nxt[: len(nxt) - len(nxt.lstrip())]
+                            break
+                        out.append(f"{item_indent}- {required}\n")
                         inserted = True
                 text = "".join(out)
             elif "checks:" in text:

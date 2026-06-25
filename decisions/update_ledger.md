@@ -17,6 +17,20 @@ How to read this ledger:
 
 ## 2026-06-25
 
+### 2026-06-25 - Fix sync manifest-wiring indentation bug (AEROS-IMPROVE-032)
+
+**Commit(s)**: `pending`
+
+**Action**: `tools/sync_aeros_latest.zsh` ensure_manifest_wiring inserted new required_files items at a hardcoded key-indent+2, ignoring the existing list's indentation. A project whose required_files items sit at the key's own indent (MAHA) got a mismatched insert that broke `project_manifest.yml`, cascading into 8+ harness failures (cockpit/context/stale/graph all parse the manifest). Fixed to detect and match the existing list-item indentation (fallback key+2 for empty lists). Verified on 4-space/6-space/empty fixtures; the old logic reproduced the exact "while parsing a block mapping" error.
+
+**Alignment**: Forward-only sync must never corrupt a downstream project's manifest. Found when a sync into MAHA broke it (and inflated MAHA from 7 to 20 fails).
+
+**Non-goal**: Only changes insertion indentation, not which files are wired. The analogous `checks:` insertion is lower-risk (column-0 convention) and left as-is.
+
+**Drift risk**: Low; purely structural.
+
+**Next check**: On the next real sync into a project, confirm project_manifest.yml stays valid YAML.
+
 ### 2026-06-25 - Scope ledger check to framework commits (AEROS-IMPROVE-031)
 
 **Commit(s)**: `16bd7ed`
