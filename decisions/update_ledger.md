@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-25 - Fix sync manifest-wiring indentation bug (AEROS-IMPROVE-032)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `3025c69`
 
 **Action**: `tools/sync_aeros_latest.zsh` ensure_manifest_wiring inserted new required_files items at a hardcoded key-indent+2, ignoring the existing list's indentation. A project whose required_files items sit at the key's own indent (MAHA) got a mismatched insert that broke `project_manifest.yml`, cascading into 8+ harness failures (cockpit/context/stale/graph all parse the manifest). Fixed to detect and match the existing list-item indentation (fallback key+2 for empty lists). Verified on 4-space/6-space/empty fixtures; the old logic reproduced the exact "while parsing a block mapping" error.
 
