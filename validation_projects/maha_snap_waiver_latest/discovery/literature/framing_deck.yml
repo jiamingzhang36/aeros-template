@@ -1,0 +1,71 @@
+idea: >
+  Ex-ante measurement of how the 2025-2026 state SNAP food-restriction waiver
+  policy-rule vectors map onto low-income-proxy purchase baskets (NielsenIQ),
+  framed as accounting exposure rather than behavioral/welfare response.
+
+# Framing cards anchored on REAL, DOI-verified closest rivals (found + verified
+# 2026-06-25 via literature search; not invented). Each caveat states the threat
+# the rival raises for MAHA's ex-ante accounting-exposure object.
+cards:
+  - id: GAP1
+    function: gap-verification
+    framework: "Retail-panel/scanner measurement of how SNAP benefits are actually spent (Hastings-Shapiro retail-panel approach)."
+    rationale: >
+      The closest empirical rival measures SNAP food spending and the marginal
+      propensity to consume from a retail panel. MAHA's gap is that no published
+      work measures the EX-ANTE exposure of low-income-proxy purchase baskets to
+      the specific 2025-2026 state waiver policy-rule vectors -- prior empirical
+      work measures realized spending/MPC, not policy-rule basket exposure.
+    role: motivation
+    caveat: >
+      Hastings-Shapiro measures realized spending and (partial) fungibility, not
+      ex-ante policy-rule exposure; using it as the rival risks conflating realized
+      behavior with MAHA's accounting-exposure object.
+    decision: proposed
+    anchors:
+      - title: "How Are SNAP Benefits Spent? Evidence from a Retail Panel"
+        year: 2018
+        kind: empirical
+        doi: "10.1257/aer.20170866"
+        verification_status: verified
+  - id: METHOD1
+    function: method-identification
+    framework: "Ex-ante microsimulation of a SNAP sugar-sweetened-beverage restriction (Choi-Wright-Bleich modeling)."
+    rationale: >
+      Closest method rival: builds an ex-ante model of restricting SSBs from SNAP
+      to project effects. MAHA adapts the ex-ante microsimulation idea but stops at
+      policy-rule purchase-basket EXPOSURE (an accounting object), not projected
+      consumption/health, to avoid causal/behavioral identification (its threats F04/F09).
+    role: measurement-strategy
+    caveat: >
+      Choi et al. project behavioral/health outcomes under modeling assumptions;
+      MAHA must NOT inherit those assumptions -- its object is ex-ante accounting
+      exposure, not projected consumption response.
+    decision: proposed
+    anchors:
+      - title: "Modeling the Impact of Restricting Sugar-Sweetened Beverages from SNAP Purchases on Children's Consumption and Risk of Dental Caries and Obesity"
+        year: 2020
+        kind: modeling
+        doi: "10.1111/1475-6773.13365"
+        verification_status: verified
+  - id: MECH1
+    function: theory-mechanism
+    framework: "Restriction -> consumption-change mechanism via NHANES microsimulation (Choi-Wright-Bleich 2021)."
+    rationale: >
+      Articulates the behavioral mechanism by which a SNAP SSB restriction would
+      change consumption and downstream health. This is the mechanism MAHA's
+      measurement BOUNDS but deliberately does not estimate: MAHA measures ex-ante
+      exposure and leaves the behavioral response (fungibility/substitution) as an
+      explicit out-of-scope mechanism.
+    role: mechanism-tested
+    caveat: >
+      The restriction->behavior mechanism depends on benefit fungibility/substitution,
+      which is contested (cf. Hastings-Shapiro mental-accounting). MAHA does not test
+      this mechanism; treating measured exposure as behavior would overreach.
+    decision: proposed
+    anchors:
+      - title: "Impact of Restricting Sugar-Sweetened Beverages From the Supplemental Nutrition Assistance Program on Children's Health"
+        year: 2021
+        kind: modeling
+        doi: "10.1016/j.amepre.2020.08.023"
+        verification_status: verified
