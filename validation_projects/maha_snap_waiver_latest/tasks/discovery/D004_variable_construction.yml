@@ -1,0 +1,63 @@
+task_id: D004_variable_construction
+stage: discovery
+depends_on:
+- D003_design_options
+- D002_data_scouting
+- D005_data_probe
+gate: G2
+automation_class: auto_rerunnable
+evidence_receipt_required: false
+receipt_path: ''
+gate_status: pending
+allowed_skills:
+- data-inventory
+- data-codebook
+- data-quality-checker
+- feature-engineering
+recommended_skills:
+- data-inventory
+- data-codebook
+- data-quality-checker
+- feature-engineering
+required_skill_classes:
+- data_scouting
+goal: "G2 Measurement. For every key variable the candidate designs need, specify\
+  \ how it is constructed from a real data source and whether it can actually be built.\
+  \ This is the bridge between the data (G1) and the designs (G3): a design that needs\
+  \ a variable that cannot be constructed is not feasible.\nRead the design options\
+  \ (the variables each design's treatment/outcome/ identification needs) and the\
+  \ data inventory (the available sources). Write discovery/variable_construction.md\
+  \ with this front matter:\n\n  ---\n  status: filled\n  variables:\n    - name:\
+  \ exposure_or_treatment\n      role: treatment        # treatment|outcome|control|instrument|moderator|unit-key|running-variable\n\
+  \      definition: \"project-specific variable definition\"\n      source_data_id:\
+  \ D001   # MUST exist in data_inventory.csv\n      construction: \"project-specific\
+  \ construction rule\"\n      validity_concern: \"main measurement or linkage concern\"\
+  \n      constructible: uncertain # yes | no | uncertain (be honest)\n    - name:\
+  \ outcome_variable\n      role: outcome\n      ...\n  ---\n\nand a \"## <variable\
+  \ name>\" prose section per variable.\nRequirements: - Define at least one treatment\
+  \ and one outcome variable. - Every variable maps to a real source_data_id from\
+  \ data_inventory.csv. - Mark constructible honestly (no/uncertain when the data\
+  \ does not clearly\n  support it); do not mark everything 'yes'. The constructible\
+  \ flags are what\n  G1-G3 feasibility reads.\n"
+inputs:
+- discovery/design_options.md
+- discovery/data_inventory.csv
+- discovery/literature/framing_deck.yml
+- project_manifest.yml
+allowed_outputs:
+- discovery/variable_construction.md
+forbidden_actions:
+- Do not write anywhere under data/raw/ (enforced by a hook).
+- Do not invent data sources; every source_data_id must already be in data_inventory.csv.
+- Do not mark a variable constructible=yes unless the named source plausibly supports
+  it; prefer 'uncertain' when unsure.
+checks:
+- check_variable_construction.py
+retry_policy:
+  max_retries: 2
+escalate_if:
+- a treatment or outcome variable is missing, or a source_data_id is not in the inventory
+- checks still fail after max_retries
+budget:
+  max_agent_calls: 3
+  max_dollars: 1.5

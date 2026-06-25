@@ -1,0 +1,83 @@
+version: 1
+policy: AEROS-RESULT-ADAPTER-CONTRACT-001
+principle: Result numbers should be registered at the estimation call boundary, with specs extracted from fitted objects rather than agent prose.
+maturity:
+  phase: 0
+  status: one adapter implemented (python_statsmodels); others contract-only
+  validated_on_real_project: true
+  validated_on: >
+    CMPD 2026-06-17 — clustered OLS on analysis_ready_with_status.csv extracted
+    by the statsmodels adapter, registered and synced end to end (R_PHASE0_*).
+    The run found and fixed an eligibility over-claim bug (substring "rd" in
+    "hardness"); non-destructive sync preserved all 26 prior results.
+  notes: >
+    register-result + sync-result-index work end to end; sync is non-destructive
+    (preserves curated columns/rows and backs up before overwrite). Other adapters
+    (linearmodels, fixest) remain contract-only until similarly validated.
+registry: evidence/result_registry.csv
+required_record_fields:
+  - result_id
+  - values_json
+  - spec_id
+  - estimator
+  - formula
+  - fixed_effects_json
+  - cluster_json
+  - sample_filters_json
+  - code_ref_json
+  - data_snapshot_hash
+  - run_event_id
+  - output_path
+  - output_artifact_hash
+  - claim_type_eligibility
+optional_reproducibility_fields:
+  - reproducible_command_json
+  - public_endpoint
+  - endpoint_reproducibility_status
+endpoint_reproducibility:
+  inspiration: Econstellar-style reproducible endpoint or command lineage
+  allowed_statuses:
+    - not_applicable
+    - not_available
+    - local_command_recorded
+    - public_endpoint_recorded
+    - verified_public_endpoint
+  rules:
+    - public endpoint statuses require an http(s) public_endpoint
+    - local_command_recorded requires reproducible_command_json
+    - endpoint metadata strengthens reproducibility auditability but does not certify estimate correctness
+adapter_contract:
+  python_statsmodels:
+    status: implemented
+    implementation: aeros/paper_ci/adapters.py::payload_from_statsmodels
+    extract:
+      estimator: fit/model class name
+      formula: model formula when available
+      fixed_effects: heuristic — C(var) absorption terms in formula (override supported)
+      cluster: covariance/cluster kwargs when available
+      sample_filters: wrapper-provided mask/query metadata
+  python_linearmodels:
+    status: contract_defined
+    extract:
+      estimator: PanelOLS/IV model class
+      formula: formula attribute when available
+      fixed_effects: entity/time/other effects metadata
+      cluster: covariance config
+      sample_filters: wrapper-provided mask/query metadata
+  r_fixest:
+    status: contract_defined
+    extract:
+      estimator: feols/feglm/fepois/iv
+      formula: formula(fit)
+      fixed_effects: fixef variables
+      cluster: vcov/cluster metadata
+      sample_filters: wrapper-provided data mask/query metadata
+claim_type_eligibility:
+  default_ols_or_panel: associational
+  descriptive_table: descriptive
+  iv_did_event_study_rdd: quasi_experimental_suggestive
+  limited_causal: requires identification_gate artifact and human claim gate
+hard_boundary:
+  - adapters may register what was run
+  - adapters may not certify identification validity
+  - adapters may not approve claims or gates

@@ -1,0 +1,87 @@
+version: 1
+policy: AEROS-STATE-TRANSITION-001
+principle: Research state advances through evidence-producing transitions, not narrative assertions.
+states:
+  unknown:
+    can_transition_to: [inventoried]
+  inventoried:
+    requires:
+      - discovery/data_inventory.csv
+    can_transition_to: [scanned]
+  scanned:
+    requires:
+      - data/data_state.yml
+    can_transition_to: [gap_planned]
+  gap_planned:
+    requires:
+      - data/data_gap_plan.yml
+    can_transition_to: [probe_planned]
+  probe_planned:
+    requires:
+      - data/probes/probe_plan.yml
+    can_transition_to: [probe_passed, probe_failed, probe_blocked]
+  probe_passed:
+    requires:
+      - data/probes/*/probe_metadata.yml
+    can_transition_to: [backfill_allowed]
+  probe_failed:
+    requires:
+      - data/probes/*/probe_metadata.yml
+    can_transition_to: [source_rejected, probe_repair_required]
+  probe_blocked:
+    requires:
+      - receipt_backed_exception
+    can_transition_to: [probe_repair_required, backfill_allowed]
+  source_rejected:
+    can_transition_to: [inventoried]
+  probe_repair_required:
+    can_transition_to: [probe_planned]
+  backfill_allowed:
+    requires:
+      - passing_probe_or_scoped_exception
+    can_transition_to: [raw_collected]
+  raw_collected:
+    requires:
+      - data/raw/
+    can_transition_to: [validated]
+  validated:
+    requires:
+      - validation_report
+    can_transition_to: [result_registered]
+  result_registered:
+    requires:
+      - evidence/result_index.csv
+      - outputs/.provenance/
+    can_transition_to: [claim_supported]
+  claim_supported:
+    requires:
+      - evidence/evidence_ledger.csv
+      - evidence/claim_registry.md
+    can_transition_to: [gate_ready]
+  gate_ready:
+    requires:
+      - decisions/gates/*_decision_packet.md
+    can_transition_to: [paper_ready]
+  paper_ready:
+    requires:
+      - paper/draft.md
+    can_transition_to: [replication_ready, release_blocked]
+  replication_ready:
+    requires:
+      - replication/
+    can_transition_to: [release_ready]
+  release_blocked:
+    can_transition_to: [release_ready]
+  release_ready:
+    requires:
+      - compliance/release_checklist.md
+    can_transition_to: []
+non_skip_rules:
+  - from: probe_planned
+    cannot_jump_to: [raw_collected, result_registered, claim_supported, paper_ready]
+  - from: probe_failed
+    cannot_jump_to: [backfill_allowed, raw_collected, result_registered, claim_supported]
+  - from: raw_collected
+    cannot_jump_to: [claim_supported, paper_ready]
+  - from: action_receipt_written
+    cannot_jump_to: [claim_supported]

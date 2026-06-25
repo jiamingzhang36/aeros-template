@@ -1,0 +1,19 @@
+evidence_unit_id: EU-TEMPLATE-001
+unit_type: literature_extract
+source_artifact: discovery/literature/extraction_cards/P000.md
+source_artifact_sha256: "<sha256>"
+locator:
+  page: "<page>"
+  section: "<section>"
+  span: "<quoted or paraphrased span locator>"
+evidence_function: gap_verification
+extracted_assertion: "<machine-extracted proposition>"
+limits:
+  - "Machine extraction only; requires human admission before claim use."
+machine_status: parsed
+admission_status: not_admitted
+claim_effect: none
+does_not_prove:
+  - "scientific truth"
+  - "claim support"
+  - "gate approval"

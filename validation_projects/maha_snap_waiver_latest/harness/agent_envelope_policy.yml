@@ -1,0 +1,25 @@
+version: "0.1"
+policy: AEROS-AGENT-ENVELOPE-001
+mode: audit
+block_on_violation: true
+principle: >
+  Provider-backed agent tasks are not yet claimed to be fully sandboxed. In
+  audit mode, AEROS snapshots the project before and after each successful
+  agent call, blocks task acceptance on denied or undeclared writes, and writes
+  an audit artifact when a violation is detected.
+deny_roots:
+  - data/raw/
+  - decisions/approvals/
+  - aeros/state/
+allowed_runtime_outputs:
+  - agent_runs/agent_envelope_audits/
+must_block:
+  - denied_writes
+  - undeclared_writes
+  - sensitive_write_without_declared_output
+does_not_prove:
+  - full LLM-agent sandboxing
+  - safe provider/network behavior
+  - scientific validity
+  - claim support
+  - gate approval

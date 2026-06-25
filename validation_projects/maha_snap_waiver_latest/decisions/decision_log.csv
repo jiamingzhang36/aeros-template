@@ -1,0 +1,2 @@
+Date,Decision ID,Task ID,Agent Recommendation,Critic Verdict,Human Decision,Rationale,Owner,Follow-up
+2026-06-24T14:17:15+00:00,G10-approve-2026-06-24T14:17:15+00:00,human_gate,,,approve G10,"Human reviewer accepts the latest-structure G10 evidence packet for Paper 1 as a measurement/descriptive paper-package gate; no causal, demand, welfare, SNAP/EBT transaction, provider-output collection, public-release, or claim-upgrade authorization is granted.",Jiaming,

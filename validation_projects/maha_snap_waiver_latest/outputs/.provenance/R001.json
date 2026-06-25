@@ -1,0 +1,11 @@
+{
+  "result_id": "R001",
+  "output_path": "outputs/model_outputs/R001_policy_rule_measurement.md",
+  "created_at": "2026-06-15T01:46:20.166302+00:00",
+  "script_or_source": "code/99_make_all.py",
+  "sha256": "3efe790f65ab8f97f32c46e7ea3338608b45cdd8416391376631f183e3ab6027",
+  "artifact_type": "public-document-derived measurement dataset",
+  "claim_ceiling": "measurement",
+  "restricted_microdata_exported": "false",
+  "notes": "Alias for R001_policy_rule_measurement. Supports design heterogeneity and scope-plus-specificity claims; not a behavioral effect."
+}

@@ -1,0 +1,13 @@
+{
+  "artifact": "outputs/audit_runs/expanded_ai_outputs.jsonl",
+  "claim_boundary": "provider collection records are research observations only; they do not approve claim upgrades, paper language, or public release",
+  "cost_usd": 0.0,
+  "created_at": "2026-06-24T14:28:25+00:00",
+  "input_grid": "outputs/audit_runs/expanded_prompt_grid.csv",
+  "model": "mock-research-model",
+  "output_path": "outputs/audit_runs/expanded_ai_outputs.jsonl",
+  "provider": "mock",
+  "rows": 12,
+  "script_or_source": "aeros collect",
+  "sha256": "a44971b1ed9fbc1c55f0020d4894fd9049b44f560f284430b363039bbe1574dc"
+}

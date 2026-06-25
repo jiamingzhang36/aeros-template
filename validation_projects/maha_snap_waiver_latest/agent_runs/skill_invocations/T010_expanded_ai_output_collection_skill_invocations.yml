@@ -1,0 +1,21 @@
+version: 1
+task_id: T010_expanded_ai_output_collection
+generated_at: '2026-06-24T14:28:36+00:00'
+contract_path: tasks/execution/T010_expanded_ai_output_collection.yml
+run_report_path: ''
+allowed_skills:
+- data-inventory
+- data-quality-checker
+recommended_skills:
+- data-inventory
+- data-quality-checker
+required_skill_classes: []
+skill_waivers:
+- skill_class: recommended_skills
+  scope: mechanical_revalidation
+  reason: Runtime wrote this receipt during mechanical revalidation of existing artifacts;
+    no external skill was invoked.
+  progress_label: mechanical_hygiene
+skills_used: []
+invocations: []
+verdict: pass

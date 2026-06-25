@@ -1,0 +1,1211 @@
+artifacts:
+  other:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.DS_Store
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/.git
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/.gitignore
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/Makefile
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/csl/chicago-author-date-17th-edition.csl
+    confidence: medium
+    action: link
+  data:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/settings.local.json
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/.claude/settings.local.json
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/README.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/manual_audit/README.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/manual_audit/nielsen_upc_manual_audit_completed_2024.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/manual_audit/nielsen_upc_manual_audit_completed_summary_2024.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/manual_audit/nielsen_upc_manual_audit_seed_2024.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/manual_audit/nielsen_upc_manual_audit_summary_2024.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/manual_audit/nielsen_upc_priority1_review_recommendations_2024.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/manual_audit/nielsen_upc_priority1_strict_sensitivity_2024.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/manual_audit/nielsen_upc_priority1_strict_sensitivity_2024.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/manual_audit/upc_category_overrides.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/.gitkeep
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/hardness_anchor_product_crosswalk.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/hardness_anchor_product_crosswalk.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/hardness_external_criterion_scaffold.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/hardness_external_criterion_scaffold.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_all_public_event_details.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_all_public_event_details.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_all_public_event_history.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_all_public_event_history.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_approved_curated_state_public_events.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_approved_curated_state_public_events.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_approved_paper_dataset.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_approved_paper_dataset.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_approved_public_event_details.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_approved_public_event_details.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_approved_public_event_history.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_approved_public_event_history.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_comments_hearings_module.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_comments_hearings_module.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_design_taxonomy.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_design_taxonomy.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_final_dataset.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_final_dataset.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_final_dataset_with_hardness.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_final_dataset_with_hardness.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_final_dataset_with_hardness_and_health_burden.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_final_dataset_with_hardness_and_health_burden.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_final_dataset_with_upstream_covariates.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_final_dataset_with_upstream_covariates.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_formal_coding_codebook.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_formal_coding_scaffold.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_formal_coding_scaffold.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_full_universe.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_full_universe.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_hardness_robustness.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_hardness_robustness.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_hardness_scores.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_hardness_scores.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_legal_challenges_module.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_legal_challenges_module.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_negative_public_signals.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_negative_public_signals.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_nonapproved_event_details.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_nonapproved_event_details.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_nonapproved_event_history.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_nonapproved_event_history.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_procurement_planning_module.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_procurement_planning_module.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_proposal_dataset.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_proposal_dataset.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_request_approval_design_change_final.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_request_approval_design_change_final.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_request_approval_design_change_scaffold.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_request_approval_design_change_scaffold.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_request_approval_hardness_deltas.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_request_approval_hardness_deltas.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_requested_hardness_scores.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_requested_hardness_scores.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_retailer_implementation_module.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_retailer_implementation_module.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_selection_mechanism_dataset.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_selection_mechanism_dataset.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_state_quarter_panel.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_state_quarter_panel.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_state_quarter_stage_model_panel.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_state_quarter_stage_model_panel.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_waivers_analysis.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_waivers_analysis.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_waivers_analysis_codebook.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_waivers_master.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_waivers_master.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_food_restriction_waivers_master_codebook.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_waiver_design_taxonomy_v2.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/snap_waiver_design_taxonomy_v2.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_admin_capacity_module.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_admin_capacity_module.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_attention_salience_covariates.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_attention_salience_covariates.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_governance_capacity_module.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_governance_capacity_module.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_health_burden_covariates.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_health_burden_covariates.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_upstream_covariates.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/state_upstream_covariates.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/processed/waiver_definitional_features.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/.gitkeep
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/google_trends/README.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/google_trends/google_trends_state_interest.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/google_trends/google_trends_state_interest_template.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/mg_pilot/README.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/mg_pilot/layer1_primary.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/mg_pilot/layer1_secondary_template.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/mg_pilot/source_packet_manifest.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/public_health/cdc_adult_obesity_prevalence_2024.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/public_health/cdc_diagnosed_diabetes_prevalence_2021.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/public_health/cdc_ssb_daily_any_intake_2015_extracted.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/cdc_diagnosed_diabetes_prevalence_2021.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/cdc_dtm_metadata.json
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/cdc_dtm_obesity_total_raw.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/cdc_dtm_sugar_drinks_total_raw.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/census_aspep_2024_individual_unit_files.zip
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/census_aspep_2024_state_employment.xlsx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/ncsl_full_and_part_time_legislatures.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/snap_retailer_locator_data_2005_2025.zip
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/snap_food_restriction_waivers_main_2026-03-11.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/snap_food_restriction_waivers_main_2026-03-12.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/snap_food_restriction_waivers_main_2026-04-02.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/arkansas.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/colorado.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/florida.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/hawaii.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/idaho.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/indiana.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/iowa.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/kansas.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/louisiana.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/missouri.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/nebraska.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/nevada.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/north_dakota.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/ohio.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/oklahoma.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/south_carolina.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/tennessee.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/texas.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/utah.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/virginia.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/west_virginia.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/state_pages/wyoming.html
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/arkansas__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/colorado__modification.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/colorado__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/florida__modification.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/florida__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/hawaii__approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/hawaii__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/idaho__modification.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/idaho__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/idaho__retailer_notice.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/indiana__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/indiana__retailer_notice.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/iowa__modification.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/iowa__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/iowa__retailer_notice.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/kansas__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/louisiana__approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/louisiana__modification.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/louisiana__retailer_notice.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/missouri__approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/missouri__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/nebraska__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/nebraska__retailer_notice.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/nevada__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/north_dakota__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/ohio__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/oklahoma__modification.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/oklahoma__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/oklahoma__retailer_notice.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/south_carolina__approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/south_carolina__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/tennessee__approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/tennessee__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/texas__modification.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/texas__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/texas__retailer_notice.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/utah__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/utah__retailer_notice.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/virginia__approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/virginia__modification.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/virginia__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/west_virginia__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/west_virginia__retailer_notice.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/approved_public_events/wyoming__request_public.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/arkansas_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/arkansas_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/colorado_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/colorado_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/florida_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/florida_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/hawaii_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/idaho_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/idaho_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/indiana_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/indiana_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/iowa_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/iowa_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/kansas_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/kansas_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/louisiana_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/missouri_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/nebraska_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/nebraska_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/nevada_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/nevada_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/north_dakota_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/ohio_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/ohio_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/oklahoma_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/oklahoma_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/south_carolina_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/tennessee_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/texas_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/texas_initial_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/texas_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/utah_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/utah_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/virginia_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/virginia_initial_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/west_virginia_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/west_virginia_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/wyoming_approval.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/usda_fns/text_extracts/wyoming_request.txt
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/reference/fpl_48_contiguous_2022_2024.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/reference/nielsen_hms_income_brackets_niq_official.csv
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/reference/nielsen_hms_income_brackets_provisional.csv
+    confidence: high
+    action: link
+  note:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/.cursor/skills/maha-build-and-outputs/SKILL.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/.cursor/skills/maha-paper-drafting/SKILL.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/.cursor/skills/maha-repo-conventions/SKILL.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/.github/workflows/repro-smoke.yml
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/AGENTS.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/PROJECT_STRUCTURE.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/README.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/SINGLE_SOURCE_OF_TRUTH.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/PROJECT_AUDIT_LOG.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/README.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/abstracts/aaea_2026_poster_prep.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/README.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/appendix_shell.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/reference_full_verification_report.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/reference_verification_log.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/proposals/README.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-03-12_dual_track_freeze_record.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-03-12_dual_track_paper_blueprint.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-04-02_status_and_next_steps.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-04-02_two_paper_split.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-04-05_waiver_coding_codebook.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-04-12_master_issues_register.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-05-02_external_referee_audit_and_action_plan.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-05-07_poster_final_prose_pass.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/README.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_formal_proposal_outline.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_project_status_record.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_proposal_memo.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_research_direction_record.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_research_paper_architecture_checklist.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-12_virginia_gap_resolution_record.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-13_nebraska_unicameral_seat_share.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-13_paper_outline.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-13_remaining_gaps_checklist.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-04-01_hardness_validation_upgrade_record.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/README.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/abstract_alignment_checklist.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/key_numbers_for_paper.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/paper_quality_six_criteria_assessment.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/paper_scoring_framework_six_criteria.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/paper_scoring_improvement_plan.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/research_question_three_criteria_assessment.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/writing_and_submission_checklist.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/project_comprehensive_audit_and_change_log.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/project_referee_audit_and_revision_plan.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/replication_and_controlled_data_manifest.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/replication_archive_zenodo.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/single_source_of_truth_outputs_index.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/research_logs/MAHA_research_log.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/research_logs/README.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/methods/all_public_event_history_protocol.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/methods/approved_public_event_protocol.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/methods/coding_protocol.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/methods/full_universe_protocol.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/methods/full_universe_stage_model_protocol.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/methods/hardness_measurement_protocol.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/methods/hardness_validation_protocol.md
+    confidence: medium
+    action: link
+  code:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/README.md
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/audit_bibliography_academic.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_aaea_poster_ppt.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_aaea_story_assets.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_all_public_event_history.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_approved_public_event_details.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_approved_track_assets.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_attention_salience_covariates.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_descriptives.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_design_change_scaffold.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_design_index_weight_sensitivity.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_design_taxonomy.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_final_dataset.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_formal_coding_scaffold.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_full_universe_stage_models.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_full_universe_tracker.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_google_trends_state_interest.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_hardness_beta_appendix.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_hardness_dataset.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_hardness_robustness.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_hardness_validation.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_health_burden_analysis.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_implementation_days_aft_appendix.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_layer2_rule_sensitivity.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_maps.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_mg_reliability_pilot_packet.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_household_exposure_distribution.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_paper_assets.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_policy_bridge.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_policy_rule_microsimulation.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_pooled_2022_2024.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_pooled_long_from_yearly.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_strict_priority1_sensitivity.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_substitution_appendix.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_upc_manual_audit.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nielsen_weighted_state_exposure.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_nonapproved_event_details.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_paper1_operational_modules.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_presentation_ppt.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_proposal_assets.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_requested_hardness.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_selection_inference.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_selection_mechanism_dataset.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/build_upstream_covariates.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/check_artifact_fingerprints.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/complete_nielsen_upc_manual_audit.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/compute_mg_kappa.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/data_quality_and_model_check.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/export_nielsen_category_diagnostics.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/export_nielsen_upc_audit_list.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/finalize_design_change_coding.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/firth_logit.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/literature_audit_crossref_batch.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/merge_nielsen_exposure_yearly.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/__init__.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/build_targeting_state.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/chunked_pipeline.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/duckdb_exposure.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/income_fpl.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/nielsen_io.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/nielsen_staging.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/pipeline.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/policy_tags.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/policy_targeting.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/product_classification.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/restricted_rollup.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/state_year_pipeline.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/strict_headline.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/us_states.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/rebuild_nielsen_strict_from_duckdb.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/run_all.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/run_nielsen_policy_exposure.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/run_nielsen_policy_targeting.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/run_nielsen_yearly_sequential.sh
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/update_waiver_master.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/verify_bibliography_full.py
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/verify_nonapproved_latest_event_urls.py
+    confidence: high
+    action: link
+  result:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/nielsen_snap_exposure/reference_tables.py
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/fec_2024_presidential_results.xlsx
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_approved_track_results_draft.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_full_universe_stage_model_empirical_strategy_results_draft.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_paper_hook_and_results_skeleton.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-13_methods_and_results_draft_text.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-13_paper_tables_figures_quick_ref.md
+    confidence: medium
+    action: review_required
+  paper:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/render_manuscript_chicago_md.py
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/code/render_manuscript_docx.py
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/paper_manuscript_draft.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/proposals/2026-03-11_formal_proposal_draft.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-04-06_build_smoke_fingerprints_and_manuscript_links.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/aepp_manuscript_wordcount.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_approved_track_full_paper_draft.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-11_approved_track_intro_discussion_draft.md
+    confidence: medium
+    action: review_required
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/replication_note_for_manuscript.md
+    confidence: medium
+    action: review_required
+  pdf:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/census_aspep_2024_disclaimer.pdf
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/census_aspep_2024_tech_doc.pdf
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/ncsl_legis_control_2025.pdf
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/ncsl_legis_control_2026.pdf
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/snap_participation_rates_2022.pdf
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/data/raw/upstream_covariates/snap_state_activity_report_fy2023.pdf
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/abstracts/AAEA2026Abstract_Health_Policy_Instrument_Choice_under_Federal_Constraints_0121.pdf
+    confidence: medium
+    action: link
+  memo:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/abstracts/AAEA2026Abstract_Health_Policy_Instrument_Choice_under_Federal_Constraints_0121.docx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/paper_manuscript_draft.docx
+    confidence: high
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/policy-tracking/SNAP_Food_Restriction_Waivers.docx
+    confidence: high
+    action: link
+  literature:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/LITERATURE_AUDIT_AND_EXPANSION_REPORT.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/reference_academic_citation_audit_report.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/manuscript/references_placeholders.bib
+    confidence: medium
+    action: link
+  method:
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-04-03_methods_review_issues.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/2026-04-05_hardness_redesign_rationale.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/2026-03-13_paper_design_and_methods_memo.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/docs/records/archive/design_and_inference_summary.md
+    confidence: medium
+    action: link
+  - source: /Users/jiamingzhang/Desktop/MAHA/.claude/worktrees/romantic-faraday-2653c6/methods/design_change_coding_protocol.md
+    confidence: medium
+    action: link

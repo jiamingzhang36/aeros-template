@@ -1,0 +1,132 @@
+version: 4
+task_id: T004_main_execution
+generated_at: '2026-06-24T14:32:32+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T004_main_execution.yml
+automation_class: auto_rerunnable
+gate_status: pending
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T004_main_execution_skill_invocations.yml
+allowed_outputs_expected:
+- outputs/
+- evidence/result_index.csv
+- evidence/claim_registry.md
+allowed_outputs_found:
+- outputs/
+- evidence/result_index.csv
+- evidence/claim_registry.md
+allowed_outputs_missing: []
+actual_outputs:
+- path: outputs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 8
+- path: evidence/result_index.csv
+  exists: true
+  type: file
+  sha256: 02416052905843cf9faaf37fb57c35a5640099b5f6c24fdff67ce71b69a05678
+  bytes: 2021
+- path: evidence/claim_registry.md
+  exists: true
+  type: file
+  sha256: a8e553b45583a8a31ed8ea6c5aba436639174cf71cbaa2c0a57faab3f586ffa0
+  bytes: 1525
+checks_required:
+- check_number_registry.py
+- check_number_scan.py
+- check_provenance.py
+- check_claim_registry.py
+- check_claim_ceiling.py
+- check_claim_method_consistency.py
+checks_run:
+- check_number_registry
+- check_number_scan
+- check_provenance.py
+- check_claim_registry.py
+- check_claim_ceiling
+- check_claim_method_consistency.py
+checks_passed:
+- check_number_registry
+- check_number_scan
+- check_provenance.py
+- check_claim_registry.py
+- check_claim_ceiling
+- check_claim_method_consistency.py
+checks_failed: []
+check_attestations:
+- name: check_number_registry
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_number_registry.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.084
+- name: check_number_scan
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_number_scan.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.084
+- name: check_provenance.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_provenance.py
+  exit_code: 0
+  elapsed_seconds: 0.107
+- name: check_claim_registry.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_registry.py
+  exit_code: 0
+  elapsed_seconds: 0.092
+- name: check_claim_ceiling
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_ceiling.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.077
+- name: check_claim_method_consistency.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_method_consistency.py
+  exit_code: 0
+  elapsed_seconds: 0.133
+evidence_receipt_required: false
+evidence_receipt_path: ''
+evidence_receipt_exists: false
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: bb85f7f77322ba32d4d59fdc9a350e806d7d575a39161304de5f4a77a36eb3f7
+output_fingerprint: 4cd2c24530aafba80f0bec8880f87e93ab1748cba5d5b58518b93a5348abd7de
+dependency_fingerprint: 5bd11212ed52f280c334e06d836d9b495d3d3a1a52220c20076ffa02505d7c23
+completion_verdict: pass
+failures: []

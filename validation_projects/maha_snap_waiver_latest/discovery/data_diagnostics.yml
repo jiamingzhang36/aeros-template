@@ -1,0 +1,22 @@
+status: measured
+measured_at: "2026-06-15T01:02:38+00:00"
+source_inventory: "discovery/data_inventory.csv"
+scope_note: "Wrapper-level scouting diagnostics only; no raw MAHA data or restricted NielsenIQ microdata inspected."
+diagnostics:
+  inventory_rows: 5
+  public_sources: 3
+  restricted_sources: 1
+  granted_project_sources: 1
+  high_priority_sources: 4
+  rows_with_next_probe: 5
+  rows_with_tbd_feasibility: 5
+auxiliary:
+  data_ids:
+    - "D001"
+    - "D002"
+    - "D003"
+    - "D004"
+    - "D005"
+  interpretation:
+    - "This closes the AEROS G1 measured-diagnostics requirement for the mirror wrapper only."
+    - "It does not validate final Paper 1 claims, NielsenIQ uncertainty intervals, or MG second-coder reliability."

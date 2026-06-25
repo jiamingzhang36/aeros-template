@@ -1,0 +1,347 @@
+current_stage: discovery
+current_gate: G10
+gate_status: approved
+candidate_stage: discovery
+candidate_gate: G11
+tasks:
+  D002_data_scouting:
+    status: passed
+    agent_calls_total: 3
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T00:55:46+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 4721df544ed875ac7f4782a5363e0ee3f54c4f3b8a3d5e55fca832899eb6d5cd
+    output_fingerprint: 9e43c79e64e870eb8a39eb54c11a46a4eca35bc7032bca79ce11edfd21edaea0
+    dependency_fingerprint: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+    passed_at: '2026-06-15T01:00:01+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.990773+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  D005_data_probe:
+    status: passed
+    agent_calls_total: 0
+    cost_usd_total: 0.0
+    input_fingerprint: 70e174c10843f0e447b545032ce54ae25df508a549d9902e6bcfe23e12b7b18b
+    output_fingerprint: 5d531035e5e00890dcb23560be624d8cbf2b2ddcd06c888a6d4747e5f7651064
+    dependency_fingerprint: 826bbe9cfb7ee976ca2821144e04eaa4d652266b0839c4380705ba7d6841d595
+    passed_at: '2026-06-15T01:02:38+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991299+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  D001a_framing:
+    status: passed
+    agent_calls_total: 3
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:03:13+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 6aa4ad2b75ae086d9b6dbc5cd2b135c964f6f041ea0830868208790264e3f641
+    output_fingerprint: 3c523da86cafcb304dfc5c108000b552375fe7fb7d3f813c1ebb346a1fa93127
+    dependency_fingerprint: 826bbe9cfb7ee976ca2821144e04eaa4d652266b0839c4380705ba7d6841d595
+    passed_at: '2026-06-15T01:04:58+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991304+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  D001b_framework_search:
+    status: passed
+    agent_calls_total: 3
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:05:08+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 696cc741e5879a1b667fa8cb49b08828d4a82aac69765451d8c8262d54a59015
+    output_fingerprint: 068c4f43ee31a08eebde3cb7020353fe110bb312a9b99adf537ed61419e1f60a
+    dependency_fingerprint: 8a38fa01d25f516688bddcfbbb5bbeced24b3e14d0ac6d8ae0b28e9c874191e7
+    passed_at: '2026-06-15T01:06:46+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991307+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  D003_design_options:
+    status: passed
+    agent_calls_total: 3
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:06:48+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 57679b16ca8ee1c255f9d80bcc7e14427ca14b3ad46c2c5d078280f22406576e
+    output_fingerprint: b368d0a9b319fd37368a763f6946d5bdf3ecfb0e122ce6d437fa95171afdfd5d
+    dependency_fingerprint: ca0a5dc3762715c218a7d0b17083f83e94c767da6cf495526f281d757e3cdb49
+    passed_at: '2026-06-15T01:08:07+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991309+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  D004_variable_construction:
+    status: passed
+    agent_calls_total: 0
+    cost_usd_total: 0.0
+    input_fingerprint: a62ea4f5a90c619cb9f63a52d699989245db7df27a7f3335044628626edf5503
+    output_fingerprint: 8ccc91136a0385bd97092cad8545305e1798c37c2fc24ac25a049c358a5506aa
+    dependency_fingerprint: 6b44294d8143f544d72ad3e8f79ad1b91c343829fef75e8a9d04ed91836ccaf2
+    passed_at: '2026-06-15T01:09:35+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991312+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T001_discovery_audit:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:17:44+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 2cf4d73500fb7d1e8acf22221f8a87e6c9dab820209e1d84e4adfc3c26128bb6
+    output_fingerprint: d98deeef87e6980f1674e44091505f96c17b74daa836998e5bf02c571c0ecf1e
+    dependency_fingerprint: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+    passed_at: '2026-06-24T14:23:17+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991314+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T002_data_feasibility:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:20:20+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 36ed46fbbc5ea086a549a1ee8c436089330475e3b6068177356419560eb37608
+    output_fingerprint: 438dd29fa219f29278b022475f5c8b1e409f54eb07e00e4aae35a7bd6531025b
+    dependency_fingerprint: dc9f4155ced327658084d9382c421e6eacd7b301e62c317c2bcc2fc540682aae
+    passed_at: '2026-06-24T14:24:05+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991316+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T003_design_audit:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:21:49+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: f98c0fcb7c35fe2462f186475706a005bb0129d54a27791aa1a491c337d9e7bf
+    output_fingerprint: 34994a6bfccb2559bd06e18369a0392cd71e3bed7b4cf8dc1b6fc48fea346ea1
+    dependency_fingerprint: 9b538dcdbe98744e29bf150263141f2161e0c8885c0f7803a53a9aaca85cead8
+    passed_at: '2026-06-15T01:22:34+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991319+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T003a_protocol_design:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:22:42+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: cb116645a5af155967c208faff898f485af038370dd4fddf4541cf1841aa1097
+    output_fingerprint: 3c4b92612591e5c6702bb46a54bd08ec04ab6ef5160f17137cf558dfd9898dc3
+    dependency_fingerprint: 1043a459b70ebc4d7f76efd54e1673b45d1108ef1661ac9f95556716e116f456
+    passed_at: '2026-06-24T14:22:18+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991323+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T003b_pipeline_instantiation:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:23:49+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 8cda5862ac913daab1162ed96a8c82be05a3420b44400f8ffd6becf9a979471f
+    output_fingerprint: b8cab38fda7513fde28c02621bb7a3e3087c353412a1f9ad95639599c17be26b
+    dependency_fingerprint: 741f3e0b60b98fb9db4c8bfcf05d4f3a0cd555e24859bd4ca5b1f6dff922183d
+    passed_at: '2026-06-24T14:26:56+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991325+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T004_main_execution:
+    status: passed
+    agent_calls_total: 0
+    cost_usd_total: 0.0
+    input_fingerprint: bb85f7f77322ba32d4d59fdc9a350e806d7d575a39161304de5f4a77a36eb3f7
+    output_fingerprint: 625c2f7a091ca4ddde12ee55419e23b3f5f542cbab3a4f09fd3c1f7f6639107f
+    dependency_fingerprint: 5bd11212ed52f280c334e06d836d9b495d3d3a1a52220c20076ffa02505d7c23
+    passed_at: '2026-06-24T14:26:56+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991327+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T004b_robustness_plan:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:33:30+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 1f7d2ceda5e037fd60ebdea71d0cabc8be27cd741473ad0ce0b2a8e1b25f4805
+    output_fingerprint: d65bc694b3c7c47b32c8a3363040c7c0e7f74cc245dfb584999cb0a2fd2dc3d4
+    dependency_fingerprint: 84904b903836843632494d89cc1c68846bd8a6b8a3f49307735102d8e49d9483
+    passed_at: '2026-06-24T14:27:44+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991330+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T004_result_validation:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T01:43:31+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 368f64550a8ae5cbdada806d8ef8d8d6eba20d56c4e9cf30b5d81bde66e6860c
+    output_fingerprint: f64b06e9daee3f09b6899937f5f379976bfebe7019bab9ca9c197a8ee464f856
+    dependency_fingerprint: bf0fa0c6f73aeff413478f2f79c3aac2a7e3e1209803a9f404e27dea37ecd690
+    passed_at: '2026-06-24T14:22:18+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991332+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T005_claim_audit:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T06:05:25+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 26aaebeb5a34ec0dc0f7153b862324148484c0038ba8351cec074ee5c12d516e
+    output_fingerprint: ada4a37f8e2a95e0fd82bd4a0594db07fb2009260416e97de3ca4fdd89b46569
+    dependency_fingerprint: 0d2e7812c261c66328b8d8106e771ffb72d67956a27e3cc5b1963c9ea5752ce9
+    passed_at: '2026-06-15T06:07:47+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991334+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T006_referee_panel:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T06:11:21+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: 221492be08246925d128fc0a5fd8fddd689b05823d5c411f5677b0c2befb6af9
+    output_fingerprint: 729ca8622ce37c3e3eced67c0cd4adc769ae5edf4612ceb69b4d5d80c5777a10
+    dependency_fingerprint: ae72d48b9d32cd98fd5c4b5a3f1c41cc9466570027d821c0bc9497b47d8ce885
+    passed_at: '2026-06-24T14:22:31+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991338+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T007_replication_package:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T06:52:06+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: ce4cc1b7b7f1ec9e5c1678d72d3638fbf2bbcf8e88113048f74caacb60b9bfa5
+    output_fingerprint: 2a0b31c221e62c2447919776f554131ed6b734047c04268c4a26d04b26744dd0
+    dependency_fingerprint: d92d8091cfb8879451b442fe73ec6a7b96bd8e63eaf83ab96ed771839dceabbd
+    passed_at: '2026-06-24T14:23:03+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991340+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T008_paper_package_draft:
+    status: passed
+    agent_calls_total: 2
+    cost_usd_total: 0.0
+    last_call: '2026-06-15T08:05:08+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    input_fingerprint: aecf2a9c721b400f23a99f8db2d07245d19234ebe7b6fab6b956dc2f2def0170
+    output_fingerprint: e6914cff57c6b3bdfeb552ecbdd3d1f4f718c738c3cec24a76b1520af2d9606a
+    dependency_fingerprint: 12d1114b48dacd1c76854e97740c7d14b1f9d97ce9a580176e48d1da21f47d19
+    passed_at: '2026-06-15T08:06:38+00:00'
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991343+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+  T009_expanded_collection_design:
+    status: passed
+    agent_calls_total: 0
+    cost_usd_total: 0.0
+    input_fingerprint: 7cd53ac4bd317c6eb9d63bc1310d5482ef41a51db70df1a119cdc6a0a30f3767
+    output_fingerprint: 8086b6c45b1de4534094cf0be6440133d0d144a6c9e23517835a7178b14a2066
+    dependency_fingerprint: 8bbb03492853856d9af31836ce922b6c2176af85790456b5cd2152dbcc79e2eb
+    passed_at: '2026-06-24T14:27:10+00:00'
+    last_run_calls: 0
+    last_run_cost_usd: 0.0
+    migrated_from_wrapper: maha_snap_waiver
+    migrated_at: '2026-06-24T14:21:21.991345+00:00'
+    migration_note: Task runtime state migrated into latest wrapper; research artifacts/provenance
+      were already migrated separately.
+gate_history:
+- at: '2026-06-24T14:17:15+00:00'
+  stage: discovery
+  gate: G10
+  task_id: human_gate
+  reason: human_approved
+candidate_gate_history:
+- at: '2026-06-24T13:59:05+00:00'
+  stage: execution
+  gate: G10
+  task_id: adoption
+  reason: paper/draft artifacts found
+- at: '2026-06-24T14:22:18+00:00'
+  gate: G11
+  task_id: recompute
+  reason: derived_from_passed_tasks
+gate_decisions:
+- at: '2026-06-24T14:17:15+00:00'
+  stage: discovery
+  gate: G10
+  decision: approve
+  owner: Jiaming
+  note: Human reviewer accepts the latest-structure G10 evidence packet for Paper
+    1 as a measurement/descriptive paper-package gate; no causal, demand, welfare,
+    SNAP/EBT transaction, provider-output collection, public-release, or claim-upgrade
+    authorization is granted.
+adoption:
+  mode: mirror
+  source: /Users/jiamingzhang/Desktop/MAHA
+  candidate_gate_reason: paper/draft artifacts found
+  human_approval_required: true
+updated_at: '2026-06-24T14:27:44+00:00'
+migration_history:
+- at: '2026-06-24T14:21:21.991348+00:00'
+  source_wrapper: /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver
+  target_wrapper: /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest
+  scope: passed task runtime state only; current gate/gate decisions preserved from
+    latest wrapper
+  migrated_task_count: 19
+  migrated_tasks:
+  - D001a_framing
+  - D001b_framework_search
+  - D002_data_scouting
+  - D003_design_options
+  - D004_variable_construction
+  - D005_data_probe
+  - T001_discovery_audit
+  - T002_data_feasibility
+  - T003_design_audit
+  - T003a_protocol_design
+  - T003b_pipeline_instantiation
+  - T004_main_execution
+  - T004_result_validation
+  - T004b_robustness_plan
+  - T005_claim_audit
+  - T006_referee_panel
+  - T007_replication_package
+  - T008_paper_package_draft
+  - T009_expanded_collection_design
+  skipped_tasks: {}

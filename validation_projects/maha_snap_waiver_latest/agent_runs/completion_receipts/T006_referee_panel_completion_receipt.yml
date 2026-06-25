@@ -1,0 +1,92 @@
+version: 4
+task_id: T006_referee_panel
+generated_at: '2026-06-24T14:32:21+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T006_referee_panel.yml
+automation_class: receipt_audited
+gate_status: needs_receipt_audit
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T006_referee_panel_skill_invocations.yml
+allowed_outputs_expected:
+- audits/referee_panel_report.md
+- agent_runs/
+allowed_outputs_found:
+- audits/referee_panel_report.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: audits/referee_panel_report.md
+  exists: true
+  type: file
+  sha256: 6e1948b40bc88d0d1a10e8459e862a742ef89d0ffe2ec297e3264f294c4de906
+  bytes: 6554
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 5
+checks_required:
+- check_protected_definitions.py
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_run:
+- check_protected_definitions.py
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_passed:
+- check_protected_definitions.py
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_protected_definitions.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_protected_definitions.py
+  exit_code: 0
+  elapsed_seconds: 0.194
+- name: check_claim_registry.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_registry.py
+  exit_code: 0
+  elapsed_seconds: 0.124
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.192
+evidence_receipt_required: true
+evidence_receipt_path: evidence/receipts/T006_referee_panel_human_review_receipt.md
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 3a437387f5b4d906ad3576c78a2fc78449f7f7be8da1648a2833853a44533957
+output_fingerprint: 729ca8622ce37c3e3eced67c0cd4adc769ae5edf4612ceb69b4d5d80c5777a10
+dependency_fingerprint: ae72d48b9d32cd98fd5c4b5a3f1c41cc9466570027d821c0bc9497b47d8ce885
+completion_verdict: pass
+failures: []

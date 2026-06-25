@@ -1,0 +1,112 @@
+version: 4
+task_id: T007_replication_package
+generated_at: '2026-06-24T14:32:22+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T007_replication_package.yml
+automation_class: auto_rerunnable
+gate_status: pending
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T007_replication_package_skill_invocations.yml
+allowed_outputs_expected:
+- audits/replication_package_report.md
+- agent_runs/
+allowed_outputs_found:
+- audits/replication_package_report.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: audits/replication_package_report.md
+  exists: true
+  type: file
+  sha256: e4e75e0baa8659892e540e0deb1fd2863d6d636d837a17f7b1024c30033d56f1
+  bytes: 2847
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 5
+checks_required:
+- check_replication_package.py
+- check_pipeline_runs.py
+- check_output_reproducibility.py
+- check_provenance.py
+- check_agent_run_report.py
+checks_run:
+- check_replication_package.py
+- check_pipeline_runs.py
+- check_output_reproducibility.py
+- check_provenance.py
+- check_agent_run_report.py
+checks_passed:
+- check_replication_package.py
+- check_pipeline_runs.py
+- check_output_reproducibility.py
+- check_provenance.py
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_replication_package.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_replication_package.py
+  exit_code: 0
+  elapsed_seconds: 0.121
+- name: check_pipeline_runs.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_pipeline_runs.py
+  exit_code: 0
+  elapsed_seconds: 0.309
+- name: check_output_reproducibility.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_output_reproducibility.py
+  exit_code: 0
+  elapsed_seconds: 0.136
+- name: check_provenance.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_provenance.py
+  exit_code: 0
+  elapsed_seconds: 0.127
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.157
+evidence_receipt_required: false
+evidence_receipt_path: ''
+evidence_receipt_exists: false
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 4818867d4487431888d4c8757519261f3319937eb1ccdd685480fad32df21821
+output_fingerprint: 2a0b31c221e62c2447919776f554131ed6b734047c04268c4a26d04b26744dd0
+dependency_fingerprint: d92d8091cfb8879451b442fe73ec6a7b96bd8e63eaf83ab96ed771839dceabbd
+completion_verdict: pass
+failures: []

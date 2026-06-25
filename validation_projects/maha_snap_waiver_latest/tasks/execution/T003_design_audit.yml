@@ -1,0 +1,52 @@
+task_id: T003_design_audit
+stage: execution
+gate: G3
+automation_class: receipt_audited
+evidence_receipt_required: true
+receipt_path: evidence/receipts/T003_design_audit_human_review_receipt.md
+gate_status: needs_receipt_audit
+required_skill_classes: []
+allowed_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
+- econ-principles-check
+recommended_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+depends_on:
+- T001_discovery_audit
+- T002_data_feasibility
+goal: 'Audit whether the selected design can support the intended claim ceiling and
+  whether the method card, design selection, and claim registry agree.
+
+  '
+inputs:
+- discovery/design_selection.md
+- docs/method_card.md
+- docs/robustness_checklist.md
+- docs/language_constraints.md
+- evidence/claim_registry.md
+allowed_outputs:
+- audits/design_audit_report.md
+- agent_runs/
+forbidden_actions:
+- Do not choose a preferred specification based on significance.
+- Do not upgrade descriptive or associational claims to causal.
+- Do not change protected definitions.
+checks:
+- check_design_selection.py
+- check_claim_ceiling.py
+- check_claim_method_consistency.py
+- check_agent_run_report.py
+retry_policy:
+  max_retries: 1
+escalate_if:
+- method card and claim registry disagree
+- checks still fail after max_retries
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 480

@@ -1,0 +1,9 @@
+candidate_gate: G10
+missing:
+- memo/docx deep review
+- formal claim registry
+- compliance / release review
+recommended_next:
+- rerun adoption with Codex deep synthesis or manually review extracted_drafts.md
+- run result validation and claim audit
+- run compliance gate before public release

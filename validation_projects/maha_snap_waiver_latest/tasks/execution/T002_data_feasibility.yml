@@ -1,0 +1,55 @@
+task_id: T002_data_feasibility
+stage: execution
+gate: G3
+automation_class: receipt_audited
+evidence_receipt_required: true
+receipt_path: evidence/receipts/T002_data_feasibility_human_review_receipt.md
+gate_status: needs_receipt_audit
+allowed_skills:
+- data-inventory
+- describe-data
+- data-quality-checker
+- data-merge-audit
+- summary-stats-table
+recommended_skills:
+- data-quality-checker
+- data-merge-audit
+- summary-stats-table
+required_skill_classes:
+- data_scouting
+depends_on:
+- T001_discovery_audit
+goal: 'Audit whether the candidate data and constructed diagnostics can support the
+  selected execution design and registered claims. Preserve uncertainty and record
+  any remaining data blockers.
+
+  '
+inputs:
+- discovery/data_inventory.csv
+- discovery/feasibility_memo.md
+- discovery/design_selection.md
+- docs/data_contract.yml
+- docs/protected_definitions.yml
+- evidence/claim_registry.md
+allowed_outputs:
+- audits/data_audit_report.md
+- discovery/feasibility_memo.md
+- agent_runs/
+forbidden_actions:
+- Do not write anywhere under data/raw/.
+- Do not mark data feasible without source evidence.
+- Do not change protected definitions.
+checks:
+- check_git_guardrails.py
+- check_data_inventory.py
+- check_data_contract.py
+- check_agent_run_report.py
+retry_policy:
+  max_retries: 1
+escalate_if:
+- data feasibility affects pursue/pause/drop recommendation
+- checks still fail after max_retries
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 480

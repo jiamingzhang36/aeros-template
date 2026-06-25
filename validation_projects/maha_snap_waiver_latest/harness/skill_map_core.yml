@@ -1,0 +1,627 @@
+version: '0.1'
+principle: External economics skills can accelerate work, but AEROS controls evidence
+  status, file permissions, protected definitions, claim boundaries, critic review,
+  and human gates.
+sources:
+  awesome_econ_ai_stuff:
+    name: Awesome Econ AI Stuff
+    url: https://github.com/meleantonio/awesome-econ-ai-stuff
+    role: Stage-organized catalog of economics AI skills.
+  econ_writing_skill:
+    name: Econ Writing Skill
+    url: https://github.com/hanlulong/econ-writing-skill
+    role: Economics writing, rewriting, review, and paper audit skill.
+  awesome_ai_for_economists:
+    name: Awesome AI for Economists
+    url: https://github.com/hanlulong/awesome-ai-for-economists
+    role: Tool and infrastructure index for economists.
+  local_codex_skills:
+    name: Local Codex Skills
+    url: local
+    role: Already installed local skills for economics, data, writing, replication,
+      and document workflows.
+  academic_research_suite:
+    name: Academic Research Suite
+    url: local
+    role: Codex-native academic research workflows for deep research, paper writing,
+      review, pipeline, and experiment planning.
+  lcrawfurd_academic_skills:
+    name: Claude Code Skills for Academic Research
+    url: https://lcrawfurd.github.io/claude-skills/
+    role: Paper review, code review, computational reproducibility audit, and pre-submission
+      review skills for academic economists and social scientists.
+  academic_research_agent_skill:
+    name: Academic Research Agent Skill
+    url: https://ngtiendong.github.io/Academic-Research-Agent-Skill/
+    role: Human-guided research workflow with source inspection, novelty gates, experiment
+      planning, reviewer simulation, and claim verification.
+  paper_writer_skill:
+    name: Paper Writer Skill
+    url: https://github.com/kgraph57/paper-writer-skill
+    role: Full-pipeline academic paper writing with stage gates and quality checklists.
+skill_stage_taxonomy:
+  external_stages:
+  - ideation
+  - literature
+  - theory
+  - data
+  - analysis
+  - writing
+  - communication
+  - engineering
+  aeros_stages:
+  - discovery_ideation
+  - literature_discovery
+  - literature_extraction
+  - data_scouting
+  - design_formation
+  - execution_analysis
+  - writing_revision
+  - communication
+  - engineering_maintenance
+skills:
+  research_ideation:
+    name: research-ideation
+    source: awesome_econ_ai_stuff
+    invocation: external_repo
+    external_stage: ideation
+    aeros_stage: discovery_ideation
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - discovery/idea_bank.csv
+    - discovery/idea_memo.md
+    - discovery/01_literature_scope.md
+    forbidden_outputs:
+    - final go/no-go decision
+    - formal gap claim
+    - final causal design
+    aeros_constraints:
+    - All generated ideas must be marked speculative, under_verification, supported,
+      parked, dropped, or promoted_to_design.
+    - No idea can enter design_options.md without literature, data, or method evidence.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  lit_review_assistant:
+    name: lit-review-assistant
+    source: awesome_econ_ai_stuff
+    invocation: external_repo
+    external_stage: literature
+    aeros_stage: literature_discovery
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - discovery/literature/search_log.csv
+    - discovery/literature/paper_registry.csv
+    - discovery/literature/exclusion_log.csv
+    forbidden_outputs:
+    - final literature synthesis without extraction cards
+    - gap claim based on search snippets
+    - paper summary based on title only
+    aeros_constraints:
+    - Search results must flow through paper_registry.csv.
+    - Full synthesis requires extraction cards.
+    - Abstract-only papers must be labeled abstract_only.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  academic_research_suite_deep_research:
+    name: academic-research-suite
+    source: academic_research_suite
+    invocation: mcp_skill
+    external_stage: literature
+    aeros_stage: literature_discovery
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - discovery/01_literature_scope.md
+    - discovery/literature/search_log.csv
+    - discovery/literature/paper_registry.csv
+    - discovery/literature/citation_audit.md
+    - discovery/literature/extraction_cards/
+    forbidden_outputs:
+    - source synthesis without opened sources
+    - novelty claim without closest-literature extraction
+    - formal recommendation without human gate
+    aeros_constraints:
+    - Use source-grounded mode only.
+    - Do not load or run a full research-to-paper pipeline before discovery promotion.
+    - Claims from this skill must pass paper_registry, citation_audit, and extraction-card
+      checks.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  data_inventory:
+    name: data-inventory
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: data
+    aeros_stage: data_scouting
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - discovery/data_inventory.csv
+    - docs/data_sources.md
+    - audits/data_audit_report.md
+    forbidden_outputs:
+    - data feasibility claim without access path
+    - undocumented paid or restricted-data assumption
+    aeros_constraints:
+    - Every data source must record owner, access path, unit, geography, time period,
+      variables, barriers, and limitations.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  causal_id_review:
+    name: causal-id-review
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: analysis
+    aeros_stage: design_formation
+    use_status: review_only
+    allowed_outputs:
+    - audits/design_audit_report.md
+    - discovery/design_options.md
+    - docs/method_card.md
+    forbidden_outputs:
+    - final identification decision
+    - unapproved protected definition changes
+    aeros_constraints:
+    - Use to surface identification risks, not to decide the design.
+    - Causal designs require documented variation and human approval.
+    human_gate_required: true
+    tier: core
+    default_use: true
+  did_checklist:
+    name: did-checklist
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: analysis
+    aeros_stage: design_formation
+    use_status: review_only
+    allowed_outputs:
+    - audits/design_audit_report.md
+    - docs/robustness_checklist.md
+    forbidden_outputs:
+    - automatic approval of DiD design
+    - preferred event window chosen by significance
+    aeros_constraints:
+    - Use for parallel trends, anticipation, treatment timing, comparison group, event-study,
+      and clustering checks.
+    human_gate_required: true
+    tier: core
+    default_use: true
+  code_review_econ:
+    name: code-review-econ
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: engineering
+    aeros_stage: engineering_maintenance
+    use_status: review_only
+    allowed_outputs:
+    - audits/code_review_report.md
+    - decisions/issue_log.csv
+    forbidden_outputs:
+    - silent code edits
+    - review that ignores empirical-design consequences
+    aeros_constraints:
+    - Findings should prioritize reproducibility, data provenance, sample construction,
+      estimands, and output consistency.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  econ_writing_skill:
+    name: econ-write
+    source: econ_writing_skill
+    invocation: external_repo
+    external_stage: writing
+    aeros_stage: writing_revision
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - paper/draft.md
+    - paper/draft.tex
+    - audits/writing_audit_report.md
+    - audits/referee_panel_report.md
+    forbidden_outputs:
+    - stronger causal claim than claim_registry.md
+    - forecast language without forecast validation
+    - policy conclusion beyond language_constraints.md
+    aeros_constraints:
+    - Writing must preserve registered claim type and evidence status.
+    - Unsupported claims must be removed, weakened, or marked for human decision.
+    - For introduction and conclusion drafts, check against claim_registry.md and
+      language_constraints.md.
+    human_gate_required: true
+    tier: core
+    default_use: true
+  describe_data:
+    name: describe-data
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: data
+    aeros_stage: data_scouting
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/data_audit_report.md
+    - discovery/data_inventory.csv
+    - docs/data_dictionary.md
+    forbidden_outputs:
+    - data feasibility claim without source path
+    - claim support based on profiling alone
+    aeros_constraints:
+    - Use to inspect and summarize existing datasets, not to certify evidence.
+    - Missingness, coverage, and units must flow into data inventory or audit reports.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  data_codebook:
+    name: data-codebook
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: data
+    aeros_stage: data_scouting
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - docs/data_dictionary.md
+    - docs/data_contract.yml
+    - audits/data_audit_report.md
+    forbidden_outputs:
+    - protected definition changes without human approval
+    - undocumented variable construction
+    aeros_constraints:
+    - Variable labels, units, sources, and limitations must remain source-grounded.
+    - Derived-variable definitions must be consistent with method_card.md.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  data_quality_checker:
+    name: data-quality-checker
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: data
+    aeros_stage: data_scouting
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/data_quality_report.md
+    - audits/data_audit_report.md
+    - outputs/diagnostics/
+    forbidden_outputs:
+    - automatic row deletion
+    - automatic sample restriction changes
+    - claim support based only on passing data-quality checks
+    aeros_constraints:
+    - Flag missingness, duplicates, type problems, coverage gaps, and suspicious values.
+    - Any proposed exclusion must be review_needed unless pre-specified.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  data_merge_audit:
+    name: data-merge-audit
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: data
+    aeros_stage: execution_analysis
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/merge_audit_report.md
+    - audits/data_quality_report.md
+    - outputs/diagnostics/
+    forbidden_outputs:
+    - silent merge-key changes
+    - silent sample-loss acceptance
+    aeros_constraints:
+    - Report join keys, uniqueness, many-to-many risks, unmatched rows, and sample loss.
+    - Merge losses that affect estimands must be surfaced for human review.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  summary_stats_table:
+    name: summary-stats-table
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: analysis
+    aeros_stage: execution_analysis
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - outputs/tables/
+    - audits/result_validation_report.md
+    forbidden_outputs:
+    - paper claims unsupported by result_index.csv
+    - unregistered table numbers
+    aeros_constraints:
+    - Tables must be reproducible and traceable to source CSVs or result artifacts.
+    - Report descriptive statistics as descriptive, not causal.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  quick_stats:
+    name: quick-stats
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: analysis
+    aeros_stage: execution_analysis
+    use_status: advisory_only
+    allowed_outputs:
+    - outputs/diagnostics/
+    - audits/data_audit_report.md
+    forbidden_outputs:
+    - final paper tables without registration
+    - claim upgrades
+    aeros_constraints:
+    - Use for exploratory diagnostics only.
+    - Any statistic used in paper text must be registered through result_index.csv.
+    human_gate_required: false
+    tier: advisory
+    default_use: false
+  feature_engineering:
+    name: feature-engineering
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: data
+    aeros_stage: design_formation
+    use_status: advisory_only
+    allowed_outputs:
+    - docs/method_card.md
+    - audits/design_audit_report.md
+    - outputs/diagnostics/
+    forbidden_outputs:
+    - unapproved protected definition changes
+    - outcome-driven variable construction
+    aeros_constraints:
+    - Proposed features must be pre-analysis candidates unless already locked.
+    - Do not choose variables by statistical significance.
+    human_gate_required: true
+    tier: advisory
+    default_use: false
+  regression_table:
+    name: regression-table
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: analysis
+    aeros_stage: execution_analysis
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - outputs/tables/
+    - audits/result_validation_report.md
+    forbidden_outputs:
+    - specification fishing
+    - unregistered causal conclusions
+    aeros_constraints:
+    - Regression outputs must be registered in result_index.csv before supporting claims.
+    - Tables must preserve pre-specified estimands and controls.
+    human_gate_required: true
+    tier: advisory
+    default_use: true
+  robustness_suite:
+    name: robustness-suite
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: analysis
+    aeros_stage: design_formation
+    use_status: review_only
+    allowed_outputs:
+    - docs/robustness_checklist.md
+    - audits/design_audit_report.md
+    - audits/result_validation_report.md
+    forbidden_outputs:
+    - automatic robustness pass/fail judgment
+    - claim upgrade based on one robustness table
+    aeros_constraints:
+    - Surface robustness families and threats; do not decide identification quality.
+    - Distinguish pre-specified robustness from exploratory sensitivity checks.
+    human_gate_required: true
+    tier: advisory
+    default_use: true
+  placebo_test:
+    name: placebo-test
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: analysis
+    aeros_stage: design_formation
+    use_status: review_only
+    allowed_outputs:
+    - docs/robustness_checklist.md
+    - audits/design_audit_report.md
+    - audits/result_validation_report.md
+    forbidden_outputs:
+    - automatic identification approval
+    - undisclosed failed placebo suppression
+    aeros_constraints:
+    - Placebos are diagnostic evidence, not proof of identification.
+    - Failed or ambiguous placebo checks must remain visible to the claim audit.
+    human_gate_required: true
+    tier: advisory
+    default_use: true
+  replication_check:
+    name: replication-check
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: engineering
+    aeros_stage: engineering_maintenance
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/replication_package_report.md
+    - audits/code_review_report.md
+    - decisions/issue_log.csv
+    forbidden_outputs:
+    - public release approval
+    - silent data or code rewrites
+    aeros_constraints:
+    - Check reproducibility, paths, manifests, seeds, package instructions, and result drift.
+    - Public release still requires compliance/release gate approval.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  pre_submission_audit:
+    name: pre-submission-audit
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: writing
+    aeros_stage: writing_revision
+    use_status: review_only
+    allowed_outputs:
+    - audits/pre_submission_audit.md
+    - audits/referee_panel_report.md
+    - decisions/issue_log.csv
+    forbidden_outputs:
+    - submission approval
+    - claim strengthening
+    aeros_constraints:
+    - Audit coherence, claims, tables, citations, data availability, limitations, and reproducibility.
+    - Submission requires human approval after audit findings are resolved or accepted.
+    human_gate_required: true
+    tier: core
+    default_use: true
+  paper_draft:
+    name: paper-draft
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: writing
+    aeros_stage: writing_revision
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - paper/draft.md
+    - paper/draft.tex
+    - audits/writing_audit_report.md
+    forbidden_outputs:
+    - stronger claims than evidence/claim_registry.md
+    - unregistered numerical claims
+    aeros_constraints:
+    - Drafting must obey claim_registry.md, language_constraints.md, and number registry.
+    - Unsupported claims must be weakened or routed to human decision.
+    human_gate_required: true
+    tier: core
+    default_use: true
+  results_narrator:
+    name: results-narrator
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: writing
+    aeros_stage: writing_revision
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - paper/draft.md
+    - audits/writing_audit_report.md
+    forbidden_outputs:
+    - causal interpretation beyond method_card.md
+    - narrative based on unregistered outputs
+    aeros_constraints:
+    - Results prose must trace to result_index.csv and claim_registry.md.
+    - Distinguish descriptive, correlational, causal, and speculative language.
+    human_gate_required: true
+    tier: core
+    default_use: true
+  journal_adapt:
+    name: journal-adapt
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: writing
+    aeros_stage: writing_revision
+    use_status: dormant_reference
+    allowed_outputs:
+    - paper/draft.md
+    - audits/submission_fit_report.md
+    forbidden_outputs:
+    - journal submission
+    - strategic claim inflation
+    aeros_constraints:
+    - Adapt framing and structure without changing evidence status.
+    - Human owner chooses journal and submission strategy.
+    human_gate_required: true
+    tier: reference
+    default_use: false
+  response_letter:
+    name: response-letter
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: writing
+    aeros_stage: writing_revision
+    use_status: dormant_reference
+    allowed_outputs:
+    - paper/response_letter.md
+    - audits/revision_audit_report.md
+    forbidden_outputs:
+    - unapproved rebuttal commitments
+    - hidden claim changes
+    aeros_constraints:
+    - Every promised revision must map to a changed artifact or issue-log entry.
+    - Human owner approves response strategy.
+    human_gate_required: true
+    tier: reference
+    default_use: false
+  bib_manager:
+    name: bib-manager
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: literature
+    aeros_stage: literature_extraction
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - references.bib
+    - discovery/literature/citation_audit.md
+    - audits/bib_verification_report.md
+    forbidden_outputs:
+    - fabricated citations
+    - bibliography entries without source verification
+    aeros_constraints:
+    - Bibliography changes must be verifiable and pass citation/bib checks.
+    - Do not infer missing metadata when DOI/OpenAlex/Zotero metadata is unavailable.
+    human_gate_required: false
+    tier: core
+    default_use: true
+  zotero_connector:
+    name: zotero:Zotero
+    source: local_codex_skills
+    invocation: connector_skill
+    external_stage: literature
+    aeros_stage: literature_extraction
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - references.bib
+    - discovery/literature/citation_audit.md
+    forbidden_outputs:
+    - unverified citation import
+    - paywalled content extraction outside user access rights
+    aeros_constraints:
+    - Use Zotero only as a source/library connector; AEROS citation checks remain authoritative.
+    - Imported references must remain auditable through references.bib and citation reports.
+    human_gate_required: false
+    tier: core
+    default_use: false
+  policy_timeline:
+    name: policy-timeline
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: data
+    aeros_stage: data_scouting
+    use_status: receipt_required
+    allowed_outputs:
+    - docs/policy_timeline.md
+    - audits/source_snapshot_report.md
+    - discovery/data_inventory.csv
+    forbidden_outputs:
+    - unsnapshotted source claims
+    - automatic treatment-date approval
+    aeros_constraints:
+    - Policy dates must include source snapshot/date and ambiguity notes.
+    - Treatment timing needs human approval before becoming protected definition.
+    human_gate_required: true
+    tier: advisory
+    default_use: false
+  econ_principles_check:
+    name: econ-principles-check
+    source: local_codex_skills
+    invocation: mcp_skill
+    external_stage: theory
+    aeros_stage: design_formation
+    use_status: review_only
+    allowed_outputs:
+    - audits/design_audit_report.md
+    - docs/method_card.md
+    - audits/writing_audit_report.md
+    forbidden_outputs:
+    - final theory claim approval
+    - claim strengthening without evidence
+    aeros_constraints:
+    - Use to surface economic logic, mechanism plausibility, and interpretation risks.
+    - Formal claims still require evidence registry and human gate approval.
+    human_gate_required: true
+    tier: advisory
+    default_use: true

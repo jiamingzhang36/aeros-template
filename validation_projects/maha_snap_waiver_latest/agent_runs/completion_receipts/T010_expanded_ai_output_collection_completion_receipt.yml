@@ -1,0 +1,118 @@
+version: 4
+task_id: T010_expanded_ai_output_collection
+generated_at: '2026-06-24T14:28:36+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: failed
+verification_level: failed_attestation
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T010_expanded_ai_output_collection.yml
+automation_class: approval_required
+gate_status: blocked_requires_approval
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T010_expanded_ai_output_collection_skill_invocations.yml
+allowed_outputs_expected:
+- outputs/audit_runs/expanded_ai_outputs.jsonl
+- outputs/.provenance/
+- audits/expanded_collection_run_report.md
+- agent_runs/
+allowed_outputs_found:
+- outputs/audit_runs/expanded_ai_outputs.jsonl
+- outputs/.provenance/
+- audits/expanded_collection_run_report.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: outputs/audit_runs/expanded_ai_outputs.jsonl
+  exists: true
+  type: file
+  sha256: a44971b1ed9fbc1c55f0020d4894fd9049b44f560f284430b363039bbe1574dc
+  bytes: 12090
+- path: outputs/.provenance/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 5
+- path: audits/expanded_collection_run_report.md
+  exists: true
+  type: file
+  sha256: 00574499eef08eb32d18f69efec27d9009d19582bc98a0e8d55b946cbc61187c
+  bytes: 513
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 5
+checks_required:
+- check_expanded_collection_design.py
+- check_expanded_collection_outputs.py
+- check_provider_collection.py
+- check_provenance.py
+checks_run:
+- check_expanded_collection_design.py
+- check_expanded_collection_outputs.py
+- check_provider_collection.py
+- check_provenance.py
+checks_passed:
+- check_expanded_collection_design.py
+- check_expanded_collection_outputs.py
+- check_provider_collection.py
+- check_provenance.py
+checks_failed: []
+check_attestations:
+- name: check_expanded_collection_design.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_expanded_collection_design.py
+  exit_code: 0
+  elapsed_seconds: 0.089
+- name: check_expanded_collection_outputs.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_expanded_collection_outputs.py
+  exit_code: 0
+  elapsed_seconds: 0.087
+- name: check_provider_collection.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_provider_collection.py
+  exit_code: 0
+  elapsed_seconds: 0.086
+- name: check_provenance.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_provenance.py
+  exit_code: 0
+  elapsed_seconds: 0.097
+evidence_receipt_required: false
+evidence_receipt_path: ''
+evidence_receipt_exists: false
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: c44c85a6c2a62ad57fc6178322326c34a3f5168db4d706c2c140d6a175cfd1d0
+output_fingerprint: a298925fbafce9336376adfb8d3a18c3ab3ccc4b8bfdbd32b3ca80608f1b11f5
+dependency_fingerprint: da5f93a50ad08b1758ba84b454888e741fcc26586645a4c70ee33956d4a7b256
+completion_verdict: fail
+failures:
+- 'task is blocked: approval_required/blocked_requires_approval'

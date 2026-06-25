@@ -1,0 +1,23 @@
+version: 1
+task_id: T009_expanded_collection_design
+generated_at: '2026-06-24T14:32:32+00:00'
+contract_path: tasks/execution/T009_expanded_collection_design.yml
+run_report_path: ''
+allowed_skills:
+- data-inventory
+- data-quality-checker
+- policy-timeline
+recommended_skills:
+- data-inventory
+- data-quality-checker
+- policy-timeline
+required_skill_classes: []
+skill_waivers:
+- skill_class: recommended_skills
+  scope: mechanical_revalidation
+  reason: Runtime wrote this receipt during mechanical revalidation of existing artifacts;
+    no external skill was invoked.
+  progress_label: mechanical_hygiene
+skills_used: []
+invocations: []
+verdict: pass

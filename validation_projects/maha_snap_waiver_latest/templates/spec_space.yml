@@ -1,0 +1,14 @@
+version: 1
+spec_space_id: SPEC-SPACE-001
+status: draft
+preanalysis_plan_ref: analysis/preanalysis_plan.yml
+dimensions:
+  outcomes: []
+  samples: []
+  controls: []
+  estimators: []
+  inference_methods: []
+  transformations: []
+confirmatory_specs: []
+exploratory_specs: []
+selection_rule: report all confirmatory specs and summarize exploratory multiverse/sensitivity; do not select by significance alone.

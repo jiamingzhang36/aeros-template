@@ -1,0 +1,50 @@
+task_id: LIT-PAPER-001_literature_positioning
+stage: discovery
+depends_on:
+- LIT-SYNTH-001_function_specific_synthesis
+gate: G0
+automation_class: approval_required
+evidence_receipt_required: true
+receipt_path: agent_runs/action_receipts/LIT-PAPER-001.yml
+gate_status: blocked_requires_approval
+required_skill_classes: []
+allowed_skills:
+- academic-research-suite
+- econ-write
+- bib-manager
+recommended_skills:
+- academic-research-suite
+- econ-write
+- bib-manager
+goal: >
+  Rewrite project literature positioning from function-specific synthesis only.
+  The output should explain closest literature, contribution, method lineage,
+  data/measurement lineage, institutional background, and theory/mechanism
+  positioning without citing source-bound or abstract-only cards.
+inputs:
+- discovery/literature/synthesis/gap_verification_synthesis.md
+- discovery/literature/synthesis/method_identification_synthesis.md
+- discovery/literature/synthesis/theory_mechanism_synthesis.md
+- discovery/literature/synthesis/data_measurement_synthesis.md
+- discovery/literature/synthesis/background_institutional_synthesis.md
+- discovery/literature/extraction_cards/
+allowed_outputs:
+- discovery/literature/synthesis/paper_literature_positioning.md
+- discovery/literature/synthesis/literature_review_draft.md
+- agent_runs/
+forbidden_actions:
+- Do not make empirical result claims.
+- Do not cite papers without verified full-text extraction.
+- Do not claim the entire paper is ready; this task only updates literature positioning.
+checks:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+retry_policy:
+  max_retries: 1
+escalate_if:
+- full text cannot be obtained for all priority papers in the function queue
+- check_literature_fulltext_execution.py fails after one repair pass
+budget:
+  max_agent_calls: 4
+  max_dollars: 8.0
+  timeout_seconds: 1800

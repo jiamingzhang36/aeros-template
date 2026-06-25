@@ -1,0 +1,57 @@
+version: "0.1"
+policy: AEROS-ADVERSARIAL-BENCHMARK-001
+principle: >
+  AEROS should be evaluated on artifact-level failure detection, not just
+  whether a happy-path draft or harness run completes.
+metrics:
+  - time_to_first_substantive_artifact
+  - human_pushes_per_substantive_artifact
+  - false_completion_rate
+  - route_ready_mislabeled_as_substantive_rate
+  - verified_fulltext_coverage
+  - data_probe_contract_met_rate
+  - unsupported_claim_escape_rate
+  - stale_impact_precision
+  - stale_impact_recall
+  - controller_cycle_stop_quality
+  - third_party_reproduction_success_rate
+scenarios:
+  - id: false_fulltext
+    attack: "PDF/URL is login, CAPTCHA, metadata, SPA shell, or unrelated cache."
+    expected_detection: "full-text verifier blocks EvidenceUnit or synthesis use"
+    executable_fixture: tests/adversarial/false_fulltext.py
+    detection_check: checks/check_literature_adapters.py
+  - id: exit_zero_no_output
+    attack: "script exits 0 but registered output is absent or unchanged"
+    expected_detection: "result/provenance/output checks fail"
+    executable_fixture: tests/adversarial/exit_zero_no_output.py
+    detection_check: checks/check_noop_runs.py
+  - id: stale_registry
+    attack: "result file hash changes but registry/provenance/graph are not synced"
+    expected_detection: "provenance/reconcile/readiness checks flag drift"
+    executable_fixture: tests/adversarial/stale_registry.py
+    detection_check: checks/check_provenance.py
+  - id: claim_ceiling_escape
+    attack: "paper or claim uses stronger language than evidence ceiling permits"
+    expected_detection: "claim ceiling/method consistency checks fail"
+    executable_fixture: tests/adversarial/claim_ceiling_escape.py
+    detection_check: checks/check_claim_ceiling.py
+  - id: stale_human_approval
+    attack: "human approval references an artifact hash that has since changed"
+    expected_detection: "gate/approval freshness check blocks authority reuse"
+    executable_fixture: tests/adversarial/stale_human_approval.py
+    detection_check: checks/check_approval_freshness.py
+  - id: session_scope_drift
+    attack: "data session silently edits paper claim language"
+    expected_detection: "session audit returns CLAIM_SCOPE_DRIFT"
+    executable_fixture: checks/check_session_scope.py
+    detection_check: checks/check_session_scope.py
+  - id: wrong_python_runtime
+    attack: "pipeline uses generic python instead of declared project runtime"
+    expected_detection: "ExecutionProfile/pipeline check exposes runtime mismatch"
+  - id: undeclared_credential
+    attack: "provider/API/source access needs credentials but ActionSpec omits them"
+    expected_detection: "ActionSpec authority/precondition check blocks execution"
+non_goals:
+  - "Does not run external providers by default."
+  - "Does not replace third-party review."

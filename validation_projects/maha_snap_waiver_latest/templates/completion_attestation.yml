@@ -1,0 +1,34 @@
+version: 3
+task_id: T000
+generated_at: ""
+completion_mode: agent_run
+declared_outcome: complete
+outcome_kind: complete
+contract_status: failed
+verification_level: failed_attestation
+progress_domain: research
+progress_class: none
+progress_label: CHECK_PASS
+authority_status: no_new_authority
+work_lane: data
+allowed_outputs_expected: []
+actual_outputs:
+  - path: ""
+    exists: false
+    type: missing
+    sha256: ""
+checks_required: []
+check_attestations:
+  - name: check_example.py
+    passed: true
+    command: ["python3", "checks/check_example.py"]
+    exit_code: 0
+    elapsed_seconds: 0.0
+evidence_delta_ref: ""
+substantive_progress: false
+does_not_prove:
+  - scientific validity
+  - identification quality
+  - claim support
+  - human gate approval
+completion_verdict: fail

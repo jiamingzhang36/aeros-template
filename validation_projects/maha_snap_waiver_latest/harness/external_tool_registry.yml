@@ -1,0 +1,240 @@
+version: "0.1"
+policy: AEROS-EXTERNAL-ECON-TOOLS-001
+principle: >
+  External economics tools are registered capabilities, references, adapter
+  candidates, or advisory reviewers. They may help discover artifacts, structure
+  work, or propose risks, but they cannot approve gates, certify claims, replace
+  source-bound evidence, or override AEROS checks.
+default_status: advisory
+tools:
+  awesome_ai_for_economists:
+    lane: harness
+    role: reference_index
+    maturity: reference
+    url: "https://github.com/hanlulong/awesome-ai-for-economists"
+    use_for:
+      - tracking economics-oriented AI tools and data resources
+      - identifying future adapter candidates
+    evidence_output:
+      - external_tool_notes
+    must_not_do:
+      - approve gates
+      - certify claims
+      - replace project-specific evidence
+  openalex:
+    lane: literature
+    role: adapter_candidate
+    maturity: stable_api
+    url: "https://docs.openalex.org/"
+    use_for:
+      - literature metadata discovery
+      - citation graph candidate expansion
+      - author/venue/source disambiguation
+    evidence_output:
+      - discovery/literature/search_log.csv
+      - discovery/literature/citation_graph_edges.csv
+    must_not_do:
+      - treat metadata as full-text evidence
+      - approve literature synthesis
+      - certify gap claims
+  citec_repec:
+    lane: literature
+    role: adapter_candidate
+    maturity: stable_reference
+    url: "https://citec.repec.org/"
+    use_for:
+      - economics-specific citation graph discovery
+      - RePEc working-paper citation tracing
+    evidence_output:
+      - discovery/literature/citation_graph_edges.csv
+      - discovery/literature/citation_audit.md
+    must_not_do:
+      - treat citation links as evidence of findings
+      - approve literature synthesis
+      - certify gap claims
+  pybiblionet:
+    lane: literature
+    role: adapter_candidate
+    maturity: emerging_tool
+    url: "https://arxiv.org/abs/2601.16990"
+    use_for:
+      - OpenAlex-based bibliometric network analysis
+      - citation-cluster exploration
+    evidence_output:
+      - discovery/literature/citation_graph_edges.csv
+      - discovery/literature/literature_network_notes.md
+    must_not_do:
+      - replace full-text extraction
+      - rank papers as sufficient evidence without review
+      - certify gap claims
+      - approve gates
+  preprintresolver:
+    lane: literature
+    role: adapter_candidate
+    maturity: advisory_resolver
+    url: "https://arxiv.org/abs/2309.01373"
+    use_for:
+      - resolving working papers or preprints to published versions
+      - documenting WP/version conflicts before citation lock
+    evidence_output:
+      - discovery/literature/preprint_resolution_log.csv
+    must_not_do:
+      - bulk-resolve without manual review
+      - overwrite paper registry identity without receipt
+      - certify final bibliography entries
+      - approve gates
+  aea_data_editor:
+    lane: compliance
+    role: external_standard
+    maturity: external_policy
+    url: "https://aeadataeditor.github.io/"
+    use_for:
+      - replication package alignment
+      - data availability and reproducibility checklist design
+      - pre-submission package audit
+    evidence_output:
+      - replication/aea_data_package_manifest.yml
+      - audits/aea_replication_alignment.md
+    must_not_do:
+      - certify AEA acceptance
+      - replace human policy review
+      - waive data license or confidentiality constraints
+  opensourceeconomics:
+    lane: analysis
+    role: reference_index
+    maturity: reference
+    url: "https://github.com/OpenSourceEconomics"
+    use_for:
+      - reproducible economics project structure ideas
+      - environment and package organization references
+    evidence_output:
+      - external_tool_notes
+    must_not_do:
+      - replace AEROS task contracts
+      - approve replication package completeness
+      - certify claims
+  econstellar:
+    lane: analysis
+    role: reference_pattern
+    maturity: emerging_reference
+    url: "https://arxiv.org/abs/2606.05705"
+    use_for:
+      - endpoint-reproducible result pattern
+      - result registry reproducibility metadata design
+    evidence_output:
+      - evidence/result_registry.csv
+      - evidence/result_index.csv
+    must_not_do:
+      - require every result to have a public endpoint
+      - certify endpoint stability forever
+      - certify claims
+      - approve gates
+  econometrics_agent:
+    lane: analysis
+    role: advisory_reviewer
+    maturity: emerging_tool
+    url: "https://github.com/FromCSUZhou/Econometrics-Agent"
+    use_for:
+      - econometric workflow suggestions
+      - specification-risk brainstorming
+      - optional reviewer notes
+    evidence_output:
+      - audits/advisory/econometrics_agent_notes.md
+    must_not_do:
+      - approve gates
+      - certify identification
+      - certify claims
+      - replace reproducible code or result registry
+  causal_copilot:
+    lane: claim
+    role: advisory_reviewer
+    maturity: emerging_tool
+    url: "https://arxiv.org/abs/2504.13263"
+    use_for:
+      - causal identification risk brainstorming
+      - alternative explanation checklist generation
+      - advisory claim-ceiling notes
+    evidence_output:
+      - audits/advisory/causal_copilot_notes.md
+    must_not_do:
+      - approve gates
+      - certify identification
+      - upgrade claim status
+      - replace human G3/G7/G12 decisions
+  causalagent:
+    lane: claim
+    role: advisory_reviewer
+    maturity: emerging_tool
+    url: "https://arxiv.org/abs/2602.11527"
+    use_for:
+      - causal graph or identification-assumption brainstorming
+      - robustness-risk suggestions
+    evidence_output:
+      - audits/advisory/causalagent_notes.md
+    must_not_do:
+      - approve gates
+      - certify identification
+      - upgrade claim status
+      - replace human G3/G7/G12 decisions
+
+
+econ_agent_skills:
+  lane: analysis
+  role: advisory_reviewer
+  maturity: emerging_tool
+  url: "https://github.com/JonasWeinert/EconAgentSkills"
+  use_for:
+    - economics-specific data, DiD, IV, RDD, panel, writing, and visualization skill policy
+    - ASK/DEFAULT+flag/DOCUMENT/PROCEED method discipline
+  evidence_output:
+    - audits/advisory/econ_agent_skills_notes.md
+    - docs/method_card.md
+  must_not_do:
+    - approve gates
+    - certify identification
+    - certify claims
+    - silently swap estimators without documentation
+did_agent_workflow:
+  lane: analysis
+  role: advisory_reviewer
+  maturity: emerging_tool
+  url: "https://github.com/zhangxiany-tamu/DID"
+  use_for:
+    - modern DiD treatment profiling and estimator-risk routing
+    - advisory pretrend, heterogeneity, and HonestDiD checklists
+  evidence_output:
+    - audits/advisory/did_agent_workflow_notes.md
+  must_not_do:
+    - approve gates
+    - certify identification
+    - certify causal claims
+    - replace project-owned analysis code or result registry
+scholar_deep_research:
+  lane: literature
+  role: reference_pattern
+  maturity: emerging_tool
+  url: "https://github.com/Agents365-ai/scholar-deep-research"
+  use_for:
+    - literature search phase decomposition
+    - citation chasing, deduplication, and self-critique pattern design
+  evidence_output:
+    - discovery/literature/search_log.csv
+    - discovery/literature/citation_snowball_queue.csv
+  must_not_do:
+    - approve gates
+    - certify literature gaps
+    - replace full-text extraction cards
+    - write synthesis without source-bound extraction
+citecheck:
+  lane: literature
+  role: reference_pattern
+  maturity: emerging_reference
+  url: "https://arxiv.org/abs/2605.27700"
+  use_for:
+    - citation existence and metadata faithfulness audit design
+  evidence_output:
+    - discovery/literature/citation_audit.md
+  must_not_do:
+    - approve gates
+    - certify scientific truth
+    - certify claim support without project evidence

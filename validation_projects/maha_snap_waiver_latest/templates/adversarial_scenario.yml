@@ -1,0 +1,11 @@
+version: "0.1"
+policy: AEROS-ADVERSARIAL-BENCHMARK-001
+id: false_fulltext
+description: "A candidate full-text URL returns login/CAPTCHA/metadata HTML instead of article text."
+target_check: check_literature_fulltext_execution.py
+expected_detection: true
+false_positive_risk: ""
+fixture_path: ""
+does_not_prove:
+  - "overall scientific validity"
+  - "all future attacks are covered"

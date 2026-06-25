@@ -1,0 +1,83 @@
+version: 4
+task_id: T003a_protocol_design
+generated_at: '2026-06-24T14:32:21+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T003a_protocol_design.yml
+automation_class: auto_rerunnable
+gate_status: pending
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T003a_protocol_design_skill_invocations.yml
+allowed_outputs_expected:
+- execution/protocol/main_execution_protocol.md
+- agent_runs/
+allowed_outputs_found:
+- execution/protocol/main_execution_protocol.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: execution/protocol/main_execution_protocol.md
+  exists: true
+  type: file
+  sha256: f35fb9e0f0e571b326a6e8cfa88f6bc5b89eed1e2a56754dc60f258cb8a73ed7
+  bytes: 3014
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 5
+checks_required:
+- check_execution_protocol.py
+- check_agent_run_report.py
+checks_run:
+- check_execution_protocol
+- check_agent_run_report.py
+checks_passed:
+- check_execution_protocol
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_execution_protocol
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_execution_protocol.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.117
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.206
+evidence_receipt_required: false
+evidence_receipt_path: ''
+evidence_receipt_exists: false
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 5d87da1826d44d175262fa5fdf5b8bcca815f0f9b1c1f713076b183bf3069b72
+output_fingerprint: 3c4b92612591e5c6702bb46a54bd08ec04ab6ef5160f17137cf558dfd9898dc3
+dependency_fingerprint: 1043a459b70ebc4d7f76efd54e1673b45d1108ef1661ac9f95556716e116f456
+completion_verdict: pass
+failures: []

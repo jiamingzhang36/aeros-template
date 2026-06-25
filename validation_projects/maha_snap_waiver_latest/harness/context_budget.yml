@@ -1,0 +1,38 @@
+version: "0.1"
+policy: AEROS-CONTEXT-BUDGET-001
+principle: >
+  Context is an engineered input, not a transcript dump. AEROS should give
+  agents the smallest project-specific context bundle that contains the next
+  action, stop rule, blocker, lane state, and source anchors needed for the
+  current step.
+brief_max_lines: 40
+lane_max_lines: 80
+max_recent_deltas: 5
+max_human_gate_items: 3
+max_source_hashes: 12
+must_include:
+  - current_goal
+  - recommended_next_action
+  - status_label
+  - next_command
+  - stop_rule
+  - does_not_prove
+context_risks:
+  - context_poisoning
+  - context_distraction
+  - context_confusion
+  - context_clash
+  - stale_retrieval
+boundaries:
+  - Context bundles do not certify substantive progress.
+  - Context bundles do not approve gates or claims.
+  - Agents should read referenced files only when the next action requires them.
+  - Long-term memory must be project-scoped and source-anchored, not free-floating chat memory.
+
+stale_context_policy:
+  compare_against: outputs/context/context_bundle.json
+  stale_if:
+    - tracked_source_hash_changed
+    - tracked_source_removed
+    - bundle_lane_differs_from_requested_lane
+  action: "Regenerate with `aeros cockpit --write` or `aeros context --write` before relying on old context."

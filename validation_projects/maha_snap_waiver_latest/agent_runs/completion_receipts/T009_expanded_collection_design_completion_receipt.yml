@@ -1,0 +1,106 @@
+version: 4
+task_id: T009_expanded_collection_design
+generated_at: '2026-06-24T14:32:32+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T009_expanded_collection_design.yml
+automation_class: frozen_evidence
+gate_status: needs_receipt_audit
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T009_expanded_collection_design_skill_invocations.yml
+allowed_outputs_expected:
+- execution/collection/expanded_collection_plan.md
+- outputs/audit_runs/expanded_prompt_grid.csv
+- audits/expanded_collection_design_report.md
+- agent_runs/
+allowed_outputs_found:
+- execution/collection/expanded_collection_plan.md
+- outputs/audit_runs/expanded_prompt_grid.csv
+- audits/expanded_collection_design_report.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: execution/collection/expanded_collection_plan.md
+  exists: true
+  type: file
+  sha256: a708d37bff1875638fad00d9fe62c9f5aee7be89743fc92516c6197feb537e5c
+  bytes: 3985
+- path: outputs/audit_runs/expanded_prompt_grid.csv
+  exists: true
+  type: file
+  sha256: 8334b8a970500d06bfc45a9bda431601e1cdbaadfa4376bef50946db03b5add2
+  bytes: 1407
+- path: audits/expanded_collection_design_report.md
+  exists: true
+  type: file
+  sha256: 003a18fc14848a711388e337aa0fc963a52f9535992d05c0802a1fae50a659a5
+  bytes: 1356
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 5
+checks_required:
+- check_expanded_collection_design.py
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_run:
+- check_expanded_collection_design.py
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_passed:
+- check_expanded_collection_design.py
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_expanded_collection_design.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_expanded_collection_design.py
+  exit_code: 0
+  elapsed_seconds: 0.099
+- name: check_claim_registry.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_registry.py
+  exit_code: 0
+  elapsed_seconds: 0.096
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.13
+evidence_receipt_required: true
+evidence_receipt_path: evidence/receipts/T009_expanded_collection_design_frozen_evidence_receipt.md
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 7cd53ac4bd317c6eb9d63bc1310d5482ef41a51db70df1a119cdc6a0a30f3767
+output_fingerprint: 8086b6c45b1de4534094cf0be6440133d0d144a6c9e23517835a7178b14a2066
+dependency_fingerprint: 8bbb03492853856d9af31836ce922b6c2176af85790456b5cd2152dbcc79e2eb
+completion_verdict: pass
+failures: []

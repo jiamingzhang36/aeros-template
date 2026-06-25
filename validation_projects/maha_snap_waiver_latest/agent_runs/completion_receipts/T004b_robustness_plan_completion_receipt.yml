@@ -1,0 +1,83 @@
+version: 4
+task_id: T004b_robustness_plan
+generated_at: '2026-06-24T14:32:56+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T004b_robustness_plan.yml
+automation_class: auto_rerunnable
+gate_status: pending
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T004b_robustness_plan_skill_invocations.yml
+allowed_outputs_expected:
+- docs/robustness_checklist.md
+- agent_runs/
+allowed_outputs_found:
+- docs/robustness_checklist.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: docs/robustness_checklist.md
+  exists: true
+  type: file
+  sha256: 71b55b625820d68108856a677ab4a4005ec1d456a5baa29251fe0623061856a9
+  bytes: 7272
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 5
+checks_required:
+- check_claim_ceiling.py
+- check_agent_run_report.py
+checks_run:
+- check_claim_ceiling
+- check_agent_run_report.py
+checks_passed:
+- check_claim_ceiling
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_claim_ceiling
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_ceiling.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.083
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.129
+evidence_receipt_required: false
+evidence_receipt_path: ''
+evidence_receipt_exists: false
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 1f7d2ceda5e037fd60ebdea71d0cabc8be27cd741473ad0ce0b2a8e1b25f4805
+output_fingerprint: d65bc694b3c7c47b32c8a3363040c7c0e7f74cc245dfb584999cb0a2fd2dc3d4
+dependency_fingerprint: 8888cafe23df52f7ab8c6d4d1b48fb25d6526b8c85baa78930af872d2288ec5d
+completion_verdict: pass
+failures: []

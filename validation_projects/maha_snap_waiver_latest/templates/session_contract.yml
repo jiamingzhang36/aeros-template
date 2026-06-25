@@ -1,0 +1,34 @@
+version: "0.1"
+policy: AEROS-SESSION-SCOPE-001
+active: true
+started_at: "YYYY-MM-DDTHH:MM:SSZ"
+active_lane: data
+objective: "One concrete objective for this chat/run."
+max_actions: 2
+allowed_actions:
+  - aeros cockpit
+  - aeros next
+  - lane-scoped action
+allowed_prefixes:
+  - SESSION_CONTRACT.yml
+  - agent_runs/
+  - outputs/logs/
+  - decisions/revision_log.md
+forbidden_prefixes:
+  - paper/
+  - evidence/claim_registry.md
+stop_condition: "Stop at human gate, blocker, no-progress, max_actions, or first off-scope diff."
+completion_label_rule: "Use CHECK_PASS, ROUTE_READY, or SUBSTANTIVE_PRODUCED."
+semantic_audit_outputs:
+  - changed_artifacts
+  - owner_lane
+  - artifact_type
+  - semantic_class
+  - authority_risk
+  - verdict
+does_not_prove:
+  - "that any task is complete"
+  - "that any research artifact is valid"
+  - "that a claim is supported"
+  - "that a human gate is approved"
+  - "that off-scope changes are acceptable"

@@ -1,0 +1,34 @@
+current_stage: discovery
+current_gate: G10
+gate_status: approved
+candidate_stage: discovery
+candidate_gate: G10
+tasks: {}
+gate_history:
+- at: '2026-06-24T14:17:15+00:00'
+  stage: discovery
+  gate: G10
+  task_id: human_gate
+  reason: human_approved
+candidate_gate_history:
+- at: '2026-06-24T13:59:05+00:00'
+  stage: execution
+  gate: G10
+  task_id: adoption
+  reason: paper/draft artifacts found
+gate_decisions:
+- at: '2026-06-24T14:17:15+00:00'
+  stage: discovery
+  gate: G10
+  decision: approve
+  owner: Jiaming
+  note: Human reviewer accepts the latest-structure G10 evidence packet for Paper
+    1 as a measurement/descriptive paper-package gate; no causal, demand, welfare,
+    SNAP/EBT transaction, provider-output collection, public-release, or claim-upgrade
+    authorization is granted.
+adoption:
+  mode: mirror
+  source: /Users/jiamingzhang/Desktop/MAHA
+  candidate_gate_reason: paper/draft artifacts found
+  human_approval_required: true
+updated_at: '2026-06-24T14:17:15+00:00'

@@ -1,0 +1,5 @@
+evidence_id,result_id,claim_id,evidence_type,source_path,summary,boundary
+EV001,R001,C001,registered_result,outputs/model_outputs/R001_policy_rule_measurement.md,Policy-rule measurement artifact supporting heterogeneous state-specific waiver design claims,Measurement only; not behavioral health welfare or demand evidence
+EV002,R002,C002,registered_result,outputs/model_outputs/R002_approval_risk_concentration.md,Approval-risk concentration diagnostic artifact supporting descriptive or associational approval-window claims,No causal governor-party or federal-selection claim
+EV003,R003,C003,registered_result,outputs/model_outputs/R003_nielsen_policy_rule_exposure.md,NielsenIQ ex-ante aggregate exposure artifact supporting low-income proxy basket exposure claims,No actual SNAP/EBT transaction or post-policy response claim
+EV004,R004,C004,registered_result,outputs/model_outputs/R004_boundary_and_feasibility_diagnostics.md,Boundary diagnostic artifact supporting SNAP/EBT target-implementation and scanner-ambiguity limitations,Limits interpretation; not demand welfare health or forecast evidence

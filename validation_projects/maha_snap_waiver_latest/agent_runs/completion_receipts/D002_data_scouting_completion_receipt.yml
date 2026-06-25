@@ -1,0 +1,65 @@
+version: 4
+task_id: D002_data_scouting
+generated_at: '2026-06-25T15:09:53+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/discovery/D002_data_scouting.yml
+automation_class: receipt_audited
+gate_status: needs_receipt_audit
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/D002_data_scouting_skill_invocations.yml
+allowed_outputs_expected:
+- discovery/data_inventory.csv
+allowed_outputs_found:
+- discovery/data_inventory.csv
+allowed_outputs_missing: []
+actual_outputs:
+- path: discovery/data_inventory.csv
+  exists: true
+  type: file
+  sha256: a9032742bfd69cca7eeb1f7cd008c948b1b08b2f810aac045fc852f6c1dd300a
+  bytes: 4938
+checks_required:
+- check_data_inventory.py
+checks_run:
+- check_data_inventory
+checks_passed:
+- check_data_inventory
+checks_failed: []
+check_attestations:
+- name: check_data_inventory
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_data_inventory.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.055
+evidence_receipt_required: true
+evidence_receipt_path: evidence/receipts/D002_data_scouting_human_review_receipt.md
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 2ed7d3768a5af2fb9e414051d8720ee8f6ffd0ccde0bb827db772fe4e8db4242
+output_fingerprint: 9e43c79e64e870eb8a39eb54c11a46a4eca35bc7032bca79ce11edfd21edaea0
+dependency_fingerprint: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+completion_verdict: pass
+failures: []

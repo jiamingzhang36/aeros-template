@@ -1,0 +1,11 @@
+{
+  "result_id": "R002",
+  "output_path": "outputs/model_outputs/R002_approval_risk_concentration.md",
+  "created_at": "2026-06-15T01:46:20.166984+00:00",
+  "script_or_source": "code/99_make_all.py",
+  "sha256": "bf8741bcf63672bd14d51de8a48b1d4085391a7a9148b06229a8b8bc0e780bdf",
+  "artifact_type": "public-process descriptive diagnostics",
+  "claim_ceiling": "descriptive_association",
+  "restricted_microdata_exported": "false",
+  "notes": "Alias for R002_approval_risk_concentration. Supports approval-risk concentration language only; no causal governor-party effect."
+}

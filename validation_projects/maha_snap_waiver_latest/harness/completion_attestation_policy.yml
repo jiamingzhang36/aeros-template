@@ -1,0 +1,65 @@
+version: "0.1"
+policy: AEROS-COMPLETION-ATTESTATION-001
+principle: >
+  Completion is a small mechanical attestation, not a research verdict. A task
+  may be marked passed only when AEROS can point to substantive allowed outputs,
+  check commands with exit codes, and a boundary statement about what completion
+  does not prove.
+minimal_attestation_fields:
+  - task_id
+  - declared_outcome
+  - work_lane
+  - allowed_outputs_expected
+  - actual_outputs
+  - check_attestations
+  - substantive_progress
+  - outcome_kind
+  - contract_status
+  - verification_level
+  - progress_domain
+  - progress_class
+  - progress_label
+  - authority_status
+  - does_not_prove
+allowed_declared_outcomes:
+  - complete
+  - partial
+  - blocked
+  - hygiene
+outcome_labels:
+  CHECK_PASS: Mechanical checks, schemas, receipts, or harness validations passed.
+  ROUTE_READY: A plan, queue, approval packet, route audit, or execution packet is ready.
+  SUBSTANTIVE_PRODUCED: A real source snapshot, data artifact, full-text extraction, result, paper edit, or approved decision changed the research substance.
+  DECISION_RECORDED: A governance decision was recorded; it is not research-substantive output by itself.
+progress_domains:
+  research: Research-project evidence, data, literature, analysis, claim, or paper state changed.
+  runtime: AEROS framework/runtime capability or fixture changed.
+  governance: Human authority, approval, blocker, or decision state changed.
+progress_classes:
+  none: No substantive progress artifact exists.
+  bookkeeping: Registry, dashboard, or receipt bookkeeping changed.
+  routing: A route, queue, blocker, packet, or plan was produced.
+  substantive: A real source/data/literature/result/paper/decision artifact was produced.
+  decision: A human or governance decision was recorded without implying research-substantive output.
+passed_task_rule:
+  declared_outcome: complete
+  requires:
+    - at least one substantive allowed output outside agent_runs/
+    - progress_class is substantive
+    - progress_label is SUBSTANTIVE_PRODUCED
+    - file outputs include sha256
+    - every required check has command and exit_code
+    - completion_verdict is pass
+does_not_prove_defaults:
+  - scientific validity
+  - identification quality
+  - claim support
+  - human gate approval
+non_goals:
+  - decide whether a result is true
+  - approve gates
+  - upgrade claims
+  - replace evidence delta logs or provenance manifests
+enforced_by:
+  - checks/check_completion_receipts.py
+  - checks/check_noop_runs.py

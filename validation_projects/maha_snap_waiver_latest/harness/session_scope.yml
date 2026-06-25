@@ -1,0 +1,125 @@
+version: "0.1"
+policy: AEROS-SESSION-SCOPE-001
+principle: >
+  Chat-driven work must declare one active lane and objective. The session guard
+  audits changed files against lane scope so off-scope drift becomes visible
+  instead of silently mixing data, literature, claims, writing, and harness work.
+common_allowed_prefixes:
+  - SESSION_CONTRACT.yml
+  - CURRENT_STATE.md
+  - NEXT_ACTION.md
+  - CONTEXT_BUNDLE.md
+  - agent_runs/
+  - outputs/logs/
+  - outputs/context/
+  - decisions/revision_log.md
+  - decisions/update_ledger.md
+  - harness/improvement_backlog.yml
+lanes:
+  data:
+    allowed_prefixes:
+      - data/
+      - discovery/data_inventory.csv
+      - discovery/feasibility_matrix.md
+      - docs/data_contract.yml
+      - docs/data_dictionary.md
+      - docs/data_sources.md
+      - code/00_setup/
+      - code/01_ingest/
+      - code/02_clean/
+      - code/03_construct/
+      - data/backfill/
+    forbidden_prefixes:
+      - paper/
+      - discovery/literature/
+      - evidence/claim_registry.md
+  literature:
+    allowed_prefixes:
+      - discovery/literature/
+      - docs/related_work
+      - paper/references
+    forbidden_prefixes:
+      - data/raw/
+      - data/clean/
+      - evidence/claim_registry.md
+      - paper/draft
+  method:
+    allowed_prefixes:
+      - design/
+      - docs/method
+      - code/04_analysis/
+      - code/05_robustness/
+      - templates/estimand
+      - evidence/estimand
+    forbidden_prefixes:
+      - data/raw/
+      - paper/draft
+      - evidence/claim_registry.md
+  analysis:
+    allowed_prefixes:
+      - code/04_analysis/
+      - code/05_robustness/
+      - code/06_tables/
+      - code/07_figures/
+      - outputs/tables/
+      - outputs/figures/
+      - outputs/model_outputs/
+      - evidence/result_index.csv
+      - evidence/result_registry.csv
+      - outputs/.provenance/
+    forbidden_prefixes:
+      - paper/draft
+      - evidence/claim_registry.md
+  claim:
+    allowed_prefixes:
+      - evidence/
+      - audits/
+      - decisions/gates/
+      - docs/design/falsification
+    forbidden_prefixes:
+      - data/raw/
+      - paper/draft
+  writing:
+    allowed_prefixes:
+      - paper/
+      - docs/
+      - outputs/tables/
+      - outputs/figures/
+    forbidden_prefixes:
+      - data/raw/
+      - evidence/claim_registry.md
+  compliance:
+    allowed_prefixes:
+      - replication/
+      - compliance/
+      - docs/data_availability
+      - paper/supplement
+      - outputs/logs/
+    forbidden_prefixes:
+      - data/raw/
+      - evidence/claim_registry.md
+  harness:
+    allowed_prefixes:
+      - aeros/
+      - checks/
+      - harness/
+      - templates/
+      - tools/
+      - docs/design/
+      - project_manifest.yml
+      - AGENTS.md
+    forbidden_prefixes:
+      - data/raw/
+      - paper/draft.md
+      - evidence/claim_registry.md
+non_goals:
+  - "Does not revert off-scope files automatically."
+  - "Does not approve cross-lane work; it only surfaces drift."
+  - "Does not certify research substance or gate completion."
+semantic_verdicts:
+  expected_lane_change: "Changed files match the declared lane."
+  supporting_cross_lane_change: "Allowed support file changed outside the lane; review but not automatically drift."
+  bookkeeping_only: "Only context/log/ledger surfaces changed."
+  SCOPE_DRIFT: "Changed files fall outside the declared lane scope."
+  CLAIM_SCOPE_DRIFT: "A non-writing/non-claim session touched paper claim-language surfaces."
+  AUTHORITY_DRIFT: "A session touched claim, gate, release, or runtime authority surfaces outside its authority."

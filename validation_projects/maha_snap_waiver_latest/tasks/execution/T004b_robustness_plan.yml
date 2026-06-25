@@ -1,0 +1,51 @@
+task_id: T004b_robustness_plan
+stage: execution
+gate: G5
+automation_class: auto_rerunnable
+evidence_receipt_required: false
+receipt_path: ''
+gate_status: pending
+required_skill_classes: []
+allowed_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
+recommended_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
+depends_on:
+- T004_main_execution
+goal: 'Translate the selected design, method card, and first execution outputs into
+  a robustness checklist. Each robustness item must name the threat addressed, the
+  exact rerun or sensitivity rule, expected output, and whether it is required before
+  claims can be supported.
+
+  '
+inputs:
+- docs/method_card.md
+- discovery/design_selection.md
+- evidence/result_index.csv
+- evidence/claim_registry.md
+- audits/design_audit_report.md
+allowed_outputs:
+- docs/robustness_checklist.md
+- agent_runs/
+forbidden_actions:
+- Do not run robustness checks in this task; define them.
+- Do not choose robustness checks based on significance.
+- Do not strengthen claims.
+checks:
+- check_claim_ceiling.py
+- check_agent_run_report.py
+retry_policy:
+  max_retries: 1
+escalate_if:
+- robustness checklist does not map checks to named threats
+- checks still fail after max_retries
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 480

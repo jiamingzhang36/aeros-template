@@ -1,0 +1,419 @@
+version: "0.1"
+purpose: >
+  Track known AEROS weaknesses, deferred improvements, repeated friction, and
+  candidate refinements that should not be left only in chat.
+entries:
+  - id: AEROS-IMPROVE-001
+    created_at: "2026-06-14"
+    updated_at: "2026-06-14"
+    status: open
+    priority: medium
+    area: skill-router
+    source: user_observation
+    issue: "Skills are routed and receipt-gated, but not yet auto-invoked by task type."
+    proposed_fix: "Add a skill invocation planner and run-report skill extraction so runtime receipts can record actual skill use."
+    owner: human
+    target_gate: G0
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Keep as advisory until actual skill invocation can be mechanically audited."
+  - id: AEROS-IMPROVE-002
+    created_at: "2026-06-14"
+    updated_at: "2026-06-14"
+    status: open
+    priority: medium
+    area: validation
+    source: self_audit
+    issue: "AEROS has strong self-validation but still needs more third-party or blind external review of real project outputs."
+    proposed_fix: "Create an external evaluation packet workflow that samples adoption packets, decision packets, claim audits, and draft sections for human or peer review."
+    owner: human
+    target_gate: G8
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Do not treat more internal checks as a substitute for external judgment."
+  - id: AEROS-IMPROVE-003
+    created_at: "2026-06-17"
+    updated_at: "2026-06-17"
+    status: resolved
+    priority: high
+    area: paper-ci
+    source: real_project_validation
+    issue: "paper-ci result registry is a parallel provenance track: registering a result and syncing result_index does NOT emit the provenance JSON / research-graph edges that check_provenance, check_research_graph, and check_gate_exit (G6/G9) require, so a registered result fails those checks."
+    proposed_fix: "On register/sync, also write the provenance record (or have register-result drive `aeros graph build`/provenance emission) so result-born numbers satisfy the existing provenance subsystem instead of contradicting it."
+    owner: human
+    target_gate: G6
+    resolved_at: "2026-06-17"
+    resolution_commit: "6ac6748"
+    notes: "Found when the first real Phase 0 run on CMPD made provenance/gate checks fail on the registered result. Resolved: `paper-ci sync-result-index` now also runs sync_provenance, so check_provenance / check_gate_exit pass for a registered result whose artifact exists. The research_graph derived edges still require a separate `aeros graph build`."
+  - id: AEROS-IMPROVE-004
+    created_at: "2026-06-17"
+    updated_at: "2026-06-17"
+    status: resolved
+    priority: medium
+    area: sync
+    source: real_project_validation
+    issue: "sync_aeros_latest.zsh pushes template-development checks (e.g. check_update_ledger) into downstream research projects, where they fail: check_update_ledger expects the project's own recent commits to appear in a template-evolution ledger that is not a per-project artifact."
+    proposed_fix: "Split checks into template-development vs project checks; have the sync (and run_harness_checks) only run project-applicable checks in downstream targets."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-17"
+    resolution_commit: "bb0db72"
+    notes: "Surfaced when a manual partial rsync (anti-pattern) brought check_update_ledger into CMPD; the official sync tool would propagate it too. Resolved: harness/check_scope.yml lists template_only_checks and run_harness_checks.py skips them unless run inside the template (detected via tools/sync_aeros_latest.zsh). Currently scopes out check_update_ledger only."
+  - id: AEROS-IMPROVE-005
+    created_at: "2026-06-20"
+    updated_at: "2026-06-20"
+    status: open
+    priority: high
+    area: claim_integrity
+    source: literature_borrow + real_project_validation
+    issue: "AEROS has the parts for falsification (negative_result_ledger, placebo, robustness_suite, spec_run_index) but they are passive and not claim-targeted; nothing feeds 'how hard a claim was attacked' into the claim ceiling. T006_referee_panel is wording-only and never opens the data."
+    proposed_fix: "Build a Claim Falsification Engine (design: docs/design/falsification_engine.md): a FALSIFY <claim_id> task that runs a claim-type-aware attack battery as registered spec runs, computes an attack-survival profile, and emits a claim-ceiling RECOMMENDATION (lower/hold autonomously; raises stay human-gated). Borrows AIGS falsification-as-engine; seeded by code/27_referee_robustness.py. Yields AEROS's first self-metric (claim-survival rate)."
+    owner: human
+    target_gate: G7
+    notes: "Design proposal only, not implemented. Proven manually as the 2026-06-20 referee pressure-test (R1-R7 on CMPD C1/C2), which found caveats the passive referee_panel missed. Anti-Goodhart (L4 creativity survey): output is registered artifacts + recommendation, full attack denominator registered, human gate for raises."
+  - id: AEROS-IMPROVE-006
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: next-action
+    source: user_observation
+    issue: "AEROS checks can say whether the project is broken, but Codex still needs the human to manually decide the next best action across checks, human gates, data, literature, analysis, claim, writing, and compliance lanes."
+    proposed_fix: "Add a deterministic `aeros next` command that reads project state, human gate queue, recent harness summaries, and task contracts to emit recommended_next_action, why_this_next, lane, status_label, command, and stop_condition without executing or approving anything."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-21"
+    resolution_commit: "5b37c42"
+    notes: "`aeros next` is a deterministic projection, not an LLM planner. It preserves CHECK_PASS / ROUTE_READY / SUBSTANTIVE_PRODUCED distinctions and cannot certify research substance."
+
+  - id: AEROS-IMPROVE-007
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: literature-method-fusion
+    source: user_observation_plus_external_scan
+    issue: "AEROS had literature registries, skill policies, external tool registry, and next-action routing, but external discovery tools and economics method skills were not fused into a deterministic lane path."
+    proposed_fix: "Add a conservative literature adapter CLI, citation faithfulness audit fields, econ method advisory policy, and next-action lane routing that outputs ROUTE_READY rather than claiming substantive review."
+    owner: human
+    target_gate: G1
+    resolved_at: "2026-06-21"
+    resolution_commit: "1376748"
+    notes: "OpenAlex/manual are implemented adapters; Semantic Scholar/CrossRef/RePEc remain registered candidates until deterministic ingestion is added."
+
+  - id: AEROS-IMPROVE-008
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: context-engineering
+    source: user_observation_plus_cs_scan
+    issue: "Agents can preserve project context through files, but context is spread across CURRENT_STATE, NEXT_ACTION, state, ledgers, queues, and lane artifacts, causing over-reading or empty goal-mode drift."
+    proposed_fix: "Add deterministic `aeros context` bundles with lane focus, stop rules, does_not_prove boundaries, source hashes, and a context budget policy."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-21"
+    resolution_commit: "1376748"
+    notes: "Inspired by context engineering patterns: write/select/compress/isolate, repo-scoped memory graphs, context-as-tool, and task-aware pruning."
+  - id: AEROS-IMPROVE-009
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: efficiency-cockpit
+    source: user_observation_plus_cs_scan
+    issue: "AEROS had a heavy internal harness but no fast profile/cockpit layer, so small work steps either ran too much or relied on chat memory."
+    proposed_fix: "Add check profiles, context stale detection, a lightweight context graph, cockpit command, and lane-specific next-action refinements."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-21"
+    resolution_commit: "1376748"
+    notes: "This is an efficiency/view layer only. It does not reduce full harness obligations, approve gates, certify claims, or turn route readiness into substantive progress."
+  - id: AEROS-IMPROVE-010
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: high
+    area: stale-triage
+    source: critic_review_plus_real_project_cmpd
+    issue: "aeros next conservatively surfaced stale upstream tasks without distinguishing rerun-needed work from free revalidation or provably irrelevant stale noise."
+    proposed_fix: "Add deterministic stale impact triage with three buckets: rerun_required, revalidate_free, and suppress_as_irrelevant. Use task DAG, fingerprints, allowed outputs, research graph, and claim/result/evidence links only; never LLM ranking."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-21"
+    resolution_commit: "1376748"
+    notes: "Implemented as `aeros stale triage --dry-run` and consumed by `aeros next`. It is conservative: suppress only when no frontier/claim path and output fingerprint unchanged; claim-bound stale paths are high-impact review items."
+  - id: AEROS-IMPROVE-011
+    created_at: "2026-06-21"
+    updated_at: "2026-06-21"
+    status: resolved
+    priority: medium
+    area: stale-triage
+    source: critic_review_plus_real_project_cmpd
+    issue: "Stale-triage claim impact attributes claims only when a task's own allowed_outputs string-match a registered result path. The 2026-06-21 CMPD acid test (G10, 18 tasks) showed correct discrimination (1/18 high) but NO task hit specific_claims; result-producing tasks fell back to registry_unknown because CMPD task outputs are coarser than the result CSV paths."
+    proposed_fix: "Graph-propagated claim impact (design: docs/design/graph_propagated_claim_impact.md): resolve a stale task's impacted claims via results it (transitively) produces, using research_graph result_generated_by edges + result_index, not only own-output string match. Deterministic; keep registry_unknown fallback when production mapping is ambiguous; cap transitive propagation to the frontier band; recommend-only."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "6ac6748"
+    notes: "Phase 1 (registrar production edge) + Phase 2 (depth-1 descendant propagation with over-attribution cap) both IMPLEMENTED in stale_triage.py and tested in check_stale_triage.py. Validated read-only on CMPD: T004_main_execution -> specific_claims [C1,C2,C3,C4]; T003b inherits via Phase 2 but downgrades to broad registry_unknown (covers all claims); all other ancestors stay none (no flood). Depth-1 bound + all-active->registry_unknown cap prevent over-attribution; impact_propagated_from records the source for auditability."
+  - id: AEROS-IMPROVE-012
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: open
+    priority: medium
+    area: sync
+    source: real_project_validation_cmpd
+    issue: "CMPD has now been upgraded/green/pushed, so the remaining problem is not that CMPD is unsynced; it is the framework-side graceful-degradation gap when newer/stricter template checks meet older project artifacts."
+    proposed_fix: "Add or refine project-scoped check migration/graceful-degradation behavior so first syncs classify old schemas as migration-required instead of creating a confusing wall of red checks."
+    owner: human
+    target_gate: G0
+    notes: "CMPD upgrade is no longer the open work. Keep this item open only for the framework-side graceful-degradation/migration UX mitigation."
+  - id: AEROS-IMPROVE-013
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: literature-fulltext
+    source: real_project_validation_cmpd
+    issue: "CMPD targeted retrieval showed that OA metadata, repository locators, DOI pages, and local cache files can look like full-text routes while actually returning Cloudflare/security challenge HTML, SPA shells, 404/login pages, or unrelated cached PDFs."
+    proposed_fix: "Add deterministic full-text candidate verification semantics: candidate URLs enter `candidate_url_unverified` / `needs_verification`, PDF-only attachments remain parse/OCR routes, blocker reasons are typed, and adapter checks require content/identity verification before extraction or synthesis."
+    owner: human
+    target_gate: G1
+    resolved_at: "2026-06-22"
+    resolution_commit: "bb0db72"
+    notes: "Template fix only. It prevents metadata/OA/cache routes from being reported as readable target-paper text; it does not fetch publisher pages, bypass access controls, OCR PDFs, write extraction cards, or complete the CMPD literature review."
+  - id: AEROS-IMPROVE-014
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: controller-loop
+    source: external_architecture_review_plus_user_observation
+    issue: "AEROS could recommend the next action with `aeros next`, but still required the human to manually say continue after each safe step; this left goal-mode work prone to empty loops or chat-driven pushing."
+    proposed_fix: "Add a bounded deterministic `aeros run --until ...` controller loop that consumes `aeros next`, executes only allowlisted safe preview/check commands by default, requires explicit `--allow-task-runs` for real iterate/task execution, and stops at human authority, blockers, no-progress, or max-step limits."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "1376748"
+    notes: "The loop is a controller over existing authority, not a new planner. It does not approve gates, upgrade claims, certify identification, release outputs, or turn route readiness into substantive progress. `--until max-steps` is a step-count guard, not a dollar budget guard."
+  - id: AEROS-IMPROVE-015
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: controller-loop
+    source: real_project_validation_cmpd
+    issue: "After syncing the controller-loop template into CMPD, `aeros run --until no-progress --dry-run --lane literature` stopped after one dry-run step but routed to a stale D001b framework-search preview instead of the explicit P013/P016/P030 full-text blockers; the same sync also let lane-specific next-action requests for data/claim drift back to literature."
+    proposed_fix: "Make `aeros next --lane literature` detect `blocked_fulltext` records in `discovery/literature/search_log.csv` and return a blocked literature action naming the paper IDs; restore lane-scoped fallback so explicit non-literature lane requests cannot drift into another lane; add check_next_action coverage for blocked_fulltext routing."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "0c380a0"
+    notes: "Validated on CMPD: `aeros next --lane literature` now stops on P013/P016/P030, and `aeros run --until no-progress --dry-run --lane literature` stops with reason human_authority_or_blocker instead of would-running stale discovery."
+  - id: AEROS-IMPROVE-016
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: controller-kernel
+    source: external_architecture_review_plus_user_request
+    issue: "`aeros next` exposed a free-form command string as the main control surface, which risked letting a rendered shell preview become the de facto authority instead of a typed, auditable action object."
+    proposed_fix: "Add typed ActionSpec v0 for deterministic next actions, wire it into `aeros next`, bounded controller records, and check_next_action, and document that command strings are compatibility previews rather than authority."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "1376748"
+    notes: "This is a kernel-shrink step, not a new research module. It does not migrate state to SQLite, remove existing CLI commands, approve gates, execute task runs without --allow-task-runs, or certify scientific validity."
+  - id: AEROS-IMPROVE-017
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: controller-kernel
+    source: external_architecture_review_plus_user_request
+    issue: "The bounded controller still treated no-progress as mostly file-hash based and did not keep wall-time/provider/cost/action budgets, semantic state hashes, frontier hashes, or action signatures as first-class stop records. Completion receipts also mixed outcome, verification, progress, and authority concepts."
+    proposed_fix: "Make controller safety stops always-on with max-actions, wall-time, provider-call, and cost limits; add semantic_state_hash/frontier_hash/action_signature cycle detection; report primary_stop_reason; and add orthogonal completion receipt fields outcome_kind, contract_status, verification_level, progress_class, and authority_status."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "1376748"
+    notes: "Implemented compatibly: SUBSTANTIVE_PRODUCED is the preferred label, while SUBSTANTIVE_DONE remains a deprecated runtime/check alias. Existing v2 receipts remain accepted; newly written receipts are version 3 with orthogonal fields."
+  - id: AEROS-IMPROVE-018
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: controller-kernel
+    source: action_spec_wip_review
+    issue: "ActionSpec Phase 1 is still a derived shim: `next_action.to_dict()` infers ActionSpec kind/effect from the rendered command string, so command text remains upstream of typed control semantics."
+    proposed_fix: "Invert producers in Phase 2: each next-action branch must construct ActionSpec directly, render command from the spec, and let the controller dispatch on ActionSpec kind/effect instead of inferring from command substrings."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "1376748"
+    notes: "Producer inversion implemented: next_action branches now use declared ActionSpecs and check_next_action requires producer_mode=declared for computed actions. Compatibility inference remains only for old/bare NextAction callers."
+  - id: AEROS-IMPROVE-019
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: open
+    priority: medium
+    area: controller-kernel
+    source: action_spec_phase2_followup
+    issue: "After producer inversion, the bounded controller still renders and validates argv through `_command_args()` for execution compatibility. This is safer than inferred specs, but command parsing still exists as an executor guard."
+    proposed_fix: "Shrink `_command_args()` into a final renderer/guard and dispatch real executions from ActionSpec kind/effect once downstream projects have synced."
+    owner: human
+    target_gate: G0
+    notes: "Do not do this as a big-bang change; keep command compatibility until real projects are green on producer-declared ActionSpec."
+  - id: AEROS-IMPROVE-020
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: open
+    priority: medium
+    area: controller-kernel
+    source: action_spec_phase2_review
+    issue: "`action_spec_from_next()` / `_infer_kind()` remain as an inferred compatibility path after producer inversion. This is acceptable for old/bare NextAction callers, but it should not become permanent string-parser debt."
+    proposed_fix: "Retire the inferred_compat path once all synced downstream projects report computed and controller ActionSpecs with producer_mode=declared. After retirement, remove `_infer_kind()` or confine it to an explicit legacy artifact migrator."
+    owner: human
+    target_gate: G0
+    notes: "Retirement trigger: template plus active downstream projects, including CMPD, pass `check_next_action.py` and `aeros run --until ... --dry-run --json` with producer_mode=declared and no inferred_compat records in normal controller output."
+  - id: AEROS-IMPROVE-021
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: pipeline-reconciliation
+    source: real_project_validation_cmpd
+    issue: "CMPD real pipeline regenerated registered outputs and correctly tripped provenance checks, but recovery required the human/agent to remember three manual derived-sync commands: `aeros provenance sync`, `aeros graph build`, and `aeros state global`."
+    proposed_fix: "Add a low-authority `aeros reconcile` command that deterministically runs post-pipeline derived sync steps, writes a bounded report, and labels what reconciliation does not prove."
+    owner: human
+    target_gate: G6
+    resolved_at: "2026-06-22"
+    resolution_commit: "aff9ec9"
+    notes: "`aeros reconcile` is a projection refresh, not evidence validation. It does not approve gates, recover stale tasks, upgrade claims, or certify scientific correctness."
+  - id: AEROS-IMPROVE-022
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: medium
+    area: pipeline-environment
+    source: real_project_validation_cmpd
+    issue: "Pipeline smoke/run behavior could drift from the project-declared runtime: template checks displayed automation.pipeline.command, while run mode still fell back to the current interpreter and generic master script path."
+    proposed_fix: "Make check_pipeline_runs honor `automation.pipeline.runtime.python` and delegated `automation.pipeline.command` in run mode, with AEROS_PIPELINE_PYTHON as an override."
+    owner: human
+    target_gate: G6
+    resolved_at: "2026-06-22"
+    resolution_commit: "aff9ec9"
+    notes: "This makes environment expectations explicit. It does not install dependencies, choose conda environments automatically, or prove the delegated pipeline is reproducible on another machine."
+  - id: AEROS-IMPROVE-023
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: conversation-guard
+    source: user_observation
+    issue: "Chat-driven agent work can drift across lanes: a data request may turn into literature cleanup, harness edits, claim changes, or paper writing because AGENTS.md is a soft instruction rather than a mechanically audited scope."
+    proposed_fix: "Add a thin session scope guard: `aeros session start/status/audit`, lane file allowlists, `SESSION_CONTRACT.yml`, and `check_session_scope.py` so off-scope diffs become visible as SCOPE_DRIFT."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "849632f"
+    notes: "This reuses existing lanes/status labels rather than adding a new planning authority. It does not revert files automatically, approve cross-lane work, or certify research substance."
+  - id: AEROS-IMPROVE-024
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: contract-runtime
+    source: external_architecture_review_plus_user_request
+    issue: "AEROS was becoming command-rich: reconcile, runtime-aware pipeline checks, and session guard existed as useful commands, but their semantics were not yet pulled into typed runtime contracts."
+    proposed_fix: "Add ExecutionProfile v1, ActionSpec authority/progress/hook fields, automatic reconcile post-run hooks, and semantic session-scope audit verdicts so the new features become contract-bound rather than extra ceremony."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "e783c77"
+    notes: "This is consolidation, not a new research module. It does not migrate to SQLite, add parser adapters, create new lanes, or make AEROS decide scientific truth."
+  - id: AEROS-IMPROVE-025
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: research-contracts
+    source: user_request_second_batch
+    issue: "The next architecture layer needed concrete but lightweight hooks for EstimandDataContract, EvidenceUnit, parser benchmarks, adversarial benchmarks, and readiness vectors without turning them into new authority layers."
+    proposed_fix: "Add minimal templates, checks, manifest/profile wiring, and `aeros readiness` projection for these concepts while keeping them derived/advisory unless a later gated workflow promotes them."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "e783c77"
+    notes: "This is scaffolding and validation plumbing only. It does not certify data availability, full-text synthesis, scientific validity, claim support, or paper/release readiness."
+  - id: AEROS-IMPROVE-026
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: action-spec
+    source: behavioral_review
+    issue: "`aeros next` computed a declared ActionSpec internally, but the primary next-action producer did not expose it through a machine-readable CLI surface."
+    proposed_fix: "Add `aeros next --json` that emits `NextAction.to_dict()` with the full ActionSpec, surface `producer_mode` in the human view, and add a check assertion that the JSON ActionSpec validates and has `producer_mode: declared`."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "e783c77"
+    notes: "This closes the contract-surface inconsistency. It does not change controller execution, approve gates, or remove the legacy inferred compatibility path."
+  - id: AEROS-IMPROVE-027
+    created_at: "2026-06-22"
+    updated_at: "2026-06-22"
+    status: resolved
+    priority: high
+    area: adversarial-benchmark
+    source: behavioral_review
+    issue: "The adversarial benchmark check was scaffold-green: it validated scenario names but did not execute any fixture or measure whether AEROS detected a failure mode."
+    proposed_fix: "Add one executable vertical slice for `exit_zero_no_output`: run a fixture that exits 0 without producing the declared output, then require `check_noop_runs.py` to detect the false completion in a temporary project."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-22"
+    resolution_commit: "3b16b2d"
+    notes: "This starts adversarial execution with one fixture. Other scenarios remain scaffold-only until fixtures are added; parser and EstimandDataContract checks now label scaffold-only states explicitly."
+  - id: AEROS-IMPROVE-028
+    created_at: "2026-06-23"
+    updated_at: "2026-06-23"
+    status: resolved
+    priority: high
+    area: adversarial-benchmark
+    source: user_requested_vertical_slices
+    issue: "Session-scope drift and stale-registry scenarios were still named adversarial cases without executable fixtures proving AEROS can detect them."
+    proposed_fix: "Add executable `stale_registry` fixture that mutates a result artifact after provenance is recorded, require `check_provenance.py` to detect the hash mismatch, and add session-scope semantic fixtures that force `CLAIM_SCOPE_DRIFT` and `AUTHORITY_DRIFT` in temporary git projects."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-23"
+    resolution_commit: "ff63b77"
+    notes: "This keeps adversarial benchmark progress vertical: three scenarios now execute behaviorally; remaining scenarios stay scaffold-only until fixtures are implemented."
+  - id: AEROS-IMPROVE-029
+    created_at: "2026-06-23"
+    updated_at: "2026-06-23"
+    status: resolved
+    priority: medium
+    area: smoke-profile
+    source: real_project_sync_cmpd
+    issue: "CMPD smoke profile timed out on `check_next_action.py` because the check recomputed every lane-specific next action in a real project, turning a contract-surface check into an expensive lane traversal."
+    proposed_fix: "Keep the full lane matrix in the root template, but skip lane-matrix traversal in instantiated projects while preserving default next-action, CLI JSON, ActionSpec, and bounded-controller assertions."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-23"
+    resolution_commit: "68fc121"
+    notes: "This is a smoke-profile efficiency fix. It does not weaken ActionSpec validation or change actual next-action recommendations."
+  - id: AEROS-IMPROVE-030
+    created_at: "2026-06-25"
+    updated_at: "2026-06-25"
+    status: resolved
+    priority: high
+    area: authority-boundary
+    source: real_project_validation_maha
+    issue: "Gate approval was not bound to integrity checks: the 2026-06-25 MAHA validation found a committed G10 approval on a project failing 7 integrity checks (no-op completions, missing completion/skill receipts, incomplete EstimandDataContract). The harness was red but nothing tied the approval to those failures, so 'approved' could silently coexist with broken integrity."
+    proposed_fix: "Add check_approval_integrity.py: when any decisions/approvals/G*.md exists, the integrity-critical checks (noop_runs, completion_receipts, skill_invocations, estimand_data_contract) must pass or the harness fails with one pointed 'approval is not integrity-backed' signal naming the gate and failing checks."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-25"
+    resolution_commit: "pending"
+    notes: "Validated 2026-06-25: TEMPLATE inactive PASS; CMPD (G7,G10 approved + green) PASS; MAHA (G10 approved + red) FAILs naming the 4 failing checks. Wired into run_harness_checks + sync. Does not auto-fix or auto-withdraw; the human must repair the work or withdraw the approval."

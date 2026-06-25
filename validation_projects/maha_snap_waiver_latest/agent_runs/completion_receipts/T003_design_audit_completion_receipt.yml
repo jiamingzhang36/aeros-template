@@ -1,0 +1,104 @@
+version: 4
+task_id: T003_design_audit
+generated_at: '2026-06-24T14:22:18+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T003_design_audit.yml
+automation_class: receipt_audited
+gate_status: needs_receipt_audit
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T003_design_audit_skill_invocations.yml
+allowed_outputs_expected:
+- audits/design_audit_report.md
+- agent_runs/
+allowed_outputs_found:
+- audits/design_audit_report.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: audits/design_audit_report.md
+  exists: true
+  type: file
+  sha256: 4977e4b1da291a1303b1f6409849771d54496ae83586dec480670067c89b414e
+  bytes: 1281
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 5
+checks_required:
+- check_design_selection.py
+- check_claim_ceiling.py
+- check_claim_method_consistency.py
+- check_agent_run_report.py
+checks_run:
+- check_design_selection
+- check_claim_ceiling
+- check_claim_method_consistency.py
+- check_agent_run_report.py
+checks_passed:
+- check_design_selection
+- check_claim_ceiling
+- check_claim_method_consistency.py
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_design_selection
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_design_selection.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.096
+- name: check_claim_ceiling
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_ceiling.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.082
+- name: check_claim_method_consistency.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_method_consistency.py
+  exit_code: 0
+  elapsed_seconds: 0.146
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.141
+evidence_receipt_required: true
+evidence_receipt_path: evidence/receipts/T003_design_audit_human_review_receipt.md
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: f98c0fcb7c35fe2462f186475706a005bb0129d54a27791aa1a491c337d9e7bf
+output_fingerprint: 34994a6bfccb2559bd06e18369a0392cd71e3bed7b4cf8dc1b6fc48fea346ea1
+dependency_fingerprint: 12404a21dbec8b5c3c905490d585466eb3d6ef744c7cec30fa5a8e3df6978ddf
+completion_verdict: pass
+failures: []

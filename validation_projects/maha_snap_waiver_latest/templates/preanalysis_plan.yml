@@ -1,0 +1,38 @@
+version: 1
+plan_id: PAP-001
+status: draft
+locked_at: ''
+locked_by: ''
+gate_ref: G3
+research_question: ''
+claim_mode: confirmatory
+estimand: ''
+unit_of_analysis: ''
+sample:
+  inclusion_rules: []
+  exclusion_rules: []
+  time_window: ''
+  geography: ''
+outcomes: []
+treatment_or_exposure: ''
+controls: []
+estimators: []
+inference:
+  clustering: ''
+  multiple_testing_adjustment: ''
+  uncertainty_report: ''
+robustness_plan: []
+multiverse_dimensions:
+  allowed_outcome_variants: []
+  allowed_sample_variants: []
+  allowed_control_sets: []
+  allowed_estimators: []
+forbidden_posthoc_choices:
+  - selecting specifications based only on significance
+  - changing sample windows after seeing results without deviation receipt
+  - registering only favorable estimates from a larger search
+notes: ''
+
+track_policy:
+  discovery_track: exploration is allowed with light event/spec logging but cannot support confirmatory claims
+  confirmatory_track: requires locked plan, locked spec space, locked data snapshot, and locked estimand

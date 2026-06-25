@@ -1,0 +1,52 @@
+version: 1
+policy: AEROS-SOURCE-TYPE-MATRIX-001
+principle: Probe requirements depend on source type; one generic parse check is not enough.
+source_types:
+  local_csv:
+    required_probe_checks: [parseability, schema, sample_rows, missingness, source_snapshot]
+    allowed_probe_command: local_file_sample
+    requires_human_approval: false
+  local_jsonl:
+    required_probe_checks: [parseability, schema, sample_rows, source_snapshot]
+    allowed_probe_command: local_file_sample
+    requires_human_approval: false
+  official_webpage:
+    required_probe_checks: [canonical_url, access_stability, timestamp, snapshot, terms_review]
+    allowed_probe_command: source_snapshot_only
+    requires_human_approval: true
+  official_pdf:
+    required_probe_checks: [canonical_url, snapshot, machine_readable_text, page_level_citation, table_extraction_feasibility]
+    allowed_probe_command: source_snapshot_only
+    requires_human_approval: true
+  api:
+    required_probe_checks: [auth_status, pagination, rate_limit, sampling_rule, cost_terms, snapshot]
+    allowed_probe_command: approval_required
+    requires_human_approval: true
+  scraped_html:
+    required_probe_checks: [robots_or_terms_review, selector_stability, timestamp, canonical_url, snapshot]
+    allowed_probe_command: approval_required
+    requires_human_approval: true
+  court_document:
+    required_probe_checks: [docket_id, date, jurisdiction, document_type, page_or_filing_reference]
+    allowed_probe_command: source_snapshot_only
+    requires_human_approval: true
+  manual_coding_sheet:
+    required_probe_checks: [coder_id, codebook_version, double_code_rate, disagreement_log, source_snapshot]
+    allowed_probe_command: receipt_required
+    requires_human_approval: true
+  private_scanner_data:
+    required_probe_checks: [data_use_agreement, privacy_review, sample_unit, coverage, release_constraints]
+    allowed_probe_command: approval_required
+    requires_human_approval: true
+  foia_response:
+    required_probe_checks: [request_id, response_date, producing_agency, file_inventory, redaction_notes]
+    allowed_probe_command: source_snapshot_only
+    requires_human_approval: true
+  llm_extracted_table:
+    required_probe_checks: [source_span, extraction_prompt, model_metadata, confidence, human_audit]
+    allowed_probe_command: receipt_required
+    requires_human_approval: true
+  image_or_satellite_source:
+    required_probe_checks: [spatial_resolution, temporal_resolution, georeferencing, license, sample_tile]
+    allowed_probe_command: approval_required
+    requires_human_approval: true

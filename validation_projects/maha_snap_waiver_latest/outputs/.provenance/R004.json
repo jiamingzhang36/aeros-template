@@ -1,0 +1,11 @@
+{
+  "result_id": "R004",
+  "output_path": "outputs/model_outputs/R004_boundary_and_feasibility_diagnostics.md",
+  "created_at": "2026-06-15T01:46:20.167465+00:00",
+  "script_or_source": "code/99_make_all.py",
+  "sha256": "7b4c028f04962b02cac034116b744f1502b983b1dcbb42923b74a3be5d16431e",
+  "artifact_type": "audit and limitation register",
+  "claim_ceiling": "boundary",
+  "restricted_microdata_exported": "false",
+  "notes": "Alias for R004_boundary_and_feasibility_diagnostics. Records SNAP/EBT non-observation target implementation dates no post-policy causal design and future extensions."
+}

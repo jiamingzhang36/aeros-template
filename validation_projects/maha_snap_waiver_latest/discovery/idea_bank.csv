@@ -1,0 +1,3 @@
+idea_id,idea,source,intake_ref,intake_priority,status,evidence_needed,next_action,human_decision,notes
+I001,Policy-rule exposure as the current Paper 1 core,method_card,docs/method_card.md,high,under_verification,claim/result provenance registration,register main claims and result IDs after G4,pending,
+I002,Post-policy demand response as future Paper 2,design_options,discovery/design_options.md,medium,future_direction,2026+ purchase outcomes and credible controls,do not include as current causal claim,pending,

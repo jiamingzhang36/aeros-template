@@ -1,0 +1,26 @@
+version: 1
+policy: AEROS-SCOPE-CALCULUS-001
+principle: Evidence can be true while the claim is too broad; claim scope must be contained by evidence scope or explicitly downgraded.
+scope_vector_fields:
+  - geography
+  - time_period
+  - population
+  - industry
+  - unit
+  - data_source
+  - measurement_level
+  - claim_type
+containment_rule: claim.scope must be equal to or narrower than the supporting evidence scope for the same dimension
+overreach_effects:
+  geography: block_generalized_wording
+  time_period: block_long-run_or_current-period_expansion
+  population: block_population_expansion
+  industry: block_industry_expansion
+  unit: require_unit_qualifier
+  data_source: require_source_qualifier
+  measurement_level: block_measurement_upgrade
+  claim_type: enforce_claim_language_ceiling
+compiler_boundary:
+  kernel_role: enforce compiler output and reject formal overreach
+  compiler_role: calculate ceiling, scope containment, obligations, and allowed language
+  human_role: approve or reject high-risk exits; human approval is not empirical evidence

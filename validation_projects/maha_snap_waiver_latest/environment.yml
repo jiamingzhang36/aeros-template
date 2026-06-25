@@ -1,0 +1,6 @@
+name: maha-snap-waiver-aeros
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - pyyaml>=6.0
