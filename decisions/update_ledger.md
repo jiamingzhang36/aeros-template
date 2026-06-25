@@ -17,6 +17,20 @@ How to read this ledger:
 
 ## 2026-06-25
 
+### 2026-06-25 - Scope ledger check to framework commits (AEROS-IMPROVE-031)
+
+**Commit(s)**: `pending`
+
+**Action**: `check_update_ledger` now only requires a narrative ledger entry for commits that change the framework itself (`aeros/ checks/ harness/ templates/ tools/`). Bookkeeping, validation-project, docs, and project-artifact commits are exempt. Added `_commit_touches_framework`; non-framework commits are skipped instead of flagged.
+
+**Alignment**: Kills the recurring false-red harness failure (a validation-project gate approval `b12222e`, backfill commits, etc. tripped the check though they touch no framework code) WITHOUT weakening rationale enforcement -- real framework changes still require a narrative entry.
+
+**Non-goal**: Not the full "generate the ledger from RunRecord+git" projection; that remains deferred. This is the minimal correct scoping that removes the brittleness at no integrity cost.
+
+**Drift risk**: If framework code were committed under a path outside FRAMEWORK_PREFIXES it would escape the requirement; mitigated by the prefixes covering all framework dirs, and unknown-commit inspection failing conservative (require entry).
+
+**Next check**: Confirm a framework-only commit still must be referenced, and a validation-project/bookkeeping commit no longer trips the check.
+
 ### 2026-06-25 - Bind gate approval to integrity checks (AEROS-IMPROVE-030)
 
 **Commit(s)**: `68fc121`
