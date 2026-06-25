@@ -15,6 +15,22 @@ How to read this ledger:
 - `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
 - `Next check`: what should be watched in the next real project run.
 
+## 2026-06-25
+
+### 2026-06-25 - Bind gate approval to integrity checks (AEROS-IMPROVE-030)
+
+**Commit(s)**: `pending`
+
+**Action**: Added `checks/check_approval_integrity.py`, wired into run_harness_checks and the sync CHECKS map. When any `decisions/approvals/G*.md` exists, the integrity-critical checks (noop_runs, completion_receipts, skill_invocations, estimand_data_contract) must pass; otherwise the harness fails with one pointed "gate approval is not integrity-backed" signal naming the gate and failing checks. Surfaced by the 2026-06-25 MAHA validation, where a G10 approval was committed on a project failing 7 integrity checks with nothing tying the approval to them. (That approval was committed as `b12222e`, which this check now flags as not integrity-backed.)
+
+**Alignment**: Makes the authority boundary executable -- "approved" can no longer silently coexist with red integrity. Serves "declared completion must correspond to a qualified product."
+
+**Non-goal**: AEROS does not block a human git commit, auto-fix the work, or auto-withdraw the approval; it converts an unbacked approval into a blocking, legible harness failure. The human repairs the work or withdraws the approval.
+
+**Drift risk**: The integrity-critical set is fixed (4 checks); too broad could over-block. Mitigation: the set is the unambiguous "claimed-done-but-isn't" signals; the FAIL lists exactly which fired.
+
+**Next check**: On MAHA, after the work is completed or G10 withdrawn, confirm PASS; on a green approved project (CMPD) confirm no false positive.
+
 ## 2026-06-23
 
 ### 2026-06-23 - AgentEnvelope audit mode

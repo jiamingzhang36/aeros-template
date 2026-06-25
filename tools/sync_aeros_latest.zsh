@@ -281,6 +281,7 @@ CHECKS = {
     "goal_mode_data_progress": "checks/check_goal_mode_data_progress.py",
     "work_lanes": "checks/check_work_lanes.py",
     "noop_runs": "checks/check_noop_runs.py",
+    "approval_integrity": "checks/check_approval_integrity.py",
     "exception_scope": "checks/check_exception_scope.py",
     "provenance_boundary": "checks/check_provenance_boundary.py",
     "analysis_ledger": "checks/check_analysis_ledger.py",
