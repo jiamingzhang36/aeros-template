@@ -1,0 +1,86 @@
+# Pipeline manifest — MAHA SNAP-waiver wrapper
+#
+# HONEST SCAFFOLD (2026-06-25). This is NOT yet a verified-reproducing pipeline.
+# The real analysis lives in the external source repo (~67 scripts) with no
+# documented master run-order. This manifest INVENTORIES the source scripts as
+# candidate steps and records an INFERRED (filename-based) grouping that the
+# author must confirm before the wrapper can claim reproduction. Nothing here
+# asserts that the wrapper currently produces R001-R004.
+
+status: scaffold_unconfirmed
+reproduction_status: not_yet_reproducing
+pipeline_entrypoint: code/99_make_all.py
+raw_data_write: forbidden
+claim_ceiling: measurement
+
+source_pipeline:
+  repo: /Users/jiamingzhang/Desktop/MAHA
+  code_dir: /Users/jiamingzhang/Desktop/MAHA/code
+  total_scripts: 67
+  master_run_order: needs_author_confirmation
+  note: >
+    No Makefile / run_all / documented order exists in the source repo. The
+    wrapper, by policy, does not ingest source raw data. To make the wrapper
+    reproduce, the author must (a) confirm the run-order below and (b) decide
+    how the wrapper invokes or mirrors the source pipeline (incl. controlled
+    NielsenIQ data, currently on a disconnected disk for the household-CI step).
+
+run_order: needs_author_confirmation
+
+# Inferred grouping from filenames ONLY. Each step is unconfirmed; the author
+# must verify which scripts actually produce each result family and in what order.
+candidate_steps:
+  R001_policy_rule_measurement:
+    mapping: inferred_from_filename_needs_author_confirmation
+    scripts:
+      - code/build_design_taxonomy.py
+      - code/build_design_change_scaffold.py
+      - code/build_design_index_weight_sensitivity.py
+      - code/build_final_dataset.py
+  R002_approval_risk_concentration:
+    mapping: inferred_from_filename_needs_author_confirmation
+    scripts:
+      - code/build_all_public_event_history.py
+      - code/build_approved_public_event_details.py
+      - code/build_nonapproved_event_details.py
+      - code/build_selection_mechanism_dataset.py
+      - code/build_selection_inference.py
+      - code/build_full_universe_stage_models.py
+  R003_nielsen_policy_rule_exposure:
+    mapping: inferred_from_filename_needs_author_confirmation
+    requires: controlled_nielsen_data (disconnected disk per data_inventory)
+    scripts:
+      - code/build_nielsen_policy_bridge.py
+      - code/build_nielsen_policy_rule_microsimulation.py
+      - code/build_nielsen_pooled_2022_2024.py
+      - code/merge_nielsen_exposure_yearly.py
+      - code/build_nielsen_weighted_state_exposure.py
+      - code/build_nielsen_uncertainty_ci.py
+      - code/build_nielsen_strict_priority1_sensitivity.py
+  R004_boundary_and_feasibility:
+    mapping: inferred_from_filename_needs_author_confirmation
+    scripts:
+      - code/build_descriptives.py
+      - code/build_hardness_validation.py
+      - code/build_llm_auxiliary_coding_validation.py
+  unmapped_source_scripts:
+    note: "~47 further source scripts exist and are not yet mapped to a result family."
+
+registered_results:
+  - result_id: R001
+    output_path: outputs/model_outputs/R001_policy_rule_measurement.md
+    reproduced_by: NOT_YET (currently a smoke-registered summary; see source_pipeline)
+  - result_id: R002
+    output_path: outputs/model_outputs/R002_approval_risk_concentration.md
+    reproduced_by: NOT_YET
+  - result_id: R003
+    output_path: outputs/model_outputs/R003_nielsen_policy_rule_exposure.md
+    reproduced_by: NOT_YET
+  - result_id: R004
+    output_path: outputs/model_outputs/R004_boundary_and_feasibility_diagnostics.md
+    reproduced_by: NOT_YET
+
+does_not_prove:
+  - "This manifest does NOT assert the wrapper reproduces any result."
+  - "The candidate-step groupings are filename inferences, not confirmed provenance."
+  - "Run-order, IO, and the NielsenIQ data path all require author confirmation."
