@@ -415,7 +415,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-25"
-    resolution_commit: "pending"
+    resolution_commit: "16bd7ed"
     notes: "Validated 2026-06-25: TEMPLATE inactive PASS; CMPD (G7,G10 approved + green) PASS; MAHA (G10 approved + red) FAILs naming the 4 failing checks. Wired into run_harness_checks + sync. Does not auto-fix or auto-withdraw; the human must repair the work or withdraw the approval."
   - id: AEROS-IMPROVE-031
     created_at: "2026-06-25"

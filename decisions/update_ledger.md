@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-25 - Scope ledger check to framework commits (AEROS-IMPROVE-031)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `16bd7ed`
 
 **Action**: `check_update_ledger` now only requires a narrative ledger entry for commits that change the framework itself (`aeros/ checks/ harness/ templates/ tools/`). Bookkeeping, validation-project, docs, and project-artifact commits are exempt. Added `_commit_touches_framework`; non-framework commits are skipped instead of flagged.
 
