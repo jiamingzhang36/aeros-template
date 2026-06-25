@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-06-25 - Bind gate approval to integrity checks (AEROS-IMPROVE-030)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `68fc121`
 
 **Action**: Added `checks/check_approval_integrity.py`, wired into run_harness_checks and the sync CHECKS map. When any `decisions/approvals/G*.md` exists, the integrity-critical checks (noop_runs, completion_receipts, skill_invocations, estimand_data_contract) must pass; otherwise the harness fails with one pointed "gate approval is not integrity-backed" signal naming the gate and failing checks. Surfaced by the 2026-06-25 MAHA validation, where a G10 approval was committed on a project failing 7 integrity checks with nothing tying the approval to them. (That approval was committed as `b12222e`, which this check now flags as not integrity-backed.)
 
