@@ -1,0 +1,121 @@
+version: 4
+task_id: T008_paper_package_draft
+generated_at: '2026-06-27T01:28:45+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T008_paper_package_draft.yml
+automation_class: auto_rerunnable
+gate_status: pending
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T008_paper_package_draft_skill_invocations.yml
+allowed_outputs_expected:
+- paper/draft.md
+- audits/paper_package_report.md
+- agent_runs/
+allowed_outputs_found:
+- paper/draft.md
+- audits/paper_package_report.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: paper/draft.md
+  exists: true
+  type: file
+  sha256: 33b814cc70a15062b22897df9223af6a8adaea049279ee4445bf4efdf46a2c83
+  bytes: 5595
+- path: audits/paper_package_report.md
+  exists: true
+  type: file
+  sha256: 0ba0a903fe8577ae6b43f6d4a94bbaf711bc64a35b01cc718ccf861d68f09917
+  bytes: 1840
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 6
+checks_required:
+- check_paper_package.py
+- check_number_registry.py
+- check_number_scan.py
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_run:
+- check_paper_package.py
+- check_number_registry
+- check_number_scan
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_passed:
+- check_paper_package.py
+- check_number_registry
+- check_number_scan
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_paper_package.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_paper_package.py
+  exit_code: 0
+  elapsed_seconds: 0.083
+- name: check_number_registry
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_number_registry.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.074
+- name: check_number_scan
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_number_scan.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.079
+- name: check_claim_registry.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_registry.py
+  exit_code: 0
+  elapsed_seconds: 0.091
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.12
+evidence_receipt_required: false
+evidence_receipt_path: ''
+evidence_receipt_exists: false
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: aecf2a9c721b400f23a99f8db2d07245d19234ebe7b6fab6b956dc2f2def0170
+output_fingerprint: e6914cff57c6b3bdfeb552ecbdd3d1f4f718c738c3cec24a76b1520af2d9606a
+dependency_fingerprint: 12d1114b48dacd1c76854e97740c7d14b1f9d97ce9a580176e48d1da21f47d19
+completion_verdict: pass
+failures: []

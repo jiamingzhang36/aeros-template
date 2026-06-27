@@ -1,6 +1,6 @@
 version: 4
 task_id: T010_expanded_ai_output_collection
-generated_at: '2026-06-24T14:28:36+00:00'
+generated_at: '2026-06-27T01:28:46+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -50,7 +50,7 @@ actual_outputs:
   type: directory
   sha256: ''
   bytes: 0
-  entries: 5
+  entries: 6
 checks_required:
 - check_expanded_collection_design.py
 - check_expanded_collection_outputs.py
@@ -74,28 +74,28 @@ check_attestations:
   - /Users/jiamingzhang/opt/anaconda3/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_expanded_collection_design.py
   exit_code: 0
-  elapsed_seconds: 0.089
+  elapsed_seconds: 0.087
 - name: check_expanded_collection_outputs.py
   passed: true
   command:
   - /Users/jiamingzhang/opt/anaconda3/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_expanded_collection_outputs.py
   exit_code: 0
-  elapsed_seconds: 0.087
+  elapsed_seconds: 0.088
 - name: check_provider_collection.py
   passed: true
   command:
   - /Users/jiamingzhang/opt/anaconda3/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_provider_collection.py
   exit_code: 0
-  elapsed_seconds: 0.086
+  elapsed_seconds: 0.084
 - name: check_provenance.py
   passed: true
   command:
   - /Users/jiamingzhang/opt/anaconda3/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_provenance.py
   exit_code: 0
-  elapsed_seconds: 0.097
+  elapsed_seconds: 0.094
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false

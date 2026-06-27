@@ -1,6 +1,6 @@
 version: 4
 task_id: T003_design_audit
-generated_at: '2026-06-24T14:22:18+00:00'
+generated_at: '2026-06-27T01:28:43+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -35,7 +35,7 @@ actual_outputs:
   type: directory
   sha256: ''
   bytes: 0
-  entries: 5
+  entries: 6
 checks_required:
 - check_design_selection.py
 - check_claim_ceiling.py
@@ -60,7 +60,7 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_design_selection.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.096
+  elapsed_seconds: 0.079
 - name: check_claim_ceiling
   passed: true
   command:
@@ -68,21 +68,21 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_ceiling.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.082
+  elapsed_seconds: 0.076
 - name: check_claim_method_consistency.py
   passed: true
   command:
   - /Users/jiamingzhang/opt/anaconda3/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_method_consistency.py
   exit_code: 0
-  elapsed_seconds: 0.146
+  elapsed_seconds: 0.13
 - name: check_agent_run_report.py
   passed: true
   command:
   - /Users/jiamingzhang/opt/anaconda3/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
   exit_code: 0
-  elapsed_seconds: 0.141
+  elapsed_seconds: 0.125
 evidence_receipt_required: true
 evidence_receipt_path: evidence/receipts/T003_design_audit_human_review_receipt.md
 evidence_receipt_exists: true
@@ -99,6 +99,6 @@ does_not_prove:
 - human gate approval
 input_fingerprint: f98c0fcb7c35fe2462f186475706a005bb0129d54a27791aa1a491c337d9e7bf
 output_fingerprint: 34994a6bfccb2559bd06e18369a0392cd71e3bed7b4cf8dc1b6fc48fea346ea1
-dependency_fingerprint: 12404a21dbec8b5c3c905490d585466eb3d6ef744c7cec30fa5a8e3df6978ddf
+dependency_fingerprint: 9b538dcdbe98744e29bf150263141f2161e0c8885c0f7803a53a9aaca85cead8
 completion_verdict: pass
 failures: []

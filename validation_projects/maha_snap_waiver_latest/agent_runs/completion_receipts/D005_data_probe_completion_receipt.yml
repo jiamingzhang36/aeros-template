@@ -1,0 +1,65 @@
+version: 4
+task_id: D005_data_probe
+generated_at: '2026-06-27T01:28:42+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/discovery/D005_data_probe.yml
+automation_class: auto_rerunnable
+gate_status: pending
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/D005_data_probe_skill_invocations.yml
+allowed_outputs_expected:
+- discovery/data_diagnostics.yml
+allowed_outputs_found:
+- discovery/data_diagnostics.yml
+allowed_outputs_missing: []
+actual_outputs:
+- path: discovery/data_diagnostics.yml
+  exists: true
+  type: file
+  sha256: 4f1f32c281c96b2380a09b9d1a04fd0676e04485ac42dcbe0e7b97ee186a9b2a
+  bytes: 731
+checks_required:
+- check_data_diagnostics.py
+checks_run:
+- check_data_diagnostics
+checks_passed:
+- check_data_diagnostics
+checks_failed: []
+check_attestations:
+- name: check_data_diagnostics
+  passed: true
+  command:
+  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_data_diagnostics.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.085
+evidence_receipt_required: false
+evidence_receipt_path: ''
+evidence_receipt_exists: false
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 0213c765085bfde133c7b062ca05abc1de3147ea42e837d70059b067912f859b
+output_fingerprint: 5d531035e5e00890dcb23560be624d8cbf2b2ddcd06c888a6d4747e5f7651064
+dependency_fingerprint: 826bbe9cfb7ee976ca2821144e04eaa4d652266b0839c4380705ba7d6841d595
+completion_verdict: pass
+failures: []
