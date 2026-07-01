@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-07-01 - Add workflow presets and staging evidence semantics (AEROS-IMPROVE-032)
 
-**Commit(s)**: `pending`
+**Commit(s)**: `f435106`
 
 **Action**: Added session workflow presets (`recapture_source_pool`, `claim_audit`, `writing_guardrail`, `chrome_assisted_review`, `source_promotion_queue`) so project-specific intermediate work can be declared without hand-extending lane prefixes. Added `discovery/route_decision.yml` plus a route-decision check for early data strategy selection, including `negative_seed_first` for scam/fraud/enforcement-style projects. Extended completion receipts with `staging_artifact_paths` and `substantive_evidence_paths` so staging work can be `ROUTE_READY` without being laundered into substantive evidence.
 

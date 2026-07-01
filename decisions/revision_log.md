@@ -552,7 +552,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV039 - 2026-07-01 17:25 -0400
 
-- commit: pending
+- commit: f435106
 - change_type: session-scope presets / discovery routing / completion semantics
 - summary: Added workflow presets for real project intermediate work, a discovery route-decision scaffold, and completion receipt separation between staging artifacts and substantive evidence.
 - files:
