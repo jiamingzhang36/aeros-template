@@ -76,6 +76,7 @@ for T in "${TARGETS[@]}"; do
   fi
   mkdir -p "$T/discovery/literature" "$T/execution" "$T/tasks"
   [ -f "$SRC/discovery/AGENTS.md" ] && rsync -a "$SRC/discovery/AGENTS.md" "$T/discovery/AGENTS.md"
+  [ -f "$T/discovery/route_decision.yml" ] || rsync -a "$SRC/discovery/route_decision.yml" "$T/discovery/route_decision.yml"
   [ -f "$SRC/discovery/literature/AGENTS.md" ] && rsync -a "$SRC/discovery/literature/AGENTS.md" "$T/discovery/literature/AGENTS.md"
   mkdir -p "$T/discovery/literature/extraction_cards" "$T/discovery/literature/synthesis"
   [ -f "$SRC/discovery/literature/extraction_cards/TEMPLATE_extraction_card.md" ] && rsync -a "$SRC/discovery/literature/extraction_cards/TEMPLATE_extraction_card.md" "$T/discovery/literature/extraction_cards/TEMPLATE_extraction_card.md"
@@ -242,6 +243,7 @@ REQUIRED_FILES = [
     "templates/CURRENT_STATE.md",
     "templates/NEXT_ACTION.md",
     "templates/update_ledger_entry.md",
+    "discovery/route_decision.yml",
     "decisions/update_ledger.md",
     "decisions/human_gate_queue.yml",
     "docs/architecture_v0_5.md",

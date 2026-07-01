@@ -17,6 +17,20 @@ How to read this ledger:
 
 ## 2026-07-01
 
+### 2026-07-01 - Sync route-decision scaffold to downstream projects
+
+**Commit(s)**: `pending`
+
+**Action**: Updated `tools/sync_aeros_latest.zsh` so `discovery/route_decision.yml` is seeded into downstream projects and wired into `project_manifest.yml` required files. This fixes the first SNAP rollout finding where the new check synced but its required scaffold did not.
+
+**Alignment**: Keeps framework sync self-contained: a check introduced by the template must bring its required template artifact along, otherwise downstream projects get false red harness failures.
+
+**Non-goal**: Does not decide a project's route, overwrite an existing project-specific `route_decision.yml`, or make any data/source collection progress.
+
+**Drift risk**: Low; this is seed-only and preserves existing downstream route decisions. The risk is forgetting future check dependencies in sync, so route-decision becomes a regression example.
+
+**Next check**: Re-sync SNAP and confirm `check_discovery_route_decision.py` no longer fails due to a missing scaffold.
+
 ### 2026-07-01 - Add workflow presets and staging evidence semantics (AEROS-IMPROVE-032)
 
 **Commit(s)**: `f435106`

@@ -580,3 +580,16 @@ Use this file to track template or project-level changes that alter workflow, ev
   - `python checks/check_completion_receipts.py`
   - `PYTHONDONTWRITEBYTECODE=1 python checks/run_harness_checks.py --profile smoke --timeout 20`
 - notes: Staging-only work is now `ROUTE_READY` with `substantive_progress: false`; it does not become canonical evidence or claim support.
+
+## REV040 - 2026-07-01 17:31 -0400
+
+- commit: pending
+- change_type: sync rollout repair
+- summary: Updated the AEROS sync script to seed `discovery/route_decision.yml` and wire it into downstream manifests after the SNAP smoke found the new route-decision check without its required scaffold.
+- files:
+  - tools/sync_aeros_latest.zsh
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - `python checks/check_update_ledger.py`
+- notes: This is a sync completeness repair. It does not overwrite existing route decisions or make research progress.
