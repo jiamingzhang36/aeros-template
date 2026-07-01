@@ -11,6 +11,8 @@ minimal_attestation_fields:
   - work_lane
   - allowed_outputs_expected
   - actual_outputs
+  - staging_artifact_paths
+  - substantive_evidence_paths
   - check_attestations
   - substantive_progress
   - outcome_kind
@@ -38,15 +40,17 @@ progress_domains:
 progress_classes:
   none: No substantive progress artifact exists.
   bookkeeping: Registry, dashboard, or receipt bookkeeping changed.
-  routing: A route, queue, blocker, packet, or plan was produced.
+  routing: A route, queue, blocker, staging artifact, packet, or plan was produced.
   substantive: A real source/data/literature/result/paper/decision artifact was produced.
   decision: A human or governance decision was recorded without implying research-substantive output.
 passed_task_rule:
   declared_outcome: complete
   requires:
-    - at least one substantive allowed output outside agent_runs/
-    - progress_class is substantive
-    - progress_label is SUBSTANTIVE_PRODUCED
+    - at least one allowed output outside runtime logs
+    - final evidence uses substantive_evidence_paths
+    - staging/review/queue work uses staging_artifact_paths and ROUTE_READY
+    - progress_class is substantive or routing
+    - progress_label is SUBSTANTIVE_PRODUCED or ROUTE_READY
     - file outputs include sha256
     - every required check has command and exit_code
     - completion_verdict is pass

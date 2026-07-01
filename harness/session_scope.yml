@@ -12,6 +12,8 @@ common_allowed_prefixes:
   - agent_runs/
   - outputs/logs/
   - outputs/context/
+  - evidence/delta_log.jsonl
+  - aeros/state/global_state.yml
   - decisions/revision_log.md
   - decisions/update_ledger.md
   - harness/improvement_backlog.yml
@@ -112,6 +114,89 @@ lanes:
       - data/raw/
       - paper/draft.md
       - evidence/claim_registry.md
+workflow_presets:
+  recapture_source_pool:
+    description: "Recover and review candidate source pools without promoting them to canonical evidence."
+    allowed_prefixes:
+      - work/recapture_
+      - audits/source_recapture/
+      - quality_reports/source_recapture/
+      - source_snapshots/
+      - evidence/delta_log.jsonl
+    allowed_actions:
+      - source recapture
+      - chrome-assisted review
+      - source-promotion queue
+    forbidden_prefixes:
+      - evidence/claim_registry.md
+      - decisions/approvals/
+  claim_audit:
+    description: "Audit claim support and deltas without collecting new raw data."
+    allowed_prefixes:
+      - audits/claim/
+      - audits/advisory/
+      - evidence/research_graph.yml
+      - evidence/delta_log.jsonl
+      - quality_reports/claim_audit/
+    allowed_actions:
+      - claim audit
+      - support-chain review
+      - delta audit
+    forbidden_prefixes:
+      - data/raw/
+      - decisions/approvals/
+  writing_guardrail:
+    description: "Bounded paper/TeX edits and guardrail reports tied to existing claims and numbers."
+    allowed_prefixes:
+      - paper/
+      - output/tex/
+      - outputs/tex/
+      - quality_reports/writing/
+      - audits/writing/
+      - evidence/delta_log.jsonl
+    allowed_actions:
+      - bounded writing edit
+      - number/claim guardrail
+      - tex compile review
+    forbidden_prefixes:
+      - data/raw/
+      - evidence/claim_registry.md
+      - decisions/approvals/
+  chrome_assisted_review:
+    description: "Browser-assisted source review that produces staging notes, screenshots, or queues."
+    allowed_prefixes:
+      - work/chrome_review/
+      - work/recapture_
+      - audits/chrome_assisted_review/
+      - quality_reports/chrome_assisted_review/
+      - source_snapshots/
+      - evidence/delta_log.jsonl
+    allowed_actions:
+      - chrome-assisted review
+      - source locator check
+      - manual page audit
+    forbidden_prefixes:
+      - evidence/claim_registry.md
+      - decisions/approvals/
+  source_promotion_queue:
+    description: "Promote reviewed staging sources into explicit queues without claiming final evidence."
+    allowed_prefixes:
+      - work/source_promotion/
+      - audits/source_promotion/
+      - quality_reports/source_promotion/
+      - data/backfill/
+      - discovery/data_inventory.csv
+      - docs/data_sources.md
+      - evidence/delta_log.jsonl
+      - aeros/state/global_state.yml
+    allowed_actions:
+      - source promotion queue
+      - backfill queue update
+      - global state refresh
+    forbidden_prefixes:
+      - paper/
+      - evidence/claim_registry.md
+      - decisions/approvals/
 non_goals:
   - "Does not revert off-scope files automatically."
   - "Does not approve cross-lane work; it only surfaces drift."

@@ -137,7 +137,7 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_execution_profiles.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_discovery_route_decision.py, check_execution_profiles.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
   full: {checks: all}
 """,
     "harness/stale_triage_policy.yml": """version: "0.1"
@@ -156,7 +156,7 @@ rule: "If only volatile allowed outputs changed, route to recover --check before
     "harness/session_scope.yml": """version: "0.1"
 policy: AEROS-SESSION-SCOPE-001
 principle: Chat-driven work must declare one active lane and audit changed files against lane scope.
-common_allowed_prefixes: [SESSION_CONTRACT.yml, CURRENT_STATE.md, NEXT_ACTION.md, CONTEXT_BUNDLE.md, agent_runs/, outputs/logs/, outputs/context/, decisions/revision_log.md, decisions/update_ledger.md, harness/improvement_backlog.yml]
+common_allowed_prefixes: [SESSION_CONTRACT.yml, CURRENT_STATE.md, NEXT_ACTION.md, CONTEXT_BUNDLE.md, agent_runs/, outputs/logs/, outputs/context/, evidence/delta_log.jsonl, aeros/state/global_state.yml, decisions/revision_log.md, decisions/update_ledger.md, harness/improvement_backlog.yml]
 lanes:
   data: {allowed_prefixes: [data/, discovery/data_inventory.csv, discovery/feasibility_matrix.md, docs/data_contract.yml, docs/data_dictionary.md, code/00_setup/, code/01_ingest/, code/02_clean/, code/03_construct/], forbidden_prefixes: [paper/, discovery/literature/, evidence/claim_registry.md]}
   literature: {allowed_prefixes: [discovery/literature/, docs/related_work, paper/references], forbidden_prefixes: [data/raw/, data/clean/, evidence/claim_registry.md, paper/draft]}
@@ -166,6 +166,12 @@ lanes:
   writing: {allowed_prefixes: [paper/, docs/, outputs/tables/, outputs/figures/], forbidden_prefixes: [data/raw/, evidence/claim_registry.md]}
   compliance: {allowed_prefixes: [replication/, compliance/, docs/data_availability, paper/supplement, outputs/logs/], forbidden_prefixes: [data/raw/, evidence/claim_registry.md]}
   harness: {allowed_prefixes: [aeros/, checks/, harness/, templates/, tools/, docs/design/, project_manifest.yml, AGENTS.md], forbidden_prefixes: [data/raw/, paper/draft.md, evidence/claim_registry.md]}
+workflow_presets:
+  recapture_source_pool: {description: Recover and review candidate source pools without promoting them to canonical evidence., allowed_prefixes: [work/recapture_, audits/source_recapture/, quality_reports/source_recapture/, source_snapshots/, evidence/delta_log.jsonl], allowed_actions: [source recapture, chrome-assisted review, source-promotion queue], forbidden_prefixes: [evidence/claim_registry.md, decisions/approvals/]}
+  claim_audit: {description: Audit claim support and deltas without collecting new raw data., allowed_prefixes: [audits/claim/, audits/advisory/, evidence/research_graph.yml, evidence/delta_log.jsonl, quality_reports/claim_audit/], allowed_actions: [claim audit, support-chain review, delta audit], forbidden_prefixes: [data/raw/, decisions/approvals/]}
+  writing_guardrail: {description: Bounded paper/TeX edits and guardrail reports tied to existing claims and numbers., allowed_prefixes: [paper/, output/tex/, outputs/tex/, quality_reports/writing/, audits/writing/, evidence/delta_log.jsonl], allowed_actions: [bounded writing edit, number/claim guardrail, tex compile review], forbidden_prefixes: [data/raw/, evidence/claim_registry.md, decisions/approvals/]}
+  chrome_assisted_review: {description: Browser-assisted source review that produces staging notes, screenshots, or queues., allowed_prefixes: [work/chrome_review/, work/recapture_, audits/chrome_assisted_review/, quality_reports/chrome_assisted_review/, source_snapshots/, evidence/delta_log.jsonl], allowed_actions: [chrome-assisted review, source locator check, manual page audit], forbidden_prefixes: [evidence/claim_registry.md, decisions/approvals/]}
+  source_promotion_queue: {description: Promote reviewed staging sources into explicit queues without claiming final evidence., allowed_prefixes: [work/source_promotion/, audits/source_promotion/, quality_reports/source_promotion/, data/backfill/, discovery/data_inventory.csv, docs/data_sources.md, evidence/delta_log.jsonl, aeros/state/global_state.yml], allowed_actions: [source promotion queue, backfill queue update, global state refresh], forbidden_prefixes: [paper/, evidence/claim_registry.md, decisions/approvals/]}
 semantic_verdicts:
   expected_lane_change: Changed files match the declared lane.
   supporting_cross_lane_change: Allowed support file changed outside the lane.
@@ -178,6 +184,7 @@ semantic_verdicts:
 policy: AEROS-SESSION-SCOPE-001
 active: true
 active_lane: data
+active_workflow: ""
 objective: "One concrete objective for this chat/run."
 max_actions: 2
 allowed_actions: [aeros cockpit, aeros next, lane-scoped action]
@@ -505,7 +512,7 @@ def main() -> int:
 if __name__ == "__main__":
     raise SystemExit(main())
 ''',
-    "templates/completion_attestation.yml": """version: 3
+    "templates/completion_attestation.yml": """version: 5
 task_id: T000
 generated_at: ""
 completion_mode: agent_run
@@ -513,12 +520,15 @@ declared_outcome: complete
 outcome_kind: complete
 contract_status: failed
 verification_level: failed_attestation
+progress_domain: research
 progress_class: none
 progress_label: CHECK_PASS
 authority_status: no_new_authority
 work_lane: data
 allowed_outputs_expected: []
 actual_outputs: []
+staging_artifact_paths: []
+substantive_evidence_paths: []
 checks_required: []
 check_attestations: []
 evidence_delta_ref: ""
@@ -687,12 +697,13 @@ forbidden_cross_lane_substitutions:
     "harness/completion_attestation_policy.yml": """version: "0.1"
 policy: AEROS-COMPLETION-ATTESTATION-001
 principle: "Completion is a small mechanical attestation, not a research verdict."
-minimal_attestation_fields: [task_id, declared_outcome, work_lane, allowed_outputs_expected, actual_outputs, check_attestations, substantive_progress, does_not_prove]
+minimal_attestation_fields: [task_id, declared_outcome, work_lane, allowed_outputs_expected, actual_outputs, staging_artifact_paths, substantive_evidence_paths, check_attestations, substantive_progress, does_not_prove]
 allowed_declared_outcomes: [complete, partial, blocked, hygiene]
 passed_task_rule:
   declared_outcome: complete
   requires:
-    - at least one substantive allowed output outside agent_runs/
+    - at least one allowed output outside runtime logs
+    - staging/review/queue work uses staging_artifact_paths and ROUTE_READY
     - file outputs include sha256
     - every required check has command and exit_code
     - completion_verdict is pass

@@ -46,6 +46,9 @@ def main() -> int:
     minimal = set(completion.get("minimal_attestation_fields") or [])
     if "progress_domain" not in minimal:
         failures.append("completion policy missing progress_domain attestation field")
+    for field in ["staging_artifact_paths", "substantive_evidence_paths"]:
+        if field not in minimal:
+            failures.append(f"completion policy missing {field} attestation field")
     domains = set(completion.get("progress_domains") or {})
     if not {"research", "runtime", "governance"}.issubset(domains):
         failures.append("completion policy missing required progress domains")
@@ -62,6 +65,9 @@ def main() -> int:
     template = _load(TEMPLATE)
     if "progress_domain" not in template:
         failures.append("completion attestation template missing progress_domain")
+    for field in ["staging_artifact_paths", "substantive_evidence_paths"]:
+        if field not in template:
+            failures.append(f"completion attestation template missing {field}")
 
     if progress_domain_for("harness", authority_status="no_new_authority") != "runtime":
         failures.append("harness lane should map to runtime progress_domain")

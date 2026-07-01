@@ -13,6 +13,18 @@ from .contract import Contract
 
 RECEIPT_DIR = Path("agent_runs/completion_receipts")
 PROGRESS_DOMAINS = {"research", "runtime", "governance"}
+RUNTIME_LOG_PREFIXES = ("agent_runs", "outputs/logs", "outputs/context")
+STAGING_ARTIFACT_PREFIXES = (
+    "work/",
+    "audits/",
+    "quality_reports/",
+    "source_snapshots/",
+    "data/backfill/",
+    "output/tex/",
+    "outputs/tex/",
+    "discovery/literature/missing_fulltext_queue",
+    "discovery/literature/source_promotion_queue",
+)
 
 
 @dataclass(frozen=True)
@@ -128,6 +140,16 @@ def _same_check_set(left: list[str], right: list[str]) -> bool:
     return sorted(_check_key(item) for item in left) == sorted(_check_key(item) for item in right)
 
 
+def _is_runtime_log(rel: str) -> bool:
+    value = str(rel or "").strip().rstrip("/")
+    return any(value == prefix.rstrip("/") or value.startswith(prefix.rstrip("/") + "/") for prefix in RUNTIME_LOG_PREFIXES)
+
+
+def _is_staging_artifact(rel: str) -> bool:
+    value = str(rel or "").strip()
+    return any(value == prefix.rstrip("/") or value.startswith(prefix) for prefix in STAGING_ARTIFACT_PREFIXES)
+
+
 def progress_domain_for(work_lane: str, *, authority_status: str = "") -> str:
     lane = str(work_lane or "").strip().lower()
     authority = str(authority_status or "").strip().lower()
@@ -158,10 +180,19 @@ def write_completion_receipt(
     found = [p for p in expected if _exists(project_root, p)]
     missing_outputs = [p for p in expected if not _exists(project_root, p) and p != "agent_runs"]
     output_records = [_artifact_record(project_root, p) for p in expected]
+    staging_outputs = [
+        row for row in output_records
+        if row.get("exists")
+        and not _is_runtime_log(str(row.get("path", "")))
+        and _is_staging_artifact(str(row.get("path", "")))
+    ]
     substantive_outputs = [
         row for row in output_records
-        if row.get("exists") and not str(row.get("path", "")).rstrip("/").startswith("agent_runs")
+        if row.get("exists")
+        and not _is_runtime_log(str(row.get("path", "")))
+        and not _is_staging_artifact(str(row.get("path", "")))
     ]
+    progress_outputs = substantive_outputs or staging_outputs
     report_rel = _rel(project_root, run_report_path) or latest_run_report(project_root, contract.task_id)
     receipt_required = contract.evidence_receipt_required
     evidence_receipt_exists = _exists(project_root, contract.receipt_path) if receipt_required else False
@@ -172,8 +203,8 @@ def write_completion_receipt(
         failures.append("receipt check list does not match task contract checks")
     if checks_failed:
         failures.append("one or more required checks failed")
-    if not substantive_outputs:
-        failures.append("no substantive allowed output artifact exists")
+    if not progress_outputs:
+        failures.append("no allowed output artifact exists outside runtime logs")
     if mode == "agent_run" and not report_rel:
         failures.append("agent run completion requires a run report")
     if receipt_required and not evidence_receipt_exists:
@@ -186,13 +217,20 @@ def write_completion_receipt(
         failures.append("open issues remain")
 
     verdict = "fail" if failures else "pass"
-    progress_class = "substantive" if substantive_outputs else "none"
-    progress_label = "SUBSTANTIVE_PRODUCED" if substantive_outputs else "CHECK_PASS"
+    if substantive_outputs:
+        progress_class = "substantive"
+        progress_label = "SUBSTANTIVE_PRODUCED"
+    elif staging_outputs:
+        progress_class = "routing"
+        progress_label = "ROUTE_READY"
+    else:
+        progress_class = "none"
+        progress_label = "CHECK_PASS"
     verification_level = "checks_passed_with_artifact_hashes" if verdict == "pass" else "failed_attestation"
     authority_status = "human_decision_required" if human_decision_needed else "no_new_authority"
     progress_domain = progress_domain_for(contract.work_lane, authority_status=authority_status)
     payload = {
-        "version": 4,
+        "version": 5,
         "task_id": contract.task_id,
         "generated_at": _now(),
         "completion_mode": mode,
@@ -215,6 +253,8 @@ def write_completion_receipt(
         "allowed_outputs_found": found,
         "allowed_outputs_missing": missing_outputs,
         "actual_outputs": output_records,
+        "staging_artifact_paths": [str(row.get("path", "")) for row in staging_outputs],
+        "substantive_evidence_paths": [str(row.get("path", "")) for row in substantive_outputs],
         "checks_required": list(contract.checks),
         "checks_run": required,
         "checks_passed": checks_passed,
@@ -281,15 +321,25 @@ def validate_completion_receipts(project_root: Path, contracts: dict[str, tuple[
                 failures.append(f"{task_id}: completion receipt contract_status is not passed")
             if payload.get("verification_level") not in {"checks_passed_with_artifact_hashes", "checks_passed"}:
                 failures.append(f"{task_id}: completion receipt verification_level is not sufficient")
+            staging_paths = list(payload.get("staging_artifact_paths") or [])
+            substantive_paths = list(payload.get("substantive_evidence_paths") or [])
             if payload.get("progress_class") != "substantive":
-                failures.append(f"{task_id}: completion receipt progress_class is not substantive")
-            if payload.get("progress_label") not in {"SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}:
-                failures.append(f"{task_id}: completion receipt progress_label is not SUBSTANTIVE_PRODUCED")
+                if int(payload.get("version") or 1) >= 5 and payload.get("progress_class") == "routing" and staging_paths and not substantive_paths:
+                    pass
+                else:
+                    failures.append(f"{task_id}: completion receipt progress_class is not substantive or staging-routing")
+            if payload.get("progress_label") not in {"SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE", "ROUTE_READY"}:
+                failures.append(f"{task_id}: completion receipt progress_label is not an allowed completion label")
             if not payload.get("authority_status"):
                 failures.append(f"{task_id}: completion receipt authority_status missing")
         if int(payload.get("version") or 1) >= 4:
             if payload.get("progress_domain") not in PROGRESS_DOMAINS:
                 failures.append(f"{task_id}: completion receipt progress_domain is invalid")
+        if int(payload.get("version") or 1) >= 5:
+            if not isinstance(payload.get("staging_artifact_paths"), list):
+                failures.append(f"{task_id}: completion receipt staging_artifact_paths is missing or invalid")
+            if not isinstance(payload.get("substantive_evidence_paths"), list):
+                failures.append(f"{task_id}: completion receipt substantive_evidence_paths is missing or invalid")
         if payload.get("work_lane") != contract.work_lane:
             failures.append(f"{task_id}: completion receipt work_lane does not match contract")
         if not _same_check_set(list(payload.get("checks_required") or []), list(contract.checks)):
@@ -299,13 +349,22 @@ def validate_completion_receipts(project_root: Path, contracts: dict[str, tuple[
         if payload.get("checks_failed"):
             failures.append(f"{task_id}: completion receipt records failed checks")
         actual_outputs = list(payload.get("actual_outputs") or [])
+        staging_outputs = [
+            row for row in actual_outputs
+            if row.get("exists")
+            and not _is_runtime_log(str(row.get("path", "")))
+            and _is_staging_artifact(str(row.get("path", "")))
+        ]
         substantive_outputs = [
             row for row in actual_outputs
-            if row.get("exists") and not str(row.get("path", "")).rstrip("/").startswith("agent_runs")
+            if row.get("exists")
+            and not _is_runtime_log(str(row.get("path", "")))
+            and not _is_staging_artifact(str(row.get("path", "")))
         ]
-        if not substantive_outputs:
-            failures.append(f"{task_id}: completion receipt has no substantive output artifact")
-        for row in substantive_outputs:
+        progress_outputs = substantive_outputs or staging_outputs
+        if not progress_outputs:
+            failures.append(f"{task_id}: completion receipt has no allowed output artifact outside runtime logs")
+        for row in progress_outputs:
             if row.get("type") == "file" and not row.get("sha256"):
                 failures.append(f"{task_id}: file output lacks sha256: {row.get('path')}")
         check_attestations = list(payload.get("check_attestations") or [])

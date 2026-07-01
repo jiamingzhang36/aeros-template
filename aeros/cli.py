@@ -558,6 +558,7 @@ def _cmd_session(args: argparse.Namespace) -> int:
             root,
             lane=args.lane,
             objective=args.objective,
+            workflow=args.workflow,
             max_actions=args.max_actions,
             allowed_actions=args.allowed_action or None,
             dry_run=args.dry_run,
@@ -1441,6 +1442,7 @@ def main(argv: list[str] | None = None) -> int:
                                choices=["data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"],
                                help="active lane for this session")
     session_start.add_argument("--objective", required=True, help="one concrete objective for this session")
+    session_start.add_argument("--workflow", default="", help="optional workflow preset, e.g. recapture_source_pool")
     session_start.add_argument("--max-actions", type=int, default=2, help="maximum intended actions before stopping")
     session_start.add_argument("--allowed-action", action="append", default=[], help="allowed action phrase; may be repeated")
     session_start.add_argument("--dry-run", action="store_true", help="preview the session contract without writing")

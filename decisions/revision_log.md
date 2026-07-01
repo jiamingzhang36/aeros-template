@@ -549,3 +549,34 @@ Use this file to track template or project-level changes that alter workflow, ev
 - checks:
   - Not run in this edit pass unless explicitly requested.
 - notes: This is a fast-profile fix for real projects. It does not change next-action recommendations or weaken ActionSpec/controller safety checks.
+
+## REV039 - 2026-07-01 17:25 -0400
+
+- commit: pending
+- change_type: session-scope presets / discovery routing / completion semantics
+- summary: Added workflow presets for real project intermediate work, a discovery route-decision scaffold, and completion receipt separation between staging artifacts and substantive evidence.
+- files:
+  - AGENTS.md
+  - aeros/cli.py
+  - aeros/runtime/completion.py
+  - aeros/runtime/init_project.py
+  - aeros/runtime/session_guard.py
+  - checks/check_discovery_completeness.py
+  - checks/check_discovery_route_decision.py
+  - checks/check_progress_semantics.py
+  - checks/check_session_scope.py
+  - checks/run_harness_checks.py
+  - discovery/route_decision.yml
+  - harness/check_profiles.yml
+  - harness/completion_attestation_policy.yml
+  - harness/session_scope.yml
+  - project_manifest.yml
+  - templates/completion_attestation.yml
+  - templates/session_contract.yml
+- checks:
+  - `python checks/check_session_scope.py`
+  - `python checks/check_discovery_route_decision.py`
+  - `python checks/check_progress_semantics.py`
+  - `python checks/check_completion_receipts.py`
+  - `PYTHONDONTWRITEBYTECODE=1 python checks/run_harness_checks.py --profile smoke --timeout 20`
+- notes: Staging-only work is now `ROUTE_READY` with `substantive_progress: false`; it does not become canonical evidence or claim support.

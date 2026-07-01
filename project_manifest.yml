@@ -368,6 +368,7 @@ checks:
   improvement_backlog: checks/check_improvement_backlog.py
   update_ledger: checks/check_update_ledger.py
   discovery_completeness: checks/check_discovery_completeness.py
+  discovery_route_decision: checks/check_discovery_route_decision.py
   gate_exit: checks/check_gate_exit.py
   idea_bank: checks/check_idea_bank.py
   stage_agents: checks/check_stage_agents.py

@@ -251,6 +251,7 @@ Lane rules:
 
 - Stay in the active lane for the whole run unless the human explicitly asks to switch lanes.
 - Before a chat-driven work burst that may edit files, prefer starting a scoped session with `aeros session start --lane <lane> --objective "..."`.
+- When the work is a known intermediate workflow, add `--workflow <preset>` instead of hand-expanding prefixes. Current presets include `recapture_source_pool`, `claim_audit`, `writing_guardrail`, `chrome_assisted_review`, and `source_promotion_queue`.
 - If a session is active, stay inside `SESSION_CONTRACT.yml` until the stop condition or run `aeros session audit`.
 - Off-scope changes reported by `aeros session audit` are `SCOPE_DRIFT`, `CLAIM_SCOPE_DRIFT`, or `AUTHORITY_DRIFT`. Do not call the work complete until the drift is reverted, explicitly human-approved, or moved into `harness/improvement_backlog.yml` as deferred work.
 - A session scope is a guardrail, not authority. It cannot approve gates, upgrade claims, or turn route/check work into `SUBSTANTIVE_PRODUCED`.
@@ -294,8 +295,10 @@ In an active or adopted research project, data state drives the next action. Do 
 - In goal/continue mode, a data-oriented request must follow `harness/goal_mode_policy.yml`: attempt safe data acquisition first, then either produce a data/source/probe artifact or stop with an honest blocker/source-discovery receipt.
 - Local-cache-safe data repair may run only when a queue item is `auto_rerunnable` and has an explicit `run_command`.
 - Official-source, API, credentialed, scraping, source-date-sensitive, or LLM-extraction work must be blocked for approval or receipt until the human accepts the source snapshot and terms/credential implications.
-- A passed task must produce a substantive allowed output; logs alone are not completion.
+- A passed task must produce a real allowed output outside runtime logs. Final evidence belongs in `substantive_evidence_paths`; route/review/queue preparation belongs in `staging_artifact_paths`.
 - A task is not complete merely because the run report is filled. A passed task requires a version-2 completion attestation with actual outputs, file hashes when applicable, check commands, exit codes, and an explicit `does_not_prove` boundary.
+- Completion receipts distinguish `staging_artifact_paths` from `substantive_evidence_paths`. Staging artifacts such as `work/`, Chrome/OCR review notes, recapture pools, source-promotion queues, audits, and quality reports may justify `ROUTE_READY`, but they do not by themselves prove substantive research progress.
+- Use `substantive_evidence_paths` only for canonical data, full-text extraction, registered result, paper edit, or approved evidence artifacts that materially change the research substance.
 - Completion attestation is mechanical only. It proves that declared task outputs and checks exist; it does not prove scientific validity, identification quality, claim support, or human gate approval.
 - If a task declares `recommended_skills` or `required_skill_classes`, the skill receipt must record either the invoked skill(s) or a waiver explaining why the skill was not used.
 

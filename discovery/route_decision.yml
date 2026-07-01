@@ -1,0 +1,67 @@
+version: "0.1"
+policy: AEROS-DISCOVERY-ROUTE-DECISION-001
+decision_status: pending
+selected_route: pending
+allowed_routes:
+  - negative_seed_first
+  - base_universe_first
+  - coverage_probe_first
+  - literature_gap_first
+  - data_access_first
+route_rules:
+  negative_seed_first:
+    default_when:
+      - "illegal, disputed, enforcement, court, complaint, penalty, or scam-like phenomena"
+      - "positive base universes are likely incomplete, promotional, or strategically curated"
+    first_actions:
+      - "collect verified negative seeds from adjudication, enforcement, complaints, or official notices"
+      - "back-trace entities to business registries, CNIPA/IP, MOFCOM, or domain-specific base lists"
+    does_not_prove:
+      - "population coverage"
+      - "prevalence"
+      - "representativeness"
+  base_universe_first:
+    default_when:
+      - "a stable official population frame exists before outcome/event discovery"
+      - "coverage denominator is central to the estimand"
+    first_actions:
+      - "verify base universe coverage and time vintage"
+      - "sample records before enrichment"
+  coverage_probe_first:
+    default_when:
+      - "multiple plausible source families exist and access/coverage is unknown"
+    first_actions:
+      - "probe small source samples before choosing a collection route"
+  literature_gap_first:
+    default_when:
+      - "the empirical object is unclear and the first risk is novelty/framing"
+    first_actions:
+      - "map closest literatures and identify what evidence would be decision-relevant"
+  data_access_first:
+    default_when:
+      - "the idea depends on credentialed, licensed, API, portal, or non-public data"
+    first_actions:
+      - "resolve access, license, ToS, and reproducibility constraints before design lock"
+current_decision:
+  route: pending
+  rationale: ""
+  decided_by: ""
+  decided_at: ""
+  decision_ref: ""
+  first_next_action: "Run `aeros next --lane data` or create a route packet before source collection."
+negative_seed_keywords:
+  - illegal
+  - scam
+  - fraud
+  - penalty
+  - enforcement
+  - complaint
+  - lawsuit
+  - court
+  - sanction
+  - violation
+does_not_prove:
+  - "that the selected route is scientifically correct"
+  - "that data access exists"
+  - "that negative seeds are representative"
+  - "that a gate is approved"

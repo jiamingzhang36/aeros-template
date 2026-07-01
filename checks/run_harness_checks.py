@@ -44,6 +44,7 @@ CHECKS = [
     "check_update_ledger.py",
     "check_derived_vs_asserted_audit.py",
     "check_discovery_completeness.py",
+    "check_discovery_route_decision.py",
     "check_gate_exit.py",
     "check_idea_bank.py",
     "check_feasibility_matrix.py",

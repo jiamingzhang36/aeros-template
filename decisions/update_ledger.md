@@ -15,6 +15,22 @@ How to read this ledger:
 - `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
 - `Next check`: what should be watched in the next real project run.
 
+## 2026-07-01
+
+### 2026-07-01 - Add workflow presets and staging evidence semantics (AEROS-IMPROVE-032)
+
+**Commit(s)**: `pending`
+
+**Action**: Added session workflow presets (`recapture_source_pool`, `claim_audit`, `writing_guardrail`, `chrome_assisted_review`, `source_promotion_queue`) so project-specific intermediate work can be declared without hand-extending lane prefixes. Added `discovery/route_decision.yml` plus a route-decision check for early data strategy selection, including `negative_seed_first` for scam/fraud/enforcement-style projects. Extended completion receipts with `staging_artifact_paths` and `substantive_evidence_paths` so staging work can be `ROUTE_READY` without being laundered into substantive evidence.
+
+**Alignment**: Reduces false AUTHORITY_DRIFT/SCOPE_DRIFT in real projects while preserving AEROS's authority boundary. It lets recapture/source-review/Chrome/OCR/queue preparation count as legitimate route progress, but not as final data, result, claim support, or gate approval.
+
+**Non-goal**: Does not loosen claim authority, approve gates, certify source validity, promote staging artifacts into canonical evidence, fetch data/full text, or decide the scientifically correct discovery route.
+
+**Drift risk**: Workflow presets could become a broad bypass if they grow into catch-all allowlists. Mitigation: presets remain named, narrow, audited by `check_session_scope.py`, and completion receipts still separate staging from substantive evidence.
+
+**Next check**: Sync into SNAP and run `aeros session start --lane data --workflow recapture_source_pool --dry-run` plus a session audit fixture to confirm expected staging paths no longer trip AUTHORITY_DRIFT while forbidden authority surfaces still do.
+
 ## 2026-06-25
 
 ### 2026-06-25 - Fix sync manifest-wiring indentation bug (AEROS-IMPROVE-032)

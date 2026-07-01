@@ -24,6 +24,7 @@ REQUIRED_FILES = [
     Path("discovery/feasibility_matrix.md"),
     Path("discovery/feasibility_memo.md"),
     Path("discovery/design_sketch.md"),
+    Path("discovery/route_decision.yml"),
     Path("discovery/PROMOTE_TO_HARNESS.md"),
 ]
 
