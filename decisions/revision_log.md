@@ -583,7 +583,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV040 - 2026-07-01 17:31 -0400
 
-- commit: pending
+- commit: 0f41180
 - change_type: sync rollout repair
 - summary: Updated the AEROS sync script to seed `discovery/route_decision.yml` and wire it into downstream manifests after the SNAP smoke found the new route-decision check without its required scaffold.
 - files:

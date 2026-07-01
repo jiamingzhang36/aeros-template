@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-07-01 - Sync route-decision scaffold to downstream projects
 
-**Commit(s)**: `pending`
+**Commit(s)**: `0f41180`
 
 **Action**: Updated `tools/sync_aeros_latest.zsh` so `discovery/route_decision.yml` is seeded into downstream projects and wired into `project_manifest.yml` required files. This fixes the first SNAP rollout finding where the new check synced but its required scaffold did not.
 
