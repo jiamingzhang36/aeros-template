@@ -42,6 +42,7 @@ CHECKS = [
     "check_harness_profiles.py",
     "check_skill_layer.py",
     "check_skill_invocations.py",
+    "check_skill_coverage.py",
     "check_correction_ledger.py",
     "check_improvement_backlog.py",
     "check_update_ledger.py",

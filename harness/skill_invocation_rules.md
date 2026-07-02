@@ -193,9 +193,20 @@ If no external skill was used, the receipt records an empty skill list. If a
 skill was used, the receipt must show that the skill is known to
 `harness/skill_map_core.yml` and allowed by the active task contract.
 
-Task contracts may declare `recommended_skills` for controller planning. Every
-recommended skill must exist in `harness/skill_map_core.yml` and must also
-appear in the task's `allowed_skills`. Recommendations are advisory only: they
-do not invoke the skill, approve a gate, or weaken checks.
+Task contracts may declare `skill_obligations`, `required_skill_classes`, and
+`recommended_skills` for controller planning. Every recommended skill must exist
+in `harness/skill_map_core.yml` and must also appear in the task's
+`allowed_skills`.
+
+Recommendations and obligations are advisory for scientific authority: they do
+not approve a gate, certify a claim, or weaken checks. They are not optional for
+auditability: a skill-eligible task must either invoke/use an allowed skill,
+mark the class as required for the run, or record an explicit waiver/blocker
+with `skill_class`, `reason`, `scope`, and `progress_label`.
+
+Lightweight mechanical work may waive skill use when the run is limited to
+typos, one-line parser fixes, ledger hash backfills, or mechanical
+revalidation. The waiver must say that it does not prove substantive research
+progress.
 
 Do not treat a skill output as admissible if the skill invocation receipt fails.

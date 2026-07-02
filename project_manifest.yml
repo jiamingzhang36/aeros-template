@@ -307,6 +307,7 @@ layers:
     - harness/skill_invocation_rules.md
     - harness/practical_skill_menu.md
     - harness/skill_map_core.yml
+    - harness/skill_obligation_policy.yml
     - harness/skill_map_reference.md
     - harness/human_review_receipt_template.md
     - harness/automation_policy.yml
@@ -378,6 +379,7 @@ checks:
   stage_agents: checks/check_stage_agents.py
   skill_layer: checks/check_skill_layer.py
   skill_invocations: checks/check_skill_invocations.py
+  skill_coverage: checks/check_skill_coverage.py
   feasibility_matrix: checks/check_feasibility_matrix.py
   literature_tools: checks/check_literature_tools.py
   literature_fulltext_execution: checks/check_literature_fulltext_execution.py

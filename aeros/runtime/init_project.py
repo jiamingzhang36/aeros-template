@@ -138,6 +138,19 @@ modes:
   waiting_on_external_input: {profile: smoke, max_actions: 0, requires_human_decision: true, allowed_progress_label: ROUTE_READY}
 does_not_prove: [scientific validity, claim support, gate approval, release readiness]
 """,
+    "harness/skill_obligation_policy.yml": """version: "0.1"
+policy: AEROS-SKILL-OBLIGATION-001
+principle: Skill-eligible tasks must consider relevant skills and either declare usable skills, mark the class required, or record an explicit waiver.
+classes:
+  data_source: {skills: [data-inventory, data-quality-checker, data-merge-audit], triggers: [data, source, probe, capture, inventory, denominator, gdp, schema]}
+  literature: {skills: [academic-research-suite, lit-review-assistant], triggers: [literature, citation, paper_registry, full-text, fulltext, synthesis]}
+  writing: {skills: [econ-write, pre-submission-audit], triggers: [paper, draft, writing, submission, referee, response]}
+  causal_identification: {skills: [causal-id-review, did-checklist], triggers: [identification, causal, did, event study, method_card, design]}
+  replication: {skills: [code-review-econ, replication-check], triggers: [replication, reproduc, provenance, pipeline, result_validation, code_review]}
+allowed_waiver_classes: [ledger_hash_only, typo_only, mechanical_revalidation, single_line_parser_patch]
+required_waiver_fields: [skill_class, reason, scope, progress_label]
+does_not_prove: [skill invocation, skill output correctness, scientific validity, claim support, human gate approval]
+""",
     "harness/context_budget.yml": """version: "0.1"
 policy: AEROS-CONTEXT-BUDGET-001
 brief_max_lines: 40
@@ -149,7 +162,7 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_execution_mode.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_skill_coverage.py, check_execution_mode.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
   full: {checks: all}
 """,
     "harness/stale_triage_policy.yml": """version: "0.1"

@@ -27,6 +27,9 @@ check_attestations:
     exit_code: 0
     elapsed_seconds: 0.0
 evidence_delta_ref: ""
+skill_invocation_ref: ""
+skill_obligations: []
+skill_waivers: []
 substantive_progress: false
 does_not_prove:
   - scientific validity

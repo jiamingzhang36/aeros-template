@@ -1634,3 +1634,17 @@ otherwise checks can reference template-only files.
 **Drift risk**: Execution modes could become another policy surface if used as authority instead of advice. The artifact selector must stay a conservative staging helper, not a replacement for human review before commit.
 
 **Next check**: Sync into SNAP or another active project and verify that smoke-test work stays light while source-capture/staging work is not mislabeled as substantive evidence.
+
+### 2026-07-02 — Add Skill Obligation Layer
+
+**Commit(s)**: `pending`
+
+**Action**: Added a skill obligation policy, runtime helper, and `check_skill_coverage.py` so skill-eligible tasks must either declare relevant skills, mark a required skill class, or record an explicit waiver/blocker. Runtime skill receipts now record obligations and waivers instead of silently treating empty skill use as sufficient.
+
+**Alignment**: Turns skills from optional suggestions into auditable professional inputs while preserving AEROS authority boundaries: skills may assist, but they do not approve gates, certify claims, or prove scientific validity.
+
+**Non-goal**: Does not force every task to invoke an external skill, does not run skills automatically, does not certify skill output quality, and does not convert skill use into substantive research progress.
+
+**Drift risk**: If obligation inference becomes too broad, it can create bureaucratic false positives. Keep inference conservative: tasks with explicit skill declarations, required classes, or waivers should not receive extra inferred obligations.
+
+**Next check**: Sync into a real active project and verify that data/source/literature/writing tasks either use the relevant skill path or carry an explicit waiver, without making smoke-test work heavy.

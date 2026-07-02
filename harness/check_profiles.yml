@@ -21,6 +21,7 @@ profiles:
       - check_evidence_units.py
       - check_parser_benchmark.py
       - check_session_scope.py
+      - check_skill_coverage.py
       - check_execution_mode.py
       - check_execution_profiles.py
       - check_source_id_consistency.py
@@ -50,6 +51,7 @@ profiles:
       - check_data_probe.py
       - check_data_backfill_queue.py
       - check_action_receipts.py
+      - check_skill_coverage.py
       - check_goal_mode_data_progress.py
       - check_noop_runs.py
   lane:literature:
@@ -59,6 +61,7 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_literature_tools.py
+      - check_skill_coverage.py
       - check_literature_adapters.py
       - check_literature_fulltext_execution.py
       - check_evidence_units.py
@@ -71,6 +74,7 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_estimand_cards.py
+      - check_skill_coverage.py
       - check_identification_gate.py
       - check_analysis_ledger.py
       - check_preanalysis_happens_before.py
@@ -96,6 +100,7 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_number_registry.py
+      - check_skill_coverage.py
       - check_number_scan.py
       - check_claim_numbers_bound.py
       - check_table_cell_sources.py
@@ -108,6 +113,7 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_aea_replication_alignment.py
+      - check_skill_coverage.py
       - check_replication_package.py
       - check_data_availability_present.py
       - check_compliance_gate.py

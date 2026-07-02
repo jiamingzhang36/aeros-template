@@ -591,3 +591,9 @@ Keep source IDs stable across `docs/data_contract.yml`, `discovery/data_inventor
 
 Before committing project work with raw captures or staging files, prefer `aeros artifact stage --canonical --exclude-raw-staging` and review the output. Raw API responses, browser captures, and `work/` staging files should not be mixed into canonical commits unless the human explicitly asks.
 
+## Skill Obligation Layer
+
+For skill-eligible tasks, do not leave skill use implicit. Check the task contract for `skill_obligations`, `required_skill_classes`, `allowed_skills`, and `recommended_skills`. Use the smallest relevant skill when it helps; if no skill is used, record an explicit waiver or blocker with `skill_class`, `reason`, `scope`, and `progress_label`.
+
+Skill use and skill waivers are audit evidence only. They do not approve gates, certify claims, prove identification quality, or convert `ROUTE_READY` into `SUBSTANTIVE_PRODUCED`.
+
