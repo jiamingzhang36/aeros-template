@@ -1623,7 +1623,7 @@ otherwise checks can reference template-only files.
 
 ### 2026-07-02 — Right-size execution mode and canonical staging controls
 
-**Commit(s)**: `pending`
+**Commit(s)**: `35d9830`
 
 **Action**: Added an advisory `aeros mode recommend` selector for smoke/probe/source/release/API/waiting modes, a source-id consistency check across data contract/inventory/provenance/result registry surfaces, and `aeros artifact stage --canonical --exclude-raw-staging` to separate canonical outputs from raw/staging captures before commits.
 
