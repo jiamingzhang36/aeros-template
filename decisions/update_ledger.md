@@ -1637,7 +1637,7 @@ otherwise checks can reference template-only files.
 
 ### 2026-07-02 — Add Skill Obligation Layer
 
-**Commit(s)**: `pending`
+**Commit(s)**: `b5c18dc`
 
 **Action**: Added a skill obligation policy, runtime helper, and `check_skill_coverage.py` so skill-eligible tasks must either declare relevant skills, mark a required skill class, or record an explicit waiver/blocker. Runtime skill receipts now record obligations and waivers instead of silently treating empty skill use as sufficient.
 
