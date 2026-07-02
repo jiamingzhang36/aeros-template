@@ -126,6 +126,18 @@ execution_profiles:
 policy: AEROS-ECON-METHOD-ADVISORY-001
 principle: Advisory method skills cannot certify identification, claims, or gates.
 """,
+    "harness/execution_mode_policy.yml": """version: "0.1"
+policy: AEROS-EXECUTION-MODE-001
+principle: Right-size governance before running; modes advise/check scope but do not approve gates or certify research substance.
+modes:
+  smoke_test: {profile: smoke, max_actions: 1, requires_human_decision: false, allowed_progress_label: CHECK_PASS}
+  bounded_probe: {profile: lane:data, max_actions: 3, requires_human_decision: false, allowed_progress_label: ROUTE_READY}
+  source_capture: {profile: lane:data, max_actions: 5, requires_human_decision: false, allowed_progress_label: ROUTE_READY}
+  paper_release: {profile: full, max_actions: 1, requires_human_decision: true, allowed_progress_label: DECISION_RECORDED}
+  expensive_api_run: {profile: lane:data, max_actions: 1, requires_human_decision: true, allowed_progress_label: ROUTE_READY}
+  waiting_on_external_input: {profile: smoke, max_actions: 0, requires_human_decision: true, allowed_progress_label: ROUTE_READY}
+does_not_prove: [scientific validity, claim support, gate approval, release readiness]
+""",
     "harness/context_budget.yml": """version: "0.1"
 policy: AEROS-CONTEXT-BUDGET-001
 brief_max_lines: 40
@@ -137,7 +149,7 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_discovery_route_decision.py, check_execution_profiles.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_execution_mode.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
   full: {checks: all}
 """,
     "harness/stale_triage_policy.yml": """version: "0.1"

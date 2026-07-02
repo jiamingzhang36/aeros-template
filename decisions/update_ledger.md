@@ -1620,3 +1620,17 @@ research content, approve gates, or weaken project checks.
 otherwise checks can reference template-only files.
 
 **Next check**: Re-sync CMPD and rerun `checks/check_parser_benchmark.py`.
+
+### 2026-07-02 — Right-size execution mode and canonical staging controls
+
+**Commit(s)**: `pending`
+
+**Action**: Added an advisory `aeros mode recommend` selector for smoke/probe/source/release/API/waiting modes, a source-id consistency check across data contract/inventory/provenance/result registry surfaces, and `aeros artifact stage --canonical --exclude-raw-staging` to separate canonical outputs from raw/staging captures before commits.
+
+**Alignment**: Reduces chat-driven overgovernance and empty running by making the next governance shell explicit, catches source-id drift before data gaps become misleading, and keeps project commits from mixing canonical outputs with raw captures.
+
+**Non-goal**: Does not approve gates, certify claim support, decide scientific validity, run source capture, or make raw staging files safe for public release.
+
+**Drift risk**: Execution modes could become another policy surface if used as authority instead of advice. The artifact selector must stay a conservative staging helper, not a replacement for human review before commit.
+
+**Next check**: Sync into SNAP or another active project and verify that smoke-test work stays light while source-capture/staging work is not mislabeled as substantive evidence.

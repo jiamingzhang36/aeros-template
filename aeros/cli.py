@@ -1311,6 +1311,38 @@ def _cmd_list_tasks(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_mode_recommend(args: argparse.Namespace) -> int:
+    from .runtime.execution_mode import format_execution_mode, recommend_execution_mode
+
+    report = recommend_execution_mode(
+        _project_root(),
+        lane=getattr(args, "lane", "") or "",
+        intent=getattr(args, "intent", "") or "",
+        mode=getattr(args, "mode", "") or "",
+    )
+    if getattr(args, "json", False):
+        print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+    else:
+        print(format_execution_mode(report))
+    return 0 if report.get("status") in {"PASS", "ADVISORY"} else 1
+
+
+def _cmd_artifact_stage(args: argparse.Namespace) -> int:
+    from .runtime.artifact_stage import format_artifact_stage_report, stage_canonical_artifacts
+
+    report = stage_canonical_artifacts(
+        _project_root(),
+        apply=bool(getattr(args, "apply", False)),
+        canonical=bool(getattr(args, "canonical", False)),
+        exclude_raw_staging=bool(getattr(args, "exclude_raw_staging", False)),
+    )
+    if getattr(args, "json", False):
+        print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+    else:
+        print(format_artifact_stage_report(report))
+    return 0 if report.get("status") == "PASS" else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="aeros", description="AEROS runtime")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1879,6 +1911,37 @@ def main(argv: list[str] | None = None) -> int:
     iterate.add_argument("--max-retries", type=int, default=None,
                          help="override each task's retry_policy.max_retries")
     iterate.set_defaults(func=_cmd_iterate)
+
+    mode_p = sub.add_parser("mode", help="recommend right-sized execution mode")
+    mode_sub = mode_p.add_subparsers(dest="mode_command", required=True)
+    mode_recommend_p = mode_sub.add_parser("recommend", help="recommend smoke/probe/source/release/API/waiting mode")
+    mode_recommend_p.add_argument("--lane", default="", help="Optional active lane, e.g. data/literature/writing")
+    mode_recommend_p.add_argument("--intent", default="", help="Short description of what you are about to do")
+    mode_recommend_p.add_argument(
+        "--mode",
+        default="",
+        choices=[
+            "",
+            "smoke_test",
+            "bounded_probe",
+            "source_capture",
+            "paper_release",
+            "expensive_api_run",
+            "waiting_on_external_input",
+        ],
+        help="Explicit mode override to validate and display",
+    )
+    mode_recommend_p.add_argument("--json", action="store_true")
+    mode_recommend_p.set_defaults(func=_cmd_mode_recommend)
+
+    artifact_p = sub.add_parser("artifact", help="artifact selection helpers")
+    artifact_sub = artifact_p.add_subparsers(dest="artifact_command", required=True)
+    artifact_stage_p = artifact_sub.add_parser("stage", help="select canonical artifacts while excluding raw staging")
+    artifact_stage_p.add_argument("--canonical", action="store_true", help="Required: select canonical outputs only")
+    artifact_stage_p.add_argument("--exclude-raw-staging", action="store_true", help="Required: keep raw/staging captures unstaged")
+    artifact_stage_p.add_argument("--apply", action="store_true", help="Actually run git add for selected canonical paths")
+    artifact_stage_p.add_argument("--json", action="store_true")
+    artifact_stage_p.set_defaults(func=_cmd_artifact_stage)
 
     args = parser.parse_args(argv)
     return args.func(args)

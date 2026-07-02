@@ -582,3 +582,12 @@ For each update, record:
 - next check on a real project
 
 Use `templates/update_ledger_entry.md` for new entries. If an update only changes logs or formatting, say so; do not describe it as research capability progress.
+
+## Execution Mode, Source IDs, and Canonical Staging
+
+Before starting ambiguous or multi-step work, run or mentally apply `aeros mode recommend --lane <lane> --intent "<short intent>"`. The mode is advisory: it right-sizes governance, but it does not approve gates, certify claims, or make research progress by itself.
+
+Keep source IDs stable across `docs/data_contract.yml`, `discovery/data_inventory.csv`, provenance JSON, and result registry records. If a source changes identity, create a new source ID rather than silently reusing an old one.
+
+Before committing project work with raw captures or staging files, prefer `aeros artifact stage --canonical --exclude-raw-staging` and review the output. Raw API responses, browser captures, and `work/` staging files should not be mixed into canonical commits unless the human explicitly asks.
+

@@ -1,0 +1,60 @@
+version: "0.1"
+policy: AEROS-EXECUTION-MODE-001
+principle: >
+  AEROS should right-size governance. Execution modes decide how much shell a
+  work burst needs; they do not weaken evidence rules, approve gates, run
+  tasks, or certify research substance.
+modes:
+  smoke_test:
+    governance_shell: light
+    check_profile: smoke
+    max_provider_calls: 0
+    max_cost_usd: 0
+    requires_human_decision: false
+    allowed_progress_label: CHECK_PASS
+    stop_condition: "Stop after fast checks or first failure."
+  bounded_probe:
+    governance_shell: medium
+    check_profile: lane:data
+    max_provider_calls: 0
+    max_cost_usd: 0
+    requires_human_decision: false
+    allowed_progress_label: ROUTE_READY
+    stop_condition: "Stop after one bounded probe, blocker, or queue update."
+  source_capture:
+    governance_shell: medium
+    check_profile: lane:data
+    max_provider_calls: 0
+    max_cost_usd: 0
+    requires_human_decision: false
+    allowed_progress_label: ROUTE_READY
+    stop_condition: "Capture staging sources only; do not promote to canonical evidence without review."
+  paper_release:
+    governance_shell: strict
+    check_profile: lane:compliance
+    max_provider_calls: 0
+    max_cost_usd: 0
+    requires_human_decision: true
+    allowed_progress_label: DECISION_RECORDED
+    stop_condition: "Stop at human release gate; do not assert paper-ready automatically."
+  expensive_api_run:
+    governance_shell: strict
+    check_profile: lane:data
+    max_provider_calls: 1
+    max_cost_usd: 1
+    requires_human_decision: true
+    allowed_progress_label: ROUTE_READY
+    stop_condition: "Stop for explicit cost/credential/source-date approval before execution."
+  waiting_on_external_input:
+    governance_shell: blocked
+    check_profile: smoke
+    max_provider_calls: 0
+    max_cost_usd: 0
+    requires_human_decision: true
+    allowed_progress_label: ROUTE_READY
+    stop_condition: "Do not continue running; record blocker and wait for external input."
+does_not_prove:
+  - "that the recommended mode is scientifically optimal"
+  - "that a task is complete"
+  - "that data access exists"
+  - "that a human gate is approved"

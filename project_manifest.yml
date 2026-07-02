@@ -208,6 +208,7 @@ gate_exit_criteria:
 layers:
   research_judgment:
     required_files:
+    - harness/execution_mode_policy.yml
     - discovery/anchor.yml
     - discovery/idea_memo.md
     - discovery/01_literature_scope.md
@@ -330,6 +331,9 @@ default_task_policy:
   claim_strengthening: requires evidence and claim registry update
   preferred_spec_selection: must not be based on significance alone
 checks:
+  artifact_stage: checks/check_artifact_stage.py
+  source_id_consistency: checks/check_source_id_consistency.py
+  execution_mode: checks/check_execution_mode.py
   stale_triage: checks/check_stale_triage.py
   session_scope: checks/check_session_scope.py
   execution_profiles: checks/check_execution_profiles.py
