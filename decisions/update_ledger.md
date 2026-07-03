@@ -1767,7 +1767,7 @@ chain record against the final ledger hash.
 
 ### 2026-07-03 — Tighten sync-doctor and governance-enforcement meta checks
 
-**Commit(s)**: `pending`
+**Commit(s)**: `80671d7`
 
 **Action**: Added a sync-doctor meta-check requiring every check in
 `harness/check_profiles.yml` to appear in sync-doctor `CAPABILITIES` or an
