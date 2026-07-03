@@ -597,3 +597,13 @@ For skill-eligible tasks, do not leave skill use implicit. Check the task contra
 
 Skill use and skill waivers are audit evidence only. They do not approve gates, certify claims, prove identification quality, or convert `ROUTE_READY` into `SUBSTANTIVE_PRODUCED`.
 
+## Task Mode, Output Intent, and Improvement Harvest
+
+Before non-trivial project work, classify the task shape with `aeros mode classify --lane <lane> --intent "<short intent>"`. Use the result to choose the lightest matching workflow preset; do not treat the classifier as execution authority or evidence admission.
+
+For source/data outputs, declare output intent where practical: `probe_only`, `staging_artifact`, `canonical_candidate`, `canonical_update`, or `audit_note`. Do not promote staging artifacts into canonical evidence without the appropriate data contract, provenance, or human review path.
+
+For route-sensitive work such as denominator capture, negative-seed discovery, source recapture, or official registry expansion, check `discovery/route_decision.yml` before collecting more sources. A pending route means the next action is a route packet or human decision, not more source accumulation.
+
+Use `aeros improve harvest` to collect framework-improvement candidates from local receipts and logs. Harvest output is advisory backlog input only; it does not modify gates, claims, or project state.
+

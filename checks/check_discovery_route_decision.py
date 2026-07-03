@@ -17,6 +17,9 @@ REQUIRED_ROUTES = {
     "coverage_probe_first",
     "literature_gap_first",
     "data_access_first",
+    "document_first",
+    "registry_first",
+    "hybrid",
 }
 NEGATIVE_SEED_TERMS = {"illegal", "scam", "fraud", "penalty", "enforcement", "complaint", "lawsuit", "court"}
 

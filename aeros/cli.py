@@ -1327,6 +1327,22 @@ def _cmd_mode_recommend(args: argparse.Namespace) -> int:
     return 0 if report.get("status") in {"PASS", "ADVISORY"} else 1
 
 
+def _cmd_mode_classify(args: argparse.Namespace) -> int:
+    from .runtime.task_mode import format_task_mode, infer_task_mode
+
+    report = infer_task_mode(
+        _project_root(),
+        task_id=getattr(args, "task_id", "") or "",
+        lane=getattr(args, "lane", "") or "",
+        intent=getattr(args, "intent", "") or "",
+    )
+    if getattr(args, "json", False):
+        print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+    else:
+        print(format_task_mode(report))
+    return 0 if report.get("status") in {"PASS", "ADVISORY"} else 1
+
+
 def _cmd_artifact_stage(args: argparse.Namespace) -> int:
     from .runtime.artifact_stage import format_artifact_stage_report, stage_canonical_artifacts
 
@@ -1341,6 +1357,22 @@ def _cmd_artifact_stage(args: argparse.Namespace) -> int:
     else:
         print(format_artifact_stage_report(report))
     return 0 if report.get("status") == "PASS" else 1
+
+
+def _cmd_improve_harvest(args: argparse.Namespace) -> int:
+    from .runtime.improve_harvest import format_harvest, harvest_improvements
+
+    report = harvest_improvements(_project_root())
+    if getattr(args, "write", False):
+        out = _project_root() / "outputs" / "context" / "improvement_harvest.md"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(format_harvest(report), encoding="utf-8")
+        report["written_to"] = out.relative_to(_project_root()).as_posix()
+    if getattr(args, "json", False):
+        print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+    else:
+        print(format_harvest(report))
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1933,6 +1965,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     mode_recommend_p.add_argument("--json", action="store_true")
     mode_recommend_p.set_defaults(func=_cmd_mode_recommend)
+    mode_classify_p = mode_sub.add_parser("classify", help="classify task workflow preset before work starts")
+    mode_classify_p.add_argument("--task-id", default="", help="Optional AEROS task_id to classify")
+    mode_classify_p.add_argument("--lane", default="", help="Optional active lane")
+    mode_classify_p.add_argument("--intent", default="", help="Short description of intended work")
+    mode_classify_p.add_argument("--json", action="store_true")
+    mode_classify_p.set_defaults(func=_cmd_mode_classify)
 
     artifact_p = sub.add_parser("artifact", help="artifact selection helpers")
     artifact_sub = artifact_p.add_subparsers(dest="artifact_command", required=True)
@@ -1942,6 +1980,13 @@ def main(argv: list[str] | None = None) -> int:
     artifact_stage_p.add_argument("--apply", action="store_true", help="Actually run git add for selected canonical paths")
     artifact_stage_p.add_argument("--json", action="store_true")
     artifact_stage_p.set_defaults(func=_cmd_artifact_stage)
+
+    improve_p = sub.add_parser("improve", help="framework improvement helpers")
+    improve_sub = improve_p.add_subparsers(dest="improve_command", required=True)
+    improve_harvest_p = improve_sub.add_parser("harvest", help="harvest improvement candidates from local run artifacts")
+    improve_harvest_p.add_argument("--write", action="store_true", help="Write outputs/context/improvement_harvest.md")
+    improve_harvest_p.add_argument("--json", action="store_true")
+    improve_harvest_p.set_defaults(func=_cmd_improve_harvest)
 
     args = parser.parse_args(argv)
     return args.func(args)

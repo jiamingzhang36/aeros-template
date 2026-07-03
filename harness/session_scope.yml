@@ -197,6 +197,7 @@ workflow_presets:
       - paper/
       - evidence/claim_registry.md
       - decisions/approvals/
+  submission_release_preflight: {description: Check submission/release readiness without declaring paper-ready or public-release approval., allowed_prefixes: [paper/, replication/, compliance/, audits/submission_preflight/, quality_reports/submission_preflight/, outputs/logs/, evidence/delta_log.jsonl], allowed_actions: [submission preflight, release checklist, replication package audit], forbidden_prefixes: [data/raw/, evidence/claim_registry.md, decisions/approvals/]}
 non_goals:
   - "Does not revert off-scope files automatically."
   - "Does not approve cross-lane work; it only surfaces drift."

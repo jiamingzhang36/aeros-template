@@ -1,0 +1,18 @@
+version: "0.1"
+policy: AEROS-OUTPUT-INTENT-001
+principle: >
+  Source/data outputs must state whether they are probe-only, staging,
+  canonical candidates, canonical updates, or audit notes. Output intent protects
+  raw/staging/canonical boundaries but does not admit evidence.
+valid_output_intents:
+  - probe_only
+  - staging_artifact
+  - canonical_candidate
+  - canonical_update
+  - audit_note
+promotion_rule: "Only canonical_candidate may be promoted after human/data-contract review; canonical_update must already be declared by contract."
+does_not_prove:
+  - output existence
+  - evidence admissibility
+  - release readiness
+  - claim support

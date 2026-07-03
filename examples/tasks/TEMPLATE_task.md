@@ -12,6 +12,8 @@ required_skill_classes:
 skill_obligations:
   - data_source
 skill_waivers: []
+output_intents:
+  discovery/data_inventory.csv: canonical_candidate
 ---
 # Task Template
 

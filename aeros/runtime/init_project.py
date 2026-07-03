@@ -126,6 +126,23 @@ execution_profiles:
 policy: AEROS-ECON-METHOD-ADVISORY-001
 principle: Advisory method skills cannot certify identification, claims, or gates.
 """,
+    "harness/task_mode_policy.yml": """version: "0.1"
+policy: AEROS-TASK-MODE-001
+principle: Classify task shape before work starts; task mode is advisory and cannot approve gates, admit evidence, or certify claim support.
+modes:
+  source_capture: {workflow_preset: recapture_source_pool, execution_mode: source_capture, allowed_output_intents: [probe_only, staging_artifact, audit_note]}
+  data_repair: {workflow_preset: source_promotion_queue, execution_mode: bounded_probe, allowed_output_intents: [probe_only, canonical_candidate, audit_note]}
+  claim_audit: {workflow_preset: claim_audit, execution_mode: bounded_probe, allowed_output_intents: [audit_note, canonical_candidate]}
+  writing_sync: {workflow_preset: writing_guardrail, execution_mode: paper_release, allowed_output_intents: [audit_note, canonical_candidate, canonical_update]}
+  submission_readiness: {workflow_preset: submission_release_preflight, execution_mode: paper_release, allowed_output_intents: [audit_note, canonical_candidate]}
+  route_recovery: {workflow_preset: source_promotion_queue, execution_mode: waiting_on_external_input, allowed_output_intents: [audit_note, probe_only]}
+does_not_prove: [task execution, output admissibility, claim support, human gate approval]
+""",
+    "harness/output_intent_policy.yml": """version: "0.1"
+policy: AEROS-OUTPUT-INTENT-001
+valid_output_intents: [probe_only, staging_artifact, canonical_candidate, canonical_update, audit_note]
+does_not_prove: [output existence, evidence admissibility, release readiness, claim support]
+""",
     "harness/execution_mode_policy.yml": """version: "0.1"
 policy: AEROS-EXECUTION-MODE-001
 principle: Right-size governance before running; modes advise/check scope but do not approve gates or certify research substance.
@@ -162,7 +179,7 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_skill_coverage.py, check_execution_mode.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_skill_coverage.py, check_execution_mode.py, check_task_mode.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_output_intent.py, check_route_early_gate.py, check_improve_harvest.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
   full: {checks: all}
 """,
     "harness/stale_triage_policy.yml": """version: "0.1"

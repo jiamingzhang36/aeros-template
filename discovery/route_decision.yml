@@ -8,6 +8,9 @@ allowed_routes:
   - coverage_probe_first
   - literature_gap_first
   - data_access_first
+  - document_first
+  - registry_first
+  - hybrid
 route_rules:
   negative_seed_first:
     default_when:
@@ -42,6 +45,21 @@ route_rules:
       - "the idea depends on credentialed, licensed, API, portal, or non-public data"
     first_actions:
       - "resolve access, license, ToS, and reproducibility constraints before design lock"
+  document_first:
+    default_when:
+      - "the empirical object is primarily in documents, filings, judgments, PDFs, or web pages"
+    first_actions:
+      - "capture a small document sample and classify source reliability before constructing data"
+  registry_first:
+    default_when:
+      - "a registry or administrative index is the safest source of entity identity"
+    first_actions:
+      - "verify registry identity, vintage, and fields before enrichment or negative-seed expansion"
+  hybrid:
+    default_when:
+      - "no single source family can establish both coverage and outcome signals"
+    first_actions:
+      - "run bounded probes across source families and choose the next route from observed coverage"
 current_decision:
   route: pending
   rationale: ""

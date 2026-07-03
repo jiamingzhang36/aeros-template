@@ -30,6 +30,7 @@ evidence_delta_ref: ""
 skill_invocation_ref: ""
 skill_obligations: []
 skill_waivers: []
+output_intents: {}
 substantive_progress: false
 does_not_prove:
   - scientific validity
