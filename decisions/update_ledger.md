@@ -1856,7 +1856,7 @@ If committed, backfill this pending entry and append a final hash-chain record.
 
 ### 2026-07-03 — Add control-tax dashboard projection
 
-**Commit(s)**: `pending`
+**Commit(s)**: `2672e72`
 
 **Action**: Added a derived control-tax dashboard that separates control actions,
 substantive actions, route actions, human decisions, and accepted artifacts;
