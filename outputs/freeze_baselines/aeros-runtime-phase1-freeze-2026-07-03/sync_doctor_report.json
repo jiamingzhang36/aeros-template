@@ -1,0 +1,1786 @@
+{
+  "does_not_prove": [
+    "that a project is scientifically correct",
+    "that a project should be synced now",
+    "that local project customizations are safe to overwrite",
+    "that gates, claims, or papers are approved"
+  ],
+  "projects": [
+    {
+      "capabilities": {
+        "aea_replication_alignment": {
+          "files": [
+            {
+              "path": "harness/aea_replication_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "templates/aea_data_package_manifest.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_aea_replication_alignment.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "artifact_stage": {
+          "files": [
+            {
+              "path": "aeros/runtime/artifact_stage.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_artifact_stage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "broad_capture": {
+          "files": [
+            {
+              "path": "aeros/runtime/broad_capture.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_broad_capture_firewall.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/execution_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "evidence_sufficiency_audit": {
+          "files": [
+            {
+              "path": "harness/evidence_sufficiency_audit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "templates/evidence_sufficiency_audit.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_evidence_sufficiency_audit.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "harness_observed_receipts": {
+          "files": [
+            {
+              "path": "aeros/runtime/harness_receipt.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_harness_observed_receipts.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/run_harness_checks.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "improve": {
+          "files": [
+            {
+              "path": "aeros/runtime/improve_harvest.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_improve_harvest.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "mode": {
+          "files": [
+            {
+              "path": "aeros/runtime/execution_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/task_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/mode_compiler.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_mode.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "output_intent": {
+          "files": [
+            {
+              "path": "aeros/runtime/output_intent.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/output_intent_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_output_intent.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "protected_path_hook": {
+          "files": [
+            {
+              "path": "harness/protected_path_commit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "tools/hooks/pre-commit-aeros-protected-paths",
+              "status": "missing"
+            },
+            {
+              "path": "tools/install_aeros_git_hooks.zsh",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_protected_path_hook.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "route_gate": {
+          "files": [
+            {
+              "path": "aeros/runtime/route_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_route_early_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_discovery_route_decision.py",
+              "status": "missing"
+            },
+            {
+              "path": "discovery/route_decision.yml",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "skill_coverage": {
+          "files": [
+            {
+              "path": "aeros/runtime/skill_obligation.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/skill_obligation_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_skill_coverage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "source_capture_permission": {
+          "files": [
+            {
+              "path": "aeros/runtime/source_capture_permission.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/source_capture_permission_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_source_capture_permission.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "task_preflight": {
+          "files": [
+            {
+              "path": "aeros/runtime/task_preflight.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_preflight.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "update_ledger_hash_chain": {
+          "files": [
+            {
+              "path": "aeros/runtime/ledger_hash_chain.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/update_ledger_hash_chain_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "decisions/update_ledger_chain.jsonl",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_update_ledger_hash_chain.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "workflow_presets": {
+          "files": [
+            {
+              "path": "aeros/runtime/session_guard.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_session_scope.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        }
+      },
+      "missing_capabilities": [
+        "improve",
+        "harness_observed_receipts",
+        "update_ledger_hash_chain",
+        "protected_path_hook",
+        "evidence_sufficiency_audit",
+        "aea_replication_alignment",
+        "mode",
+        "broad_capture",
+        "workflow_presets",
+        "route_gate",
+        "artifact_stage",
+        "skill_coverage",
+        "output_intent",
+        "source_capture_permission",
+        "task_preflight"
+      ],
+      "outdated_capabilities": [],
+      "project": "/Users/jiamingzhang/aeros-template/validation_projects/ai_grocery_recommendation_audit",
+      "status": "ATTENTION"
+    },
+    {
+      "capabilities": {
+        "aea_replication_alignment": {
+          "files": [
+            {
+              "path": "harness/aea_replication_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "templates/aea_data_package_manifest.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_aea_replication_alignment.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "artifact_stage": {
+          "files": [
+            {
+              "path": "aeros/runtime/artifact_stage.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_artifact_stage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "broad_capture": {
+          "files": [
+            {
+              "path": "aeros/runtime/broad_capture.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_broad_capture_firewall.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/execution_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "evidence_sufficiency_audit": {
+          "files": [
+            {
+              "path": "harness/evidence_sufficiency_audit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "templates/evidence_sufficiency_audit.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_evidence_sufficiency_audit.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "harness_observed_receipts": {
+          "files": [
+            {
+              "path": "aeros/runtime/harness_receipt.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_harness_observed_receipts.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/run_harness_checks.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "improve": {
+          "files": [
+            {
+              "path": "aeros/runtime/improve_harvest.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_improve_harvest.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "mode": {
+          "files": [
+            {
+              "path": "aeros/runtime/execution_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/task_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/mode_compiler.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_mode.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "output_intent": {
+          "files": [
+            {
+              "path": "aeros/runtime/output_intent.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/output_intent_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_output_intent.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "protected_path_hook": {
+          "files": [
+            {
+              "path": "harness/protected_path_commit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "tools/hooks/pre-commit-aeros-protected-paths",
+              "status": "missing"
+            },
+            {
+              "path": "tools/install_aeros_git_hooks.zsh",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_protected_path_hook.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "route_gate": {
+          "files": [
+            {
+              "path": "aeros/runtime/route_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_route_early_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_discovery_route_decision.py",
+              "status": "missing"
+            },
+            {
+              "path": "discovery/route_decision.yml",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "skill_coverage": {
+          "files": [
+            {
+              "path": "aeros/runtime/skill_obligation.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/skill_obligation_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_skill_coverage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "source_capture_permission": {
+          "files": [
+            {
+              "path": "aeros/runtime/source_capture_permission.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/source_capture_permission_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_source_capture_permission.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "task_preflight": {
+          "files": [
+            {
+              "path": "aeros/runtime/task_preflight.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_preflight.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "update_ledger_hash_chain": {
+          "files": [
+            {
+              "path": "aeros/runtime/ledger_hash_chain.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/update_ledger_hash_chain_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "decisions/update_ledger_chain.jsonl",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_update_ledger_hash_chain.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "workflow_presets": {
+          "files": [
+            {
+              "path": "aeros/runtime/session_guard.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_session_scope.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        }
+      },
+      "missing_capabilities": [
+        "improve",
+        "harness_observed_receipts",
+        "update_ledger_hash_chain",
+        "protected_path_hook",
+        "evidence_sufficiency_audit",
+        "aea_replication_alignment",
+        "mode",
+        "broad_capture",
+        "workflow_presets",
+        "route_gate",
+        "artifact_stage",
+        "skill_coverage",
+        "output_intent",
+        "source_capture_permission",
+        "task_preflight"
+      ],
+      "outdated_capabilities": [],
+      "project": "/Users/jiamingzhang/aeros-template/validation_projects/cultivated_meat_policy",
+      "status": "ATTENTION"
+    },
+    {
+      "capabilities": {
+        "aea_replication_alignment": {
+          "files": [
+            {
+              "path": "harness/aea_replication_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "templates/aea_data_package_manifest.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_aea_replication_alignment.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "artifact_stage": {
+          "files": [
+            {
+              "path": "aeros/runtime/artifact_stage.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_artifact_stage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "broad_capture": {
+          "files": [
+            {
+              "path": "aeros/runtime/broad_capture.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_broad_capture_firewall.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/execution_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "evidence_sufficiency_audit": {
+          "files": [
+            {
+              "path": "harness/evidence_sufficiency_audit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "templates/evidence_sufficiency_audit.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_evidence_sufficiency_audit.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "harness_observed_receipts": {
+          "files": [
+            {
+              "path": "aeros/runtime/harness_receipt.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_harness_observed_receipts.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/run_harness_checks.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "missing"
+        },
+        "improve": {
+          "files": [
+            {
+              "path": "aeros/runtime/improve_harvest.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_improve_harvest.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "mode": {
+          "files": [
+            {
+              "path": "aeros/runtime/execution_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/task_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/mode_compiler.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_mode.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "output_intent": {
+          "files": [
+            {
+              "path": "aeros/runtime/output_intent.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/output_intent_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_output_intent.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "protected_path_hook": {
+          "files": [
+            {
+              "path": "harness/protected_path_commit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "tools/hooks/pre-commit-aeros-protected-paths",
+              "status": "missing"
+            },
+            {
+              "path": "tools/install_aeros_git_hooks.zsh",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_protected_path_hook.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "route_gate": {
+          "files": [
+            {
+              "path": "aeros/runtime/route_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_route_early_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_discovery_route_decision.py",
+              "status": "missing"
+            },
+            {
+              "path": "discovery/route_decision.yml",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "skill_coverage": {
+          "files": [
+            {
+              "path": "aeros/runtime/skill_obligation.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/skill_obligation_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_skill_coverage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "source_capture_permission": {
+          "files": [
+            {
+              "path": "aeros/runtime/source_capture_permission.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/source_capture_permission_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_source_capture_permission.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "task_preflight": {
+          "files": [
+            {
+              "path": "aeros/runtime/task_preflight.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_preflight.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "update_ledger_hash_chain": {
+          "files": [
+            {
+              "path": "aeros/runtime/ledger_hash_chain.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/update_ledger_hash_chain_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "decisions/update_ledger_chain.jsonl",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_update_ledger_hash_chain.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "workflow_presets": {
+          "files": [
+            {
+              "path": "aeros/runtime/session_guard.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_session_scope.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        }
+      },
+      "missing_capabilities": [
+        "improve",
+        "harness_observed_receipts",
+        "update_ledger_hash_chain",
+        "protected_path_hook",
+        "evidence_sufficiency_audit",
+        "aea_replication_alignment",
+        "mode",
+        "broad_capture",
+        "workflow_presets",
+        "route_gate",
+        "artifact_stage",
+        "skill_coverage",
+        "output_intent",
+        "source_capture_permission",
+        "task_preflight"
+      ],
+      "outdated_capabilities": [],
+      "project": "/Users/jiamingzhang/aeros-template/validation_projects/franchise_fraud",
+      "status": "ATTENTION"
+    },
+    {
+      "capabilities": {
+        "aea_replication_alignment": {
+          "files": [
+            {
+              "path": "harness/aea_replication_policy.yml",
+              "status": "outdated"
+            },
+            {
+              "path": "templates/aea_data_package_manifest.yml",
+              "status": "outdated"
+            },
+            {
+              "path": "checks/check_aea_replication_alignment.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "outdated"
+        },
+        "artifact_stage": {
+          "files": [
+            {
+              "path": "aeros/runtime/artifact_stage.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_artifact_stage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "broad_capture": {
+          "files": [
+            {
+              "path": "aeros/runtime/broad_capture.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_broad_capture_firewall.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/execution_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "outdated"
+            }
+          ],
+          "status": "missing"
+        },
+        "evidence_sufficiency_audit": {
+          "files": [
+            {
+              "path": "harness/evidence_sufficiency_audit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "templates/evidence_sufficiency_audit.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_evidence_sufficiency_audit.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "harness_observed_receipts": {
+          "files": [
+            {
+              "path": "aeros/runtime/harness_receipt.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_harness_observed_receipts.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/run_harness_checks.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "missing"
+        },
+        "improve": {
+          "files": [
+            {
+              "path": "aeros/runtime/improve_harvest.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_improve_harvest.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "mode": {
+          "files": [
+            {
+              "path": "aeros/runtime/execution_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/task_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/mode_compiler.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_mode.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "output_intent": {
+          "files": [
+            {
+              "path": "aeros/runtime/output_intent.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/output_intent_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_output_intent.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "protected_path_hook": {
+          "files": [
+            {
+              "path": "harness/protected_path_commit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "tools/hooks/pre-commit-aeros-protected-paths",
+              "status": "missing"
+            },
+            {
+              "path": "tools/install_aeros_git_hooks.zsh",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_protected_path_hook.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "route_gate": {
+          "files": [
+            {
+              "path": "aeros/runtime/route_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_route_early_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_discovery_route_decision.py",
+              "status": "missing"
+            },
+            {
+              "path": "discovery/route_decision.yml",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "skill_coverage": {
+          "files": [
+            {
+              "path": "aeros/runtime/skill_obligation.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/skill_obligation_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_skill_coverage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "source_capture_permission": {
+          "files": [
+            {
+              "path": "aeros/runtime/source_capture_permission.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/source_capture_permission_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_source_capture_permission.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "task_preflight": {
+          "files": [
+            {
+              "path": "aeros/runtime/task_preflight.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_preflight.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "update_ledger_hash_chain": {
+          "files": [
+            {
+              "path": "aeros/runtime/ledger_hash_chain.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/update_ledger_hash_chain_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "decisions/update_ledger_chain.jsonl",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_update_ledger_hash_chain.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "workflow_presets": {
+          "files": [
+            {
+              "path": "aeros/runtime/session_guard.py",
+              "status": "outdated"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "outdated"
+            },
+            {
+              "path": "checks/check_session_scope.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "outdated"
+        }
+      },
+      "missing_capabilities": [
+        "improve",
+        "harness_observed_receipts",
+        "update_ledger_hash_chain",
+        "protected_path_hook",
+        "evidence_sufficiency_audit",
+        "mode",
+        "broad_capture",
+        "route_gate",
+        "artifact_stage",
+        "skill_coverage",
+        "output_intent",
+        "source_capture_permission",
+        "task_preflight"
+      ],
+      "outdated_capabilities": [
+        "aea_replication_alignment",
+        "workflow_presets"
+      ],
+      "project": "/Users/jiamingzhang/aeros-template/validation_projects/light-meal",
+      "status": "ATTENTION"
+    },
+    {
+      "capabilities": {
+        "aea_replication_alignment": {
+          "files": [
+            {
+              "path": "harness/aea_replication_policy.yml",
+              "status": "outdated"
+            },
+            {
+              "path": "templates/aea_data_package_manifest.yml",
+              "status": "outdated"
+            },
+            {
+              "path": "checks/check_aea_replication_alignment.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "outdated"
+        },
+        "artifact_stage": {
+          "files": [
+            {
+              "path": "aeros/runtime/artifact_stage.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_artifact_stage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "broad_capture": {
+          "files": [
+            {
+              "path": "aeros/runtime/broad_capture.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_broad_capture_firewall.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/execution_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "outdated"
+            }
+          ],
+          "status": "missing"
+        },
+        "evidence_sufficiency_audit": {
+          "files": [
+            {
+              "path": "harness/evidence_sufficiency_audit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "templates/evidence_sufficiency_audit.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_evidence_sufficiency_audit.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "harness_observed_receipts": {
+          "files": [
+            {
+              "path": "aeros/runtime/harness_receipt.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_harness_observed_receipts.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/run_harness_checks.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "missing"
+        },
+        "improve": {
+          "files": [
+            {
+              "path": "aeros/runtime/improve_harvest.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_improve_harvest.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "mode": {
+          "files": [
+            {
+              "path": "aeros/runtime/execution_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/task_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/mode_compiler.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_mode.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "output_intent": {
+          "files": [
+            {
+              "path": "aeros/runtime/output_intent.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/output_intent_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_output_intent.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "protected_path_hook": {
+          "files": [
+            {
+              "path": "harness/protected_path_commit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "tools/hooks/pre-commit-aeros-protected-paths",
+              "status": "missing"
+            },
+            {
+              "path": "tools/install_aeros_git_hooks.zsh",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_protected_path_hook.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "route_gate": {
+          "files": [
+            {
+              "path": "aeros/runtime/route_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_route_early_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_discovery_route_decision.py",
+              "status": "missing"
+            },
+            {
+              "path": "discovery/route_decision.yml",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "skill_coverage": {
+          "files": [
+            {
+              "path": "aeros/runtime/skill_obligation.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/skill_obligation_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_skill_coverage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "source_capture_permission": {
+          "files": [
+            {
+              "path": "aeros/runtime/source_capture_permission.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/source_capture_permission_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_source_capture_permission.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "task_preflight": {
+          "files": [
+            {
+              "path": "aeros/runtime/task_preflight.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_preflight.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "update_ledger_hash_chain": {
+          "files": [
+            {
+              "path": "aeros/runtime/ledger_hash_chain.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/update_ledger_hash_chain_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "decisions/update_ledger_chain.jsonl",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_update_ledger_hash_chain.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "workflow_presets": {
+          "files": [
+            {
+              "path": "aeros/runtime/session_guard.py",
+              "status": "outdated"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "outdated"
+            },
+            {
+              "path": "checks/check_session_scope.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "outdated"
+        }
+      },
+      "missing_capabilities": [
+        "improve",
+        "harness_observed_receipts",
+        "update_ledger_hash_chain",
+        "protected_path_hook",
+        "evidence_sufficiency_audit",
+        "mode",
+        "broad_capture",
+        "route_gate",
+        "artifact_stage",
+        "skill_coverage",
+        "output_intent",
+        "source_capture_permission",
+        "task_preflight"
+      ],
+      "outdated_capabilities": [
+        "aea_replication_alignment",
+        "workflow_presets"
+      ],
+      "project": "/Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver",
+      "status": "ATTENTION"
+    },
+    {
+      "capabilities": {
+        "aea_replication_alignment": {
+          "files": [
+            {
+              "path": "harness/aea_replication_policy.yml",
+              "status": "outdated"
+            },
+            {
+              "path": "templates/aea_data_package_manifest.yml",
+              "status": "outdated"
+            },
+            {
+              "path": "checks/check_aea_replication_alignment.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "outdated"
+        },
+        "artifact_stage": {
+          "files": [
+            {
+              "path": "aeros/runtime/artifact_stage.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_artifact_stage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "broad_capture": {
+          "files": [
+            {
+              "path": "aeros/runtime/broad_capture.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_broad_capture_firewall.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/execution_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "outdated"
+            }
+          ],
+          "status": "missing"
+        },
+        "evidence_sufficiency_audit": {
+          "files": [
+            {
+              "path": "harness/evidence_sufficiency_audit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "templates/evidence_sufficiency_audit.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_evidence_sufficiency_audit.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "harness_observed_receipts": {
+          "files": [
+            {
+              "path": "aeros/runtime/harness_receipt.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_harness_observed_receipts.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/run_harness_checks.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "missing"
+        },
+        "improve": {
+          "files": [
+            {
+              "path": "aeros/runtime/improve_harvest.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_improve_harvest.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "mode": {
+          "files": [
+            {
+              "path": "aeros/runtime/execution_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/task_mode.py",
+              "status": "missing"
+            },
+            {
+              "path": "aeros/runtime/mode_compiler.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/task_mode_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_mode.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "output_intent": {
+          "files": [
+            {
+              "path": "aeros/runtime/output_intent.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/output_intent_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_output_intent.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "protected_path_hook": {
+          "files": [
+            {
+              "path": "harness/protected_path_commit_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "tools/hooks/pre-commit-aeros-protected-paths",
+              "status": "missing"
+            },
+            {
+              "path": "tools/install_aeros_git_hooks.zsh",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_protected_path_hook.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "route_gate": {
+          "files": [
+            {
+              "path": "aeros/runtime/route_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_route_early_gate.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_discovery_route_decision.py",
+              "status": "missing"
+            },
+            {
+              "path": "discovery/route_decision.yml",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "skill_coverage": {
+          "files": [
+            {
+              "path": "aeros/runtime/skill_obligation.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/skill_obligation_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_skill_coverage.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "source_capture_permission": {
+          "files": [
+            {
+              "path": "aeros/runtime/source_capture_permission.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/source_capture_permission_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_source_capture_permission.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "task_preflight": {
+          "files": [
+            {
+              "path": "aeros/runtime/task_preflight.py",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_task_preflight.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "update_ledger_hash_chain": {
+          "files": [
+            {
+              "path": "aeros/runtime/ledger_hash_chain.py",
+              "status": "missing"
+            },
+            {
+              "path": "harness/update_ledger_hash_chain_policy.yml",
+              "status": "missing"
+            },
+            {
+              "path": "decisions/update_ledger_chain.jsonl",
+              "status": "missing"
+            },
+            {
+              "path": "checks/check_update_ledger_hash_chain.py",
+              "status": "missing"
+            }
+          ],
+          "status": "missing"
+        },
+        "workflow_presets": {
+          "files": [
+            {
+              "path": "aeros/runtime/session_guard.py",
+              "status": "outdated"
+            },
+            {
+              "path": "harness/session_scope.yml",
+              "status": "outdated"
+            },
+            {
+              "path": "checks/check_session_scope.py",
+              "status": "outdated"
+            }
+          ],
+          "status": "outdated"
+        }
+      },
+      "missing_capabilities": [
+        "improve",
+        "harness_observed_receipts",
+        "update_ledger_hash_chain",
+        "protected_path_hook",
+        "evidence_sufficiency_audit",
+        "mode",
+        "broad_capture",
+        "route_gate",
+        "artifact_stage",
+        "skill_coverage",
+        "output_intent",
+        "source_capture_permission",
+        "task_preflight"
+      ],
+      "outdated_capabilities": [
+        "aea_replication_alignment",
+        "workflow_presets"
+      ],
+      "project": "/Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest",
+      "status": "ATTENTION"
+    }
+  ],
+  "projects_checked": 6,
+  "status": "ATTENTION",
+  "template_root": "/Users/jiamingzhang/aeros-template"
+}

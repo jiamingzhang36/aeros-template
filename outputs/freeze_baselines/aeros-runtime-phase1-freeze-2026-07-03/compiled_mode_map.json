@@ -1,0 +1,274 @@
+{
+  "does_not_prove": [
+    "that the preset is scientifically optimal",
+    "that a task has run",
+    "that a lead or candidate is evidence",
+    "that a claim, paper, or release is approved"
+  ],
+  "fields": {
+    "artifact_level": [
+      "candidate",
+      "canonical",
+      "canonical_candidate",
+      "claim",
+      "lead",
+      "paper",
+      "release",
+      "result",
+      "staging"
+    ],
+    "authority_surface": [
+      "claim",
+      "none",
+      "paper",
+      "release",
+      "resource",
+      "route"
+    ],
+    "effect_class": [
+      "credentialed_read",
+      "external_write",
+      "local_write",
+      "network_read",
+      "read_only"
+    ],
+    "execution_budget": [
+      "bounded",
+      "expensive",
+      "smoke",
+      "waiting"
+    ],
+    "verification_strength": [
+      "externally_reproduced",
+      "harness_observed",
+      "human_accepted",
+      "machine_validated",
+      "self_reported"
+    ]
+  },
+  "model": "five_field_compiled_control_model",
+  "presets": [
+    {
+      "allowed_outputs": [
+        "work/leads/**",
+        "data/backfill/*_lead_queue.csv",
+        "data/backfill/*_candidate_queue.csv",
+        "audits/broad_capture/**",
+        "quality_reports/broad_capture/**",
+        "outputs/logs/**",
+        "evidence/delta_log.jsonl"
+      ],
+      "artifact_level": "lead",
+      "authority_surface": "none",
+      "check_profile": "lane:data",
+      "effect_class": "network_read",
+      "execution_budget": "bounded",
+      "execution_mode": "broad_capture",
+      "forbidden_outputs": [
+        "data/raw/**",
+        "data/intermediate/**",
+        "data/processed/**",
+        "paper/**",
+        "evidence/claim_registry.md",
+        "replication/**",
+        "compliance/**",
+        "decisions/approvals/**"
+      ],
+      "output_intents": [
+        "lead_queue",
+        "candidate_queue",
+        "audit_note"
+      ],
+      "preset": "broad_capture",
+      "requires_human_decision": false,
+      "task_mode": "broad_capture",
+      "verification_strength": "harness_observed",
+      "workflow_preset": "broad_capture_leads"
+    },
+    {
+      "allowed_outputs": [],
+      "artifact_level": "claim",
+      "authority_surface": "claim",
+      "check_profile": "lane:data",
+      "effect_class": "local_write",
+      "execution_budget": "bounded",
+      "execution_mode": "bounded_probe",
+      "forbidden_outputs": [
+        "decisions/approvals/**"
+      ],
+      "output_intents": [
+        "audit_note",
+        "canonical_candidate"
+      ],
+      "preset": "claim_audit",
+      "requires_human_decision": false,
+      "task_mode": "claim_audit",
+      "verification_strength": "human_accepted",
+      "workflow_preset": "claim_audit"
+    },
+    {
+      "allowed_outputs": [],
+      "artifact_level": "canonical_candidate",
+      "authority_surface": "route",
+      "check_profile": "lane:data",
+      "effect_class": "local_write",
+      "execution_budget": "bounded",
+      "execution_mode": "bounded_probe",
+      "forbidden_outputs": [
+        "decisions/approvals/**"
+      ],
+      "output_intents": [
+        "probe_only",
+        "canonical_candidate",
+        "audit_note"
+      ],
+      "preset": "data_repair",
+      "requires_human_decision": false,
+      "task_mode": "data_repair",
+      "verification_strength": "harness_observed",
+      "workflow_preset": "source_promotion_queue"
+    },
+    {
+      "allowed_outputs": [],
+      "artifact_level": "candidate",
+      "authority_surface": "none",
+      "check_profile": "lane:data",
+      "effect_class": "local_write",
+      "execution_budget": "bounded",
+      "execution_mode": "bounded_probe",
+      "forbidden_outputs": [
+        "data/raw/**",
+        "data/intermediate/**",
+        "data/processed/**",
+        "paper/**",
+        "evidence/claim_registry.md",
+        "replication/**",
+        "compliance/**",
+        "decisions/approvals/**"
+      ],
+      "output_intents": [
+        "audit_note",
+        "probe_only"
+      ],
+      "preset": "general_guardrail",
+      "requires_human_decision": false,
+      "task_mode": "general_guardrail",
+      "verification_strength": "harness_observed",
+      "workflow_preset": ""
+    },
+    {
+      "allowed_outputs": [],
+      "artifact_level": "candidate",
+      "authority_surface": "route",
+      "check_profile": "smoke",
+      "effect_class": "read_only",
+      "execution_budget": "waiting",
+      "execution_mode": "waiting_on_external_input",
+      "forbidden_outputs": [
+        "data/raw/**",
+        "data/intermediate/**",
+        "data/processed/**",
+        "paper/**",
+        "evidence/claim_registry.md",
+        "replication/**",
+        "compliance/**",
+        "decisions/approvals/**"
+      ],
+      "output_intents": [
+        "audit_note",
+        "probe_only"
+      ],
+      "preset": "route_recovery",
+      "requires_human_decision": true,
+      "task_mode": "route_recovery",
+      "verification_strength": "self_reported",
+      "workflow_preset": "source_promotion_queue"
+    },
+    {
+      "allowed_outputs": [
+        "work/recapture_**",
+        "source_snapshots/**",
+        "audits/source_recapture/**",
+        "quality_reports/source_recapture/**"
+      ],
+      "artifact_level": "staging",
+      "authority_surface": "route",
+      "check_profile": "lane:data",
+      "effect_class": "network_read",
+      "execution_budget": "bounded",
+      "execution_mode": "source_capture",
+      "forbidden_outputs": [
+        "data/raw/**",
+        "data/intermediate/**",
+        "data/processed/**",
+        "paper/**",
+        "evidence/claim_registry.md",
+        "replication/**",
+        "compliance/**",
+        "decisions/approvals/**"
+      ],
+      "output_intents": [
+        "probe_only",
+        "staging_artifact",
+        "audit_note"
+      ],
+      "preset": "source_capture",
+      "requires_human_decision": false,
+      "task_mode": "source_capture",
+      "verification_strength": "harness_observed",
+      "workflow_preset": "recapture_source_pool"
+    },
+    {
+      "allowed_outputs": [],
+      "artifact_level": "release",
+      "authority_surface": "release",
+      "check_profile": "lane:compliance",
+      "effect_class": "local_write",
+      "execution_budget": "bounded",
+      "execution_mode": "paper_release",
+      "forbidden_outputs": [
+        "decisions/approvals/**"
+      ],
+      "output_intents": [
+        "audit_note",
+        "canonical_candidate"
+      ],
+      "preset": "submission_readiness",
+      "requires_human_decision": true,
+      "task_mode": "submission_readiness",
+      "verification_strength": "human_accepted",
+      "workflow_preset": "submission_release_preflight"
+    },
+    {
+      "allowed_outputs": [
+        "paper/**",
+        "output/tex/**",
+        "outputs/tex/**",
+        "quality_reports/writing/**",
+        "audits/writing/**"
+      ],
+      "artifact_level": "paper",
+      "authority_surface": "release",
+      "check_profile": "lane:compliance",
+      "effect_class": "local_write",
+      "execution_budget": "bounded",
+      "execution_mode": "paper_release",
+      "forbidden_outputs": [
+        "data/raw/**",
+        "evidence/claim_registry.md",
+        "decisions/approvals/**"
+      ],
+      "output_intents": [
+        "audit_note",
+        "canonical_candidate",
+        "canonical_update"
+      ],
+      "preset": "writing_sync",
+      "requires_human_decision": true,
+      "task_mode": "writing_sync",
+      "verification_strength": "human_accepted",
+      "workflow_preset": "writing_guardrail"
+    }
+  ],
+  "status": "ADVISORY"
+}

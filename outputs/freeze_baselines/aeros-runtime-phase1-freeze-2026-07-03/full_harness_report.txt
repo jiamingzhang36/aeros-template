@@ -1,0 +1,425 @@
+AEROS harness profile: full (119 check(s))
+==> checks/check_stage_agents.py (timeout: 20s)
+PASS: root, discovery, literature, and execution AGENTS rules exist
+<== checks/check_stage_agents.py finished in 0.0s (exit 0)
+==> checks/check_architecture_freeze.py (timeout: 20s)
+PASS: architecture freeze baseline is recorded
+<== checks/check_architecture_freeze.py finished in 0.0s (exit 0)
+==> checks/check_operating_dashboard.py (timeout: 20s)
+PASS: operating dashboard files are valid
+<== checks/check_operating_dashboard.py finished in 0.0s (exit 0)
+==> checks/check_session_scope.py (timeout: 20s)
+PASS: session scope guard is configured; semantic drift fixtures detected
+<== checks/check_session_scope.py finished in 0.3s (exit 0)
+==> checks/check_execution_mode.py (timeout: 20s)
+PASS: execution modes are valid
+<== checks/check_execution_mode.py finished in 0.1s (exit 0)
+==> checks/check_task_mode.py (timeout: 20s)
+PASS: task modes are valid
+<== checks/check_task_mode.py finished in 0.1s (exit 0)
+==> checks/check_task_preflight.py (timeout: 20s)
+PASS: task preflight is valid
+<== checks/check_task_preflight.py finished in 0.1s (exit 0)
+==> checks/check_source_capture_permission.py (timeout: 20s)
+PASS: source capture permission tiers are valid
+<== checks/check_source_capture_permission.py finished in 0.0s (exit 0)
+==> checks/check_broad_capture_firewall.py (timeout: 20s)
+PASS: broad capture firewall is valid
+<== checks/check_broad_capture_firewall.py finished in 0.1s (exit 0)
+==> checks/check_next_action.py (timeout: 20s)
+PASS: next action is valid (ROUTE_READY / discovery)
+<== checks/check_next_action.py finished in 0.3s (exit 0)
+==> checks/check_action_spec.py (timeout: 20s)
+PASS: ActionSpec invariants are valid
+<== checks/check_action_spec.py finished in 0.2s (exit 0)
+==> checks/check_execution_envelope.py (timeout: 20s)
+PASS: ExecutionEnvelope isolated-worktree enforcement is valid
+<== checks/check_execution_envelope.py finished in 1.4s (exit 0)
+==> checks/check_agent_envelope.py (timeout: 20s)
+[kernel] attempt 1/1: invoking agent (spent $0.0000/0.01, call cap $0.01)...
+[kernel]   check check_allowed.py: PASS
+[kernel] task T_AGENT_ALLOWED PASSED.
+[kernel] run report -> agent_runs/T_AGENT_ALLOWED_20260703_193718.md (cost $0.0000, 1 call(s))
+[kernel] completion receipt -> agent_runs/completion_receipts/T_AGENT_ALLOWED_completion_receipt.yml
+[kernel] attempt 1/1: invoking agent (spent $0.0000/0.01, call cap $0.01)...
+[kernel] agent envelope violation -> agent_runs/agent_envelope_audits/T_AGENT_DENIED_20260703_193718.json
+[kernel] task T_AGENT_DENIED ESCALATED -> /private/var/folders/1q/5bbv7pvn117_jknmqmjzj5dm0000gn/T/aeros_agent_envelope_34u4_0k1/decisions/escalations/T_AGENT_DENIED.md
+[kernel] run report -> agent_runs/T_AGENT_DENIED_20260703_193718.md (cost $0.0000, 1 call(s))
+[kernel] attempt 1/1: invoking agent (spent $0.0000/0.01, call cap $0.01)...
+[kernel] agent envelope violation -> agent_runs/agent_envelope_audits/T_AGENT_UNDECLARED_20260703_193718.json
+[kernel] task T_AGENT_UNDECLARED ESCALATED -> /private/var/folders/1q/5bbv7pvn117_jknmqmjzj5dm0000gn/T/aeros_agent_envelope_34u4_0k1/decisions/escalations/T_AGENT_UNDECLARED.md
+[kernel] run report -> agent_runs/T_AGENT_UNDECLARED_20260703_193718.md (cost $0.0000, 1 call(s))
+PASS: AgentEnvelope audit mode is valid
+<== checks/check_agent_envelope.py finished in 0.4s (exit 0)
+==> checks/check_progress_semantics.py (timeout: 20s)
+PASS: progress domain/class semantics are valid
+<== checks/check_progress_semantics.py finished in 0.0s (exit 0)
+==> checks/check_execution_profiles.py (timeout: 20s)
+PASS: execution profiles are valid
+<== checks/check_execution_profiles.py finished in 0.0s (exit 0)
+==> checks/check_source_id_consistency.py (timeout: 20s)
+PASS: source-id consistency check passed
+<== checks/check_source_id_consistency.py finished in 0.1s (exit 0)
+==> checks/check_artifact_stage.py (timeout: 20s)
+PASS: artifact stage selector check passed
+<== checks/check_artifact_stage.py finished in 0.1s (exit 0)
+==> checks/check_output_intent.py (timeout: 20s)
+PASS: output intents are valid
+<== checks/check_output_intent.py finished in 0.1s (exit 0)
+==> checks/check_source_capture_permission.py (timeout: 20s)
+PASS: source capture permission tiers are valid
+<== checks/check_source_capture_permission.py finished in 0.0s (exit 0)
+==> checks/check_route_early_gate.py (timeout: 20s)
+PASS: route early gate is valid
+<== checks/check_route_early_gate.py finished in 0.1s (exit 0)
+==> checks/check_improve_harvest.py (timeout: 20s)
+PASS: improvement harvest is valid
+<== checks/check_improve_harvest.py finished in 0.0s (exit 0)
+==> checks/check_sync_doctor.py (timeout: 20s)
+PASS: sync doctor is valid
+<== checks/check_sync_doctor.py finished in 0.1s (exit 0)
+==> checks/check_readiness_vector.py (timeout: 20s)
+PASS: readiness vector is derivable
+<== checks/check_readiness_vector.py finished in 0.0s (exit 0)
+==> checks/check_estimand_data_contract.py (timeout: 20s)
+PASS: scaffold_only EstimandDataContract scaffold is valid (draft, not evidence-bound)
+<== checks/check_estimand_data_contract.py finished in 0.0s (exit 0)
+==> checks/check_evidence_units.py (timeout: 20s)
+PASS: EvidenceUnit/ResultAdmission records are valid (1 evidence unit(s), 1 admission record(s))
+<== checks/check_evidence_units.py finished in 0.0s (exit 0)
+==> checks/check_parser_benchmark.py (timeout: 20s)
+PASS: parser benchmark scaffold is valid (3 local fixture(s) executed)
+<== checks/check_parser_benchmark.py finished in 0.0s (exit 0)
+==> checks/check_adversarial_benchmark.py (timeout: 20s)
+PASS: adversarial benchmark fixtures detected false_fulltext, exit_zero_no_output, stale_registry, claim_ceiling_escape, and stale_human_approval
+<== checks/check_adversarial_benchmark.py finished in 0.5s (exit 0)
+==> checks/check_stale_triage.py (timeout: 20s)
+PASS: stale triage is valid (0 item(s))
+<== checks/check_stale_triage.py finished in 0.4s (exit 0)
+==> checks/check_context_bundle.py (timeout: 20s)
+PASS: context bundle plumbing is valid
+<== checks/check_context_bundle.py finished in 0.1s (exit 0)
+==> checks/check_context_graph.py (timeout: 20s)
+PASS: context graph plumbing is valid
+<== checks/check_context_graph.py finished in 0.1s (exit 0)
+==> checks/check_cockpit.py (timeout: 20s)
+PASS: cockpit view is valid
+<== checks/check_cockpit.py finished in 0.4s (exit 0)
+==> checks/check_harness_profiles.py (timeout: 20s)
+PASS: check profiles are valid
+<== checks/check_harness_profiles.py finished in 0.1s (exit 0)
+==> checks/check_skill_layer.py (timeout: 20s)
+PASS: skill layer scaffold is complete
+<== checks/check_skill_layer.py finished in 0.1s (exit 0)
+==> checks/check_skill_invocations.py (timeout: 20s)
+PASS: skill invocation receipts are valid
+<== checks/check_skill_invocations.py finished in 0.6s (exit 0)
+==> checks/check_skill_coverage.py (timeout: 20s)
+PASS: skill coverage obligations are valid
+<== checks/check_skill_coverage.py finished in 0.6s (exit 0)
+==> checks/check_correction_ledger.py (timeout: 20s)
+PASS: correction ledger is well-formed (0 entry/entries)
+<== checks/check_correction_ledger.py finished in 0.1s (exit 0)
+==> checks/check_improvement_backlog.py (timeout: 20s)
+PASS: improvement backlog is well-formed (33 entry/entries)
+<== checks/check_improvement_backlog.py finished in 0.1s (exit 0)
+==> checks/check_update_ledger.py (timeout: 20s)
+PASS: update ledger tracks recent updates (5 commit(s) checked)
+<== checks/check_update_ledger.py finished in 0.1s (exit 0)
+==> checks/check_update_ledger_hash_chain.py (timeout: 20s)
+PASS: update ledger hash chain is valid
+<== checks/check_update_ledger_hash_chain.py finished in 0.1s (exit 0)
+==> checks/check_harness_observed_receipts.py (timeout: 20s)
+PASS: harness observed receipts are generated from observed check outputs and hashes
+<== checks/check_harness_observed_receipts.py finished in 0.0s (exit 0)
+==> checks/check_protected_path_hook.py (timeout: 20s)
+PASS: protected-path pre-commit hook blocks protected staged files by default
+<== checks/check_protected_path_hook.py finished in 0.3s (exit 0)
+==> checks/check_evidence_sufficiency_audit.py (timeout: 20s)
+PASS: evidence sufficiency audit policy is valid (template only)
+<== checks/check_evidence_sufficiency_audit.py finished in 0.0s (exit 0)
+==> checks/check_derived_vs_asserted_audit.py (timeout: 20s)
+PASS: derived-vs-asserted audit valid (7 field(s))
+<== checks/check_derived_vs_asserted_audit.py finished in 0.0s (exit 0)
+==> checks/check_discovery_completeness.py (timeout: 20s)
+PASS: discovery harness scaffold is complete
+<== checks/check_discovery_completeness.py finished in 0.0s (exit 0)
+==> checks/check_discovery_route_decision.py (timeout: 20s)
+PASS: discovery route decision scaffold is valid
+<== checks/check_discovery_route_decision.py finished in 0.0s (exit 0)
+==> checks/check_gate_exit.py (timeout: 20s)
+PASS: gate_exit check passed at G0 (source: runtime state)
+<== checks/check_gate_exit.py finished in 0.1s (exit 0)
+==> checks/check_idea_bank.py (timeout: 20s)
+PASS: idea bank statuses are valid (0 row(s) checked)
+<== checks/check_idea_bank.py finished in 0.0s (exit 0)
+==> checks/check_feasibility_matrix.py (timeout: 20s)
+PASS: feasibility matrix contains required dimensions and decision label
+<== checks/check_feasibility_matrix.py finished in 0.0s (exit 0)
+==> checks/check_literature_tools.py (timeout: 20s)
+PASS: literature registry is valid (0 row(s) checked)
+PASS: literature function classifications and existing function matrix rows are consistent
+PASS: extraction card template and registry-linked cards are valid
+PASS: synthesis files cite only extraction-card-backed paper IDs
+PASS: citation audit covers papers requiring audit and includes faithfulness fields
+PASS: gap memos are grounded in extracted gap-verification papers
+PASS: literature full-text execution inactive (no registry rows yet)
+PASS: literature checks passed
+<== checks/check_literature_tools.py finished in 0.2s (exit 0)
+==> checks/check_literature_adapters.py (timeout: 20s)
+PASS: literature adapter plumbing is valid
+<== checks/check_literature_adapters.py finished in 0.1s (exit 0)
+==> checks/check_literature_fulltext_execution.py (timeout: 20s)
+PASS: literature full-text execution inactive (no registry rows yet)
+<== checks/check_literature_fulltext_execution.py finished in 0.0s (exit 0)
+==> checks/check_citation_audit.py (timeout: 20s)
+PASS: citation audit covers papers requiring audit and includes faithfulness fields
+<== checks/check_citation_audit.py finished in 0.0s (exit 0)
+==> checks/check_external_tool_registry.py (timeout: 20s)
+PASS: external economics tool registry and discovery policy are valid
+<== checks/check_external_tool_registry.py finished in 0.0s (exit 0)
+==> checks/check_git_guardrails.py (timeout: 20s)
+PASS: no raw data changes detected
+PASS: no placeholder violations for stateful artifacts
+PASS: no git-tracked file exceeds 100 MB (1629 file(s) checked)
+PASS: git/data guardrail checks passed
+<== checks/check_git_guardrails.py finished in 0.2s (exit 0)
+==> checks/check_data_inventory.py (timeout: 20s)
+PASS: data inventory is valid (0 row(s) checked)
+<== checks/check_data_inventory.py finished in 0.0s (exit 0)
+==> checks/check_data_first_readiness.py (timeout: 20s)
+PASS: data-first readiness inactive in template mode
+<== checks/check_data_first_readiness.py finished in 0.0s (exit 0)
+==> checks/check_data_probe.py (timeout: 20s)
+PASS: data probe layer is valid
+<== checks/check_data_probe.py finished in 0.0s (exit 0)
+==> checks/check_global_state.py (timeout: 20s)
+PASS: global state is valid
+<== checks/check_global_state.py finished in 0.0s (exit 0)
+==> checks/check_event_log_replay.py (timeout: 20s)
+PASS: event log inactive (no events/event_log.jsonl yet)
+<== checks/check_event_log_replay.py finished in 0.0s (exit 0)
+==> checks/check_sqlite_journal.py (timeout: 20s)
+PASS: SQLite journal derived index is valid
+<== checks/check_sqlite_journal.py finished in 0.1s (exit 0)
+==> checks/check_evidence_delta_log.py (timeout: 20s)
+PASS: evidence delta log inactive (no evidence/delta_log.jsonl yet)
+<== checks/check_evidence_delta_log.py finished in 0.0s (exit 0)
+==> checks/check_data_backfill_queue.py (timeout: 20s)
+SKIP: data backfill queue not present
+<== checks/check_data_backfill_queue.py finished in 0.0s (exit 0)
+==> checks/check_anchor.py (timeout: 20s)
+PASS: anchor status is 'draft' (not locked; not yet enforced)
+<== checks/check_anchor.py finished in 0.0s (exit 0)
+==> checks/check_funnel.py (timeout: 20s)
+PASS: no funnels yet
+<== checks/check_funnel.py finished in 0.0s (exit 0)
+==> checks/check_design_selection.py (timeout: 20s)
+PASS: design selection matches a fresh adjudication
+<== checks/check_design_selection.py finished in 0.0s (exit 0)
+==> checks/check_no_degenerate_content.py (timeout: 20s)
+PASS: no degenerate content (8 file(s) scanned)
+<== checks/check_no_degenerate_content.py finished in 0.1s (exit 0)
+==> checks/check_artifact_linkage.py (timeout: 20s)
+PASS: all declared data references resolve (0 ref(s) checked)
+<== checks/check_artifact_linkage.py finished in 0.0s (exit 0)
+==> checks/check_dataset_aware_ideation.py (timeout: 20s)
+PASS: dataset-aware ideation guard inert (no idea-bank rows opt in via requires_data)
+<== checks/check_dataset_aware_ideation.py finished in 0.0s (exit 0)
+==> checks/check_data_contract.py (timeout: 20s)
+PASS: data contract contains required harness sections
+<== checks/check_data_contract.py finished in 0.0s (exit 0)
+==> checks/check_protected_definitions.py (timeout: 20s)
+PASS: protected definition files unchanged in draft mode
+<== checks/check_protected_definitions.py finished in 0.0s (exit 0)
+==> checks/check_claim_registry.py (timeout: 20s)
+PASS: claim registry links are valid for 0 claim row(s)
+<== checks/check_claim_registry.py finished in 0.0s (exit 0)
+==> checks/check_claim_toulmin_schema.py (timeout: 20s)
+PASS: Toulmin claim cards inactive (no claim cards yet)
+<== checks/check_claim_toulmin_schema.py finished in 0.0s (exit 0)
+==> checks/check_claim_vector.py (timeout: 20s)
+PASS: ClaimVector advisory compiler is valid
+<== checks/check_claim_vector.py finished in 0.2s (exit 0)
+==> checks/check_claim_upgrade.py (timeout: 20s)
+PASS: claim-upgrade recommendation is human-gated
+<== checks/check_claim_upgrade.py finished in 0.1s (exit 0)
+==> checks/check_paper_readiness.py (timeout: 20s)
+PASS: paper-readiness report is human-gated and non-authoritative
+<== checks/check_paper_readiness.py finished in 0.1s (exit 0)
+==> checks/check_claim_ceiling.py (timeout: 20s)
+PASS: no asserted claim exceeds the earned ceiling — no adjudication yet
+<== checks/check_claim_ceiling.py finished in 0.0s (exit 0)
+==> checks/check_claim_method_consistency.py (timeout: 20s)
+PASS: claim-method consistency skipped; no parsed claims in evidence/claim_registry.md
+<== checks/check_claim_method_consistency.py finished in 0.0s (exit 0)
+==> checks/check_identification_gate.py (timeout: 20s)
+PASS: identification gate inactive (no identification cards yet)
+<== checks/check_identification_gate.py finished in 0.0s (exit 0)
+==> checks/check_estimand_cards.py (timeout: 20s)
+PASS: estimand cards inactive (no estimand cards yet)
+<== checks/check_estimand_cards.py finished in 0.0s (exit 0)
+==> checks/check_research_graph.py (timeout: 20s)
+PASS: research graph relationships are consistent
+<== checks/check_research_graph.py finished in 0.1s (exit 0)
+==> checks/check_artifact_admissibility.py (timeout: 20s)
+PASS: artifact admissibility graph inactive (no evidence/admissibility_edges.csv yet)
+<== checks/check_artifact_admissibility.py finished in 0.0s (exit 0)
+==> checks/check_referee_review_present.py (timeout: 20s)
+PASS: every signed claim is covered by an on-file referee review — no signed claims yet
+<== checks/check_referee_review_present.py finished in 0.0s (exit 0)
+==> checks/check_claim_numbers_bound.py (timeout: 20s)
+PASS: every signed-claim/abstract number traces to a registered artifact — no signed claim or abstract yet
+<== checks/check_claim_numbers_bound.py finished in 0.0s (exit 0)
+==> checks/check_number_registry.py (timeout: 20s)
+PASS: 0 cell-sourced, 0 weak, 0 result path(s), 1 paper(s)
+<== checks/check_number_registry.py finished in 0.0s (exit 0)
+==> checks/check_number_scan.py (timeout: 20s)
+PASS (advisory): 0 raw number(s) scanned, 0 untraceable; injection coverage 0/0 = 0% (advisory only; gate on check_number_registry)
+<== checks/check_number_scan.py finished in 0.1s (exit 0)
+==> checks/check_paper_package.py (timeout: 20s)
+PASS: paper package check inactive in template mode
+<== checks/check_paper_package.py finished in 0.0s (exit 0)
+==> checks/check_bib_verification_present.py (timeout: 20s)
+PASS: signed bib-verification report covers every entry — no references.bib yet
+<== checks/check_bib_verification_present.py finished in 0.0s (exit 0)
+==> checks/check_table_cell_sources.py (timeout: 20s)
+PASS: every paper table cell traces to its source CSV — no tex/paper.tex yet
+<== checks/check_table_cell_sources.py finished in 0.1s (exit 0)
+==> checks/check_data_availability_present.py (timeout: 20s)
+PASS: paper carries a substantive Data Availability Statement — no tex/paper.tex yet
+<== checks/check_data_availability_present.py finished in 0.0s (exit 0)
+==> checks/check_output_reproducibility.py (timeout: 20s)
+PASS: registered outputs have generating sources (0 populated output(s) checked)
+<== checks/check_output_reproducibility.py finished in 0.0s (exit 0)
+==> checks/check_result_registry.py (timeout: 20s)
+PASS: result registry inactive (no evidence/result_registry.csv yet)
+<== checks/check_result_registry.py finished in 0.0s (exit 0)
+==> checks/check_review_verification.py (timeout: 20s)
+PASS: no audits/skill_runs review reports (review skills not in use here)
+<== checks/check_review_verification.py finished in 0.0s (exit 0)
+==> checks/check_analysis_ledger.py (timeout: 20s)
+PASS: analysis ledger inactive (no analysis artifacts yet)
+<== checks/check_analysis_ledger.py finished in 0.0s (exit 0)
+==> checks/check_preanalysis_happens_before.py (timeout: 20s)
+PASS: preregistration happens-before inactive (no event log yet)
+<== checks/check_preanalysis_happens_before.py finished in 0.0s (exit 0)
+==> checks/check_negative_result_ledger.py (timeout: 20s)
+PASS: negative result ledger inactive (no spec runs yet)
+<== checks/check_negative_result_ledger.py finished in 0.0s (exit 0)
+==> checks/check_artifact_manifest.py (timeout: 20s)
+PASS: no artifact manifest yet (run `aeros manifest` to snapshot)
+<== checks/check_artifact_manifest.py finished in 0.0s (exit 0)
+==> checks/check_project_status.py (timeout: 20s)
+AEROS Project Status Dashboard
+------------------------------
+Project: AEROS project | Status: draft | Stage: discovery
+Current gate: G0
+Gate status: open
+Candidate gate: discovery / G0
+
+Idea Bank
+- total: 0
+- stale: 0
+- status distribution: no data
+
+Literature Registry
+- total papers: 0
+- papers missing extraction cards: 0
+- status distribution: no data
+
+Claim Registry
+- total claims: 0
+- status distribution: no claims
+- draft claims: 0
+
+Protected Definitions
+- discovery/anchor.yml: unlabeled
+- docs/protected_definitions.yml: unlabeled
+- docs/data_contract.yml: unlabeled
+- evidence/claim_registry.md: no_status
+- harness/permissions.yml: unlabeled
+
+Human Decisions
+- pending entries: 0
+
+Provenance
+- provenance records: 0
+- paper-result references: 0
+STATUS: OK
+<== checks/check_project_status.py finished in 0.0s (exit 0)
+==> checks/check_provenance.py (timeout: 20s)
+PASS: provenance and result_id references are consistent (0 indexed / 0 provenance records)
+<== checks/check_provenance.py finished in 0.0s (exit 0)
+==> checks/check_provenance_boundary.py (timeout: 20s)
+PASS: provenance boundary rules valid (7 rule(s))
+<== checks/check_provenance_boundary.py finished in 0.0s (exit 0)
+==> checks/check_exception_scope.py (timeout: 20s)
+PASS: exception scopes valid (0 exception file(s) checked)
+<== checks/check_exception_scope.py finished in 0.0s (exit 0)
+==> checks/check_meta_monitor.py (timeout: 20s)
+PASS: meta-monitor closed (0 failed probe(s), 0 exception(s))
+<== checks/check_meta_monitor.py finished in 0.0s (exit 0)
+==> checks/check_data_provenance.py (timeout: 20s)
+PASS: evidence/data_index.csv not present (data-acquisition layer not in use yet)
+<== checks/check_data_provenance.py finished in 0.0s (exit 0)
+==> checks/check_data_fitness.py (timeout: 20s)
+PASS: every registered dataset has a ratified 口径/fitness entry — no data_index.csv yet
+<== checks/check_data_fitness.py finished in 0.0s (exit 0)
+==> checks/check_data_lock.py (timeout: 20s)
+PASS: registered datasets match the owner-signed lock — no data_index.csv yet
+<== checks/check_data_lock.py finished in 0.0s (exit 0)
+==> checks/check_task_contract.py (timeout: 20s)
+PASS: task contracts include required harness sections (14 file(s) checked)
+<== checks/check_task_contract.py finished in 0.0s (exit 0)
+==> checks/check_task_automation_policy.py (timeout: 20s)
+PASS: task automation policy valid (30 contract(s) checked)
+<== checks/check_task_automation_policy.py finished in 0.1s (exit 0)
+==> checks/check_approval_freshness.py (timeout: 20s)
+PASS: no artifact-bound approval records
+<== checks/check_approval_freshness.py finished in 0.0s (exit 0)
+==> checks/check_work_lanes.py (timeout: 20s)
+PASS: work lanes are valid (analysis=9, claim=2, compliance=1, data=7, literature=9, writing=2)
+<== checks/check_work_lanes.py finished in 0.1s (exit 0)
+==> checks/check_agent_runs_tools.py (timeout: 20s)
+unchanged 0 row(s) -> /Users/jiamingzhang/aeros-template/agent_runs/INDEX.csv
+PASS: agent_runs index is consistent (0 report(s); template state)
+PASS: agent/critic templates and run reports include required sections
+PASS: agent-runs tools checks passed
+<== checks/check_agent_runs_tools.py finished in 0.1s (exit 0)
+==> checks/check_action_receipts.py (timeout: 20s)
+PASS: action receipts are valid
+<== checks/check_action_receipts.py finished in 0.0s (exit 0)
+==> checks/check_goal_mode_data_progress.py (timeout: 20s)
+PASS: goal-mode data progress claims are artifact-backed or honestly blocked
+<== checks/check_goal_mode_data_progress.py finished in 0.0s (exit 0)
+==> checks/check_completion_receipts.py (timeout: 20s)
+PASS: passed tasks have valid completion receipts
+<== checks/check_completion_receipts.py finished in 0.1s (exit 0)
+==> checks/check_noop_runs.py (timeout: 20s)
+PASS: no passed task appears to be a no-op
+<== checks/check_noop_runs.py finished in 0.1s (exit 0)
+==> checks/check_approval_integrity.py (timeout: 20s)
+PASS: approval integrity inactive (no gate approvals on file)
+<== checks/check_approval_integrity.py finished in 0.0s (exit 0)
+==> checks/check_reconcile.py (timeout: 20s)
+PASS: reconcile command is wired and boundary-labeled
+<== checks/check_reconcile.py finished in 0.1s (exit 0)
+==> checks/check_pipeline_runs.py (timeout: 20s)
+SMOKE: pipeline master script exists and compiles
+SMOKE: execution_profile=smoke cwd=. command=python3 code/99_make_all.py --mode smoke
+SMOKE: configured pipeline python=python3
+SMOKE: post_run_hooks=reconcile
+PASS: pipeline smoke check passed
+<== checks/check_pipeline_runs.py finished in 0.1s (exit 0)
+==> checks/check_replication_package.py (timeout: 20s)
+PASS: replication package scaffolding exists
+<== checks/check_replication_package.py finished in 0.0s (exit 0)
+==> checks/check_aea_replication_alignment.py (timeout: 20s)
+PASS: AEA replication alignment metadata valid (template only)
+<== checks/check_aea_replication_alignment.py finished in 0.0s (exit 0)
+==> checks/check_compliance_gate.py (timeout: 20s)
+PASS: compliance gate inactive in template mode
+<== checks/check_compliance_gate.py finished in 0.0s (exit 0)
+wrote observed harness receipt -> /Users/jiamingzhang/aeros-template/outputs/harness_receipts/HARNESS-full-20260703T193726Z.json
+PASS: all harness checks passed

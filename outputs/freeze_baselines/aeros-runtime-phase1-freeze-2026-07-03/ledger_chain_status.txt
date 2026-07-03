@@ -1,0 +1,1 @@
+PASS: update ledger hash chain is valid

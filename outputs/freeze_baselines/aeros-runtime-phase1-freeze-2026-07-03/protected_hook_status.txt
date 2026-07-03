@@ -1,0 +1,1 @@
+PASS: protected-path pre-commit hook blocks protected staged files by default
