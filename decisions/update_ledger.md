@@ -19,7 +19,7 @@ How to read this ledger:
 
 ### 2026-07-03 - Repair adapter-layer ledger and preflight authority drift
 
-**Commit(s)**: `pending`
+**Commit(s)**: `7a3bc70`
 
 **Action**: Fixed the adapter layer after review found three correctness risks: neutral tasks defaulted to `claim_audit`, which removed `evidence/claim_registry.md` from `must_not_touch`; route keyword inference overwrote a pending route decision instead of surfacing it as a suggestion; and sync doctor did not cover route-gate/workflow-preset surfaces. Added `general_guardrail`, kept claim registry protected by default, changed preflight to report `route=pending` plus `route_suggestion`, expanded sync doctor capabilities, removed the hardcoded template fallback, and ignored the local `validation_projects/light-meal/` scratch project.
 
