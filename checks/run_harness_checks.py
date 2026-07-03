@@ -52,6 +52,7 @@ CHECKS = [
     "check_context_bundle.py",
     "check_context_graph.py",
     "check_cockpit.py",
+    "check_control_tax_dashboard.py",
     "check_harness_profiles.py",
     "check_skill_layer.py",
     "check_skill_invocations.py",

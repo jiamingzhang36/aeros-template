@@ -1122,10 +1122,11 @@ def _cmd_cockpit(args: argparse.Namespace) -> int:
     else:
         print(format_cockpit(cockpit))
     if args.write:
-        md_path, bundle_path, graph_path = write_cockpit(root, lane=args.lane or "project", check_profile=args.profile)
+        md_path, bundle_path, graph_path, control_tax_path = write_cockpit(root, lane=args.lane or "project", check_profile=args.profile)
         print(f"wrote {md_path.relative_to(root)}")
         print(f"wrote {bundle_path.relative_to(root)}")
         print(f"wrote {graph_path.relative_to(root)}")
+        print(f"wrote {control_tax_path.relative_to(root)}")
     return 0
 
 def _cmd_roadmap(args: argparse.Namespace) -> int:

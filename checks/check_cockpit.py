@@ -20,7 +20,7 @@ def main() -> int:
         cockpit = {}
         rendered = ""
     if cockpit:
-        for key in ["context", "next_action", "fast_check_command", "context_graph_summary"]:
+        for key in ["context", "next_action", "fast_check_command", "context_graph_summary", "control_tax"]:
             if key not in cockpit:
                 failures.append(f"cockpit missing {key}")
         if "--profile smoke" not in str(cockpit.get("fast_check_command", "")):
@@ -28,7 +28,7 @@ def main() -> int:
         label = (cockpit.get("next_action") or {}).get("status_label")
         if label not in {"CHECK_PASS", "ROUTE_READY", "SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}:
             failures.append(f"cockpit next_action has invalid status label {label!r}")
-    for marker in ["AEROS COCKPIT", "Recommended Next", "Does Not Prove", "navigation view"]:
+    for marker in ["AEROS COCKPIT", "Control Tax", "Recommended Next", "Does Not Prove", "navigation view"]:
         if marker not in rendered:
             failures.append(f"rendered cockpit missing marker {marker!r}")
     if failures:

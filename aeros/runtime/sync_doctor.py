@@ -29,6 +29,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "output_intent": ["aeros/runtime/output_intent.py", "harness/output_intent_policy.yml", "checks/check_output_intent.py"],
     "source_capture_permission": ["aeros/runtime/source_capture_permission.py", "harness/source_capture_permission_policy.yml", "checks/check_source_capture_permission.py"],
     "task_preflight": ["aeros/runtime/task_preflight.py", "checks/check_task_preflight.py"],
+    "control_tax_dashboard": ["aeros/runtime/control_tax.py", "checks/check_control_tax_dashboard.py", "aeros/runtime/cockpit.py"],
 }
 
 CAPABILITY_EXEMPT_CHECKS: dict[str, str] = {

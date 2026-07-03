@@ -1853,3 +1853,29 @@ should not be mistaken for evidence quality or source relevance.
 
 **Next check**: Run compiled-mode, broad-capture, smoke, and full harness checks.
 If committed, backfill this pending entry and append a final hash-chain record.
+
+### 2026-07-03 — Add control-tax dashboard projection
+
+**Commit(s)**: `pending`
+
+**Action**: Added a derived control-tax dashboard that separates control actions,
+substantive actions, route actions, human decisions, and accepted artifacts;
+embedded the summary into `aeros cockpit`; added a dedicated check; and exposed
+the capability through sync doctor so downstream projects can detect whether the
+view is available.
+
+**Alignment**: Supports the runtime phase-1 freeze direction by measuring
+control burden rather than adding another authority surface. The dashboard is a
+projection over existing receipts, decisions, deltas, and admissions; it does
+not execute work or certify research quality.
+
+**Non-goal**: Does not approve gates, judge scientific validity, certify claims,
+make papers release-ready, or prove that lower control tax is always better.
+
+**Drift risk**: Bucket assignment is intentionally coarse and depends on existing
+receipt semantics. Use it to spot over-governance and fake-progress risk, not as
+a research-quality score.
+
+**Next check**: Run control-tax, cockpit, sync doctor, smoke, and full harness.
+If committed, backfill this pending entry and append a final hash-chain record.
+
