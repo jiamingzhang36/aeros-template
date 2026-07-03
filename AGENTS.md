@@ -412,6 +412,8 @@ Use broad capture for early lead collection, not for evidence admission.
 - Broad capture must not write `data/raw/`, `data/intermediate/`, `data/processed/`, `evidence/claim_registry.md`, `paper/`, release, approval, or replication artifacts.
 - Leads and candidate queues are not evidence, not canonical data, not claim support, and not paper-facing progress.
 - Promotion from lead/candidate queues into staging, intermediate, processed, canonical, claim, or paper surfaces requires a separate promotion action with the normal AEROS audit level.
+- Broad-capture lead queues should carry `lead_id`, `source_url`, `captured_at`, `capture_method`, `why_potentially_relevant`, `route`, `dedupe_key`, `promotion_status`, `ttl_days`, and `promotion_requirements`.
+- If broad-capture queues become stale or saturated, stop collecting new leads and promote, reject, or refresh existing leads before continuing.
 
 ## Data Backfill Rules
 

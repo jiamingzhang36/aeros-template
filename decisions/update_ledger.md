@@ -1825,3 +1825,31 @@ surfaces.
 **Next check**: Run broad-capture firewall, execution/task/output/source
 permission checks, sync doctor, smoke, and full harness. If committed, backfill
 this pending entry and append a new hash-chain record.
+
+### 2026-07-03 — Freeze runtime expansion and add compiled mode/lead metrics
+
+**Commit(s)**: `pending`
+
+**Action**: Added `docs/design/runtime_phase1_freeze.md` as the phase-1 freeze
+memo, added a read-only compiled mode projection over existing task/execution
+presets, exposed it through `aeros mode compiled`, and extended broad-capture
+lead queues with required schema fields, TTL/stale detection, and promotion
+metrics.
+
+**Alignment**: Moves AEROS from horizontal policy expansion toward consolidation.
+Existing user-facing presets now have a five-field projection
+(`artifact_level`, `effect_class`, `authority_surface`, `execution_budget`,
+`verification_strength`) without changing runtime behavior. Broad-capture lead
+queues now have hygiene metrics so wide search does not become fake progress or
+a lead swamp.
+
+**Non-goal**: Does not change gate authority, approve routes, admit evidence,
+promote leads, certify claims, certify papers, add a new lane, add a new gate,
+or make the compiled map authoritative over ActionSpec/ExecutionEnvelope.
+
+**Drift risk**: The compiled map is a projection and can become misleading if
+presets change without updating the compiler. Lead metrics are lightweight and
+should not be mistaken for evidence quality or source relevance.
+
+**Next check**: Run compiled-mode, broad-capture, smoke, and full harness checks.
+If committed, backfill this pending entry and append a final hash-chain record.

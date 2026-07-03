@@ -1343,6 +1343,17 @@ def _cmd_mode_classify(args: argparse.Namespace) -> int:
     return 0 if report.get("status") in {"PASS", "ADVISORY"} else 1
 
 
+def _cmd_mode_compiled(args: argparse.Namespace) -> int:
+    from .runtime.mode_compiler import compiled_mode_map, format_compiled_mode_map
+
+    report = compiled_mode_map(_project_root())
+    if getattr(args, "json", False):
+        print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+    else:
+        print(format_compiled_mode_map(report))
+    return 0
+
+
 def _cmd_artifact_stage(args: argparse.Namespace) -> int:
     from .runtime.artifact_stage import format_artifact_stage_report, stage_canonical_artifacts
 
@@ -2004,6 +2015,7 @@ def main(argv: list[str] | None = None) -> int:
             "",
             "smoke_test",
             "bounded_probe",
+            "broad_capture",
             "source_capture",
             "paper_release",
             "expensive_api_run",
@@ -2019,6 +2031,9 @@ def main(argv: list[str] | None = None) -> int:
     mode_classify_p.add_argument("--intent", default="", help="Short description of intended work")
     mode_classify_p.add_argument("--json", action="store_true")
     mode_classify_p.set_defaults(func=_cmd_mode_classify)
+    mode_compiled_p = mode_sub.add_parser("compiled", help="show read-only five-field compiled mode map")
+    mode_compiled_p.add_argument("--json", action="store_true")
+    mode_compiled_p.set_defaults(func=_cmd_mode_compiled)
 
     artifact_p = sub.add_parser("artifact", help="artifact selection helpers")
     artifact_sub = artifact_p.add_subparsers(dest="artifact_command", required=True)

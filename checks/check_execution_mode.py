@@ -9,6 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from aeros.runtime.execution_mode import recommend_execution_mode  # noqa: E402
+from aeros.runtime.mode_compiler import compiled_mode_map  # noqa: E402
 
 
 POLICY = Path("harness/execution_mode_policy.yml")
@@ -55,6 +56,16 @@ def main() -> int:
         report = recommend_execution_mode(tmp, lane="data", intent="denominator probe")
         if report.get("mode") != "bounded_probe":
             failures.append("data probe without git status should remain bounded_probe")
+    compiled = compiled_mode_map(Path.cwd())
+    required_fields = {"artifact_level", "effect_class", "authority_surface", "execution_budget", "verification_strength"}
+    rows = {row.get("preset"): row for row in compiled.get("presets") or []}
+    broad_row = rows.get("broad_capture") or {}
+    if not broad_row:
+        failures.append("compiled mode map missing broad_capture")
+    elif {key for key in required_fields if broad_row.get(key)} != required_fields:
+        failures.append("compiled broad_capture row missing five-field projection")
+    elif broad_row.get("artifact_level") != "lead" or broad_row.get("authority_surface") != "none":
+        failures.append("compiled broad_capture row should be lead/none")
     if failures:
         print("FAIL: execution mode problems detected")
         for failure in failures:

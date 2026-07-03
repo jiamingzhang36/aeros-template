@@ -20,7 +20,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "protected_path_hook": ["harness/protected_path_commit_policy.yml", "tools/hooks/pre-commit-aeros-protected-paths", "tools/install_aeros_git_hooks.zsh", "checks/check_protected_path_hook.py"],
     "evidence_sufficiency_audit": ["harness/evidence_sufficiency_audit_policy.yml", "templates/evidence_sufficiency_audit.yml", "checks/check_evidence_sufficiency_audit.py"],
     "aea_replication_alignment": ["harness/aea_replication_policy.yml", "templates/aea_data_package_manifest.yml", "checks/check_aea_replication_alignment.py"],
-    "mode": ["aeros/runtime/execution_mode.py", "aeros/runtime/task_mode.py", "harness/task_mode_policy.yml", "checks/check_task_mode.py"],
+    "mode": ["aeros/runtime/execution_mode.py", "aeros/runtime/task_mode.py", "aeros/runtime/mode_compiler.py", "harness/task_mode_policy.yml", "checks/check_task_mode.py"],
     "broad_capture": ["aeros/runtime/broad_capture.py", "checks/check_broad_capture_firewall.py", "harness/execution_mode_policy.yml", "harness/task_mode_policy.yml", "harness/session_scope.yml"],
     "workflow_presets": ["aeros/runtime/session_guard.py", "harness/session_scope.yml", "checks/check_session_scope.py"],
     "route_gate": ["aeros/runtime/route_gate.py", "checks/check_route_early_gate.py", "checks/check_discovery_route_decision.py", "discovery/route_decision.yml"],

@@ -9,6 +9,7 @@ and paper-facing surfaces.
 from __future__ import annotations
 
 import sys
+import tempfile
 from pathlib import Path
 
 import yaml
@@ -17,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from aeros.runtime.broad_capture import validate_broad_capture_writes
+from aeros.runtime.broad_capture import LEAD_QUEUE_REQUIRED_FIELDS, summarize_broad_capture, validate_broad_capture_writes
 from aeros.runtime.execution_mode import recommend_execution_mode
 from aeros.runtime.source_capture_permission import classify_source_capture_permission
 from aeros.runtime.task_preflight import build_task_preflight
@@ -93,6 +94,28 @@ def main() -> int:
     for fragment in expected_fragments:
         if fragment not in joined:
             failures.append(f"blocked broad_capture fixture did not mention {fragment}")
+
+    with tempfile.TemporaryDirectory(prefix="aeros_broad_capture_") as tmp_name:
+        tmp = Path(tmp_name)
+        backfill = tmp / "data" / "backfill"
+        backfill.mkdir(parents=True)
+        lead_queue = backfill / "demo_lead_queue.csv"
+        lead_queue.write_text(
+            ",".join(LEAD_QUEUE_REQUIRED_FIELDS + ("promotion_blocker",))
+            + "\n"
+            + "L001,https://example.test/a,2026-07-01,manual,possible denominator source,negative_seed_first,dedupe-a,unreviewed,30,review source identity,none\n"
+            + "L002,https://example.test/b,2026-05-01,manual,possible source,broad_capture,dedupe-b,stale,30,review route,fulltext_missing\n",
+            encoding="utf-8",
+        )
+        candidate_queue = backfill / "demo_candidate_queue.csv"
+        candidate_queue.write_text("candidate_id,lead_id,source_url\nC001,L001,https://example.test/a\n", encoding="utf-8")
+        summary = summarize_broad_capture(tmp)
+        if summary.get("status") != "PASS":
+            failures.append("broad capture lead schema fixture failed: " + "; ".join(summary.get("validation_failures") or []))
+        if summary.get("total_leads") != 2 or summary.get("total_candidates") != 1:
+            failures.append("broad capture metrics did not count lead/candidate queues")
+        if summary.get("stale_lead_count") != 1:
+            failures.append("broad capture metrics did not count stale leads")
 
     if failures:
         print("FAIL: broad capture firewall problems detected")
