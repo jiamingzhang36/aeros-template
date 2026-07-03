@@ -34,9 +34,27 @@ skill_waivers:
 """,
             encoding="utf-8",
         )
-        harvested = harvest_improvements(root)
+        project = root / "project"
+        project.mkdir()
+        (project / "project_manifest.yml").write_text("project:\n  name: lagging\n", encoding="utf-8")
+        completion_dir = root / "agent_runs" / "completion_receipts"
+        completion_dir.mkdir(parents=True)
+        (completion_dir / "T002.yml").write_text(
+            """task_id: T002
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+staging_artifact_paths: [work/source.html]
+substantive_evidence_paths: []
+""",
+            encoding="utf-8",
+        )
+        harvested = harvest_improvements(root, project_roots=[project.as_posix()])
         if not any(item.get("kind") == "skill_waiver_pattern" for item in harvested.get("backlog_candidates", [])):
             failures.append("fixture: skill waiver pattern was not harvested")
+        if not any(item.get("kind") == "project_version_lag" for item in harvested.get("backlog_candidates", [])):
+            failures.append("fixture: project version lag was not harvested")
+        if not any(item.get("kind") == "staging_as_substantive_risk" for item in harvested.get("backlog_candidates", [])):
+            failures.append("fixture: staging-as-substantive risk was not harvested")
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))
     elif failures:

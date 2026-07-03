@@ -1362,7 +1362,7 @@ def _cmd_artifact_stage(args: argparse.Namespace) -> int:
 def _cmd_improve_harvest(args: argparse.Namespace) -> int:
     from .runtime.improve_harvest import format_harvest, harvest_improvements
 
-    report = harvest_improvements(_project_root())
+    report = harvest_improvements(_project_root(), project_roots=getattr(args, "project", None) or None)
     if getattr(args, "write", False):
         out = _project_root() / "outputs" / "context" / "improvement_harvest.md"
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -1372,6 +1372,37 @@ def _cmd_improve_harvest(args: argparse.Namespace) -> int:
         print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
     else:
         print(format_harvest(report))
+    return 0
+
+
+def _cmd_sync_doctor(args: argparse.Namespace) -> int:
+    from .runtime.sync_doctor import format_sync_doctor, sync_doctor
+
+    report = sync_doctor(
+        _project_root(),
+        projects=getattr(args, "project", None) or None,
+        template_root=getattr(args, "template_root", "") or None,
+    )
+    if getattr(args, "json", False):
+        print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+    else:
+        print(format_sync_doctor(report))
+    return 0 if report.get("status") == "PASS" else 1
+
+
+def _cmd_task_preflight(args: argparse.Namespace) -> int:
+    from .runtime.task_preflight import build_task_preflight, format_task_preflight
+
+    report = build_task_preflight(
+        _project_root(),
+        task_id=getattr(args, "task_id", "") or "",
+        lane=getattr(args, "lane", "") or "",
+        intent=getattr(args, "intent", "") or "",
+    )
+    if getattr(args, "json", False):
+        print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+    else:
+        print(format_task_preflight(report))
     return 0
 
 
@@ -1523,6 +1554,23 @@ def main(argv: list[str] | None = None) -> int:
     skills_plan.add_argument("--stage", default="all", choices=["all", "discovery", "execution"],
                              help="task stage to inspect (default: all)")
     skills_plan.set_defaults(func=_cmd_skills_plan)
+
+    sync = sub.add_parser("sync", help="inspect framework sync status for downstream projects")
+    sync_sub = sync.add_subparsers(dest="sync_command", required=True)
+    sync_doctor_p = sync_sub.add_parser("doctor", help="report missing/outdated AEROS capabilities in projects")
+    sync_doctor_p.add_argument("--project", action="append", default=[], help="project root to inspect; may be repeated")
+    sync_doctor_p.add_argument("--template-root", default="", help="template root to compare against")
+    sync_doctor_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    sync_doctor_p.set_defaults(func=_cmd_sync_doctor)
+
+    task = sub.add_parser("task", help="task utilities")
+    task_sub = task.add_subparsers(dest="task_command", required=True)
+    task_preflight = task_sub.add_parser("preflight", help="emit task start guardrail packet")
+    task_preflight.add_argument("--task-id", default="", help="task id to inspect")
+    task_preflight.add_argument("--lane", default="", choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"], help="task lane")
+    task_preflight.add_argument("--intent", default="", help="short description of intended work")
+    task_preflight.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    task_preflight.set_defaults(func=_cmd_task_preflight)
 
 
 
@@ -1984,6 +2032,7 @@ def main(argv: list[str] | None = None) -> int:
     improve_p = sub.add_parser("improve", help="framework improvement helpers")
     improve_sub = improve_p.add_subparsers(dest="improve_command", required=True)
     improve_harvest_p = improve_sub.add_parser("harvest", help="harvest improvement candidates from local run artifacts")
+    improve_harvest_p.add_argument("--project", action="append", default=[], help="project root to include in sync/version harvest; may be repeated")
     improve_harvest_p.add_argument("--write", action="store_true", help="Write outputs/context/improvement_harvest.md")
     improve_harvest_p.add_argument("--json", action="store_true")
     improve_harvest_p.set_defaults(func=_cmd_improve_harvest)

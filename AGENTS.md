@@ -607,3 +607,6 @@ For route-sensitive work such as denominator capture, negative-seed discovery, s
 
 Use `aeros improve harvest` to collect framework-improvement candidates from local receipts and logs. Harvest output is advisory backlog input only; it does not modify gates, claims, or project state.
 
+Before opening a project task, prefer `aeros task preflight --lane <lane> --intent "<short intent>"`. Treat the packet as the operating envelope for that turn: task mode, route, skill obligations, output intents, allowed paths, and must-not-touch paths.
+
+Use `aeros sync doctor --project <path>` before judging a downstream project's behavior against the latest template. If the doctor reports missing or outdated capabilities, sync/roll out the template first or describe the project as running an older AEROS surface.

@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
 
 from aeros.runtime.contract import load_contract
 from aeros.runtime.skill_obligation import validate_skill_coverage
+from aeros.runtime.skill_receipt import write_skill_invocation_receipt
 
 CHECK_NAME = "check_skill_coverage"
 
@@ -100,6 +101,24 @@ skills:
         fixture_failures = validate_skill_coverage(root, _discover_contracts(root))
         if fixture_failures:
             failures.append("fixture: explicit waiver did not satisfy obligation: " + "; ".join(fixture_failures))
+
+    with tempfile.TemporaryDirectory(prefix="aeros_skill_receipt_") as tmp:
+        root = Path(tmp)
+        (root / "harness").mkdir()
+        (root / "harness" / "skill_map_core.yml").write_text(
+            """version: '0.1'
+skills:
+  data_inventory:
+    name: data-inventory
+""",
+            encoding="utf-8",
+        )
+        _write_fixture(root, with_waiver=False)
+        contract = load_contract(root / "tasks" / "discovery" / "D999_probe.yml")
+        receipt = write_skill_invocation_receipt(root, contract, skills_used=[], run_report_path=None)
+        text = receipt.read_text(encoding="utf-8")
+        if "missing_skill_decision: true" not in text or "verdict: fail" not in text:
+            failures.append("fixture: missing skill invocation/waiver did not fail receipt")
 
     if "--json" in sys.argv:
         print(json.dumps({"check": CHECK_NAME, "status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))

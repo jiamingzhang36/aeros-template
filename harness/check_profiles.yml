@@ -24,12 +24,14 @@ profiles:
       - check_skill_coverage.py
       - check_execution_mode.py
       - check_task_mode.py
+      - check_task_preflight.py
       - check_execution_profiles.py
       - check_source_id_consistency.py
       - check_artifact_stage.py
       - check_output_intent.py
       - check_route_early_gate.py
       - check_improve_harvest.py
+      - check_sync_doctor.py
       - check_readiness_vector.py
       - check_discovery_route_decision.py
       - check_stale_triage.py

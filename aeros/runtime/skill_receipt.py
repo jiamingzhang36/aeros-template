@@ -85,16 +85,7 @@ def write_skill_invocation_receipt(
             "human_gate_required": bool(meta.get("human_gate_required", False)),
             "aeros_constraints": meta.get("aeros_constraints", []),
         })
-    if (recommended or obligations) and not records and not waivers:
-        waivers = [{
-            "skill_class": "recommended_skills" if recommended else ",".join(obligations),
-            "scope": "runtime_no_skill_declaration",
-            "reason": (
-                "Runtime did not receive explicit skill-use declarations. This is an "
-                "audit waiver, not evidence that the task was substantively completed."
-            ),
-            "progress_label": "ROUTE_READY",
-        }]
+    missing_skill_decision = bool((recommended or obligations or required_classes) and not records and not waivers)
     payload = {
         "version": 1,
         "task_id": contract.task_id,
@@ -108,7 +99,8 @@ def write_skill_invocation_receipt(
         "skill_waivers": waivers,
         "skills_used": [r["skill_name"] for r in records],
         "invocations": records,
-        "verdict": "fail" if any(not r["known_to_aeros"] or not r["allowed_by_contract"] for r in records) else "pass",
+        "missing_skill_decision": missing_skill_decision,
+        "verdict": "fail" if missing_skill_decision or any(not r["known_to_aeros"] or not r["allowed_by_contract"] for r in records) else "pass",
     }
     path = receipt_path(project_root, contract.task_id)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -145,6 +137,8 @@ def validate_skill_invocations(project_root: Path, contracts: dict[str, tuple[Co
                 failures.append(f"{task_id}: skill {name!r} is not allowed by task contract")
         if payload.get("verdict") == "fail":
             failures.append(f"{task_id}: skill invocation receipt verdict is fail")
+        if payload.get("missing_skill_decision"):
+            failures.append(f"{task_id}: skill obligation/recommendation has neither invocation nor explicit waiver")
         if required_classes:
             used = set(payload.get("skills_used") or [])
             used_stages = {str(skill_map.get(name, {}).get("aeros_stage", "")).strip() for name in used}

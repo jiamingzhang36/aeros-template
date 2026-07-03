@@ -335,6 +335,8 @@ default_task_policy:
   preferred_spec_selection: must not be based on significance alone
 checks:
   improve_harvest: checks/check_improve_harvest.py
+  sync_doctor: checks/check_sync_doctor.py
+  task_preflight: checks/check_task_preflight.py
   route_early_gate: checks/check_route_early_gate.py
   output_intent: checks/check_output_intent.py
   task_mode: checks/check_task_mode.py
