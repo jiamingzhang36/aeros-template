@@ -30,6 +30,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "source_capture_permission": ["aeros/runtime/source_capture_permission.py", "harness/source_capture_permission_policy.yml", "checks/check_source_capture_permission.py"],
     "task_preflight": ["aeros/runtime/task_preflight.py", "checks/check_task_preflight.py"],
     "control_tax_dashboard": ["aeros/runtime/control_tax.py", "checks/check_control_tax_dashboard.py", "aeros/runtime/cockpit.py"],
+    "write_audit": ["aeros/runtime/write_audit.py", "checks/check_write_audit.py", "aeros/cli.py"],
 }
 
 CAPABILITY_EXEMPT_CHECKS: dict[str, str] = {

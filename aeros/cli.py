@@ -49,6 +49,7 @@ from .runtime.milestones import format_roadmap, format_simple_status
 from .runtime.next_action import compute_next_action, format_next_action, write_next_action
 from .runtime.skill_router import format_skill_hint, skill_route
 from .runtime.stale_triage import format_stale_triage, stale_triage_json, triage_stale_tasks, write_stale_triage
+from .runtime.write_audit import audit_writes, format_write_audit, write_write_audit
 from .runtime.state import (
     approve_gate,
     block_gate,
@@ -1129,6 +1130,27 @@ def _cmd_cockpit(args: argparse.Namespace) -> int:
         print(f"wrote {control_tax_path.relative_to(root)}")
     return 0
 
+
+def _cmd_writes(args: argparse.Namespace) -> int:
+    root = _project_root()
+    if args.writes_command == "audit":
+        report = audit_writes(
+            root,
+            since=args.since or "HEAD",
+            declared_writes=args.declared_write or (),
+            include_session=not args.no_session,
+        )
+        if args.json:
+            print(json.dumps(report.to_dict(), indent=2, ensure_ascii=False))
+        else:
+            print(format_write_audit(report))
+        if args.write:
+            md_path, json_path = write_write_audit(root, report)
+            print(f"wrote {md_path.relative_to(root)}")
+            print(f"wrote {json_path.relative_to(root)}")
+        return 1 if args.strict and not report.ok else 0
+    raise ValueError(f"unknown writes command: {args.writes_command}")
+
 def _cmd_roadmap(args: argparse.Namespace) -> int:
     root = _project_root()
     print(format_roadmap(root))
@@ -1533,6 +1555,18 @@ def main(argv: list[str] | None = None) -> int:
     cockpit_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     cockpit_p.add_argument("--write", action="store_true", help="write cockpit, context bundle, and context graph artifacts")
     cockpit_p.set_defaults(func=_cmd_cockpit)
+
+
+    writes = sub.add_parser("writes", help="audit observed worktree writes against declared/protected boundaries")
+    writes_sub = writes.add_subparsers(dest="writes_command", required=True)
+    writes_audit = writes_sub.add_parser("audit", help="dry-run observed writes vs declared/protected paths")
+    writes_audit.add_argument("--since", default="HEAD", help="git ref to compare against; default HEAD")
+    writes_audit.add_argument("--declared-write", action="append", default=[], help="declared write root/path; may be repeated")
+    writes_audit.add_argument("--no-session", action="store_true", help="do not read SESSION_CONTRACT.yml allowed prefixes")
+    writes_audit.add_argument("--strict", action="store_true", help="return nonzero if protected or undeclared writes are observed")
+    writes_audit.add_argument("--json", action="store_true", help="emit machine-readable JSON")
+    writes_audit.add_argument("--write", action="store_true", help="write outputs/context/writes_audit.md and .json")
+    writes_audit.set_defaults(func=_cmd_writes)
 
     next_p = sub.add_parser("next", help="show the deterministic next recommended action")
     next_p.add_argument("--lane", default="",

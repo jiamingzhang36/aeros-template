@@ -363,6 +363,7 @@ checks:
   harness_profiles: checks/check_harness_profiles.py
   cockpit: checks/check_cockpit.py
   control_tax_dashboard: checks/check_control_tax_dashboard.py
+  write_audit: checks/check_write_audit.py
   context_graph: checks/check_context_graph.py
   context_bundle: checks/check_context_bundle.py
   operating_dashboard: checks/check_operating_dashboard.py

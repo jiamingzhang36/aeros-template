@@ -46,6 +46,7 @@ profiles:
       - check_context_graph.py
       - check_cockpit.py
       - check_control_tax_dashboard.py
+      - check_write_audit.py
       - check_reconcile.py
       - check_sqlite_journal.py
       - check_approval_freshness.py

@@ -1879,3 +1879,29 @@ a research-quality score.
 **Next check**: Run control-tax, cockpit, sync doctor, smoke, and full harness.
 If committed, backfill this pending entry and append a final hash-chain record.
 
+### 2026-07-03 — Add observed writes audit
+
+**Commit(s)**: `pending`
+
+**Action**: Added `aeros writes audit --since HEAD` as a dry-run observed-write
+audit that compares git-observed writes with declared write roots and protected
+path policy, with optional `--strict`, `--json`, `--write`, and repeated
+`--declared-write` roots. Added a fixture check and exposed the capability
+through smoke/full harness, project manifest, and sync doctor.
+
+**Alignment**: Completes the Day 8 runtime-freeze item by turning protected hook
+and envelope write-boundary mechanics into an operator-facing audit. The audit
+observes what changed; it does not execute, revert, approve, or certify research
+substance.
+
+**Non-goal**: Does not prove scientific validity, claim support, gate approval,
+paper readiness, or absence of off-repo side effects. Does not replace
+ExecutionEnvelope, AgentEnvelope, or protected-path pre-commit enforcement.
+
+**Drift risk**: Session-derived declared writes are broad allowed prefixes, not
+precise semantic permissions. Use `--declared-write` for narrower task-specific
+audits when needed.
+
+**Next check**: Run write-audit, sync doctor, smoke, and full harness. If
+committed, backfill this pending entry and append a final hash-chain record.
+
