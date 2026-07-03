@@ -211,6 +211,7 @@ layers:
     - harness/execution_mode_policy.yml
     - harness/task_mode_policy.yml
     - harness/output_intent_policy.yml
+    - harness/source_capture_permission_policy.yml
     - discovery/anchor.yml
     - discovery/idea_memo.md
     - discovery/01_literature_scope.md
@@ -337,6 +338,7 @@ checks:
   improve_harvest: checks/check_improve_harvest.py
   sync_doctor: checks/check_sync_doctor.py
   task_preflight: checks/check_task_preflight.py
+  source_capture_permission: checks/check_source_capture_permission.py
   route_early_gate: checks/check_route_early_gate.py
   output_intent: checks/check_output_intent.py
   task_mode: checks/check_task_mode.py

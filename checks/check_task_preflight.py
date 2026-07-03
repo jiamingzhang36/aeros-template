@@ -25,9 +25,15 @@ def main() -> int:
         failures.append("preflight did not report allowed_to_touch")
     if "data/raw/" not in (report.get("must_not_touch") or []):
         failures.append("preflight did not protect data/raw/")
+    permission = report.get("source_capture_permission") or {}
+    if permission.get("approval_required") != "route_level":
+        failures.append("recapture/browser-ish preflight should require route-level approval")
     fraud = build_task_preflight(ROOT, lane="data", intent="franchise fraud litigation negative seed route")
     if fraud.get("route") != "negative_seed_first":
         failures.append("negative seed route was not inferred for dispute/fraud context")
+    public = build_task_preflight(ROOT, lane="data", intent="public official source snapshot")
+    if (public.get("source_capture_permission") or {}).get("approval_required") != "none_for_staging_public_capture":
+        failures.append("public staging source capture should not require human approval")
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))
     elif failures:

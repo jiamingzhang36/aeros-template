@@ -19,6 +19,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "artifact_stage": ["aeros/runtime/artifact_stage.py", "checks/check_artifact_stage.py"],
     "skill_coverage": ["aeros/runtime/skill_obligation.py", "harness/skill_obligation_policy.yml", "checks/check_skill_coverage.py"],
     "output_intent": ["aeros/runtime/output_intent.py", "harness/output_intent_policy.yml", "checks/check_output_intent.py"],
+    "source_capture_permission": ["aeros/runtime/source_capture_permission.py", "harness/source_capture_permission_policy.yml", "checks/check_source_capture_permission.py"],
     "task_preflight": ["aeros/runtime/task_preflight.py", "checks/check_task_preflight.py"],
 }
 

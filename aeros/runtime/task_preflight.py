@@ -17,6 +17,7 @@ except Exception:  # pragma: no cover
 from .contract import Contract
 from .output_intent import contract_output_intents
 from .skill_obligation import infer_skill_obligations, obligation_classes
+from .source_capture_permission import classify_source_capture_permission
 from .task_mode import infer_task_mode, load_contract_by_id
 
 
@@ -98,6 +99,14 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
     must_not_touch = list(DEFAULT_MUST_NOT_TOUCH)
     if mode.get("task_mode") == "claim_audit":
         must_not_touch = [p for p in must_not_touch if p != "evidence/claim_registry.md"]
+    permission = classify_source_capture_permission(
+        root,
+        lane=lane or (contract.work_lane if contract else ""),
+        task_mode=str(mode.get("task_mode", "")),
+        intent=intent,
+        output_intents=output_intents,
+        allowed_to_touch=allowed,
+    )
     return {
         "status": "ADVISORY",
         "task_id": task_id,
@@ -109,6 +118,7 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
         "execution_mode": mode.get("execution_mode"),
         "skill_obligations": obligations,
         "output_intents": output_intents,
+        "source_capture_permission": permission,
         "allowed_to_touch": allowed,
         "must_not_touch": must_not_touch,
         "stop_before_work_if": [
@@ -130,6 +140,7 @@ def format_task_preflight(report: dict[str, Any]) -> str:
         f"route: {report.get('route')}",
         f"workflow_preset: {report.get('workflow_preset')}",
         f"execution_mode: {report.get('execution_mode')}",
+        f"source_capture_permission: {(report.get('source_capture_permission') or {}).get('approval_required')}",
         "",
         "skill_obligations:",
     ]

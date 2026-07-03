@@ -143,6 +143,14 @@ policy: AEROS-OUTPUT-INTENT-001
 valid_output_intents: [probe_only, staging_artifact, canonical_candidate, canonical_update, audit_note]
 does_not_prove: [output existence, evidence admissibility, release readiness, claim support]
 """,
+    "harness/source_capture_permission_policy.yml": """version: "0.1"
+policy: AEROS-SOURCE-CAPTURE-PERMISSION-001
+tiers:
+  green_public_staging: {approval_required: none_for_staging_public_capture}
+  yellow_route_level: {approval_required: route_level}
+  red_human_required: {approval_required: human_required}
+non_goals: [does not fetch sources, does not admit evidence, does not approve gates or canonical promotion]
+""",
     "harness/execution_mode_policy.yml": """version: "0.1"
 policy: AEROS-EXECUTION-MODE-001
 principle: Right-size governance before running; modes advise/check scope but do not approve gates or certify research substance.
@@ -179,7 +187,7 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_skill_coverage.py, check_execution_mode.py, check_task_mode.py, check_task_preflight.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_output_intent.py, check_route_early_gate.py, check_improve_harvest.py, check_sync_doctor.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_skill_coverage.py, check_execution_mode.py, check_task_mode.py, check_task_preflight.py, check_source_capture_permission.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_output_intent.py, check_route_early_gate.py, check_improve_harvest.py, check_sync_doctor.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
   full: {checks: all}
 """,
     "harness/stale_triage_policy.yml": """version: "0.1"

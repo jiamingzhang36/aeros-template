@@ -610,3 +610,5 @@ Use `aeros improve harvest` to collect framework-improvement candidates from loc
 Before opening a project task, prefer `aeros task preflight --lane <lane> --intent "<short intent>"`. Treat the packet as the operating envelope for that turn: task mode, route, skill obligations, output intents, allowed paths, and must-not-touch paths.
 
 Use `aeros sync doctor --project <path>` before judging a downstream project's behavior against the latest template. If the doctor reports missing or outdated capabilities, sync/roll out the template first or describe the project as running an older AEROS surface.
+
+For source capture, distinguish permission tiers. Public/local staging capture with `probe_only`, `staging_artifact`, or `audit_note` outputs may proceed without repeated human approval when it writes only staging/audit paths. Browser/portal/batch capture should use one bounded route/session approval. Credentials, API keys, paid sources, privacy/IRB/ToS uncertainty, `data/raw`, canonical updates, claims, papers, releases, and approvals require human approval.
