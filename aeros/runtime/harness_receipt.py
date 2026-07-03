@@ -100,5 +100,16 @@ def write_observed_harness_receipt(
         payload["storage"] = "fallback_tempdir"
         payload["storage_fallback_reason"] = f"{type(exc).__name__}: {exc}"
     path = out_dir / f"{receipt_id}.json"
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    try:
+        path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    except OSError as exc:
+        if payload.get("storage") == "fallback_tempdir":
+            raise
+        safe_root = re.sub(r"[^A-Za-z0-9_.-]+", "-", root.name or "aeros").strip("-") or "aeros"
+        out_dir = Path(tempfile.gettempdir()) / "aeros_harness_receipts" / safe_root
+        out_dir.mkdir(parents=True, exist_ok=True)
+        payload["storage"] = "fallback_tempdir"
+        payload["storage_fallback_reason"] = f"{type(exc).__name__}: {exc}"
+        path = out_dir / f"{receipt_id}.json"
+        path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return path, payload

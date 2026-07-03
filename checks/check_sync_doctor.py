@@ -8,15 +8,53 @@ import sys
 import tempfile
 from pathlib import Path
 
+try:
+    import yaml
+except ImportError as exc:  # pragma: no cover
+    raise SystemExit("FAIL: PyYAML is required for check_sync_doctor.py") from exc
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from aeros.runtime.sync_doctor import diagnose_project, sync_doctor
+from aeros.runtime.sync_doctor import CAPABILITIES, CAPABILITY_EXEMPT_CHECKS, diagnose_project, sync_doctor
+
+
+def _profile_checks() -> set[str]:
+    data = yaml.safe_load((ROOT / "harness/check_profiles.yml").read_text(encoding="utf-8")) or {}
+    checks: set[str] = set()
+    for profile in (data.get("profiles") or {}).values():
+        values = (profile or {}).get("checks")
+        if isinstance(values, list):
+            checks.update(str(item) for item in values)
+    return checks
+
+
+def _capability_checks() -> set[str]:
+    checks: set[str] = set()
+    for rels in CAPABILITIES.values():
+        for rel in rels:
+            if rel.startswith("checks/"):
+                checks.add(Path(rel).name)
+    return checks
 
 
 def main() -> int:
     failures: list[str] = []
+    profile_checks = _profile_checks()
+    covered = _capability_checks()
+    missing_meta = sorted(profile_checks - covered - set(CAPABILITY_EXEMPT_CHECKS))
+    if missing_meta:
+        failures.append(
+            "profile check(s) missing from sync doctor CAPABILITIES or explicit exemption list: "
+            + ", ".join(missing_meta)
+        )
+    stale_exemptions = sorted(set(CAPABILITY_EXEMPT_CHECKS) - profile_checks)
+    if stale_exemptions:
+        failures.append(
+            "sync doctor exemption(s) no longer appear in check_profiles.yml: "
+            + ", ".join(stale_exemptions)
+        )
     report = sync_doctor(ROOT, projects=[])
     if report.get("status") not in {"PASS", "ATTENTION"}:
         failures.append("template sync doctor returned invalid status")
@@ -28,7 +66,19 @@ def main() -> int:
         if diag.get("status") != "ATTENTION":
             failures.append("fixture: missing framework files did not produce ATTENTION")
         missing = set(diag.get("missing_capabilities") or [])
-        if not {"improve", "mode", "route_gate", "workflow_presets", "output_intent", "task_preflight"} & missing:
+        expected_missing = {
+            "improve",
+            "mode",
+            "route_gate",
+            "workflow_presets",
+            "output_intent",
+            "task_preflight",
+            "harness_observed_receipts",
+            "update_ledger_hash_chain",
+            "protected_path_hook",
+            "evidence_sufficiency_audit",
+        }
+        if not expected_missing <= missing:
             failures.append("fixture: expected missing capabilities were not reported")
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))

@@ -1764,3 +1764,33 @@ references need periodic source review as external guidance changes.
 **Next check**: Run hash-chain, evidence sufficiency, AEA alignment, smoke, and
 full harness checks. If committed, backfill this pending entry and refresh the
 chain record against the final ledger hash.
+
+### 2026-07-03 — Tighten sync-doctor and governance-enforcement meta checks
+
+**Commit(s)**: `pending`
+
+**Action**: Added a sync-doctor meta-check requiring every check in
+`harness/check_profiles.yml` to appear in sync-doctor `CAPABILITIES` or an
+explicit exemption list, added the newly introduced governance capabilities to
+sync doctor, made the protected-path hook check warn when the hook is not
+installed in the current repo, checked protected-path policy strings against the
+hook script, and tightened the ledger hash-chain check to require append-only
+growth relative to `HEAD`.
+
+**Alignment**: Addresses the repeated class of omissions where new template
+capabilities are added but not exposed through sync doctor, keeps hook policy
+and implementation from silently drifting, and makes ledger-chain history harder
+to rewrite accidentally.
+
+**Non-goal**: Does not auto-install hooks into downstream projects, force every
+profile check to become a sync-doctor capability, create a signed transparency
+log, or prove scientific validity, claim support, gate approval, or evidence
+sufficiency.
+
+**Drift risk**: The explicit sync-doctor exemption list can become stale or too
+broad if maintainers use it as a shortcut. Hook installation remains opt-in, so
+projects still need a human to install the local pre-commit guard when desired.
+
+**Next check**: Run sync doctor, protected hook, ledger hash-chain, improvement
+backlog, smoke, and full harness checks. If committed, backfill this pending
+entry and append a new hash-chain record.

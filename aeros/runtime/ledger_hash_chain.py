@@ -65,6 +65,7 @@ def validate_chain(root: Path, chain_path: Path) -> ChainValidation:
 
     previous = GENESIS
     seen_seq: set[int] = set()
+    latest_subject_hash: dict[str, str] = {}
     for index, record in enumerate(records, start=1):
         seq = record.get("seq")
         if not isinstance(seq, int) or seq <= 0:
@@ -84,10 +85,12 @@ def validate_chain(root: Path, chain_path: Path) -> ChainValidation:
             subject_path = root / subject
             if not subject_path.is_file():
                 failures.append(f"record {index}: subject missing: {subject}")
-            elif subject_sha256 != sha256_file(subject_path):
-                failures.append(f"record {index}: subject_sha256 mismatch for {subject}")
+            latest_subject_hash[subject] = str(subject_sha256 or "")
         else:
             failures.append(f"record {index}: missing subject")
         previous = str(record.get("entry_hash") or expected_hash)
+    for subject, expected_sha256 in latest_subject_hash.items():
+        subject_path = root / subject
+        if subject_path.is_file() and expected_sha256 != sha256_file(subject_path):
+            failures.append(f"latest subject_sha256 mismatch for {subject}")
     return ChainValidation(not failures, tuple(failures))
-

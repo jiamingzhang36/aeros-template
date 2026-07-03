@@ -445,3 +445,17 @@ entries:
     resolved_at: "2026-06-25"
     resolution_commit: "pending"
     notes: "Found 2026-06-25 when a sync into MAHA broke its manifest (inflated 7->20 fails). MAHA manifest repaired in place; this fixes the root cause so no future synced project is corrupted."
+  - id: AEROS-IMPROVE-033
+    created_at: "2026-07-03"
+    updated_at: "2026-07-03"
+    status: open
+    priority: high
+    area: evidence-sufficiency
+    source: post_commit_review
+    issue: "Evidence sufficiency audit v1 is currently template/policy checked only. This risks repeating the DEMM-Bench failure mode where a schema-valid governance container is mistaken for substantive evidence sufficiency."
+    proposed_fix: "Use CMPD or the next active real-project gate packet as the first rollout fixture: fill audits/evidence_sufficiency_audit.yml from actual gate artifacts and verify that actor, authority, action, policy, decision_basis, resource_access, lifecycle, and verification_strength can be reconstructed from project evidence."
+    owner: human
+    target_gate: G7
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Do not close from template checks alone; close only after a real project gate packet consumes the audit record."

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import json
+import subprocess
 import sys
 
 try:
@@ -20,6 +21,18 @@ from aeros.runtime.ledger_hash_chain import canonical_record_hash, validate_chai
 ROOT = Path.cwd()
 POLICY = ROOT / "harness/update_ledger_hash_chain_policy.yml"
 CHAIN = ROOT / "decisions/update_ledger_chain.jsonl"
+
+
+def _git_show_head_chain() -> str | None:
+    try:
+        return subprocess.check_output(
+            ["git", "show", f"HEAD:{CHAIN.as_posix()}"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return None
 
 
 def main() -> int:
@@ -43,9 +56,17 @@ def main() -> int:
     failures.extend(result.failures)
 
     if CHAIN.exists():
+        current_text = CHAIN.read_text(encoding="utf-8")
+        head_text = _git_show_head_chain()
+        if head_text:
+            normalized_head = head_text if head_text.endswith("\n") else head_text + "\n"
+            if not current_text.startswith(normalized_head):
+                failures.append(
+                    "ledger chain is not append-only relative to HEAD; current file must preserve HEAD as a prefix"
+                )
         records = [
             json.loads(raw)
-            for raw in CHAIN.read_text(encoding="utf-8").splitlines()
+            for raw in current_text.splitlines()
             if raw.strip()
         ]
         if records:
@@ -68,4 +89,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-
