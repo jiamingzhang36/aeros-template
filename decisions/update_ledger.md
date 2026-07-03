@@ -1964,7 +1964,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ### 2026-07-03 — Add bibliography verifier DOI fallback
 
-**Commit(s)**: `pending`
+**Commit(s)**: `5525b94`
 
 **Scope:** template framework only.
 
