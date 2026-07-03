@@ -1936,7 +1936,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - skill output correctness
 ### 2026-07-03 — Harden CMPD rollout sync path
 
-**Commit(s)**: `pending`
+**Commit(s)**: `0965d6c`
 
 **Scope:** template framework only.
 
