@@ -1962,3 +1962,18 @@ committed, backfill this pending entry and append a final hash-chain record.
 - claim support
 - paper readiness
 
+### 2026-07-03 — Add bibliography verifier DOI fallback
+
+**Commit(s)**: `pending`
+
+**Scope:** template framework only.
+
+**Action**: Hardened `checks/verify_bib_online.py` so bibliography verification does not collapse into all-REVIEW when OpenAlex or the local Python TLS certificate store fails. The verifier now tries OpenAlex first, then DOI/Crossref metadata, then Crossref title search, and labels unrecoverable failures as `network_error` rather than implying the citation itself is suspect.
+
+**Alignment**: Reduces false bibliography-review noise while preserving the human-signed verification gate. DOI/Crossref fallback helps active projects distinguish network/tooling failures from citation-integrity problems.
+
+**Non-goal**: Does not certify paper substance, claim support, full-text availability, publisher-page accessibility, or that Crossref/OpenAlex metadata are complete. It remains an advisory artifact generator; signed `audits/bib_verification_report.md` remains the hard gate.
+
+**Drift risk**: Crossref and OpenAlex metadata can disagree on dates, titles, or working-paper/published-version records. REVIEW rows still require human resolution. Automatic TLS fallback is limited to advisory metadata retrieval and must not be treated as source-content verification.
+
+**Next check**: Run verifier py_compile, protected hook check, smoke/full harness, then backfill this pending entry and append a final hash-chain record.

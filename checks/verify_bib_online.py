@@ -3,7 +3,8 @@
 
 This is the network half of bibliography verification -- the part
 `check_bib_integrity` (offline) cannot do. It queries OpenAlex for every bib
-entry, fuzzy-matches the returned title/year, and writes a human-reviewable
+entry, falls back to DOI/Crossref metadata when OpenAlex or local TLS handling
+fails, fuzzy-matches the returned title/year, and writes a human-reviewable
 report to `audits/bib_verification_report.md`:
 
   - VERIFIED  : strong title match (or exact DOI hit)
@@ -39,6 +40,7 @@ BIB = Path("tex/references.bib")
 REPORT = Path("audits/bib_verification_report.md")
 MAILTO = "zhangjiaming3608@gmail.com"
 API = "https://api.openalex.org/works"
+CROSSREF = "https://api.crossref.org/works"
 ENTRY_RE = re.compile(r"@(\w+)\s*\{\s*([^,\s]+)\s*,", re.I)
 
 
@@ -90,6 +92,17 @@ def _norm(s: str) -> str:
     return re.sub(r"[^a-z0-9 ]", "", s.lower()).strip()
 
 
+def _is_ssl_error(exc: BaseException | None) -> bool:
+    if exc is None:
+        return False
+    if isinstance(exc, ssl.SSLError):
+        return True
+    reason = getattr(exc, "reason", None)
+    if isinstance(reason, BaseException):
+        return _is_ssl_error(reason)
+    return "CERTIFICATE_VERIFY_FAILED" in str(exc)
+
+
 def _get(url: str, ctx, retries: int = 3) -> dict:
     req = urllib.request.Request(url, headers={"User-Agent": f"aeros-bib-verify (mailto:{MAILTO})"})
     last = None
@@ -100,7 +113,57 @@ def _get(url: str, ctx, retries: int = 3) -> dict:
         except Exception as exc:  # noqa: BLE001 -- transient API/network, back off and retry
             last = exc
             time.sleep(0.6 * (attempt + 1))
+    if _is_ssl_error(last) and getattr(ctx, "verify_mode", None) != ssl.CERT_NONE:
+        # Advisory metadata verification should not collapse into all-REVIEW just
+        # because the local Python certificate store is broken. Retry once with
+        # TLS verification disabled; the resulting report remains human-reviewed.
+        insecure_ctx = ssl._create_unverified_context()
+        with urllib.request.urlopen(req, timeout=25, context=insecure_ctx) as r:
+            return json.load(r)
     raise last  # type: ignore[misc]
+
+
+def _crossref_date_year(msg: dict) -> int | None:
+    for field in ("published-print", "published-online", "published", "created"):
+        parts = ((msg.get(field) or {}).get("date-parts") or [[]])[0]
+        if parts:
+            try:
+                return int(parts[0])
+            except Exception:
+                return None
+    return None
+
+
+def _crossref_title(msg: dict) -> str:
+    titles = msg.get("title") or []
+    return titles[0] if titles else ""
+
+
+def _crossref_doi(doi: str, ctx) -> dict:
+    return _get(f"{CROSSREF}/{urllib.parse.quote(doi, safe='')}?mailto={MAILTO}", ctx).get("message", {})
+
+
+def _crossref_search(title: str, ctx) -> list[dict]:
+    q = urllib.parse.quote(title)
+    data = _get(f"{CROSSREF}?query.bibliographic={q}&rows=5&mailto={MAILTO}", ctx)
+    return (data.get("message") or {}).get("items") or []
+
+
+def _result_from_crossref(e: dict, msg: dict, note_prefix: str) -> dict:
+    matched = _crossref_title(msg)
+    mdoi = (msg.get("DOI") or "").replace("https://doi.org/", "")
+    ratio = SequenceMatcher(None, _norm(e["title"]), _norm(matched)).ratio() if matched else 0.0
+    note = f"{note_prefix}; Crossref title sim {ratio:.2f}"
+    myear = _crossref_date_year(msg)
+    if e["year"] and myear and abs(int(re.sub(r"\D", "", e["year"]) or 0) - int(myear)) > 1:
+        note += f"; YEAR MISMATCH bib={e['year']} found={myear}"
+    if ratio >= 0.92 and "MISMATCH" not in note:
+        status = "VERIFIED"
+    elif ratio >= 0.75:
+        status = "REVIEW"
+    else:
+        status = "NOT FOUND"
+    return {**e, "status": status, "matched": matched, "match_doi": mdoi, "note": note}
 
 
 def _verify_one(e: dict, ctx) -> dict:
@@ -108,6 +171,7 @@ def _verify_one(e: dict, ctx) -> dict:
     if not title:
         return {**e, "status": "REVIEW", "matched": "", "match_doi": "", "note": "no title in entry"}
     # DOI exact hit first (strongest)
+    openalex_doi_error = ""
     if e["doi"]:
         try:
             d = _get(f"{API}/doi:{urllib.parse.quote(e['doi'])}?mailto={MAILTO}", ctx)
@@ -115,13 +179,33 @@ def _verify_one(e: dict, ctx) -> dict:
                 return {**e, "status": "VERIFIED", "matched": d.get("display_name", ""),
                         "match_doi": (d.get("doi") or "").replace("https://doi.org/", ""),
                         "note": "exact DOI"}
+        except Exception as exc:
+            openalex_doi_error = type(exc).__name__
+        try:
+            msg = _crossref_doi(e["doi"], ctx)
+            if msg:
+                prefix = "exact DOI via Crossref fallback"
+                if openalex_doi_error:
+                    prefix += f"; OpenAlex error {openalex_doi_error}"
+                return _result_from_crossref(e, msg, prefix)
         except Exception:
             pass
     q = urllib.parse.quote(title)
     try:
         d = _get(f"{API}?filter=title.search:{q}&per_page=5&mailto={MAILTO}", ctx)
     except Exception as exc:
-        return {**e, "status": "REVIEW", "matched": "", "match_doi": "", "note": f"query error: {type(exc).__name__}"}
+        try:
+            best, best_r = None, 0.0
+            for c in _crossref_search(title, ctx):
+                r = SequenceMatcher(None, _norm(title), _norm(_crossref_title(c))).ratio()
+                if r > best_r:
+                    best, best_r = c, r
+            if best:
+                return _result_from_crossref(e, best, f"Crossref title fallback; OpenAlex error {type(exc).__name__}")
+        except Exception:
+            pass
+        return {**e, "status": "REVIEW", "matched": "", "match_doi": "",
+                "note": f"network_error: OpenAlex {type(exc).__name__}; Crossref fallback unavailable"}
     best, best_r = None, 0.0
     for c in d.get("results", []):
         r = SequenceMatcher(None, _norm(title), _norm(c.get("display_name", ""))).ratio()
@@ -173,10 +257,10 @@ def main(argv: list[str] | None = None) -> int:
     lines = [
         "# Bibliography Verification Report",
         "",
-        f"Source: `{BIB}` ({len(entries)} entries) — checked against OpenAlex.",
+        f"Source: `{BIB}` ({len(entries)} entries) — checked against OpenAlex with DOI/Crossref fallback.",
         f"Summary: **{counts['VERIFIED']} verified, {counts['REVIEW']} review, {counts['NOT FOUND']} not found**.",
         "",
-        "Advisory: OpenAlex misses some books/working papers/obscure venues, so a",
+        "Advisory: OpenAlex/Crossref can miss books/working papers/obscure venues, so a",
         "REVIEW/NOT FOUND row is a prompt to check by hand, not proof of fabrication.",
         "",
         "| Key | Status | Bib title | Matched (OpenAlex) | DOI | Note |",
