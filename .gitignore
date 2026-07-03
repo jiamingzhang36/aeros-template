@@ -28,6 +28,7 @@ data/snapshots/*
 
 # Generated outputs can be committed selectively when needed.
 outputs/logs/*.log
+outputs/harness_receipts/*.json
 
 # Large model artifacts are usually regenerated or archived separately.
 outputs/model_outputs/*

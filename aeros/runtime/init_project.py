@@ -33,6 +33,7 @@ DIRS = [
     "execution",
     "harness/protocols",
     "outputs/logs",
+    "outputs/harness_receipts",
     "outputs/context",
     "outputs/source_snapshots",
     "outputs/tables",
@@ -42,6 +43,7 @@ DIRS = [
     "tasks/discovery",
     "tasks/execution",
     "templates",
+    "tools/hooks",
 ]
 
 
@@ -177,6 +179,38 @@ allowed_waiver_classes: [ledger_hash_only, typo_only, mechanical_revalidation, s
 required_waiver_fields: [skill_class, reason, scope, progress_label]
 does_not_prove: [skill invocation, skill output correctness, scientific validity, claim support, human gate approval]
 """,
+    "harness/protected_path_commit_policy.yml": """version: "0.1"
+policy: AEROS-PROTECTED-PATH-COMMIT-001
+principle: Protected research-authority paths must not be committed by default from an agent run.
+protected_paths:
+  exact: [docs/protected_definitions.yml, docs/data_contract.yml, evidence/claim_registry.md, decisions/decision_log.csv, harness/permissions.yml]
+  prefixes: [data/raw/, decisions/approvals/]
+override:
+  env_var: AEROS_ALLOW_PROTECTED_COMMIT
+  allowed_value: "1"
+installation:
+  template: tools/hooks/pre-commit-aeros-protected-paths
+  installer: tools/install_aeros_git_hooks.zsh
+  auto_installed: false
+does_not_prove: [scientific validity, claim support, human approval, release readiness]
+""",
+    "harness/update_ledger_hash_chain_policy.yml": """version: "0.1"
+policy: AEROS-UPDATE-LEDGER-HASH-CHAIN-001
+chain_file: decisions/update_ledger_chain.jsonl
+genesis: GENESIS
+record_required_fields: [version, seq, entry_id, subject, subject_sha256, prev_hash, payload, entry_hash]
+protected_subjects: [decisions/update_ledger.md]
+verification_strength: local_hash_chain_over_observed_subject_file
+does_not_prove: [malicious actor cannot rewrite both ledger and chain, scientific validity, claim support, gate approval, external transparency]
+""",
+    "harness/evidence_sufficiency_audit_policy.yml": """version: "0.1"
+policy: AEROS-EVIDENCE-SUFFICIENCY-AUDIT-001
+required_dimensions: [actor, authority, action, policy, decision_basis, resource_access, lifecycle, verification_strength]
+allowed_verification_strength: [self_attested, schema_valid, file_exists, hash_observed, source_identity_matched, independent_rerun, human_reviewed]
+minimum_for_gate_packet: [actor, authority, action, policy, decision_basis, verification_strength]
+minimum_for_completion_claim: [actor, action, decision_basis, lifecycle, verification_strength]
+does_not_prove: [scientific validity, identification quality, claim support, data truth, publication readiness]
+""",
     "harness/context_budget.yml": """version: "0.1"
 policy: AEROS-CONTEXT-BUDGET-001
 brief_max_lines: 40
@@ -188,8 +222,48 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_skill_coverage.py, check_execution_mode.py, check_task_mode.py, check_task_preflight.py, check_source_capture_permission.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_output_intent.py, check_route_early_gate.py, check_improve_harvest.py, check_sync_doctor.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_skill_coverage.py, check_execution_mode.py, check_task_mode.py, check_task_preflight.py, check_source_capture_permission.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_output_intent.py, check_route_early_gate.py, check_improve_harvest.py, check_sync_doctor.py, check_update_ledger_hash_chain.py, check_harness_observed_receipts.py, check_protected_path_hook.py, check_evidence_sufficiency_audit.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
   full: {checks: all}
+""",
+    "tools/hooks/pre-commit-aeros-protected-paths": """#!/usr/bin/env python3
+\"\"\"AEROS protected-path pre-commit guard. AEROS-PROTECTED-PATH-HOOK-001\"\"\"
+from __future__ import annotations
+import os, subprocess, sys
+PROTECTED_EXACT = {"docs/protected_definitions.yml", "docs/data_contract.yml", "evidence/claim_registry.md", "decisions/decision_log.csv", "harness/permissions.yml"}
+PROTECTED_PREFIXES = ("data/raw/", "decisions/approvals/")
+def git(args):
+    return subprocess.check_output(["git", *args], text=True, stderr=subprocess.DEVNULL)
+def is_protected(path):
+    return path in PROTECTED_EXACT or any(path.startswith(prefix) for prefix in PROTECTED_PREFIXES)
+def main():
+    staged = [line.strip() for line in git(["diff", "--cached", "--name-only"]).splitlines()]
+    hits = [path for path in staged if path and is_protected(path)]
+    if not hits:
+        return 0
+    if os.environ.get("AEROS_ALLOW_PROTECTED_COMMIT") == "1":
+        print("AEROS protected-path hook: human override accepted.", file=sys.stderr)
+        return 0
+    print("AEROS protected-path hook blocked protected staged file(s):", file=sys.stderr)
+    for path in hits:
+        print(f"  - {path}", file=sys.stderr)
+    print("Set AEROS_ALLOW_PROTECTED_COMMIT=1 only after explicit human approval/gate review.", file=sys.stderr)
+    return 1
+if __name__ == "__main__":
+    raise SystemExit(main())
+""",
+    "tools/install_aeros_git_hooks.zsh": """#!/bin/zsh
+set -euo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+SRC="$ROOT/tools/hooks/pre-commit-aeros-protected-paths"
+DEST="$ROOT/.git/hooks/pre-commit"
+MARKER="AEROS-PROTECTED-PATH-HOOK-001"
+if [ -f "$DEST" ] && ! grep -q "$MARKER" "$DEST"; then
+  print -u2 "refusing to overwrite existing non-AEROS pre-commit hook: $DEST"
+  exit 1
+fi
+cp "$SRC" "$DEST"
+chmod +x "$DEST"
+echo "installed AEROS protected-path pre-commit hook -> $DEST"
 """,
     "harness/stale_triage_policy.yml": """version: "0.1"
 policy: AEROS-STALE-TRIAGE-001
@@ -637,6 +711,23 @@ blocked: false
 
 This is a recommendation, not an execution record, gate approval, or claim-support artifact.
 """,
+    "templates/evidence_sufficiency_audit.yml": """version: "0.1"
+audit_id: ESA-TEMPLATE
+artifact_id: ""
+artifact_path: ""
+artifact_type: ""
+dimensions:
+  actor: {value: "", note: "Who or what produced, reviewed, or approved this artifact."}
+  authority: {value: "", note: "The authority level: agent, harness, human gate, external source, or journal/data editor."}
+  action: {value: "", note: "The action performed, observed, or approved."}
+  policy: {value: "", note: "The AEROS policy/check/gate/external standard that governs this record."}
+  decision_basis: {value: "", note: "The source files, outputs, hashes, checks, or human evidence used as the basis."}
+  resource_access: {value: "", note: "Credentials, licenses, source access, data-use constraints, or public-access status."}
+  lifecycle: {value: "", note: "Draft, candidate, validated, admitted, superseded, blocked, or released."}
+  verification_strength: {value: self_attested, note: "How strong the verification is."}
+overall_assessment: draft
+does_not_prove: [scientific validity, identification quality, claim support, data truth, publication readiness]
+""",
     "harness/human_review_receipt_template.md": """---
 receipt_type: human_review_receipt
 status: draft
@@ -802,15 +893,20 @@ hard_boundaries:
     "harness/aea_replication_policy.yml": """version: "0.1"
 policy: AEROS-AEA-REPLICATION-ALIGNMENT-001
 external_standard: {name: AEA Data Editor replication package guidance, url: "https://aeadataeditor.github.io/"}
+policy_version: "February 2026"
+source_urls: ["https://www.aeaweb.org/journals/data/data-code-policy", "https://aeadataeditor.github.io/posts/2026-01-19-preparing-pandp-replication-packages"]
 principle: "Align replication packages with AEA-style expectations without certifying acceptance."
+required_alignment_items: [data_availability_statement, raw_data_or_exception, analysis_data_or_reproducible_build, data_provenance_access_costs, transformation_and_cleaning_code, analysis_code_for_computational_results, master_script_or_precise_step_by_step, setup_program_or_environment, top_level_readme, program_to_output_map, software_hardware_runtime, data_citations, licenses_and_redistribution_rights, trusted_repository_plan, non_public_data_constraints, ethics_irb_or_rct_if_applicable]
 required_manifest_fields: [package_id, status, standard_alignment, data_availability, code_entrypoint, environment, result_registry, provenance, licenses, reproducibility]
 required_package_artifacts: [README_replication.md, README_data.md, Makefile, requirements.txt, environment.yml, code/99_make_all.py, evidence/result_index.csv, evidence/result_registry.csv]
 allowed_statuses: [draft, internal_review, ready_for_human_review, submitted, blocked]
-non_goals: [certify_AEA_acceptance, waive_data_license_or_confidentiality_constraints, replace_human_policy_review]
+p_and_p_2026_guidance: {compliance_check_scope: "limited compared with peer-reviewed AEA journals", requirement: "package must still be fully compliant with the AEA Data and Code Availability Policy", repository_note: "AEA Data and Code Repository strongly encouraged; GitHub alone is not a trusted archive"}
+non_goals: [certify_AEA_acceptance, waive_data_license_or_confidentiality_constraints, replace_human_policy_review, certify_data_editor_acceptance]
 """,
     "templates/aea_data_package_manifest.yml": """package_id: "AEA-PACKAGE-001"
 status: draft
-standard_alignment: {external_standard: "AEA Data Editor", reviewed_against_policy_url: "https://aeadataeditor.github.io/", reviewed_at: ""}
+standard_alignment: {external_standard: "AEA Data Editor", reviewed_against_policy_url: "https://www.aeaweb.org/journals/data/data-code-policy", policy_version: "February 2026", p_and_p_2026_guidance_url: "https://aeadataeditor.github.io/posts/2026-01-19-preparing-pandp-replication-packages", reviewed_at: ""}
+aea_2026_alignment: {data_availability_statement: draft, raw_data_or_exception: draft, analysis_data_or_reproducible_build: draft, data_provenance_access_costs: draft, transformation_and_cleaning_code: draft, analysis_code_for_computational_results: draft, master_script_or_precise_step_by_step: draft, setup_program_or_environment: draft, top_level_readme: draft, program_to_output_map: draft, software_hardware_runtime: draft, data_citations: draft, licenses_and_redistribution_rights: draft, trusted_repository_plan: draft, non_public_data_constraints: draft, ethics_irb_or_rct_if_applicable: not_applicable_or_pending}
 data_availability: {statement_path: "data/README_data.md", public_data: [], restricted_data: [], synthetic_or_demo_data: []}
 code_entrypoint: {command: "make all", master_script: "code/99_make_all.py"}
 environment: {requirements_file: "requirements.txt", environment_file: "environment.yml", container_file: ""}

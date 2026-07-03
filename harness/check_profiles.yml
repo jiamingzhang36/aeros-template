@@ -34,6 +34,10 @@ profiles:
       - check_route_early_gate.py
       - check_improve_harvest.py
       - check_sync_doctor.py
+      - check_update_ledger_hash_chain.py
+      - check_harness_observed_receipts.py
+      - check_protected_path_hook.py
+      - check_evidence_sufficiency_audit.py
       - check_readiness_vector.py
       - check_discovery_route_decision.py
       - check_stale_triage.py
@@ -121,6 +125,7 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_aea_replication_alignment.py
+      - check_evidence_sufficiency_audit.py
       - check_skill_coverage.py
       - check_replication_package.py
       - check_data_availability_present.py

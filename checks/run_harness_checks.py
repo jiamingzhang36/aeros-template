@@ -15,6 +15,10 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from aeros.runtime.harness_receipt import write_observed_harness_receipt
+
 
 CHECKS = [
     "check_stage_agents.py",
@@ -54,6 +58,10 @@ CHECKS = [
     "check_correction_ledger.py",
     "check_improvement_backlog.py",
     "check_update_ledger.py",
+    "check_update_ledger_hash_chain.py",
+    "check_harness_observed_receipts.py",
+    "check_protected_path_hook.py",
+    "check_evidence_sufficiency_audit.py",
     "check_derived_vs_asserted_audit.py",
     "check_discovery_completeness.py",
     "check_discovery_route_decision.py",
@@ -239,6 +247,7 @@ def _run_check(check_path: Path, draft_warning_mode: str, timeout_seconds: int) 
 
     draft_warning_seen = False
     suppressing_draft_warning = False
+    output_tail: list[str] = []
 
     assert proc.stdout is not None
     selector = selectors.DefaultSelector()
@@ -258,6 +267,7 @@ def _run_check(check_path: Path, draft_warning_mode: str, timeout_seconds: int) 
                 "exit_code": 124,
                 "elapsed_seconds": round(elapsed, 3),
                 "draft_warning_seen": draft_warning_seen,
+                "output_tail": output_tail[-20:],
             }
 
         events = selector.select(timeout=0.1)
@@ -274,6 +284,8 @@ def _run_check(check_path: Path, draft_warning_mode: str, timeout_seconds: int) 
                 draft_warning_seen = draft_warning_seen or saw_warning
                 if suppress:
                     continue
+            output_tail.append(line)
+            output_tail = output_tail[-20:]
             print(line, flush=True)
             continue
 
@@ -294,6 +306,7 @@ def _run_check(check_path: Path, draft_warning_mode: str, timeout_seconds: int) 
             "exit_code": returncode,
             "elapsed_seconds": round(elapsed, 3),
             "draft_warning_seen": draft_warning_seen,
+            "output_tail": output_tail[-20:],
         }
 
     if draft_warning_mode == "fail" and draft_warning_seen:
@@ -311,6 +324,7 @@ def _run_check(check_path: Path, draft_warning_mode: str, timeout_seconds: int) 
         "exit_code": returncode,
         "elapsed_seconds": round(elapsed, 3),
         "draft_warning_seen": draft_warning_seen,
+        "output_tail": output_tail[-20:],
     }
 
 
@@ -352,6 +366,11 @@ def main() -> int:
         "--json-output",
         default=None,
         help="write a structured JSON summary while still streaming human-readable output",
+    )
+    parser.add_argument(
+        "--no-observed-receipt",
+        action="store_true",
+        help="do not write the local harness-observed receipt",
     )
     parser.add_argument(
         "--profile",
@@ -411,6 +430,20 @@ def main() -> int:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
         print(f"wrote JSON summary -> {out_path}", flush=True)
+    if not args.no_observed_receipt:
+        receipt_path, _payload = write_observed_harness_receipt(
+            Path.cwd(),
+            summary,
+            [
+                sys.executable,
+                "checks/run_harness_checks.py",
+                "--profile",
+                str(args.profile),
+                "--timeout",
+                str(timeout_seconds),
+            ],
+        )
+        print(f"wrote observed harness receipt -> {receipt_path}", flush=True)
     if failures:
         print(f"FAIL: {failures} harness check(s) failed")
         return 1

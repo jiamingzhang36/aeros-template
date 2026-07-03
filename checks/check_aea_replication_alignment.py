@@ -54,11 +54,61 @@ def main() -> int:
         failures.append(f"{POLICY}: missing required_manifest_fields")
     if not statuses:
         failures.append(f"{POLICY}: missing allowed_statuses")
-    for key in ("external_standard", "principle", "required_package_artifacts", "non_goals"):
+    for key in (
+        "external_standard",
+        "policy_version",
+        "source_urls",
+        "principle",
+        "required_package_artifacts",
+        "required_alignment_items",
+        "p_and_p_2026_guidance",
+        "non_goals",
+    ):
         if not policy.get(key):
             failures.append(f"{POLICY}: missing {key}")
+    if str(policy.get("policy_version")) != "February 2026":
+        failures.append(f"{POLICY}: policy_version must be February 2026")
+    source_urls = [str(item) for item in (policy.get("source_urls") or [])]
+    for url in [
+        "https://www.aeaweb.org/journals/data/data-code-policy",
+        "https://aeadataeditor.github.io/posts/2026-01-19-preparing-pandp-replication-packages",
+    ]:
+        if url not in source_urls:
+            failures.append(f"{POLICY}: missing source URL {url}")
+    required_items = {str(item) for item in (policy.get("required_alignment_items") or [])}
+    for item in [
+        "data_availability_statement",
+        "raw_data_or_exception",
+        "analysis_data_or_reproducible_build",
+        "transformation_and_cleaning_code",
+        "analysis_code_for_computational_results",
+        "top_level_readme",
+        "program_to_output_map",
+        "licenses_and_redistribution_rights",
+        "trusted_repository_plan",
+        "non_public_data_constraints",
+    ]:
+        if item not in required_items:
+            failures.append(f"{POLICY}: required_alignment_items missing {item}")
+    p_and_p = policy.get("p_and_p_2026_guidance") or {}
+    if "fully compliant" not in str(p_and_p.get("requirement", "")).lower():
+        failures.append(f"{POLICY}: P&P guidance must preserve full-compliance requirement")
+    if "github alone" not in str(p_and_p.get("repository_note", "")).lower():
+        failures.append(f"{POLICY}: P&P guidance must flag GitHub-alone repository risk")
 
     failures.extend(_validate_manifest(TEMPLATE, template, required_fields, statuses))
+    alignment = template.get("aea_2026_alignment")
+    if not isinstance(alignment, dict):
+        failures.append(f"{TEMPLATE}: missing aea_2026_alignment")
+    else:
+        missing_items = required_items - set(alignment)
+        if missing_items:
+            failures.append(
+                f"{TEMPLATE}: aea_2026_alignment missing {', '.join(sorted(missing_items))}"
+            )
+    standard_alignment = template.get("standard_alignment") or {}
+    if standard_alignment.get("policy_version") != "February 2026":
+        failures.append(f"{TEMPLATE}: standard_alignment.policy_version must be February 2026")
 
     if ACTIVE_MANIFEST.exists():
         try:

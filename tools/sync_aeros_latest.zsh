@@ -59,10 +59,16 @@ for T in "${TARGETS[@]}"; do
   if [ ! -f "$T/decisions/update_ledger.md" ]; then
     [ -f "$SRC/decisions/update_ledger.md" ] && rsync -a "$SRC/decisions/update_ledger.md" "$T/decisions/update_ledger.md"
   fi
+  if [ ! -f "$T/decisions/update_ledger_chain.jsonl" ]; then
+    [ -f "$SRC/decisions/update_ledger_chain.jsonl" ] && rsync -a "$SRC/decisions/update_ledger_chain.jsonl" "$T/decisions/update_ledger_chain.jsonl"
+  fi
   if [ ! -f "$T/decisions/human_gate_queue.yml" ]; then
     rsync -a "$SRC/decisions/human_gate_queue.yml" "$T/decisions/human_gate_queue.yml"
   fi
   [ -d "$SRC/templates" ] && rsync -a "$SRC/templates/" "$T/templates/"
+  mkdir -p "$T/tools/hooks"
+  [ -d "$SRC/tools/hooks" ] && rsync -a "$SRC/tools/hooks/" "$T/tools/hooks/"
+  [ -f "$SRC/tools/install_aeros_git_hooks.zsh" ] && rsync -a "$SRC/tools/install_aeros_git_hooks.zsh" "$T/tools/install_aeros_git_hooks.zsh"
   [ -d "$SRC/tests/adversarial" ] && rsync -a "$SRC/tests/adversarial/" "$T/tests/adversarial/"
   [ -d "$SRC/tests/parser" ] && rsync -a "$SRC/tests/parser/" "$T/tests/parser/"
   [ -d "$SRC/tests/evidence_units" ] && rsync -a "$SRC/tests/evidence_units/" "$T/tests/evidence_units/"
@@ -191,6 +197,8 @@ targets = [Path(p) for p in os.environ.get("AEROS_SYNC_TARGETS", "").splitlines(
 REQUIRED_FILES = [
     "harness/improvement_backlog.yml",
     "harness/derived_vs_asserted_audit.yml",
+    "harness/update_ledger_hash_chain_policy.yml",
+    "harness/evidence_sufficiency_audit_policy.yml",
     "harness/event_sourcing_policy.yml",
     "harness/sqlite_journal_policy.yml",
     "harness/evidence_type_lattice.yml",
@@ -202,6 +210,7 @@ REQUIRED_FILES = [
     "harness/econ_method_advisory_policy.yml",
     "harness/aea_replication_policy.yml",
     "harness/completion_attestation_policy.yml",
+    "harness/protected_path_commit_policy.yml",
     "harness/skill_obligation_policy.yml",
     "harness/evidence_unit_policy.yml",
     "harness/claim_vector_policy.yml",
@@ -248,11 +257,15 @@ REQUIRED_FILES = [
     "templates/CURRENT_STATE.md",
     "templates/NEXT_ACTION.md",
     "templates/update_ledger_entry.md",
+    "templates/evidence_sufficiency_audit.yml",
     "discovery/route_decision.yml",
     "decisions/update_ledger.md",
+    "decisions/update_ledger_chain.jsonl",
     "decisions/human_gate_queue.yml",
     "docs/architecture_v0_5.md",
     "docs/design/architecture_freeze_v1.md",
+    "tools/hooks/pre-commit-aeros-protected-paths",
+    "tools/install_aeros_git_hooks.zsh",
 ]
 
 CHECKS = {
@@ -272,8 +285,12 @@ CHECKS = {
     "cockpit": "checks/check_cockpit.py",
     "context_graph": "checks/check_context_graph.py",
     "improvement_backlog": "checks/check_improvement_backlog.py",
+    "update_ledger_hash_chain": "checks/check_update_ledger_hash_chain.py",
     "literature_fulltext_execution": "checks/check_literature_fulltext_execution.py",
     "literature_adapters": "checks/check_literature_adapters.py",
+    "harness_observed_receipts": "checks/check_harness_observed_receipts.py",
+    "protected_path_hook": "checks/check_protected_path_hook.py",
+    "evidence_sufficiency_audit": "checks/check_evidence_sufficiency_audit.py",
     "derived_vs_asserted_audit": "checks/check_derived_vs_asserted_audit.py",
     "event_log_replay": "checks/check_event_log_replay.py",
     "sqlite_journal": "checks/check_sqlite_journal.py",

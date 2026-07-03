@@ -273,6 +273,8 @@ layers:
     - harness/invariants.yml
     - harness/event_sourcing_policy.yml
     - harness/derived_vs_asserted_audit.yml
+    - harness/update_ledger_hash_chain_policy.yml
+    - harness/evidence_sufficiency_audit_policy.yml
     - templates/identification_gate.yml
     - templates/analytic_deviation.yml
     - templates/claim_card.yml
@@ -292,6 +294,7 @@ layers:
     - harness/econ_literature_discovery_policy.yml
     - harness/aea_replication_policy.yml
     - harness/completion_attestation_policy.yml
+    - harness/protected_path_commit_policy.yml
     - harness/status_label_policy.yml
     - harness/rollout_playbook.md
     - decisions/human_gate_queue.yml
@@ -304,6 +307,8 @@ layers:
     - templates/evidence_delta_record.json
     - templates/completion_attestation.yml
     - templates/update_ledger_entry.md
+    - templates/evidence_sufficiency_audit.yml
+    - decisions/update_ledger_chain.jsonl
     - harness/probe_failure_taxonomy.yml
     - aeros/state/global_state.yml
     - harness/skill_registry.md
@@ -314,6 +319,8 @@ layers:
     - harness/skill_map_reference.md
     - harness/human_review_receipt_template.md
     - harness/automation_policy.yml
+    - tools/hooks/pre-commit-aeros-protected-paths
+    - tools/install_aeros_git_hooks.zsh
   stage_agents:
     required_files:
     - AGENTS.md
@@ -382,6 +389,10 @@ checks:
   correction_ledger: checks/check_correction_ledger.py
   improvement_backlog: checks/check_improvement_backlog.py
   update_ledger: checks/check_update_ledger.py
+  update_ledger_hash_chain: checks/check_update_ledger_hash_chain.py
+  harness_observed_receipts: checks/check_harness_observed_receipts.py
+  protected_path_hook: checks/check_protected_path_hook.py
+  evidence_sufficiency_audit: checks/check_evidence_sufficiency_audit.py
   discovery_completeness: checks/check_discovery_completeness.py
   discovery_route_decision: checks/check_discovery_route_decision.py
   gate_exit: checks/check_gate_exit.py

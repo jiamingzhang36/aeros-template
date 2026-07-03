@@ -1706,3 +1706,61 @@ otherwise checks can reference template-only files.
 **Drift risk**: If obligation inference becomes too broad, it can create bureaucratic false positives. Keep inference conservative: tasks with explicit skill declarations, required classes, or waivers should not receive extra inferred obligations.
 
 **Next check**: Sync into a real active project and verify that data/source/literature/writing tasks either use the relevant skill path or carry an explicit waiver, without making smoke-test work heavy.
+
+### 2026-07-03 — Add harness-observed receipts and protected-path commit guard
+
+**Commit(s)**: `pending`
+
+**Action**: Added a harness-generated observed receipt path for
+`checks/run_harness_checks.py` plus a protected-path pre-commit hook template and
+installer. The observed receipt records check exit codes, output tails, key
+source-file hashes, and explicit `does_not_prove` boundaries. The hook blocks
+protected staged files by default and requires an explicit human override
+environment variable for approved protected commits.
+
+**Alignment**: Reduces reliance on agent self-attestation for mechanical check
+evidence and upgrades the highest-risk `must_not_touch` paths from advisory
+text to an opt-in local enforcement layer.
+
+**Non-goal**: Does not certify scientific validity, data truth, claim support,
+paper readiness, gate approval, or the correctness of protected edits. The hook
+is not auto-installed by sync/init and does not replace human gate review.
+
+**Drift risk**: Observed receipts can become local clutter if treated as
+committed artifacts by default, so generated receipt JSON is ignored unless a
+project deliberately promotes it. The hook can be bypassed by a human override;
+that is intentional but should be paired with an approval record.
+
+**Next check**: Run the new receipt and hook checks, then smoke/full harness.
+If committed, backfill this pending entry with the framework commit hash.
+
+### 2026-07-03 — Add ledger hash-chain, evidence sufficiency audit, and AEA 2026 alignment refresh
+
+**Commit(s)**: `pending`
+
+**Action**: Added a local update-ledger hash-chain policy/check, an evidence
+sufficiency audit policy/template/check covering the eight governance dimensions
+(`actor`, `authority`, `action`, `policy`, `decision_basis`,
+`resource_access`, `lifecycle`, `verification_strength`), and refreshed the AEA
+replication policy/template/check against the February 2026 AEA Data and Code
+Availability Policy plus the 2026 Papers & Proceedings replication-package
+guidance.
+
+**Alignment**: Reduces ledger drift risk, makes governance evidence explain what
+kind of basis it actually records, and keeps AEROS replication readiness aligned
+with the current AEA-style external standard without confusing schema alignment
+with journal acceptance.
+
+**Non-goal**: Does not provide a signed transparency log, prevent a malicious
+actor from rewriting both ledger and chain, certify scientific validity, certify
+claim support, approve gates, prove evidence sufficiency for a conclusion, or
+certify AEA/Data Editor acceptance.
+
+**Drift risk**: The hash-chain is local and must be regenerated whenever the
+ledger changes. Evidence sufficiency dimensions can become checklist theater if
+used as proof of truth rather than proof of record completeness. AEA policy
+references need periodic source review as external guidance changes.
+
+**Next check**: Run hash-chain, evidence sufficiency, AEA alignment, smoke, and
+full harness checks. If committed, backfill this pending entry and refresh the
+chain record against the final ledger hash.

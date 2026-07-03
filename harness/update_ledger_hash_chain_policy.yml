@@ -1,0 +1,26 @@
+version: "0.1"
+policy: AEROS-UPDATE-LEDGER-HASH-CHAIN-001
+principle: >
+  The update ledger should be paired with a local append-style hash chain so
+  silent edits to ledger-tracking artifacts are mechanically detectable.
+chain_file: decisions/update_ledger_chain.jsonl
+genesis: GENESIS
+record_required_fields:
+  - version
+  - seq
+  - entry_id
+  - subject
+  - subject_sha256
+  - prev_hash
+  - payload
+  - entry_hash
+protected_subjects:
+  - decisions/update_ledger.md
+verification_strength: local_hash_chain_over_observed_subject_file
+does_not_prove:
+  - malicious actor cannot rewrite both ledger and chain
+  - scientific validity
+  - claim support
+  - gate approval
+  - external transparency
+
