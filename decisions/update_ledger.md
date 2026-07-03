@@ -1934,4 +1934,31 @@ committed, backfill this pending entry and append a final hash-chain record.
 - AEA acceptance
 - route correctness
 - skill output correctness
+### 2026-07-03 — Harden CMPD rollout sync path
+
+**Commit(s)**: `pending`
+
+**Scope:** template framework only.
+
+**Changed**
+- Treated `discovery/route_decision.yml` and `decisions/update_ledger_chain.jsonl` as project-owned rollout artifacts instead of byte-identical template files in sync doctor.
+- Updated `tools/sync_aeros_latest.zsh` to merge route-decision scaffold additions while preserving project decisions.
+- Updated sync to initialize or re-anchor project-local update-ledger hash chains instead of copying the template chain.
+- Fixed `check_improve_harvest.py` fixture so downstream projects do not have to masquerade as the template root.
+- Added `framework_rollout` workflow preset and expanded writing guardrail to cover CMPD poster/TeX paths.
+
+**Validation**
+- Template: `python3 checks/check_improve_harvest.py`
+- Template: `python3 checks/check_sync_doctor.py`
+- Template: `python3 checks/check_session_scope.py`
+- Template: `python3 checks/run_harness_checks.py --profile smoke --timeout 20`
+- CMPD rollout: sync doctor PASS after sync
+- CMPD rollout: smoke harness PASS after framework sync and writing session reset
+
+**Does not prove**
+- CMPD bibliography gate completion
+- AEA acceptance
+- scientific validity
+- claim support
+- paper readiness
 

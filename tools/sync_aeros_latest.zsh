@@ -59,9 +59,9 @@ for T in "${TARGETS[@]}"; do
   if [ ! -f "$T/decisions/update_ledger.md" ]; then
     [ -f "$SRC/decisions/update_ledger.md" ] && rsync -a "$SRC/decisions/update_ledger.md" "$T/decisions/update_ledger.md"
   fi
-  if [ ! -f "$T/decisions/update_ledger_chain.jsonl" ]; then
-    [ -f "$SRC/decisions/update_ledger_chain.jsonl" ] && rsync -a "$SRC/decisions/update_ledger_chain.jsonl" "$T/decisions/update_ledger_chain.jsonl"
-  fi
+  # Do not copy the template's hash-chain into a project. The chain hashes the
+  # project-local update ledger, so it must be initialized/re-anchored per
+  # target by the postprocessor below.
   if [ ! -f "$T/decisions/human_gate_queue.yml" ]; then
     rsync -a "$SRC/decisions/human_gate_queue.yml" "$T/decisions/human_gate_queue.yml"
   fi
@@ -376,3 +376,129 @@ for root in targets:
     changed = ensure_manifest_wiring(root / "project_manifest.yml")
     print(f"manifest wiring {'updated' if changed else 'ok'}: {root}")
 PYMANIFEST
+
+# Post-process 3: merge route-decision scaffold fields without overwriting the
+# project's current selected route / decision metadata.
+"$AEROS_SYNC_PYTHON" - <<'PYROUTE'
+import os
+from pathlib import Path
+import yaml
+
+src = Path("/Users/jiamingzhang/aeros-template")
+targets = [Path(p) for p in os.environ.get("AEROS_SYNC_TARGETS", "").splitlines() if p.strip()]
+template_path = src / "discovery" / "route_decision.yml"
+template = yaml.safe_load(template_path.read_text(encoding="utf-8")) or {}
+
+def merge_unique(existing, incoming):
+    out = []
+    for item in list(existing or []) + list(incoming or []):
+        if item not in out:
+            out.append(item)
+    return out
+
+for root in targets:
+    path = root / "discovery" / "route_decision.yml"
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(template_path.read_text(encoding="utf-8"), encoding="utf-8")
+        print(f"route decision scaffold initialized: {root}")
+        continue
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    original = yaml.safe_dump(data, sort_keys=False, allow_unicode=True)
+    data.setdefault("version", template.get("version", "0.1"))
+    data.setdefault("policy", template.get("policy", "AEROS-DISCOVERY-ROUTE-DECISION-001"))
+    data["allowed_routes"] = merge_unique(data.get("allowed_routes"), template.get("allowed_routes"))
+    rules = data.setdefault("route_rules", {})
+    for route, rule in (template.get("route_rules") or {}).items():
+        rules.setdefault(route, rule)
+    hypotheses = data.setdefault("route_hypotheses", {})
+    for route, hypothesis in (template.get("route_hypotheses") or {}).items():
+        hypotheses.setdefault(route, hypothesis)
+    data["negative_seed_keywords"] = merge_unique(data.get("negative_seed_keywords"), template.get("negative_seed_keywords"))
+    data["does_not_prove"] = merge_unique(data.get("does_not_prove"), template.get("does_not_prove"))
+    rendered = yaml.safe_dump(data, sort_keys=False, allow_unicode=True)
+    if rendered != original:
+        path.write_text(rendered, encoding="utf-8")
+        print(f"route decision scaffold merged: {root}")
+    else:
+        print(f"route decision scaffold ok: {root}")
+PYROUTE
+
+# Post-process 4: initialize or re-anchor each project's local update-ledger
+# hash chain. This must be project-specific because subject_sha256 points to the
+# project's own decisions/update_ledger.md.
+"$AEROS_SYNC_PYTHON" - <<'PYCHAIN'
+import hashlib
+import json
+import os
+from pathlib import Path
+
+targets = [Path(p) for p in os.environ.get("AEROS_SYNC_TARGETS", "").splitlines() if p.strip()]
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+def canonical_hash(record: dict) -> str:
+    payload = {k: v for k, v in record.items() if k != "entry_hash"}
+    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+def load_records(path: Path) -> list[dict]:
+    if not path.exists():
+        return []
+    records = []
+    for raw in path.read_text(encoding="utf-8").splitlines():
+        if raw.strip():
+            records.append(json.loads(raw))
+    return records
+
+def append_record(root: Path, entry_id: str, scope: list[str], reason: str) -> bool:
+    ledger = root / "decisions" / "update_ledger.md"
+    if not ledger.exists():
+        return False
+    chain = root / "decisions" / "update_ledger_chain.jsonl"
+    records = load_records(chain)
+    current_hash = sha256_file(ledger)
+    if records and records[-1].get("subject") == "decisions/update_ledger.md" and records[-1].get("subject_sha256") == current_hash:
+        return False
+    prev_hash = records[-1].get("entry_hash") if records else "GENESIS"
+    record = {
+        "version": 1,
+        "seq": len(records) + 1,
+        "entry_id": entry_id,
+        "subject": "decisions/update_ledger.md",
+        "subject_sha256": current_hash,
+        "prev_hash": prev_hash,
+        "payload": {
+            "commit_refs": ["sync-local"],
+            "scope": scope,
+            "verification_strength": "local_hash_chain_over_observed_subject_file",
+            "reason": reason,
+            "does_not_prove": [
+                "scientific validity",
+                "claim support",
+                "gate approval",
+                "external transparency",
+                "malicious actor cannot rewrite both ledger and chain",
+            ],
+        },
+    }
+    record["entry_hash"] = canonical_hash(record)
+    chain.parent.mkdir(parents=True, exist_ok=True)
+    with chain.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
+    return True
+
+for root in targets:
+    changed = append_record(
+        root,
+        "sync-local-update-ledger-chain-anchor",
+        ["project_specific_update_ledger_chain_anchor"],
+        "sync initialized or re-anchored the project-local ledger chain after framework rollout",
+    )
+    print(f"ledger chain {'anchored' if changed else 'ok'}: {root}")
+PYCHAIN

@@ -38,6 +38,9 @@ skill_waivers:
         project = root / "project"
         project.mkdir()
         (project / "project_manifest.yml").write_text("project:\n  name: lagging\n", encoding="utf-8")
+        template = root / "template"
+        (template / "tools").mkdir(parents=True)
+        (template / "tools" / "sync_aeros_latest.zsh").write_text("# fixture template\n", encoding="utf-8")
         completion_dir = root / "agent_runs" / "completion_receipts"
         completion_dir.mkdir(parents=True)
         (completion_dir / "T002.yml").write_text(
@@ -50,7 +53,7 @@ substantive_evidence_paths: []
             encoding="utf-8",
         )
         old_template_root = os.environ.get("AEROS_TEMPLATE_ROOT")
-        os.environ["AEROS_TEMPLATE_ROOT"] = ROOT.as_posix()
+        os.environ["AEROS_TEMPLATE_ROOT"] = template.as_posix()
         try:
             harvested = harvest_improvements(root, project_roots=[project.as_posix()])
         finally:
