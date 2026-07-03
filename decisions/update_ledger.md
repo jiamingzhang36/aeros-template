@@ -1828,7 +1828,7 @@ this pending entry and append a new hash-chain record.
 
 ### 2026-07-03 — Freeze runtime expansion and add compiled mode/lead metrics
 
-**Commit(s)**: `pending`
+**Commit(s)**: `d2aa48e`
 
 **Action**: Added `docs/design/runtime_phase1_freeze.md` as the phase-1 freeze
 memo, added a read-only compiled mode projection over existing task/execution
