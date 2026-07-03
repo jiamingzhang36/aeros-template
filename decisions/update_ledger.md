@@ -1797,7 +1797,7 @@ entry and append a new hash-chain record.
 
 ### 2026-07-03 — Add broad-capture low-audit lead mode
 
-**Commit(s)**: `pending`
+**Commit(s)**: `8237be8`
 
 **Action**: Added `broad_capture` as a low-governance execution/task mode for
 early lead sweeps, added `lead_queue` and `candidate_queue` output intents,
