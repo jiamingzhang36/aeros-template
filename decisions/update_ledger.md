@@ -1881,7 +1881,7 @@ If committed, backfill this pending entry and append a final hash-chain record.
 
 ### 2026-07-03 — Add observed writes audit
 
-**Commit(s)**: `pending`
+**Commit(s)**: `11ba058`
 
 **Action**: Added `aeros writes audit --since HEAD` as a dry-run observed-write
 audit that compares git-observed writes with declared write roots and protected
