@@ -1709,7 +1709,7 @@ otherwise checks can reference template-only files.
 
 ### 2026-07-03 — Add harness-observed receipts and protected-path commit guard
 
-**Commit(s)**: `pending`
+**Commit(s)**: `66be934`
 
 **Action**: Added a harness-generated observed receipt path for
 `checks/run_harness_checks.py` plus a protected-path pre-commit hook template and
@@ -1736,7 +1736,7 @@ If committed, backfill this pending entry with the framework commit hash.
 
 ### 2026-07-03 — Add ledger hash-chain, evidence sufficiency audit, and AEA 2026 alignment refresh
 
-**Commit(s)**: `pending`
+**Commit(s)**: `66be934`
 
 **Action**: Added a local update-ledger hash-chain policy/check, an evidence
 sufficiency audit policy/template/check covering the eight governance dimensions
