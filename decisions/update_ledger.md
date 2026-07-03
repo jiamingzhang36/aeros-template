@@ -1906,7 +1906,7 @@ audits when needed.
 committed, backfill this pending entry and append a final hash-chain record.
 ### 2026-07-03 — Close framework freeze tail items
 
-**Commit(s)**: `pending`
+**Commit(s)**: `d09012a`
 
 **Scope:** template framework only.
 
