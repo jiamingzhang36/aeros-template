@@ -15,6 +15,64 @@ How to read this ledger:
 - `Drift risk`: how this could become overbuilt, bureaucratic, or misleading.
 - `Next check`: what should be watched in the next real project run.
 
+## 2026-07-03
+
+### 2026-07-03 - Repair adapter-layer ledger and preflight authority drift
+
+**Commit(s)**: `pending`
+
+**Action**: Fixed the adapter layer after review found three correctness risks: neutral tasks defaulted to `claim_audit`, which removed `evidence/claim_registry.md` from `must_not_touch`; route keyword inference overwrote a pending route decision instead of surfacing it as a suggestion; and sync doctor did not cover route-gate/workflow-preset surfaces. Added `general_guardrail`, kept claim registry protected by default, changed preflight to report `route=pending` plus `route_suggestion`, expanded sync doctor capabilities, removed the hardcoded template fallback, and ignored the local `validation_projects/light-meal/` scratch project.
+
+**Alignment**: Keeps AEROS advisory packets honest: preflight should reduce drift, not grant accidental authority. The sync doctor should reveal stale project surfaces before judging downstream behavior.
+
+**Non-goal**: Does not make keyword classification semantic understanding, approve routes, fetch data, admit evidence, edit claims, approve gates, or sync any downstream project.
+
+**Drift risk**: Keyword classifiers remain brittle (`metadata`/`preflight`-style accidental matches are possible). Mitigation: `general_guardrail` is conservative, route inference is suggestion-only, and preflight outputs explicit `does_not_prove` boundaries.
+
+**Next check**: Run on one real source-capture project and confirm neutral cleanup keeps `claim_registry` protected, route-sensitive work stops at pending route decisions, and sync doctor flags route/workflow capability drift.
+
+### 2026-07-03 - Source capture permission tiers
+
+**Commit(s)**: `29f1e09`
+
+**Action**: Added `source_capture_permission` tiers so low-risk public/local staging capture can proceed without repeated human approval, while Chrome/browser/portal/batch capture requires bounded route-level approval and credentials/API keys/paid/private/ToS/`data/raw`/canonical/claim/paper/release work remains human-required.
+
+**Alignment**: Reduces unnecessary human pushes for safe staging work while preserving the core boundary: staging capture is not canonical evidence, claim support, paper readiness, or release approval.
+
+**Non-goal**: Does not fetch sources, validate source identity, admit evidence, write canonical data, modify protected files, approve gates, or waive legal/privacy/IRB/source terms.
+
+**Drift risk**: Green-tier capture could be mistaken for permission to promote evidence. Mitigation: preflight requires staging/probe/audit outputs only and records promotion as a separate controlled step.
+
+**Next check**: In a real public-source project, verify `aeros task preflight` returns `none_for_staging_public_capture` for official/public staging snapshots and `route_level` for browser/portal batches.
+
+### 2026-07-03 - Task preflight and sync doctor adapters
+
+**Commit(s)**: `a7f261f`
+
+**Action**: Added `aeros task preflight` to emit the short task-start operating envelope (`task_mode`, route, skill obligations, output intents, allowed paths, must-not-touch paths) and `aeros sync doctor` to compare downstream projects against current template capabilities. Tightened skill receipts so required/recommended skill work must either record `skills_used` or an explicit waiver.
+
+**Alignment**: Converts repeated chat instructions into deterministic adapter-layer packets that make the next step, boundaries, and sync drift visible before work starts.
+
+**Non-goal**: Does not execute tasks, approve routes, invoke skills, certify skill output, approve gates, admit evidence, or decide the scientific quality of a workflow.
+
+**Drift risk**: Preflight could be over-trusted as an authority envelope and sync doctor could be treated as scientific validation. Mitigation: both are advisory and carry explicit non-goal boundaries; preflight now keeps protected surfaces protected unless a true contract/human route allows them.
+
+**Next check**: Run preflight and sync doctor in SNAP/CMPD before the next source/data task and confirm stale template surfaces are reported before judging project behavior.
+
+### 2026-07-03 - Task mode, output intent, route gate, and improve harvest controls
+
+**Commit(s)**: `ecee50d`
+
+**Action**: Added task-mode classification, output-intent declarations, route early gate checks, and `aeros improve harvest` so AEROS can distinguish source capture, data repair, claim audit, writing sync, submission readiness, and route recovery without treating staging as canonical evidence.
+
+**Alignment**: Moves AEROS toward a lighter cockpit and better project adaptation: tasks get the smallest useful guardrail rather than one heavy governance shell for every action.
+
+**Non-goal**: Does not make keyword classifiers semantic reasoning, fetch data, complete literature review, promote staging artifacts, approve routes, approve gates, or upgrade claims.
+
+**Drift risk**: Keyword-based task classification can be brittle and should not be treated as scientific understanding. Mitigation: checks validate only structural honesty; route and output intent remain advisory until supported by receipts/provenance/human review.
+
+**Next check**: On a real project, compare preflight/task-mode recommendations against the actual task and record any misclassification as an improvement harvest item.
+
 ## 2026-07-01
 
 ### 2026-07-01 - Sync route-decision scaffold to downstream projects

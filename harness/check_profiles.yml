@@ -133,3 +133,4 @@ non_goals:
   - "No profile may weaken gate exit criteria."
   - "No profile may convert ROUTE_READY into SUBSTANTIVE_PRODUCED."
   - "No profile may hide a failed full harness when preparing release or publication."
+  - "Keyword classifiers are advisory guardrails only; do not treat them as semantic understanding."

@@ -43,18 +43,33 @@ def _load_yaml(path: Path) -> dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
-def _route_status(root: Path, intent: str) -> str:
+def _suggested_route(intent: str) -> str:
     text = intent.lower()
     if any(token in text for token in ("negative seed", "fraud", "violation", "litigation", "complaint")):
         return "negative_seed_first"
     if any(token in text for token in ("base universe", "registry", "official registry")):
         return "base_universe_first"
+    return ""
+
+
+def _route_status(root: Path, intent: str) -> dict[str, str]:
     data = _load_yaml(root / "discovery" / "route_decision.yml")
+    suggested = _suggested_route(intent)
     for key in ("selected_route", "recommended_route", "current_route", "route"):
         value = str(data.get(key, "")).strip()
-        if value:
-            return value
-    return "pending"
+        if value and value.lower() not in {"pending", "tbd", "none"}:
+            return {
+                "route": value,
+                "route_suggestion": suggested,
+                "decision_status": str(data.get("decision_status", "") or "").strip(),
+                "route_source": "route_decision",
+            }
+    return {
+        "route": "pending",
+        "route_suggestion": suggested,
+        "decision_status": str(data.get("decision_status", "") or "pending").strip(),
+        "route_source": "route_decision_pending" if data else "inferred_suggestion_only",
+    }
 
 
 def _workflow_allowed_prefixes(root: Path, workflow: str) -> list[str]:
@@ -97,8 +112,7 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
     if not allowed:
         allowed = ["agent_runs/", "audits/", "outputs/context/", "work/"]
     must_not_touch = list(DEFAULT_MUST_NOT_TOUCH)
-    if mode.get("task_mode") == "claim_audit":
-        must_not_touch = [p for p in must_not_touch if p != "evidence/claim_registry.md"]
+    route = _route_status(root, intent)
     permission = classify_source_capture_permission(
         root,
         lane=lane or (contract.work_lane if contract else ""),
@@ -113,7 +127,11 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
         "lane": lane or (contract.work_lane if contract else ""),
         "intent": intent,
         "task_mode": mode.get("task_mode"),
-        "route": _route_status(root, intent),
+        "task_mode_reason": mode.get("reason", ""),
+        "route": route.get("route", "pending"),
+        "route_suggestion": route.get("route_suggestion", ""),
+        "decision_status": route.get("decision_status", ""),
+        "route_source": route.get("route_source", ""),
         "workflow_preset": workflow,
         "execution_mode": mode.get("execution_mode"),
         "skill_obligations": obligations,
@@ -137,7 +155,10 @@ def format_task_preflight(report: dict[str, Any]) -> str:
         "",
         f"status: {report.get('status')}",
         f"task_mode: {report.get('task_mode')}",
+        f"task_mode_reason: {report.get('task_mode_reason')}",
         f"route: {report.get('route')}",
+        f"route_suggestion: {report.get('route_suggestion')}",
+        f"decision_status: {report.get('decision_status')}",
         f"workflow_preset: {report.get('workflow_preset')}",
         f"execution_mode: {report.get('execution_mode')}",
         f"source_capture_permission: {(report.get('source_capture_permission') or {}).get('approval_required')}",

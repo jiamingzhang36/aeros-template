@@ -5,6 +5,10 @@ principle: >
   sufficient workflow preset. Task mode is advisory and cannot approve gates,
   admit evidence, or certify claim support.
 modes:
+  general_guardrail:
+    workflow_preset: ""
+    execution_mode: bounded_probe
+    allowed_output_intents: [audit_note, probe_only]
   source_capture:
     workflow_preset: recapture_source_pool
     execution_mode: source_capture

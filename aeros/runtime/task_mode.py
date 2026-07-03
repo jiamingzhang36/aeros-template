@@ -20,6 +20,11 @@ from .contract import Contract, load_contract
 POLICY_PATH = Path("harness/task_mode_policy.yml")
 
 DEFAULT_MODES: dict[str, dict[str, Any]] = {
+    "general_guardrail": {
+        "workflow_preset": "",
+        "execution_mode": "bounded_probe",
+        "allowed_output_intents": ["audit_note", "probe_only"],
+    },
     "source_capture": {
         "workflow_preset": "recapture_source_pool",
         "execution_mode": "source_capture",
@@ -94,8 +99,15 @@ def load_contract_by_id(root: Path, task_id: str) -> Contract | None:
 def infer_task_mode(root: Path, *, task_id: str = "", lane: str = "", intent: str = "") -> dict[str, Any]:
     contract = load_contract_by_id(root, task_id)
     blob = f"{lane} {intent} {_contract_blob(contract)}".lower()
-    mode = "data_repair" if (lane == "data" or "data" in blob) else "claim_audit"
-    reason = "defaulted from lane/task context"
+    if lane == "data":
+        mode = "data_repair"
+    elif lane == "claim":
+        mode = "claim_audit"
+    elif lane == "writing":
+        mode = "writing_sync"
+    else:
+        mode = "general_guardrail"
+    reason = "defaulted to conservative guardrail from lane/task context"
 
     if any(token in blob for token in ("wrong route", "route recovery", "negative seed", "base universe", "route_decision")):
         mode, reason = "route_recovery", "route decision or failed route context detected"

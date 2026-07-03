@@ -16,6 +16,8 @@ from typing import Any
 CAPABILITIES: dict[str, list[str]] = {
     "improve": ["aeros/runtime/improve_harvest.py", "checks/check_improve_harvest.py"],
     "mode": ["aeros/runtime/execution_mode.py", "aeros/runtime/task_mode.py", "harness/task_mode_policy.yml", "checks/check_task_mode.py"],
+    "workflow_presets": ["aeros/runtime/session_guard.py", "harness/session_scope.yml", "checks/check_session_scope.py"],
+    "route_gate": ["aeros/runtime/route_gate.py", "checks/check_route_early_gate.py", "checks/check_discovery_route_decision.py", "discovery/route_decision.yml"],
     "artifact_stage": ["aeros/runtime/artifact_stage.py", "checks/check_artifact_stage.py"],
     "skill_coverage": ["aeros/runtime/skill_obligation.py", "harness/skill_obligation_policy.yml", "checks/check_skill_coverage.py"],
     "output_intent": ["aeros/runtime/output_intent.py", "harness/output_intent_policy.yml", "checks/check_output_intent.py"],
@@ -45,8 +47,7 @@ def default_template_root(current_root: Path) -> Path:
         return Path(env).expanduser().resolve()
     if (current_root / "tools" / "sync_aeros_latest.zsh").exists():
         return current_root.resolve()
-    fallback = Path("/Users/jiamingzhang/aeros-template")
-    return fallback if fallback.exists() else current_root.resolve()
+    return Path("__AEROS_TEMPLATE_ROOT_NOT_FOUND__")
 
 
 def default_project_roots(root: Path) -> list[Path]:
@@ -102,6 +103,15 @@ def diagnose_project(template_root: Path, project_root: Path) -> dict[str, Any]:
 def sync_doctor(root: Path, *, projects: list[str] | None = None, template_root: str | Path | None = None) -> dict[str, Any]:
     root = Path(root)
     tpl = Path(template_root).expanduser().resolve() if template_root else default_template_root(root)
+    if not tpl.exists() or not (tpl / "tools" / "sync_aeros_latest.zsh").exists():
+        return {
+            "status": "ATTENTION",
+            "template_root": tpl.as_posix(),
+            "template_status": "template_not_found",
+            "projects_checked": 0,
+            "projects": [],
+            "does_not_prove": DOES_NOT_PROVE,
+        }
     project_roots = [Path(p).expanduser().resolve() for p in (projects or [])] or default_project_roots(root)
     rows = [diagnose_project(tpl, project) for project in project_roots if (project / "project_manifest.yml").exists()]
     missing = sum(len(row["missing_capabilities"]) for row in rows)

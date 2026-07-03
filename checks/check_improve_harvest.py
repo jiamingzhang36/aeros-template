@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -48,7 +49,15 @@ substantive_evidence_paths: []
 """,
             encoding="utf-8",
         )
-        harvested = harvest_improvements(root, project_roots=[project.as_posix()])
+        old_template_root = os.environ.get("AEROS_TEMPLATE_ROOT")
+        os.environ["AEROS_TEMPLATE_ROOT"] = ROOT.as_posix()
+        try:
+            harvested = harvest_improvements(root, project_roots=[project.as_posix()])
+        finally:
+            if old_template_root is None:
+                os.environ.pop("AEROS_TEMPLATE_ROOT", None)
+            else:
+                os.environ["AEROS_TEMPLATE_ROOT"] = old_template_root
         if not any(item.get("kind") == "skill_waiver_pattern" for item in harvested.get("backlog_candidates", [])):
             failures.append("fixture: skill waiver pattern was not harvested")
         if not any(item.get("kind") == "project_version_lag" for item in harvested.get("backlog_candidates", [])):

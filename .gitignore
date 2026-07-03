@@ -44,3 +44,4 @@ outputs/logs/rigor_check_latest.*
 # Local validation projects not promoted to template fixtures.
 validation_projects/franchise_fraud/
 validation_projects/maha_snap_waiver/
+validation_projects/light-meal/

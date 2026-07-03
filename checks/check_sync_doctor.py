@@ -28,7 +28,7 @@ def main() -> int:
         if diag.get("status") != "ATTENTION":
             failures.append("fixture: missing framework files did not produce ATTENTION")
         missing = set(diag.get("missing_capabilities") or [])
-        if not {"improve", "mode", "output_intent", "task_preflight"} & missing:
+        if not {"improve", "mode", "route_gate", "workflow_presets", "output_intent", "task_preflight"} & missing:
             failures.append("fixture: expected missing capabilities were not reported")
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))

@@ -130,6 +130,7 @@ principle: Advisory method skills cannot certify identification, claims, or gate
 policy: AEROS-TASK-MODE-001
 principle: Classify task shape before work starts; task mode is advisory and cannot approve gates, admit evidence, or certify claim support.
 modes:
+  general_guardrail: {workflow_preset: "", execution_mode: bounded_probe, allowed_output_intents: [audit_note, probe_only]}
   source_capture: {workflow_preset: recapture_source_pool, execution_mode: source_capture, allowed_output_intents: [probe_only, staging_artifact, audit_note]}
   data_repair: {workflow_preset: source_promotion_queue, execution_mode: bounded_probe, allowed_output_intents: [probe_only, canonical_candidate, audit_note]}
   claim_audit: {workflow_preset: claim_audit, execution_mode: bounded_probe, allowed_output_intents: [audit_note, canonical_candidate]}

@@ -32,16 +32,17 @@ def main() -> int:
             if key not in spec:
                 failures.append(f"{name}: missing {key}")
 
-    cases = {
-        "recapture sources in browser": "source_capture",
-        "repair denominator data inventory": "data_repair",
-        "audit claim ceiling": "claim_audit",
-        "sync Word paper draft": "writing_sync",
-        "submission preflight": "submission_readiness",
-        "wrong route need negative seed first": "route_recovery",
-    }
-    for intent, expected in cases.items():
-        report = infer_task_mode(ROOT, lane="data", intent=intent)
+    cases = [
+        ("", "tidy up the folder structure", "general_guardrail"),
+        ("data", "recapture sources in browser", "source_capture"),
+        ("data", "repair denominator data inventory", "data_repair"),
+        ("data", "audit claim ceiling", "claim_audit"),
+        ("data", "sync Word paper draft", "writing_sync"),
+        ("data", "submission preflight", "submission_readiness"),
+        ("data", "wrong route need negative seed first", "route_recovery"),
+    ]
+    for lane, intent, expected in cases:
+        report = infer_task_mode(ROOT, lane=lane, intent=intent)
         if report["task_mode"] != expected:
             failures.append(f"intent {intent!r}: expected {expected}, got {report['task_mode']}")
     if "--json" in sys.argv:
