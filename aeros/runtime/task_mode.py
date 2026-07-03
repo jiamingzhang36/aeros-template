@@ -25,6 +25,11 @@ DEFAULT_MODES: dict[str, dict[str, Any]] = {
         "execution_mode": "bounded_probe",
         "allowed_output_intents": ["audit_note", "probe_only"],
     },
+    "broad_capture": {
+        "workflow_preset": "broad_capture_leads",
+        "execution_mode": "broad_capture",
+        "allowed_output_intents": ["lead_queue", "candidate_queue", "audit_note"],
+    },
     "source_capture": {
         "workflow_preset": "recapture_source_pool",
         "execution_mode": "source_capture",
@@ -109,7 +114,9 @@ def infer_task_mode(root: Path, *, task_id: str = "", lane: str = "", intent: st
         mode = "general_guardrail"
     reason = "defaulted to conservative guardrail from lane/task context"
 
-    if any(token in blob for token in ("wrong route", "route recovery", "negative seed", "base universe", "route_decision")):
+    if any(token in blob for token in ("broad search", "lead sweep", "lead queue", "candidate queue", "wide capture", "撒网", "线索")):
+        mode, reason = "broad_capture", "early lead capture context detected"
+    elif any(token in blob for token in ("wrong route", "route recovery", "negative seed", "base universe", "route_decision")):
         mode, reason = "route_recovery", "route decision or failed route context detected"
     elif any(token in blob for token in ("submit", "submission", "release", "replication package", "preflight")):
         mode, reason = "submission_readiness", "submission/release-facing context detected"

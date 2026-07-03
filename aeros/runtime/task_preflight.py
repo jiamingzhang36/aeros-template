@@ -23,8 +23,11 @@ from .task_mode import infer_task_mode, load_contract_by_id
 
 DEFAULT_MUST_NOT_TOUCH = [
     "data/raw/",
+    "data/intermediate/",
+    "data/processed/",
     "docs/protected_definitions.yml",
     "evidence/claim_registry.md",
+    "paper/",
     "decisions/decision_log.csv",
 ]
 

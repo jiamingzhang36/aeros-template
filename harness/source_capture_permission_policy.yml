@@ -10,12 +10,22 @@ tiers:
     allowed_when:
       - public URL, official site, OpenAlex/Zotero local metadata, or local PDF
       - no login, cookie, API key, paid access, private data, IRB, ToS, or robots concern is indicated
-      - output_intent is only probe_only, staging_artifact, or audit_note
-      - writes are limited to work, source_snapshots, audits, quality_reports, outputs/context, or evidence/delta_log.jsonl
+      - output_intent is only probe_only, lead_queue, candidate_queue, staging_artifact, or audit_note
+      - writes are limited to work, work/leads, data/backfill lead/candidate queues, source_snapshots, audits, quality_reports, outputs/context, or evidence/delta_log.jsonl
     must_not_do:
       - write data/raw or canonical data
       - modify protected definitions, claim registry, paper, release, or approval artifacts
       - claim substantive data completion or evidence admission
+  green_broad_capture:
+    approval_required: none_for_broad_lead_capture
+    allowed_when:
+      - broad_search or lead_sweep work only
+      - writes are limited to work/leads/ or data/backfill/*_lead_queue.csv and *_candidate_queue.csv
+      - no canonical, processed, claim, paper, release, credential, paid, login, privacy, ToS, or IRB risk is indicated
+    must_not_do:
+      - write data/intermediate, data/processed, data/raw, claim registry, paper, replication, release, or approval artifacts
+      - treat a lead or candidate queue as evidence
+      - claim substantive data completion or paper-facing progress
   yellow_route_level:
     approval_required: route_level
     allowed_when:

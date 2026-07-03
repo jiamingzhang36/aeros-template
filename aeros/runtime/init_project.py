@@ -133,6 +133,7 @@ policy: AEROS-TASK-MODE-001
 principle: Classify task shape before work starts; task mode is advisory and cannot approve gates, admit evidence, or certify claim support.
 modes:
   general_guardrail: {workflow_preset: "", execution_mode: bounded_probe, allowed_output_intents: [audit_note, probe_only]}
+  broad_capture: {workflow_preset: broad_capture_leads, execution_mode: broad_capture, allowed_output_intents: [lead_queue, candidate_queue, audit_note]}
   source_capture: {workflow_preset: recapture_source_pool, execution_mode: source_capture, allowed_output_intents: [probe_only, staging_artifact, audit_note]}
   data_repair: {workflow_preset: source_promotion_queue, execution_mode: bounded_probe, allowed_output_intents: [probe_only, canonical_candidate, audit_note]}
   claim_audit: {workflow_preset: claim_audit, execution_mode: bounded_probe, allowed_output_intents: [audit_note, canonical_candidate]}
@@ -143,13 +144,14 @@ does_not_prove: [task execution, output admissibility, claim support, human gate
 """,
     "harness/output_intent_policy.yml": """version: "0.1"
 policy: AEROS-OUTPUT-INTENT-001
-valid_output_intents: [probe_only, staging_artifact, canonical_candidate, canonical_update, audit_note]
+valid_output_intents: [probe_only, lead_queue, candidate_queue, staging_artifact, canonical_candidate, canonical_update, audit_note]
 does_not_prove: [output existence, evidence admissibility, release readiness, claim support]
 """,
     "harness/source_capture_permission_policy.yml": """version: "0.1"
 policy: AEROS-SOURCE-CAPTURE-PERMISSION-001
 tiers:
   green_public_staging: {approval_required: none_for_staging_public_capture}
+  green_broad_capture: {approval_required: none_for_broad_lead_capture}
   yellow_route_level: {approval_required: route_level}
   red_human_required: {approval_required: human_required}
 non_goals: [does not fetch sources, does not admit evidence, does not approve gates or canonical promotion]
@@ -160,6 +162,7 @@ principle: Right-size governance before running; modes advise/check scope but do
 modes:
   smoke_test: {profile: smoke, max_actions: 1, requires_human_decision: false, allowed_progress_label: CHECK_PASS}
   bounded_probe: {profile: lane:data, max_actions: 3, requires_human_decision: false, allowed_progress_label: ROUTE_READY}
+  broad_capture: {profile: lane:data, max_actions: 5, requires_human_decision: false, allowed_progress_label: ROUTE_READY, receipt_level: lightweight, audit_level: batch_only, claim_surface: none_by_construction}
   source_capture: {profile: lane:data, max_actions: 5, requires_human_decision: false, allowed_progress_label: ROUTE_READY}
   paper_release: {profile: full, max_actions: 1, requires_human_decision: true, allowed_progress_label: DECISION_RECORDED}
   expensive_api_run: {profile: lane:data, max_actions: 1, requires_human_decision: true, allowed_progress_label: ROUTE_READY}
@@ -292,6 +295,7 @@ lanes:
   compliance: {allowed_prefixes: [replication/, compliance/, docs/data_availability, paper/supplement, outputs/logs/], forbidden_prefixes: [data/raw/, evidence/claim_registry.md]}
   harness: {allowed_prefixes: [aeros/, checks/, harness/, templates/, tools/, docs/design/, project_manifest.yml, AGENTS.md], forbidden_prefixes: [data/raw/, paper/draft.md, evidence/claim_registry.md]}
 workflow_presets:
+  broad_capture_leads: {description: Wide early lead capture into isolated queues; not evidence or claim-supporting., allowed_prefixes: [work/leads/, data/backfill/, audits/broad_capture/, quality_reports/broad_capture/, outputs/logs/, evidence/delta_log.jsonl], allowed_actions: [broad search, lead sweep, source group probe, candidate queue update], forbidden_prefixes: [data/raw/, data/intermediate/, data/processed/, paper/, evidence/claim_registry.md, decisions/approvals/]}
   recapture_source_pool: {description: Recover and review candidate source pools without promoting them to canonical evidence., allowed_prefixes: [work/recapture_, audits/source_recapture/, quality_reports/source_recapture/, source_snapshots/, evidence/delta_log.jsonl], allowed_actions: [source recapture, chrome-assisted review, source-promotion queue], forbidden_prefixes: [evidence/claim_registry.md, decisions/approvals/]}
   claim_audit: {description: Audit claim support and deltas without collecting new raw data., allowed_prefixes: [audits/claim/, audits/advisory/, evidence/research_graph.yml, evidence/delta_log.jsonl, quality_reports/claim_audit/], allowed_actions: [claim audit, support-chain review, delta audit], forbidden_prefixes: [data/raw/, decisions/approvals/]}
   writing_guardrail: {description: Bounded paper/TeX edits and guardrail reports tied to existing claims and numbers., allowed_prefixes: [paper/, output/tex/, outputs/tex/, quality_reports/writing/, audits/writing/, evidence/delta_log.jsonl], allowed_actions: [bounded writing edit, number/claim guardrail, tex compile review], forbidden_prefixes: [data/raw/, evidence/claim_registry.md, decisions/approvals/]}

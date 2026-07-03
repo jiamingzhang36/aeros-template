@@ -34,6 +34,7 @@ def main() -> int:
 
     cases = [
         ("", "tidy up the folder structure", "general_guardrail"),
+        ("data", "broad search lead sweep into lead queue", "broad_capture"),
         ("data", "recapture sources in browser", "source_capture"),
         ("data", "repair denominator data inventory", "data_repair"),
         ("data", "audit claim ceiling", "claim_audit"),

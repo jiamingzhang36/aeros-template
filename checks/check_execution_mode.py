@@ -15,6 +15,7 @@ POLICY = Path("harness/execution_mode_policy.yml")
 REQUIRED_MODES = {
     "smoke_test",
     "bounded_probe",
+    "broad_capture",
     "source_capture",
     "paper_release",
     "expensive_api_run",
@@ -41,6 +42,9 @@ def main() -> int:
     smoke = recommend_execution_mode(Path.cwd(), lane="data", intent="quick smoke test")
     if smoke.get("mode") != "smoke_test" or smoke.get("check_profile") != "smoke":
         failures.append("smoke-test recommendation did not select smoke_test/smoke")
+    broad = recommend_execution_mode(Path.cwd(), lane="data", intent="broad search lead sweep")
+    if broad.get("mode") != "broad_capture" or broad.get("claim_surface") != "none_by_construction":
+        failures.append("broad search did not select broad_capture with no claim surface")
     api = recommend_execution_mode(Path.cwd(), lane="data", intent="paid API refresh")
     if api.get("mode") != "expensive_api_run" or not api.get("requires_human_decision"):
         failures.append("API intent did not select expensive_api_run with human decision")

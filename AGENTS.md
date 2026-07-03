@@ -402,6 +402,17 @@ For active research projects, data feasibility should be tested with a small pro
 - Do not run full collection into `data/raw/` before a passing small probe unless a human records an explicit receipt-backed exception.
 - Do not upgrade claims or draft paper conclusions from probe evidence alone; a probe establishes feasibility, not final support.
 
+## Broad Capture Rules
+
+Use broad capture for early lead collection, not for evidence admission.
+
+- `execution_mode: broad_capture` means wide search, lead sweep, or source-group probing only.
+- Broad capture may write isolated lead surfaces such as `work/leads/` and `data/backfill/*_lead_queue.csv` / `data/backfill/*_candidate_queue.csv`.
+- Broad capture uses lightweight receipts and batch-only audit. Do not require a full run report for every individual lead.
+- Broad capture must not write `data/raw/`, `data/intermediate/`, `data/processed/`, `evidence/claim_registry.md`, `paper/`, release, approval, or replication artifacts.
+- Leads and candidate queues are not evidence, not canonical data, not claim support, and not paper-facing progress.
+- Promotion from lead/candidate queues into staging, intermediate, processed, canonical, claim, or paper surfaces requires a separate promotion action with the normal AEROS audit level.
+
 ## Data Backfill Rules
 
 When a coverage, denominator, source, or variable gap is discovered, do not leave it as an informal note.

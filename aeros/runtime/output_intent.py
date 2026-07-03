@@ -10,6 +10,8 @@ from .contract import Contract
 
 VALID_OUTPUT_INTENTS = {
     "probe_only",
+    "lead_queue",
+    "candidate_queue",
     "staging_artifact",
     "canonical_candidate",
     "canonical_update",

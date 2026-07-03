@@ -115,6 +115,27 @@ lanes:
       - paper/draft.md
       - evidence/claim_registry.md
 workflow_presets:
+  broad_capture_leads:
+    description: "Wide early lead capture into isolated queues; not evidence, not canonical, not claim-supporting."
+    allowed_prefixes:
+      - work/leads/
+      - data/backfill/
+      - audits/broad_capture/
+      - quality_reports/broad_capture/
+      - outputs/logs/
+      - evidence/delta_log.jsonl
+    allowed_actions:
+      - broad search
+      - lead sweep
+      - source group probe
+      - candidate queue update
+    forbidden_prefixes:
+      - data/raw/
+      - data/intermediate/
+      - data/processed/
+      - paper/
+      - evidence/claim_registry.md
+      - decisions/approvals/
   recapture_source_pool:
     description: "Recover and review candidate source pools without promoting them to canonical evidence."
     allowed_prefixes:

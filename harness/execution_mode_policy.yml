@@ -21,6 +21,22 @@ modes:
     requires_human_decision: false
     allowed_progress_label: ROUTE_READY
     stop_condition: "Stop after one bounded probe, blocker, or queue update."
+  broad_capture:
+    governance_shell: light
+    check_profile: lane:data
+    max_provider_calls: 0
+    max_cost_usd: 0
+    requires_human_decision: false
+    allowed_progress_label: ROUTE_READY
+    receipt_level: lightweight
+    audit_level: batch_only
+    claim_surface: none_by_construction
+    promotion_required_for:
+      - data/intermediate
+      - data/processed
+      - canonical
+      - claim_registry
+    stop_condition: "Collect leads/queues only; stop before promotion, processed data, claims, or paper-facing outputs."
   source_capture:
     governance_shell: medium
     check_profile: lane:data

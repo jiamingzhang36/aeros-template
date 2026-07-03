@@ -69,6 +69,7 @@ def main() -> int:
         expected_missing = {
             "improve",
             "mode",
+            "broad_capture",
             "route_gate",
             "workflow_presets",
             "output_intent",

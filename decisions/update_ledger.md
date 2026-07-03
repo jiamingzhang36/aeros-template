@@ -1794,3 +1794,34 @@ projects still need a human to install the local pre-commit guard when desired.
 **Next check**: Run sync doctor, protected hook, ledger hash-chain, improvement
 backlog, smoke, and full harness checks. If committed, backfill this pending
 entry and append a new hash-chain record.
+
+### 2026-07-03 — Add broad-capture low-audit lead mode
+
+**Commit(s)**: `pending`
+
+**Action**: Added `broad_capture` as a low-governance execution/task mode for
+early lead sweeps, added `lead_queue` and `candidate_queue` output intents,
+added a `broad_capture_leads` workflow preset, and introduced a
+`check_broad_capture_firewall.py` fixture that allows writes to isolated
+lead/candidate queue surfaces while rejecting `data/raw`, `data/intermediate`,
+`data/processed`, claim registry, paper, release, approval, and replication
+surfaces.
+
+**Alignment**: Implements the "wide in/wide out, strict on promotion" rule:
+capture/search is not treated as evidence, canonical data, or claim support by
+construction. This reduces repeated approval/report overhead for harmless lead
+collection while keeping promotion into canonical/research-facing artifacts
+strict.
+
+**Non-goal**: Does not fetch sources, admit evidence, validate data, approve
+routes, promote candidates, support claims, update papers, or waive source
+terms, privacy, IRB, or release review.
+
+**Drift risk**: Keyword-based broad-capture detection is advisory and can
+misclassify unusual tasks. The firewall must remain narrow so lead queues do
+not become an unreviewed back door into processed/canonical or claim-facing
+surfaces.
+
+**Next check**: Run broad-capture firewall, execution/task/output/source
+permission checks, sync doctor, smoke, and full harness. If committed, backfill
+this pending entry and append a new hash-chain record.

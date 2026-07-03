@@ -9,6 +9,10 @@ modes:
     workflow_preset: ""
     execution_mode: bounded_probe
     allowed_output_intents: [audit_note, probe_only]
+  broad_capture:
+    workflow_preset: broad_capture_leads
+    execution_mode: broad_capture
+    allowed_output_intents: [lead_queue, candidate_queue, audit_note]
   source_capture:
     workflow_preset: recapture_source_pool
     execution_mode: source_capture

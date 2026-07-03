@@ -18,12 +18,14 @@ except Exception:  # pragma: no cover
 
 POLICY_PATH = Path("harness/source_capture_permission_policy.yml")
 
-GREEN_INTENTS = {"probe_only", "staging_artifact", "audit_note"}
+GREEN_INTENTS = {"probe_only", "lead_queue", "candidate_queue", "staging_artifact", "audit_note"}
 YELLOW_INTENTS = {"canonical_candidate"}
 RED_INTENTS = {"canonical_update"}
 
 RED_PATH_MARKERS = (
     "data/raw/",
+    "data/intermediate/",
+    "data/processed/",
     "evidence/claim_registry",
     "docs/protected_definitions",
     "decisions/approvals/",
@@ -35,6 +37,7 @@ RED_PATH_MARKERS = (
 
 STAGING_PATH_MARKERS = (
     "work/",
+    "data/backfill/",
     "source_snapshots/",
     "audits/",
     "quality_reports/",
@@ -77,6 +80,10 @@ YELLOW_TEXT_MARKERS = (
 )
 
 GREEN_TEXT_MARKERS = (
+    "broad search",
+    "lead sweep",
+    "lead queue",
+    "candidate queue",
     "public",
     "official",
     "openalex",
@@ -139,10 +146,22 @@ def classify_source_capture_permission(
     text = " ".join([lane, task_mode, intent, " ".join(outputs), " ".join(paths)]).lower()
     reasons: list[str] = []
 
+    broad_capture = task_mode == "broad_capture" or "broad_capture" in text or _has_any(text, ("broad search", "lead sweep", "lead queue", "candidate queue"))
+
     if any(intent in RED_INTENTS for intent in outputs) or _has_any(text, RED_TEXT_MARKERS) or _has_any(text, RED_PATH_MARKERS):
         tier = "red_human_required"
         approval_required = "human_required"
         reasons.append("credentials/cost/privacy/protected/canonical-or-release risk detected")
+    elif (
+        broad_capture
+        and outputs
+        and set(outputs).issubset({"lead_queue", "candidate_queue", "audit_note"})
+        and not _has_any(text, RED_PATH_MARKERS)
+        and any(path.startswith("work/leads/") or (path.startswith("data/backfill/") and (path.endswith("_lead_queue.csv") or path.endswith("_candidate_queue.csv"))) or path.startswith("audits/broad_capture/") or path.startswith("quality_reports/broad_capture/") for path in paths)
+    ):
+        tier = "green_broad_capture"
+        approval_required = "none_for_broad_lead_capture"
+        reasons.append("early broad capture is isolated to lead/candidate queues and has no claim surface by construction")
     elif any(intent in YELLOW_INTENTS for intent in outputs) or _has_any(text, YELLOW_TEXT_MARKERS):
         tier = "yellow_route_level"
         approval_required = "route_level"

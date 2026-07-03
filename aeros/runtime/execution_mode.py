@@ -38,6 +38,19 @@ DEFAULT_MODES: dict[str, dict[str, Any]] = {
         "allowed_progress_label": "ROUTE_READY",
         "stop_condition": "Stop after one bounded probe, blocker, or queue update.",
     },
+    "broad_capture": {
+        "governance_shell": "light",
+        "check_profile": "lane:data",
+        "max_provider_calls": 0,
+        "max_cost_usd": 0,
+        "requires_human_decision": False,
+        "allowed_progress_label": "ROUTE_READY",
+        "receipt_level": "lightweight",
+        "audit_level": "batch_only",
+        "claim_surface": "none_by_construction",
+        "promotion_required_for": ["data/intermediate", "data/processed", "canonical", "claim_registry"],
+        "stop_condition": "Collect leads/queues only; stop before promotion, processed data, claims, or paper-facing outputs.",
+    },
     "source_capture": {
         "governance_shell": "medium",
         "check_profile": "lane:data",
@@ -129,6 +142,8 @@ def _infer_mode(root: Path, *, lane: str = "", intent: str = "") -> tuple[str, s
     value = f"{lane} {intent}".lower()
     if "smoke" in value:
         return "smoke_test", "intent mentions smoke"
+    if any(token in value for token in ("broad search", "lead sweep", "lead queue", "candidate queue", "wide capture", "撒网", "线索")):
+        return "broad_capture", "intent is early lead capture, not evidence promotion"
     if any(token in value for token in ("api", "credential", "expensive", "provider", "nielsen")):
         return "expensive_api_run", "intent mentions API/credential/cost-sensitive work"
     if any(token in value for token in ("wait", "blocked", "external", "receipt", "fulltext")) or _has_pending_human_queue(root):
@@ -166,6 +181,10 @@ def recommend_execution_mode(root: Path, *, lane: str = "", intent: str = "", mo
         "max_cost_usd": float(spec.get("max_cost_usd", 0) or 0),
         "requires_human_decision": bool(spec.get("requires_human_decision", False)),
         "allowed_progress_label": spec.get("allowed_progress_label", "CHECK_PASS"),
+        "receipt_level": spec.get("receipt_level", "standard"),
+        "audit_level": spec.get("audit_level", "per_action"),
+        "claim_surface": spec.get("claim_surface", "possible"),
+        "promotion_required_for": list(spec.get("promotion_required_for") or []),
         "stop_condition": spec.get("stop_condition", ""),
         "does_not_prove": DOES_NOT_PROVE,
     }
@@ -183,6 +202,9 @@ def format_execution_mode(report: dict[str, Any]) -> str:
         f"max_provider_calls: {report.get('max_provider_calls')}",
         f"max_cost_usd: {report.get('max_cost_usd')}",
         f"allowed_progress_label: {report.get('allowed_progress_label')}",
+        f"receipt_level: {report.get('receipt_level')}",
+        f"audit_level: {report.get('audit_level')}",
+        f"claim_surface: {report.get('claim_surface')}",
         f"reason: {report.get('reason')}",
         f"stop_condition: {report.get('stop_condition')}",
         "",

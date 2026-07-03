@@ -22,7 +22,7 @@ def main() -> int:
     failures: list[str] = []
     data = yaml.safe_load(POLICY.read_text(encoding="utf-8")) if POLICY.exists() else {}
     tiers = set((data or {}).get("tiers") or {})
-    expected = {"green_public_staging", "yellow_route_level", "red_human_required"}
+    expected = {"green_public_staging", "green_broad_capture", "yellow_route_level", "red_human_required"}
     if tiers != expected:
         failures.append(f"policy tiers mismatch: expected {sorted(expected)}, got {sorted(tiers)}")
 
@@ -36,6 +36,16 @@ def main() -> int:
     )
     if green.get("approval_required") != "none_for_staging_public_capture":
         failures.append(f"green fixture required approval: {green.get('approval_required')}")
+    broad = classify_source_capture_permission(
+        ROOT,
+        lane="data",
+        task_mode="broad_capture",
+        intent="public broad search lead sweep",
+        output_intents=["lead_queue", "candidate_queue", "audit_note"],
+        allowed_to_touch=["work/leads/", "data/backfill/demo_lead_queue.csv", "data/backfill/demo_candidate_queue.csv"],
+    )
+    if broad.get("approval_required") != "none_for_broad_lead_capture":
+        failures.append(f"broad fixture required approval: {broad.get('approval_required')}")
 
     yellow = classify_source_capture_permission(
         ROOT,

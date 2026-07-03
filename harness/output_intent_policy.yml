@@ -6,11 +6,13 @@ principle: >
   raw/staging/canonical boundaries but does not admit evidence.
 valid_output_intents:
   - probe_only
+  - lead_queue
+  - candidate_queue
   - staging_artifact
   - canonical_candidate
   - canonical_update
   - audit_note
-promotion_rule: "Only canonical_candidate may be promoted after human/data-contract review; canonical_update must already be declared by contract."
+promotion_rule: "lead_queue and candidate_queue are not evidence, canonical data, or claim support. Only canonical_candidate may be promoted after human/data-contract review; canonical_update must already be declared by contract."
 does_not_prove:
   - output existence
   - evidence admissibility
