@@ -58,18 +58,24 @@ def _suggested_route(intent: str) -> str:
 def _route_status(root: Path, intent: str) -> dict[str, str]:
     data = _load_yaml(root / "discovery" / "route_decision.yml")
     suggested = _suggested_route(intent)
+    hypotheses = data.get("route_hypotheses") or {}
+    suggested_hypothesis = hypotheses.get(suggested) if isinstance(hypotheses, dict) and suggested else {}
+    hypothesis_text = str((suggested_hypothesis or {}).get("hypothesis") or "").strip()
     for key in ("selected_route", "recommended_route", "current_route", "route"):
         value = str(data.get(key, "")).strip()
         if value and value.lower() not in {"pending", "tbd", "none"}:
+            selected_hypothesis = hypotheses.get(value) if isinstance(hypotheses, dict) else {}
             return {
                 "route": value,
                 "route_suggestion": suggested,
+                "route_hypothesis": str((selected_hypothesis or {}).get("hypothesis") or hypothesis_text).strip(),
                 "decision_status": str(data.get("decision_status", "") or "").strip(),
                 "route_source": "route_decision",
             }
     return {
         "route": "pending",
         "route_suggestion": suggested,
+        "route_hypothesis": hypothesis_text,
         "decision_status": str(data.get("decision_status", "") or "pending").strip(),
         "route_source": "route_decision_pending" if data else "inferred_suggestion_only",
     }
@@ -133,6 +139,7 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
         "task_mode_reason": mode.get("reason", ""),
         "route": route.get("route", "pending"),
         "route_suggestion": route.get("route_suggestion", ""),
+        "route_hypothesis": route.get("route_hypothesis", ""),
         "decision_status": route.get("decision_status", ""),
         "route_source": route.get("route_source", ""),
         "workflow_preset": workflow,
@@ -161,6 +168,7 @@ def format_task_preflight(report: dict[str, Any]) -> str:
         f"task_mode_reason: {report.get('task_mode_reason')}",
         f"route: {report.get('route')}",
         f"route_suggestion: {report.get('route_suggestion')}",
+        f"route_hypothesis: {report.get('route_hypothesis')}",
         f"decision_status: {report.get('decision_status')}",
         f"workflow_preset: {report.get('workflow_preset')}",
         f"execution_mode: {report.get('execution_mode')}",

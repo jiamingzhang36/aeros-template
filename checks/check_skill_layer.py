@@ -55,7 +55,8 @@ REQUIRED_FILES = {
     ],
 }
 SKILL_MAP = Path("harness/skill_map_core.yml")
-ALLOWED_TIERS = {"core", "advisory", "reference"}
+ALLOWED_TIERS = {"core", "optional", "reference"}
+LEGACY_TIER_ALIASES = {"advisory": "optional"}
 MAX_CORE_SKILLS = 24
 MAX_TOTAL_SKILLS = 32
 
@@ -82,6 +83,7 @@ def main() -> int:
         for key, skill in skills.items():
             total_count += 1
             tier = skill.get("tier")
+            tier = LEGACY_TIER_ALIASES.get(tier, tier)
             if tier not in ALLOWED_TIERS:
                 failures.append(f"{key}: invalid or missing tier {tier!r}")
             default_use = skill.get("default_use")

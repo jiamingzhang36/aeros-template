@@ -27,6 +27,18 @@ allowed_waiver_classes:
   - mechanical_revalidation
   - single_line_parser_patch
 required_waiver_fields: [skill_class, reason, scope, progress_label]
+tiers:
+  core:
+    default_use: true
+    meaning: "default first-pass skills for normal AEROS work"
+  optional:
+    default_use: false
+    meaning: "task-specific skills used when clearly relevant"
+  reference:
+    default_use: false
+    meaning: "inspiration or review framing only unless the human explicitly asks"
+legacy_tier_aliases:
+  advisory: optional
 does_not_prove:
   - skill invocation
   - skill output correctness

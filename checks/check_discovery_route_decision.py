@@ -41,12 +41,20 @@ def main() -> int:
     if missing:
         failures.append(f"route_decision missing allowed routes: {sorted(missing)}")
     rules = data.get("route_rules") or {}
+    hypotheses = data.get("route_hypotheses") or {}
     for route in REQUIRED_ROUTES:
         rule = rules.get(route) or {}
         if not rule.get("default_when"):
             failures.append(f"{route}: missing default_when")
         if not rule.get("first_actions"):
             failures.append(f"{route}: missing first_actions")
+        hypothesis = hypotheses.get(route) or {}
+        if not str(hypothesis.get("hypothesis") or "").strip():
+            failures.append(f"{route}: missing route_hypotheses.hypothesis")
+        if not str(hypothesis.get("falsification_probe") or "").strip():
+            failures.append(f"{route}: missing route_hypotheses.falsification_probe")
+        if not str(hypothesis.get("promotion_condition") or "").strip():
+            failures.append(f"{route}: missing route_hypotheses.promotion_condition")
     negative_rule_text = " ".join(str(item).lower() for item in ((rules.get("negative_seed_first") or {}).get("default_when") or []))
     if not any(term in negative_rule_text for term in NEGATIVE_SEED_TERMS):
         failures.append("negative_seed_first must explicitly cover illegal/scam/enforcement/complaint phenomena")

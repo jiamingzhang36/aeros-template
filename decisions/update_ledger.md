@@ -1904,4 +1904,34 @@ audits when needed.
 
 **Next check**: Run write-audit, sync doctor, smoke, and full harness. If
 committed, backfill this pending entry and append a final hash-chain record.
+### 2026-07-03 — Close framework freeze tail items
+
+**Commit(s)**: `pending`
+
+**Scope:** template framework only.
+
+**Changed**
+- Tightened update-ledger hash-chain discipline: named the single writer, documented append-only correction policy, and added recent-commit rewrite detection with the one reviewed historical exception (`5736fad`).
+- Expanded compiled mode map from a two-surface projection into a cross-checked view over task mode, execution mode, output intent, source-capture permission, and check profiles.
+- Added an AEA check profile and policy wiring for AEA-style replication alignment without certifying submission readiness.
+- Normalized skill tiers to `core` / `optional` / `reference` while keeping skill use advisory and waiver-based.
+- Added explicit route hypotheses, falsification probes, and promotion conditions to the discovery route-decision scaffold and preflight packet.
+
+**Validation**
+- `python3 checks/check_update_ledger_hash_chain.py`
+- `python3 checks/check_execution_mode.py`
+- `python3 checks/check_aea_replication_alignment.py`
+- `python3 checks/check_skill_layer.py`
+- `python3 checks/check_skill_coverage.py`
+- `python3 checks/check_discovery_route_decision.py`
+- `python3 checks/check_task_preflight.py`
+- `python3 checks/check_harness_profiles.py`
+- `python3 checks/check_sync_doctor.py`
+
+**Does not prove**
+- scientific validity
+- CMPD rollout success
+- AEA acceptance
+- route correctness
+- skill output correctness
 

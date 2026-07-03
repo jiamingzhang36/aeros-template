@@ -54,6 +54,13 @@ allowed_statuses:
   - ready_for_human_review
   - submitted
   - blocked
+recommended_check_profile: aea
+profile_command: "python3 checks/run_harness_checks.py --profile aea --timeout 20"
+profile_checks:
+  - check_aea_replication_alignment.py
+  - check_replication_package.py
+  - check_data_availability_present.py
+  - check_provenance.py
 p_and_p_2026_guidance:
   compliance_check_scope: "limited compared with peer-reviewed AEA journals"
   requirement: "package must still be fully compliant with the AEA Data and Code Availability Policy"

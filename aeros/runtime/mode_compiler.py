@@ -86,6 +86,14 @@ def _load_policy_modes(root: Path, rel: str, fallback: dict[str, dict[str, Any]]
     return out or fallback
 
 
+def _load_yaml_policy(root: Path, rel: str) -> dict[str, Any]:
+    path = root / rel
+    if not path.exists() or yaml is None:
+        return {}
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return data if isinstance(data, dict) else {}
+
+
 def _artifact_level(task_mode: str, task_spec: dict[str, Any], execution_mode: str) -> str:
     intents = set(task_spec.get("allowed_output_intents") or [])
     if task_mode == "broad_capture" or "lead_queue" in intents:
@@ -193,6 +201,19 @@ def _forbidden_outputs(task_mode: str, artifact_level: str) -> list[str]:
 def compiled_mode_map(root: Path) -> dict[str, Any]:
     task_modes = _load_policy_modes(root, "harness/task_mode_policy.yml", DEFAULT_TASK_MODES)
     execution_modes = _load_policy_modes(root, "harness/execution_mode_policy.yml", DEFAULT_EXECUTION_MODES)
+    output_policy = _load_yaml_policy(root, "harness/output_intent_policy.yml")
+    source_policy = _load_yaml_policy(root, "harness/source_capture_permission_policy.yml")
+    profile_policy = _load_yaml_policy(root, "harness/check_profiles.yml")
+    valid_output_intents = set(str(item) for item in (output_policy.get("valid_output_intents") or []))
+    check_profiles = set((profile_policy.get("profiles") or {}).keys())
+    cross_checks_run = [
+        "task_mode_policy.execution_mode -> execution_mode_policy.modes",
+        "task_mode_policy.allowed_output_intents -> output_intent_policy.valid_output_intents",
+        "execution_mode_policy.check_profile -> check_profiles.profiles",
+        "broad_capture/source_capture -> source_capture_permission_policy.tiers",
+        "compiled authority/output boundary consistency",
+    ]
+    contradictions: list[str] = []
     rows: list[dict[str, Any]] = []
     for task_mode, task_spec in sorted(task_modes.items()):
         execution_mode = str(task_spec.get("execution_mode") or "smoke_test")
@@ -202,6 +223,26 @@ def compiled_mode_map(root: Path) -> dict[str, Any]:
         authority_surface = _authority_surface(task_mode, execution_mode)
         execution_budget = _execution_budget(execution_mode)
         verification_strength = _verification_strength(artifact_level, execution_mode, authority_surface)
+        output_intents = list(task_spec.get("allowed_output_intents") or [])
+        check_profile = execution_spec.get("check_profile") or execution_spec.get("profile") or ""
+        row_contradictions: list[str] = []
+        if execution_mode not in execution_modes:
+            row_contradictions.append(f"execution_mode {execution_mode!r} missing from execution_mode_policy")
+        unknown_intents = sorted(set(str(item) for item in output_intents) - valid_output_intents) if valid_output_intents else []
+        if unknown_intents:
+            row_contradictions.append("unknown output intents: " + ", ".join(unknown_intents))
+        if check_profile and check_profiles and check_profile not in check_profiles:
+            row_contradictions.append(f"check_profile {check_profile!r} missing from check_profiles")
+        tiers = source_policy.get("tiers") or {}
+        if task_mode == "broad_capture" and "green_broad_capture" not in tiers:
+            row_contradictions.append("broad_capture lacks green_broad_capture permission tier")
+        if task_mode == "source_capture" and "green_public_staging" not in tiers:
+            row_contradictions.append("source_capture lacks green_public_staging permission tier")
+        if artifact_level in {"lead", "candidate", "staging"} and authority_surface in {"claim", "paper", "release"}:
+            row_contradictions.append(f"early artifact_level {artifact_level!r} cannot expose {authority_surface!r} authority")
+        if "canonical_update" in output_intents and not execution_spec.get("requires_human_decision", False):
+            row_contradictions.append("canonical_update intent requires human-decision execution mode")
+        contradictions.extend(f"{task_mode}: {item}" for item in row_contradictions)
         rows.append(
             {
                 "preset": task_mode,
@@ -213,11 +254,12 @@ def compiled_mode_map(root: Path) -> dict[str, Any]:
                 "authority_surface": authority_surface,
                 "execution_budget": execution_budget,
                 "verification_strength": verification_strength,
-                "output_intents": list(task_spec.get("allowed_output_intents") or []),
+                "output_intents": output_intents,
                 "allowed_outputs": _allowed_outputs(task_mode, task_spec),
                 "forbidden_outputs": _forbidden_outputs(task_mode, artifact_level),
-                "check_profile": execution_spec.get("check_profile") or execution_spec.get("profile") or "",
+                "check_profile": check_profile,
                 "requires_human_decision": bool(execution_spec.get("requires_human_decision", False)),
+                "contradictions": row_contradictions,
             }
         )
     return {
@@ -231,6 +273,15 @@ def compiled_mode_map(root: Path) -> dict[str, Any]:
             "verification_strength": sorted(VERIFICATION_STRENGTHS),
         },
         "presets": rows,
+        "policy_surfaces": [
+            "harness/task_mode_policy.yml",
+            "harness/execution_mode_policy.yml",
+            "harness/output_intent_policy.yml",
+            "harness/source_capture_permission_policy.yml",
+            "harness/check_profiles.yml",
+        ],
+        "cross_checks_run": cross_checks_run,
+        "contradictions": contradictions,
         "does_not_prove": DOES_NOT_PROVE,
     }
 
@@ -264,7 +315,16 @@ def format_compiled_mode_map(report: dict[str, Any]) -> str:
             lines.append("- allowed_outputs: " + ", ".join(row.get("allowed_outputs") or []))
         if row.get("forbidden_outputs"):
             lines.append("- forbidden_outputs: " + ", ".join(row.get("forbidden_outputs") or []))
+        if row.get("contradictions"):
+            lines.append("- contradictions: " + "; ".join(row.get("contradictions") or []))
         lines.append("")
+    lines.append("cross_checks_run:")
+    lines.extend(f"- {item}" for item in report.get("cross_checks_run") or [])
+    lines.append("")
+    lines.append("contradictions:")
+    contradictions = report.get("contradictions") or []
+    lines.extend(f"- {item}" for item in contradictions) if contradictions else lines.append("- none")
+    lines.append("")
     lines.append("does_not_prove:")
     lines.extend(f"- {item}" for item in report.get("does_not_prove") or [])
     return "\n".join(lines) + "\n"

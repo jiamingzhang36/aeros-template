@@ -58,6 +58,16 @@ def main() -> int:
             failures.append("data probe without git status should remain bounded_probe")
     compiled = compiled_mode_map(Path.cwd())
     required_fields = {"artifact_level", "effect_class", "authority_surface", "execution_budget", "verification_strength"}
+    if len(compiled.get("policy_surfaces") or []) < 4:
+        failures.append("compiled mode map must name multiple policy surfaces")
+    cross_checks = set(compiled.get("cross_checks_run") or [])
+    for marker in ["output_intent_policy", "source_capture_permission_policy", "check_profiles"]:
+        if not any(marker in item for item in cross_checks):
+            failures.append(f"compiled mode map did not cross-check {marker}")
+    if not isinstance(compiled.get("contradictions"), list):
+        failures.append("compiled mode map must emit a contradictions list")
+    elif compiled.get("contradictions"):
+        failures.append("compiled mode map reported contradictions: " + "; ".join(compiled.get("contradictions") or []))
     rows = {row.get("preset"): row for row in compiled.get("presets") or []}
     broad_row = rows.get("broad_capture") or {}
     if not broad_row:

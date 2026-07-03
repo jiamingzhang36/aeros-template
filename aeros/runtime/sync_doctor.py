@@ -82,6 +82,7 @@ CAPABILITY_EXEMPT_CHECKS: dict[str, str] = {
     "check_parser_benchmark.py": "benchmark fixture invariant",
     "check_preanalysis_happens_before.py": "analysis event-order invariant",
     "check_progress_semantics.py": "completion/status taxonomy invariant",
+    "check_provenance.py": "project provenance invariant over project-owned result/provenance artifacts",
     "check_readiness_vector.py": "derived readiness invariant",
     "check_reconcile.py": "post-run derived-index invariant",
     "check_replication_package.py": "replication package scaffold invariant",

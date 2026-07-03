@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import hashlib
 import json
+from typing import Any
 
 
 GENESIS = "GENESIS"
@@ -42,6 +43,63 @@ def canonical_record_hash(record: dict) -> str:
     return sha256_text(encoded)
 
 
+def load_chain_records(chain_path: Path) -> list[dict[str, Any]]:
+    """Load hash-chain records from JSONL.
+
+    This helper is intentionally small so all writers use the same schema.
+    """
+    if not chain_path.exists():
+        return []
+    records: list[dict[str, Any]] = []
+    for raw in chain_path.read_text(encoding="utf-8").splitlines():
+        if raw.strip():
+            records.append(json.loads(raw))
+    return records
+
+
+def append_chain_record(
+    *,
+    root: Path,
+    chain_path: Path,
+    subject: str,
+    entry_id: str,
+    commit_refs: list[str],
+    scope: list[str],
+    does_not_prove: list[str],
+    verification_strength: str = "local_hash_chain_over_observed_subject_file",
+    extra_payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Append one canonical v1 record.
+
+    Committed ledger-chain mistakes should be corrected by appending a new
+    correction record with this writer, not by rewriting a prior record.
+    """
+    records = load_chain_records(chain_path)
+    prev_hash = records[-1].get("entry_hash") if records else GENESIS
+    payload: dict[str, Any] = {
+        "commit_refs": list(commit_refs),
+        "scope": list(scope),
+        "verification_strength": verification_strength,
+        "does_not_prove": list(does_not_prove),
+    }
+    if extra_payload:
+        payload.update(extra_payload)
+    record: dict[str, Any] = {
+        "version": 1,
+        "seq": len(records) + 1,
+        "entry_id": entry_id,
+        "subject": subject,
+        "subject_sha256": sha256_file(root / subject),
+        "prev_hash": prev_hash,
+        "payload": payload,
+    }
+    record["entry_hash"] = canonical_record_hash(record)
+    chain_path.parent.mkdir(parents=True, exist_ok=True)
+    with chain_path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n")
+    return record
+
+
 def validate_chain(root: Path, chain_path: Path) -> ChainValidation:
     failures: list[str] = []
     if not chain_path.exists():
@@ -65,6 +123,7 @@ def validate_chain(root: Path, chain_path: Path) -> ChainValidation:
 
     previous = GENESIS
     seen_seq: set[int] = set()
+    seen_entry_ids: set[str] = set()
     latest_subject_hash: dict[str, str] = {}
     for index, record in enumerate(records, start=1):
         seq = record.get("seq")
@@ -79,6 +138,13 @@ def validate_chain(root: Path, chain_path: Path) -> ChainValidation:
         expected_hash = canonical_record_hash(record)
         if record.get("entry_hash") != expected_hash:
             failures.append(f"record {index}: entry_hash mismatch")
+        entry_id = str(record.get("entry_id") or "")
+        if not entry_id:
+            failures.append(f"record {index}: missing entry_id")
+        elif entry_id in seen_entry_ids:
+            failures.append(f"record {index}: duplicate entry_id {entry_id}")
+        else:
+            seen_entry_ids.add(entry_id)
         subject = record.get("subject")
         subject_sha256 = record.get("subject_sha256")
         if isinstance(subject, str) and subject:

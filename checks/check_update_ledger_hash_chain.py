@@ -15,7 +15,7 @@ except ImportError as exc:  # pragma: no cover
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from aeros.runtime.ledger_hash_chain import canonical_record_hash, validate_chain  # noqa: E402
+from aeros.runtime.ledger_hash_chain import append_chain_record, canonical_record_hash, validate_chain  # noqa: E402
 
 
 ROOT = Path.cwd()
@@ -35,15 +35,51 @@ def _git_show_head_chain() -> str | None:
         return None
 
 
+def _git_show(ref: str) -> str | None:
+    try:
+        return subprocess.check_output(
+            ["git", "show", f"{ref}:{CHAIN.as_posix()}"],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return None
+
+
+def _recent_chain_commits(limit: int = 40) -> list[str]:
+    try:
+        out = subprocess.check_output(
+            ["git", "rev-list", f"--max-count={limit}", "HEAD", "--", CHAIN.as_posix()],
+            cwd=ROOT,
+            text=True,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        return []
+    return [line.strip() for line in out.splitlines() if line.strip()]
+
+
 def main() -> int:
     failures: list[str] = []
     if not POLICY.exists():
         failures.append("missing harness/update_ledger_hash_chain_policy.yml")
+        data = {}
     else:
         data = yaml.safe_load(POLICY.read_text(encoding="utf-8")) or {}
         for key in ["policy", "chain_file", "record_required_fields", "protected_subjects", "does_not_prove"]:
             if not data.get(key):
                 failures.append(f"{POLICY}: missing {key}")
+        writer = data.get("single_writer") or {}
+        if writer.get("module") != "aeros.runtime.ledger_hash_chain" or writer.get("function") != "append_chain_record":
+            failures.append(f"{POLICY}: single_writer must name aeros.runtime.ledger_hash_chain.append_chain_record")
+        if not callable(append_chain_record):
+            failures.append("ledger hash-chain append writer is not callable")
+        correction = data.get("correction_policy") or {}
+        if correction.get("committed_record_error") != "append_correction_record":
+            failures.append(f"{POLICY}: committed record errors must be fixed by appending correction records")
+        if correction.get("must_not_rewrite_committed_records") is not True:
+            failures.append(f"{POLICY}: must_not_rewrite_committed_records must be true")
         required = set(data.get("record_required_fields") or [])
         expected = {"version", "seq", "entry_id", "subject", "subject_sha256", "prev_hash", "payload", "entry_hash"}
         missing = expected - required
@@ -77,6 +113,23 @@ def main() -> int:
             payload = latest.get("payload") or {}
             if "does_not_prove" not in payload:
                 failures.append("latest ledger-chain payload lacks does_not_prove boundary")
+
+    exceptions = {
+        str(item.get("commit") or "").strip()
+        for item in ((data.get("historical_rewrite_exceptions") or []) if isinstance(data, dict) else [])
+        if isinstance(item, dict)
+    }
+    for commit in _recent_chain_commits():
+        before = _git_show(f"{commit}^")
+        after = _git_show(commit)
+        if not before or not after:
+            continue
+        normalized_before = before if before.endswith("\n") else before + "\n"
+        short = commit[:7]
+        if not after.startswith(normalized_before) and short not in exceptions and commit not in exceptions:
+            failures.append(
+                f"commit {short} rewrites existing ledger-chain history; append a correction record instead"
+            )
 
     if failures:
         print("FAIL: update ledger hash-chain check failed")

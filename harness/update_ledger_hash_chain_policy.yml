@@ -5,6 +5,20 @@ principle: >
   silent edits to ledger-tracking artifacts are mechanically detectable.
 chain_file: decisions/update_ledger_chain.jsonl
 genesis: GENESIS
+single_writer:
+  module: aeros.runtime.ledger_hash_chain
+  function: append_chain_record
+  rule: "new hash-chain events must be appended with the single writer; correcting a committed mistake requires an appended correction record, not rewriting an existing committed record"
+correction_policy:
+  committed_record_error: append_correction_record
+  must_not_rewrite_committed_records: true
+  correction_record_must_name:
+    - corrected_entry_id
+    - corrected_commit
+    - reason
+historical_rewrite_exceptions:
+  - commit: "5736fad"
+    reason: "2026-07-03 local schema repair for an already-reviewed observed-writes ledger-chain record; accepted once, future repairs must append correction records"
 record_required_fields:
   - version
   - seq
@@ -23,4 +37,3 @@ does_not_prove:
   - claim support
   - gate approval
   - external transparency
-

@@ -135,6 +135,13 @@ profiles:
       - check_data_availability_present.py
       - check_compliance_gate.py
       - check_approval_freshness.py
+  aea:
+    description: "AEA-style replication package alignment profile; advisory only and not a submission certificate."
+    checks:
+      - check_aea_replication_alignment.py
+      - check_replication_package.py
+      - check_data_availability_present.py
+      - check_provenance.py
   full:
     description: "Complete internal harness."
     checks: all

@@ -61,11 +61,23 @@ def main() -> int:
         "principle",
         "required_package_artifacts",
         "required_alignment_items",
+        "recommended_check_profile",
+        "profile_command",
+        "profile_checks",
         "p_and_p_2026_guidance",
         "non_goals",
     ):
         if not policy.get(key):
             failures.append(f"{POLICY}: missing {key}")
+    if policy.get("recommended_check_profile") != "aea":
+        failures.append(f"{POLICY}: recommended_check_profile must be aea")
+    profile_checks = [str(item) for item in (policy.get("profile_checks") or [])]
+    check_profiles_path = ROOT / "harness/check_profiles.yml"
+    profiles = yaml.safe_load(check_profiles_path.read_text(encoding="utf-8")) or {}
+    aea_profile = ((profiles.get("profiles") or {}).get("aea") or {}).get("checks") or []
+    for check in profile_checks:
+        if check not in aea_profile:
+            failures.append(f"{POLICY}: profile_checks item {check} missing from harness/check_profiles.yml aea profile")
     if str(policy.get("policy_version")) != "February 2026":
         failures.append(f"{POLICY}: policy_version must be February 2026")
     source_urls = [str(item) for item in (policy.get("source_urls") or [])]

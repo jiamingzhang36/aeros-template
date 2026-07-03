@@ -67,6 +67,39 @@ current_decision:
   decided_at: ""
   decision_ref: ""
   first_next_action: "Run `aeros next --lane data` or create a route packet before source collection."
+route_hypotheses:
+  negative_seed_first:
+    hypothesis: "Negative seeds are the safest first observable unit when the phenomenon is illegal, disputed, enforcement-driven, complaint-driven, or strategically hidden."
+    falsification_probe: "If a bounded negative-seed sweep yields no verifiable cases or no back-traceable entities, pause before expanding and reconsider base_universe_first or document_first."
+    promotion_condition: "At least one verified seed group can be back-traced to stable entity/source identifiers without touching canonical data or claim artifacts."
+  base_universe_first:
+    hypothesis: "A stable official population frame exists and should define the denominator before outcome/event enrichment."
+    falsification_probe: "If vintage, coverage, or identifier fields cannot be verified in a bounded probe, do not continue enrichment; switch to coverage_probe_first or data_access_first."
+    promotion_condition: "The base universe has documented vintage, field definitions, and at least one sample record that can be independently re-located."
+  coverage_probe_first:
+    hypothesis: "Source-family coverage is the primary unknown, so small probes should precede route commitment."
+    falsification_probe: "If probes cannot identify coverage, access, and duplicate risks across candidate source families, keep route pending."
+    promotion_condition: "A route packet compares source families and records a proposed next route."
+  literature_gap_first:
+    hypothesis: "The first risk is conceptual novelty/framing rather than data access."
+    falsification_probe: "If scoped literature already pins down the gap and needed empirical object, move to data/source route selection."
+    promotion_condition: "Gap-verification and method-identification queues identify what data would be decision-relevant."
+  data_access_first:
+    hypothesis: "Access, license, credential, or ToS uncertainty dominates route choice."
+    falsification_probe: "If access cannot be resolved or bounded, block rather than collect substitute evidence."
+    promotion_condition: "A resource/access packet records permissions, constraints, and allowed collection scope."
+  document_first:
+    hypothesis: "The empirical object is primarily encoded in documents, filings, judgments, PDFs, or web pages."
+    falsification_probe: "If documents cannot be captured, parsed, or identity-matched in a bounded sample, do not scale document collection."
+    promotion_condition: "A small document sample has identity metadata, parseability status, and source reliability notes."
+  registry_first:
+    hypothesis: "A registry or administrative index is the safest identity anchor."
+    falsification_probe: "If registry vintage, identity, or key fields are unstable, avoid downstream enrichment until route review."
+    promotion_condition: "Registry source identity, vintage, and join keys are documented in staging/audit artifacts."
+  hybrid:
+    hypothesis: "No single source family can establish both coverage and outcome signals."
+    falsification_probe: "If bounded probes do not reveal complementary source roles, do not combine noisy sources by default."
+    promotion_condition: "A route packet names which source family supplies coverage, which supplies outcome/event signals, and what remains unverified."
 negative_seed_keywords:
   - illegal
   - scam
