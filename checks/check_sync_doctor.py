@@ -78,6 +78,7 @@ def main() -> int:
             "update_ledger_hash_chain",
             "protected_path_hook",
             "evidence_sufficiency_audit",
+            "submission_research_driver",
         }
         if not expected_missing <= missing:
             failures.append("fixture: expected missing capabilities were not reported")

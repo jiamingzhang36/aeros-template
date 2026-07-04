@@ -525,6 +525,25 @@ def _cmd_paper_readiness(args: argparse.Namespace) -> int:
 
 
 
+def _cmd_driver(args: argparse.Namespace) -> int:
+    from .runtime.submission_driver import build_submission_driver, format_submission_driver, write_submission_driver
+
+    root = _project_root()
+    if args.driver_command == "submission":
+        report = build_submission_driver(root)
+        if args.json:
+            print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+        else:
+            print(format_submission_driver(report))
+        if args.write:
+            paths = write_submission_driver(root, report)
+            for path in paths:
+                print(f"wrote {path.relative_to(root)}")
+        return 0 if report.get("status") in {"pass", "inactive"} else 1
+    print("unknown driver command")
+    return 2
+
+
 def _cmd_stale(args: argparse.Namespace) -> int:
     root = _project_root()
     if args.stale_command == "triage":
@@ -1540,6 +1559,13 @@ def main(argv: list[str] | None = None) -> int:
     readiness = sub.add_parser("readiness", help="show derived project readiness vector")
     readiness.add_argument("--json", action="store_true", help="emit machine-readable readiness JSON")
     readiness.set_defaults(func=_cmd_readiness)
+
+    driver = sub.add_parser("driver", help="research-driver recommendations for submission and paper risk")
+    driver_sub = driver.add_subparsers(dest="driver_command", required=True)
+    driver_submission = driver_sub.add_parser("submission", help="prioritize manuscript citation faithfulness and wrapper literature sync")
+    driver_submission.add_argument("--write", action="store_true", help="write audits/submission_driver/* reports")
+    driver_submission.add_argument("--json", action="store_true", help="emit machine-readable driver report")
+    driver_submission.set_defaults(func=_cmd_driver)
 
     context_p = sub.add_parser("context", help="show a compact source-anchored context bundle")
     context_p.add_argument("--lane", default="project", choices=["project", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"], help="context lane to focus")

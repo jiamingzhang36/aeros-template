@@ -18,6 +18,9 @@ LITERATURE_CHECKS = [
     "check_citation_audit.py",
     "check_gap_grounding.py",
     "check_literature_fulltext_execution.py",
+    "check_manuscript_citation_faithfulness.py",
+    "check_manuscript_citation_interpretation.py",
+    "check_literature_wrapper_sync.py",
 ]
 
 

@@ -405,6 +405,9 @@ checks:
   skill_coverage: checks/check_skill_coverage.py
   feasibility_matrix: checks/check_feasibility_matrix.py
   literature_tools: checks/check_literature_tools.py
+  manuscript_citation_faithfulness: checks/check_manuscript_citation_faithfulness.py
+  manuscript_citation_interpretation: checks/check_manuscript_citation_interpretation.py
+  literature_wrapper_sync: checks/check_literature_wrapper_sync.py
   literature_fulltext_execution: checks/check_literature_fulltext_execution.py
   framing_deck: checks/check_framing_deck.py
   literature_registry: checks/check_literature_registry.py

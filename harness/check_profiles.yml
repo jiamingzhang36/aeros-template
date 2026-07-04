@@ -18,6 +18,9 @@ profiles:
       - check_claim_vector.py
       - check_claim_upgrade.py
       - check_paper_readiness.py
+      - check_manuscript_citation_faithfulness.py
+      - check_manuscript_citation_interpretation.py
+      - check_literature_wrapper_sync.py
       - check_evidence_units.py
       - check_parser_benchmark.py
       - check_session_scope.py
@@ -80,6 +83,9 @@ profiles:
       - check_skill_coverage.py
       - check_literature_adapters.py
       - check_literature_fulltext_execution.py
+      - check_literature_wrapper_sync.py
+      - check_manuscript_citation_faithfulness.py
+      - check_manuscript_citation_interpretation.py
       - check_evidence_units.py
       - check_parser_benchmark.py
       - check_citation_audit.py
@@ -121,6 +127,8 @@ profiles:
       - check_claim_numbers_bound.py
       - check_table_cell_sources.py
       - check_paper_package.py
+      - check_manuscript_citation_faithfulness.py
+      - check_manuscript_citation_interpretation.py
       - check_paper_readiness.py
   lane:compliance:
     description: "Release, replication, and compliance checks."
@@ -129,6 +137,9 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_aea_replication_alignment.py
+      - check_manuscript_citation_faithfulness.py
+      - check_manuscript_citation_interpretation.py
+      - check_literature_wrapper_sync.py
       - check_evidence_sufficiency_audit.py
       - check_skill_coverage.py
       - check_replication_package.py

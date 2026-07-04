@@ -546,6 +546,46 @@ def _claim_next(root: Path) -> NextAction | None:
     return None
 
 
+
+def _submission_driver_next(root: Path) -> NextAction | None:
+    from .submission_driver import build_submission_driver
+
+    report = build_submission_driver(root)
+    citation = report.get("citation_faithfulness") or {}
+    wrapper = report.get("literature_wrapper_sync") or {}
+    if citation.get("status") == "fail":
+        failures = citation.get("failures") or []
+        first = failures[0] if failures else "unsupported cited manuscript sentence"
+        return _next_action(
+            recommended_next_action="Run manuscript citation-faithfulness audit before submission/readiness work.",
+            why_this_next=(
+                "Final manuscript truth outranks stale bookkeeping: at least one cited sentence "
+                f"does not trace to registered literature support ({first})."
+            ),
+            lane="writing",
+            status_label="ROUTE_READY",
+            command="python3 checks/check_manuscript_citation_faithfulness.py",
+            stop_condition="Stop after unsupported/weak citations are mapped to extraction-card repairs, weakened prose, or removed citations; do not claim paper readiness.",
+            source="paper/ + discovery/literature/",
+            spec_kind="submission_driver",
+            spec_effect_class="read_only",
+            blocked=True,
+        )
+    if wrapper.get("status") == "fail":
+        return _next_action(
+            recommended_next_action="Resolve literature wrapper/source-project sync before literature or submission readiness.",
+            why_this_next="The wrapper does not expose all source-project extraction cards, so AEROS may route from an incomplete literature state.",
+            lane="literature",
+            status_label="ROUTE_READY",
+            command="python3 checks/check_literature_wrapper_sync.py",
+            stop_condition="Stop after source cards are imported, intentionally waived, or the source-project link is corrected.",
+            source="adoption/source_manifest.yml",
+            spec_kind="submission_driver",
+            spec_effect_class="read_only",
+            blocked=True,
+        )
+    return None
+
 def _writing_next(root: Path) -> NextAction | None:
     draft = root / "paper/draft.md"
     if not draft.exists():
@@ -585,7 +625,7 @@ def _lane_specific_next(root: Path, lane: str) -> NextAction | None:
     if lane == "data":
         return _data_next(root)
     if lane == "literature":
-        return _literature_next(root)
+        return _submission_driver_next(root) or _literature_next(root)
     if lane == "method":
         return _method_next(root)
     if lane == "analysis":
@@ -593,9 +633,9 @@ def _lane_specific_next(root: Path, lane: str) -> NextAction | None:
     if lane == "claim":
         return _claim_next(root)
     if lane == "writing":
-        return _writing_next(root)
+        return _submission_driver_next(root) or _writing_next(root)
     if lane == "compliance":
-        return _compliance_next(root)
+        return _submission_driver_next(root) or _compliance_next(root)
     return None
 
 def _method_next(root: Path) -> NextAction:
@@ -676,6 +716,10 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
         action = _lane_specific_next(root, lane)
         if action:
             return action
+
+    submission_action = _submission_driver_next(root)
+    if submission_action:
+        return submission_action
 
     if lane:
         for stage in STAGES:

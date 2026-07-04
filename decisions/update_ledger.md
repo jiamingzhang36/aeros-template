@@ -2041,3 +2041,46 @@ committed, backfill this pending entry and append a final hash-chain record.
 - dense communication should never be implemented
 
 **Next check**: If committed, backfill this pending entry and append a final hash-chain record.
+
+### 2026-07-04 — Add submission research driver citation grounding
+
+**Commit(s)**: `pending`
+
+**Scope:** template framework only.
+
+**North star:** AEROS should actively surface the highest paper-submission research risk before stale bookkeeping when a manuscript exists.
+
+**Action**: Added a submission research driver that checks manuscript citation faithfulness and wrapper/source-project literature evidence visibility. The new driver exposes `aeros driver submission`, adds `check_manuscript_citation_faithfulness.py` and `check_literature_wrapper_sync.py`, wires them into literature/writing/compliance profiles, and lets `aeros next` prioritize unsupported cited sentences or wrapper literature mismatches before mechanical stale revalidation.
+
+**Alignment**: This turns the cultured-meat/MAHA lesson into a deterministic driver rule: final manuscript truth and literature visibility are project-management risks, not just registry-shape checks. The driver remains advisory and traceability-focused; it does not decide whether a paper is good or whether a citation interpretation is scientifically correct.
+
+**Non-goal**: Does not certify literature completeness, extraction-card quality, scientific truth, paper readiness, journal acceptance, claim support, gate approval, or public release.
+
+**Drift risk**: Citation parsing is intentionally conservative and may miss nonstandard prose citations or flag weak cards that are substantively adequate. Wrapper sync uses configured source-project paths only and must not blindly import source artifacts without review.
+
+**Validation**
+- `python3 checks/check_manuscript_citation_faithfulness.py`
+- `python3 checks/check_literature_wrapper_sync.py`
+- `python3 -m aeros.cli driver submission`
+- `python3 checks/check_literature_tools.py`
+- `python3 checks/check_sync_doctor.py`
+- `python3 checks/run_harness_checks.py --profile smoke --timeout 20`
+
+**Does not prove**
+- literature completeness
+- citation interpretation correctness
+- claim support
+- paper readiness
+- gate approval
+
+**Next check**: Backfill this pending entry after commit and append the corresponding update-ledger hash-chain record.
+
+## 2026-07-04 — Add manuscript citation interpretation records
+
+- **Commit(s)**: pending
+- **Change type**: framework / submission driver / literature grounding
+- **Action**: Added a sentence-level literature interpretation record layer for manuscript citations. Each cited manuscript sentence must now map to a registry paper, full-text extraction support, and a human-approved interpretation record with source passage, support relation, scope match, claim-strength match, limitations/contradictory-evidence checks, and review verdict.
+- **Why**: Existing tools and recent citation-verification work show that bibliography existence and extraction-card presence are not enough; hallucination prevention requires claim-source alignment at the sentence/passage level.
+- **Validation**: pending targeted checks: `check_manuscript_citation_interpretation.py`, `check_manuscript_citation_faithfulness.py`, `check_literature_tools.py`, `check_sync_doctor.py`, ledger checks, and smoke harness.
+- **Does not prove**: cited sources are true; human interpretation is correct beyond the recorded evidence basis; every uncited sentence is grounded; final paper is submission-ready.
+

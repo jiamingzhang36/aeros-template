@@ -1,0 +1,36 @@
+# AEROS Literature Interpretation Record
+# Purpose: prove that one manuscript citation sentence is faithfully grounded in
+# the cited source. This is stronger than "the paper exists" or "an extraction
+# card exists". It still does not prove the cited source is true.
+
+sentence_id: "S_REPLACE_WITH_AEROS_DRIVER_ID"
+manuscript_path: "paper/main.tex"
+manuscript_sentence: "Replace with the exact cited manuscript sentence."
+citation_key: "replace_bib_key"
+paper_id: "P000"
+
+source_passage:
+  page_or_section: "page/section/table/appendix locator"
+  quote_or_paraphrase_basis: "Short source-bound quote or close paraphrase basis. Keep quotes copyright-safe."
+
+our_interpretation: "Explain exactly what the cited passage supports and what it does not support."
+support_relation: "direct_support"  # direct_support | partial_support | background_only | contradicts | unsupported
+
+scope_match:
+  geography: "match"        # match | partial | mismatch | unclear | not_applicable
+  population: "match"
+  time_period: "match"
+  method: "match"
+  outcome: "match"
+
+claim_strength_match: "pass"  # pass | weak | fail
+overclaim_flags: []
+limitations_checked: false
+contradictory_evidence_checked: false
+
+review_verdict: "unsupported"  # faithful | weak | overclaimed | unsupported
+human_status: "pending"        # pending | approved | rejected
+reviewer: ""
+reviewed_at: ""
+decision_ref: ""
+notes: ""
