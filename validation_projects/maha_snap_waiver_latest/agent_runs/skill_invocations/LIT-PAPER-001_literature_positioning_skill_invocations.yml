@@ -1,0 +1,20 @@
+version: 1
+task_id: LIT-PAPER-001_literature_positioning
+generated_at: '2026-07-04T19:19:05+00:00'
+contract_path: tasks/discovery/LIT_PAPER_001_literature_positioning.yml
+run_report_path: ''
+allowed_skills:
+- academic-research-suite
+- bib-manager
+- econ-write
+recommended_skills:
+- academic-research-suite
+- bib-manager
+- econ-write
+required_skill_classes: []
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail

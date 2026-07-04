@@ -1,7 +1,7 @@
-version: 4
+version: 5
 task_id: T003b_pipeline_instantiation
-generated_at: '2026-06-24T14:32:32+00:00'
-completion_mode: manual_recover
+generated_at: '2026-07-04T14:56:49+00:00'
+completion_mode: revalidation
 claimed_status: passed
 declared_outcome: complete
 outcome_kind: complete
@@ -23,26 +23,30 @@ allowed_outputs_expected:
 - agent_runs/
 allowed_outputs_found:
 - code/99_make_all.py
-- agent_runs/
-allowed_outputs_missing:
 - execution/pipeline_manifest.yml
+- agent_runs/
+allowed_outputs_missing: []
 actual_outputs:
 - path: code/99_make_all.py
   exists: true
   type: file
-  sha256: d86d8b25b791d4defeb87060873b27f795b7b28adedf5f4dc3343717d1d75ac1
-  bytes: 122
+  sha256: b3b5eb1f6e31a73f15e46de5f4dfef5ccc348d4eedac2fab3482e20c1a1ea80a
+  bytes: 3357
 - path: execution/pipeline_manifest.yml
-  exists: false
-  type: missing
-  sha256: ''
-  bytes: 0
+  exists: true
+  type: file
+  sha256: 6c89090d5ba7f376b7c4b265f8ec807bf4c098a3d47d67146ceb812572ed6eda
+  bytes: 3861
 - path: agent_runs/
   exists: true
   type: directory
   sha256: ''
   bytes: 0
-  entries: 5
+  entries: 6
+staging_artifact_paths: []
+substantive_evidence_paths:
+- code/99_make_all.py
+- execution/pipeline_manifest.yml
 checks_required:
 - check_pipeline_runs.py
 - check_agent_run_report.py
@@ -57,17 +61,17 @@ check_attestations:
 - name: check_pipeline_runs.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_pipeline_runs.py
   exit_code: 0
-  elapsed_seconds: 0.212
+  elapsed_seconds: 0.254
 - name: check_agent_run_report.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
   exit_code: 0
-  elapsed_seconds: 0.133
+  elapsed_seconds: 0.153
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -82,8 +86,8 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: 8cda5862ac913daab1162ed96a8c82be05a3420b44400f8ffd6becf9a979471f
-output_fingerprint: b8cab38fda7513fde28c02621bb7a3e3087c353412a1f9ad95639599c17be26b
+input_fingerprint: 2b7e79417a4a776e361076615a5ddc0111a5f628a1fa55705b37671ff37d7712
+output_fingerprint: 378d808623b0c9be7b6ae098eeed648f57473ee35f6279fb11fbb5a88a8dbb6a
 dependency_fingerprint: 741f3e0b60b98fb9db4c8bfcf05d4f3a0cd555e24859bd4ca5b1f6dff922183d
 completion_verdict: pass
 failures: []

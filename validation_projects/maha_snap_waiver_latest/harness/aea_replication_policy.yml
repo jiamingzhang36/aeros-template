@@ -3,10 +3,31 @@ policy: AEROS-AEA-REPLICATION-ALIGNMENT-001
 external_standard:
   name: AEA Data Editor replication package guidance
   url: "https://aeadataeditor.github.io/"
+policy_version: "February 2026"
+source_urls:
+  - "https://www.aeaweb.org/journals/data/data-code-policy"
+  - "https://aeadataeditor.github.io/posts/2026-01-19-preparing-pandp-replication-packages"
 principle: >
   AEROS replication and Paper CI should align package structure and provenance
   with AEA-style data editor expectations, while remaining honest that only the
   journal/data editor can accept a package.
+required_alignment_items:
+  - data_availability_statement
+  - raw_data_or_exception
+  - analysis_data_or_reproducible_build
+  - data_provenance_access_costs
+  - transformation_and_cleaning_code
+  - analysis_code_for_computational_results
+  - master_script_or_precise_step_by_step
+  - setup_program_or_environment
+  - top_level_readme
+  - program_to_output_map
+  - software_hardware_runtime
+  - data_citations
+  - licenses_and_redistribution_rights
+  - trusted_repository_plan
+  - non_public_data_constraints
+  - ethics_irb_or_rct_if_applicable
 required_manifest_fields:
   - package_id
   - status
@@ -33,7 +54,19 @@ allowed_statuses:
   - ready_for_human_review
   - submitted
   - blocked
+recommended_check_profile: aea
+profile_command: "python3 checks/run_harness_checks.py --profile aea --timeout 20"
+profile_checks:
+  - check_aea_replication_alignment.py
+  - check_replication_package.py
+  - check_data_availability_present.py
+  - check_provenance.py
+p_and_p_2026_guidance:
+  compliance_check_scope: "limited compared with peer-reviewed AEA journals"
+  requirement: "package must still be fully compliant with the AEA Data and Code Availability Policy"
+  repository_note: "AEA Data and Code Repository strongly encouraged; GitHub alone is not a trusted archive"
 non_goals:
   - certify_AEA_acceptance
   - waive_data_license_or_confidentiality_constraints
   - replace_human_policy_review
+  - certify_data_editor_acceptance

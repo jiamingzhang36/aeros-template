@@ -2,8 +2,27 @@ package_id: "AEA-PACKAGE-001"
 status: draft
 standard_alignment:
   external_standard: "AEA Data Editor"
-  reviewed_against_policy_url: "https://aeadataeditor.github.io/"
+  reviewed_against_policy_url: "https://www.aeaweb.org/journals/data/data-code-policy"
+  policy_version: "February 2026"
+  p_and_p_2026_guidance_url: "https://aeadataeditor.github.io/posts/2026-01-19-preparing-pandp-replication-packages"
   reviewed_at: ""
+aea_2026_alignment:
+  data_availability_statement: draft
+  raw_data_or_exception: draft
+  analysis_data_or_reproducible_build: draft
+  data_provenance_access_costs: draft
+  transformation_and_cleaning_code: draft
+  analysis_code_for_computational_results: draft
+  master_script_or_precise_step_by_step: draft
+  setup_program_or_environment: draft
+  top_level_readme: draft
+  program_to_output_map: draft
+  software_hardware_runtime: draft
+  data_citations: draft
+  licenses_and_redistribution_rights: draft
+  trusted_repository_plan: draft
+  non_public_data_constraints: draft
+  ethics_irb_or_rct_if_applicable: not_applicable_or_pending
 data_availability:
   statement_path: "data/README_data.md"
   public_data: []

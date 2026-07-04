@@ -35,6 +35,26 @@ def _commit_touches_ledger(commit: str) -> bool:
     return any(name.strip() == str(LEDGER) for name in names)
 
 
+# A commit needs a narrative ledger entry only if it changes the framework itself.
+# Bookkeeping, validation-project, doc, and project-artifact commits are exempt --
+# requiring a ledger entry for those is what produced recurring false-red harness
+# failures (e.g. a validation-project gate approval that touches no framework code).
+FRAMEWORK_PREFIXES = ("aeros/", "checks/", "harness/", "templates/", "tools/")
+
+
+def _commit_touches_framework(commit: str) -> bool:
+    try:
+        names = _git(["show", "--name-only", "--format=", commit]).splitlines()
+    except Exception:
+        # If we cannot inspect the commit, be conservative and require an entry.
+        return True
+    return any(
+        name.strip().startswith(FRAMEWORK_PREFIXES)
+        for name in names
+        if name.strip()
+    )
+
+
 def main() -> int:
     if not LEDGER.exists():
         print("FAIL: missing decisions/update_ledger.md")
@@ -61,7 +81,14 @@ def main() -> int:
             continue
         if _commit_touches_ledger(commit):
             continue
-        failures.append(f"recent commit {commit} is not referenced in decisions/update_ledger.md")
+        if not _commit_touches_framework(commit):
+            # Non-framework commit (bookkeeping / validation project / docs / project
+            # artifact): does not require a framework-evolution narrative entry.
+            continue
+        failures.append(
+            f"recent commit {commit} changes framework code but is not referenced "
+            "in decisions/update_ledger.md"
+        )
 
     if failures:
         print("FAIL: update ledger problems detected:")

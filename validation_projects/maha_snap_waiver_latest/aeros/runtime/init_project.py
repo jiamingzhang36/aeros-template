@@ -33,6 +33,7 @@ DIRS = [
     "execution",
     "harness/protocols",
     "outputs/logs",
+    "outputs/harness_receipts",
     "outputs/context",
     "outputs/source_snapshots",
     "outputs/tables",
@@ -42,6 +43,7 @@ DIRS = [
     "tasks/discovery",
     "tasks/execution",
     "templates",
+    "tools/hooks",
 ]
 
 
@@ -126,6 +128,92 @@ execution_profiles:
 policy: AEROS-ECON-METHOD-ADVISORY-001
 principle: Advisory method skills cannot certify identification, claims, or gates.
 """,
+    "harness/task_mode_policy.yml": """version: "0.1"
+policy: AEROS-TASK-MODE-001
+principle: Classify task shape before work starts; task mode is advisory and cannot approve gates, admit evidence, or certify claim support.
+modes:
+  general_guardrail: {workflow_preset: "", execution_mode: bounded_probe, allowed_output_intents: [audit_note, probe_only]}
+  broad_capture: {workflow_preset: broad_capture_leads, execution_mode: broad_capture, allowed_output_intents: [lead_queue, candidate_queue, audit_note]}
+  source_capture: {workflow_preset: recapture_source_pool, execution_mode: source_capture, allowed_output_intents: [probe_only, staging_artifact, audit_note]}
+  data_repair: {workflow_preset: source_promotion_queue, execution_mode: bounded_probe, allowed_output_intents: [probe_only, canonical_candidate, audit_note]}
+  claim_audit: {workflow_preset: claim_audit, execution_mode: bounded_probe, allowed_output_intents: [audit_note, canonical_candidate]}
+  writing_sync: {workflow_preset: writing_guardrail, execution_mode: paper_release, allowed_output_intents: [audit_note, canonical_candidate, canonical_update]}
+  submission_readiness: {workflow_preset: submission_release_preflight, execution_mode: paper_release, allowed_output_intents: [audit_note, canonical_candidate]}
+  route_recovery: {workflow_preset: source_promotion_queue, execution_mode: waiting_on_external_input, allowed_output_intents: [audit_note, probe_only]}
+does_not_prove: [task execution, output admissibility, claim support, human gate approval]
+""",
+    "harness/output_intent_policy.yml": """version: "0.1"
+policy: AEROS-OUTPUT-INTENT-001
+valid_output_intents: [probe_only, lead_queue, candidate_queue, staging_artifact, canonical_candidate, canonical_update, audit_note]
+does_not_prove: [output existence, evidence admissibility, release readiness, claim support]
+""",
+    "harness/source_capture_permission_policy.yml": """version: "0.1"
+policy: AEROS-SOURCE-CAPTURE-PERMISSION-001
+tiers:
+  green_public_staging: {approval_required: none_for_staging_public_capture}
+  green_broad_capture: {approval_required: none_for_broad_lead_capture}
+  yellow_route_level: {approval_required: route_level}
+  red_human_required: {approval_required: human_required}
+non_goals: [does not fetch sources, does not admit evidence, does not approve gates or canonical promotion]
+""",
+    "harness/execution_mode_policy.yml": """version: "0.1"
+policy: AEROS-EXECUTION-MODE-001
+principle: Right-size governance before running; modes advise/check scope but do not approve gates or certify research substance.
+modes:
+  smoke_test: {profile: smoke, max_actions: 1, requires_human_decision: false, allowed_progress_label: CHECK_PASS}
+  bounded_probe: {profile: lane:data, max_actions: 3, requires_human_decision: false, allowed_progress_label: ROUTE_READY}
+  broad_capture: {profile: lane:data, max_actions: 5, requires_human_decision: false, allowed_progress_label: ROUTE_READY, receipt_level: lightweight, audit_level: batch_only, claim_surface: none_by_construction}
+  source_capture: {profile: lane:data, max_actions: 5, requires_human_decision: false, allowed_progress_label: ROUTE_READY}
+  paper_release: {profile: full, max_actions: 1, requires_human_decision: true, allowed_progress_label: DECISION_RECORDED}
+  expensive_api_run: {profile: lane:data, max_actions: 1, requires_human_decision: true, allowed_progress_label: ROUTE_READY}
+  waiting_on_external_input: {profile: smoke, max_actions: 0, requires_human_decision: true, allowed_progress_label: ROUTE_READY}
+does_not_prove: [scientific validity, claim support, gate approval, release readiness]
+""",
+    "harness/skill_obligation_policy.yml": """version: "0.1"
+policy: AEROS-SKILL-OBLIGATION-001
+principle: Skill-eligible tasks must consider relevant skills and either declare usable skills, mark the class required, or record an explicit waiver.
+classes:
+  data_source: {skills: [data-inventory, data-quality-checker, data-merge-audit], triggers: [data, source, probe, capture, inventory, denominator, gdp, schema]}
+  literature: {skills: [academic-research-suite, lit-review-assistant], triggers: [literature, citation, paper_registry, full-text, fulltext, synthesis]}
+  writing: {skills: [econ-write, pre-submission-audit], triggers: [paper, draft, writing, submission, referee, response]}
+  causal_identification: {skills: [causal-id-review, did-checklist], triggers: [identification, causal, did, event study, method_card, design]}
+  replication: {skills: [code-review-econ, replication-check], triggers: [replication, reproduc, provenance, pipeline, result_validation, code_review]}
+allowed_waiver_classes: [ledger_hash_only, typo_only, mechanical_revalidation, single_line_parser_patch]
+required_waiver_fields: [skill_class, reason, scope, progress_label]
+does_not_prove: [skill invocation, skill output correctness, scientific validity, claim support, human gate approval]
+""",
+    "harness/protected_path_commit_policy.yml": """version: "0.1"
+policy: AEROS-PROTECTED-PATH-COMMIT-001
+principle: Protected research-authority paths must not be committed by default from an agent run.
+protected_paths:
+  exact: [docs/protected_definitions.yml, docs/data_contract.yml, evidence/claim_registry.md, decisions/decision_log.csv, harness/permissions.yml]
+  prefixes: [data/raw/, decisions/approvals/]
+override:
+  env_var: AEROS_ALLOW_PROTECTED_COMMIT
+  allowed_value: "1"
+installation:
+  template: tools/hooks/pre-commit-aeros-protected-paths
+  installer: tools/install_aeros_git_hooks.zsh
+  auto_installed: false
+does_not_prove: [scientific validity, claim support, human approval, release readiness]
+""",
+    "harness/update_ledger_hash_chain_policy.yml": """version: "0.1"
+policy: AEROS-UPDATE-LEDGER-HASH-CHAIN-001
+chain_file: decisions/update_ledger_chain.jsonl
+genesis: GENESIS
+record_required_fields: [version, seq, entry_id, subject, subject_sha256, prev_hash, payload, entry_hash]
+protected_subjects: [decisions/update_ledger.md]
+verification_strength: local_hash_chain_over_observed_subject_file
+does_not_prove: [malicious actor cannot rewrite both ledger and chain, scientific validity, claim support, gate approval, external transparency]
+""",
+    "harness/evidence_sufficiency_audit_policy.yml": """version: "0.1"
+policy: AEROS-EVIDENCE-SUFFICIENCY-AUDIT-001
+required_dimensions: [actor, authority, action, policy, decision_basis, resource_access, lifecycle, verification_strength]
+allowed_verification_strength: [self_attested, schema_valid, file_exists, hash_observed, source_identity_matched, independent_rerun, human_reviewed]
+minimum_for_gate_packet: [actor, authority, action, policy, decision_basis, verification_strength]
+minimum_for_completion_claim: [actor, action, decision_basis, lifecycle, verification_strength]
+does_not_prove: [scientific validity, identification quality, claim support, data truth, publication readiness]
+""",
     "harness/context_budget.yml": """version: "0.1"
 policy: AEROS-CONTEXT-BUDGET-001
 brief_max_lines: 40
@@ -137,8 +225,48 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_execution_profiles.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_skill_coverage.py, check_execution_mode.py, check_task_mode.py, check_task_preflight.py, check_source_capture_permission.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_output_intent.py, check_route_early_gate.py, check_improve_harvest.py, check_sync_doctor.py, check_update_ledger_hash_chain.py, check_harness_observed_receipts.py, check_protected_path_hook.py, check_evidence_sufficiency_audit.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
   full: {checks: all}
+""",
+    "tools/hooks/pre-commit-aeros-protected-paths": """#!/usr/bin/env python3
+\"\"\"AEROS protected-path pre-commit guard. AEROS-PROTECTED-PATH-HOOK-001\"\"\"
+from __future__ import annotations
+import os, subprocess, sys
+PROTECTED_EXACT = {"docs/protected_definitions.yml", "docs/data_contract.yml", "evidence/claim_registry.md", "decisions/decision_log.csv", "harness/permissions.yml"}
+PROTECTED_PREFIXES = ("data/raw/", "decisions/approvals/")
+def git(args):
+    return subprocess.check_output(["git", *args], text=True, stderr=subprocess.DEVNULL)
+def is_protected(path):
+    return path in PROTECTED_EXACT or any(path.startswith(prefix) for prefix in PROTECTED_PREFIXES)
+def main():
+    staged = [line.strip() for line in git(["diff", "--cached", "--name-only"]).splitlines()]
+    hits = [path for path in staged if path and is_protected(path)]
+    if not hits:
+        return 0
+    if os.environ.get("AEROS_ALLOW_PROTECTED_COMMIT") == "1":
+        print("AEROS protected-path hook: human override accepted.", file=sys.stderr)
+        return 0
+    print("AEROS protected-path hook blocked protected staged file(s):", file=sys.stderr)
+    for path in hits:
+        print(f"  - {path}", file=sys.stderr)
+    print("Set AEROS_ALLOW_PROTECTED_COMMIT=1 only after explicit human approval/gate review.", file=sys.stderr)
+    return 1
+if __name__ == "__main__":
+    raise SystemExit(main())
+""",
+    "tools/install_aeros_git_hooks.zsh": """#!/bin/zsh
+set -euo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+SRC="$ROOT/tools/hooks/pre-commit-aeros-protected-paths"
+DEST="$ROOT/.git/hooks/pre-commit"
+MARKER="AEROS-PROTECTED-PATH-HOOK-001"
+if [ -f "$DEST" ] && ! grep -q "$MARKER" "$DEST"; then
+  print -u2 "refusing to overwrite existing non-AEROS pre-commit hook: $DEST"
+  exit 1
+fi
+cp "$SRC" "$DEST"
+chmod +x "$DEST"
+echo "installed AEROS protected-path pre-commit hook -> $DEST"
 """,
     "harness/stale_triage_policy.yml": """version: "0.1"
 policy: AEROS-STALE-TRIAGE-001
@@ -156,7 +284,7 @@ rule: "If only volatile allowed outputs changed, route to recover --check before
     "harness/session_scope.yml": """version: "0.1"
 policy: AEROS-SESSION-SCOPE-001
 principle: Chat-driven work must declare one active lane and audit changed files against lane scope.
-common_allowed_prefixes: [SESSION_CONTRACT.yml, CURRENT_STATE.md, NEXT_ACTION.md, CONTEXT_BUNDLE.md, agent_runs/, outputs/logs/, outputs/context/, decisions/revision_log.md, decisions/update_ledger.md, harness/improvement_backlog.yml]
+common_allowed_prefixes: [SESSION_CONTRACT.yml, CURRENT_STATE.md, NEXT_ACTION.md, CONTEXT_BUNDLE.md, agent_runs/, outputs/logs/, outputs/context/, evidence/delta_log.jsonl, aeros/state/global_state.yml, decisions/revision_log.md, decisions/update_ledger.md, harness/improvement_backlog.yml]
 lanes:
   data: {allowed_prefixes: [data/, discovery/data_inventory.csv, discovery/feasibility_matrix.md, docs/data_contract.yml, docs/data_dictionary.md, code/00_setup/, code/01_ingest/, code/02_clean/, code/03_construct/], forbidden_prefixes: [paper/, discovery/literature/, evidence/claim_registry.md]}
   literature: {allowed_prefixes: [discovery/literature/, docs/related_work, paper/references], forbidden_prefixes: [data/raw/, data/clean/, evidence/claim_registry.md, paper/draft]}
@@ -166,6 +294,13 @@ lanes:
   writing: {allowed_prefixes: [paper/, docs/, outputs/tables/, outputs/figures/], forbidden_prefixes: [data/raw/, evidence/claim_registry.md]}
   compliance: {allowed_prefixes: [replication/, compliance/, docs/data_availability, paper/supplement, outputs/logs/], forbidden_prefixes: [data/raw/, evidence/claim_registry.md]}
   harness: {allowed_prefixes: [aeros/, checks/, harness/, templates/, tools/, docs/design/, project_manifest.yml, AGENTS.md], forbidden_prefixes: [data/raw/, paper/draft.md, evidence/claim_registry.md]}
+workflow_presets:
+  broad_capture_leads: {description: Wide early lead capture into isolated queues; not evidence or claim-supporting., allowed_prefixes: [work/leads/, data/backfill/, audits/broad_capture/, quality_reports/broad_capture/, outputs/logs/, evidence/delta_log.jsonl], allowed_actions: [broad search, lead sweep, source group probe, candidate queue update], forbidden_prefixes: [data/raw/, data/intermediate/, data/processed/, paper/, evidence/claim_registry.md, decisions/approvals/]}
+  recapture_source_pool: {description: Recover and review candidate source pools without promoting them to canonical evidence., allowed_prefixes: [work/recapture_, audits/source_recapture/, quality_reports/source_recapture/, source_snapshots/, evidence/delta_log.jsonl], allowed_actions: [source recapture, chrome-assisted review, source-promotion queue], forbidden_prefixes: [evidence/claim_registry.md, decisions/approvals/]}
+  claim_audit: {description: Audit claim support and deltas without collecting new raw data., allowed_prefixes: [audits/claim/, audits/advisory/, evidence/research_graph.yml, evidence/delta_log.jsonl, quality_reports/claim_audit/], allowed_actions: [claim audit, support-chain review, delta audit], forbidden_prefixes: [data/raw/, decisions/approvals/]}
+  writing_guardrail: {description: Bounded paper/TeX edits and guardrail reports tied to existing claims and numbers., allowed_prefixes: [paper/, output/tex/, outputs/tex/, quality_reports/writing/, audits/writing/, evidence/delta_log.jsonl], allowed_actions: [bounded writing edit, number/claim guardrail, tex compile review], forbidden_prefixes: [data/raw/, evidence/claim_registry.md, decisions/approvals/]}
+  chrome_assisted_review: {description: Browser-assisted source review that produces staging notes, screenshots, or queues., allowed_prefixes: [work/chrome_review/, work/recapture_, audits/chrome_assisted_review/, quality_reports/chrome_assisted_review/, source_snapshots/, evidence/delta_log.jsonl], allowed_actions: [chrome-assisted review, source locator check, manual page audit], forbidden_prefixes: [evidence/claim_registry.md, decisions/approvals/]}
+  source_promotion_queue: {description: Promote reviewed staging sources into explicit queues without claiming final evidence., allowed_prefixes: [work/source_promotion/, audits/source_promotion/, quality_reports/source_promotion/, data/backfill/, discovery/data_inventory.csv, docs/data_sources.md, evidence/delta_log.jsonl, aeros/state/global_state.yml], allowed_actions: [source promotion queue, backfill queue update, global state refresh], forbidden_prefixes: [paper/, evidence/claim_registry.md, decisions/approvals/]}
 semantic_verdicts:
   expected_lane_change: Changed files match the declared lane.
   supporting_cross_lane_change: Allowed support file changed outside the lane.
@@ -178,6 +313,7 @@ semantic_verdicts:
 policy: AEROS-SESSION-SCOPE-001
 active: true
 active_lane: data
+active_workflow: ""
 objective: "One concrete objective for this chat/run."
 max_actions: 2
 allowed_actions: [aeros cockpit, aeros next, lane-scoped action]
@@ -505,7 +641,7 @@ def main() -> int:
 if __name__ == "__main__":
     raise SystemExit(main())
 ''',
-    "templates/completion_attestation.yml": """version: 3
+    "templates/completion_attestation.yml": """version: 5
 task_id: T000
 generated_at: ""
 completion_mode: agent_run
@@ -513,12 +649,15 @@ declared_outcome: complete
 outcome_kind: complete
 contract_status: failed
 verification_level: failed_attestation
+progress_domain: research
 progress_class: none
 progress_label: CHECK_PASS
 authority_status: no_new_authority
 work_lane: data
 allowed_outputs_expected: []
 actual_outputs: []
+staging_artifact_paths: []
+substantive_evidence_paths: []
 checks_required: []
 check_attestations: []
 evidence_delta_ref: ""
@@ -575,6 +714,23 @@ source: deterministic
 blocked: false
 
 This is a recommendation, not an execution record, gate approval, or claim-support artifact.
+""",
+    "templates/evidence_sufficiency_audit.yml": """version: "0.1"
+audit_id: ESA-TEMPLATE
+artifact_id: ""
+artifact_path: ""
+artifact_type: ""
+dimensions:
+  actor: {value: "", note: "Who or what produced, reviewed, or approved this artifact."}
+  authority: {value: "", note: "The authority level: agent, harness, human gate, external source, or journal/data editor."}
+  action: {value: "", note: "The action performed, observed, or approved."}
+  policy: {value: "", note: "The AEROS policy/check/gate/external standard that governs this record."}
+  decision_basis: {value: "", note: "The source files, outputs, hashes, checks, or human evidence used as the basis."}
+  resource_access: {value: "", note: "Credentials, licenses, source access, data-use constraints, or public-access status."}
+  lifecycle: {value: "", note: "Draft, candidate, validated, admitted, superseded, blocked, or released."}
+  verification_strength: {value: self_attested, note: "How strong the verification is."}
+overall_assessment: draft
+does_not_prove: [scientific validity, identification quality, claim support, data truth, publication readiness]
 """,
     "harness/human_review_receipt_template.md": """---
 receipt_type: human_review_receipt
@@ -687,12 +843,13 @@ forbidden_cross_lane_substitutions:
     "harness/completion_attestation_policy.yml": """version: "0.1"
 policy: AEROS-COMPLETION-ATTESTATION-001
 principle: "Completion is a small mechanical attestation, not a research verdict."
-minimal_attestation_fields: [task_id, declared_outcome, work_lane, allowed_outputs_expected, actual_outputs, check_attestations, substantive_progress, does_not_prove]
+minimal_attestation_fields: [task_id, declared_outcome, work_lane, allowed_outputs_expected, actual_outputs, staging_artifact_paths, substantive_evidence_paths, check_attestations, substantive_progress, does_not_prove]
 allowed_declared_outcomes: [complete, partial, blocked, hygiene]
 passed_task_rule:
   declared_outcome: complete
   requires:
-    - at least one substantive allowed output outside agent_runs/
+    - at least one allowed output outside runtime logs
+    - staging/review/queue work uses staging_artifact_paths and ROUTE_READY
     - file outputs include sha256
     - every required check has command and exit_code
     - completion_verdict is pass
@@ -740,15 +897,20 @@ hard_boundaries:
     "harness/aea_replication_policy.yml": """version: "0.1"
 policy: AEROS-AEA-REPLICATION-ALIGNMENT-001
 external_standard: {name: AEA Data Editor replication package guidance, url: "https://aeadataeditor.github.io/"}
+policy_version: "February 2026"
+source_urls: ["https://www.aeaweb.org/journals/data/data-code-policy", "https://aeadataeditor.github.io/posts/2026-01-19-preparing-pandp-replication-packages"]
 principle: "Align replication packages with AEA-style expectations without certifying acceptance."
+required_alignment_items: [data_availability_statement, raw_data_or_exception, analysis_data_or_reproducible_build, data_provenance_access_costs, transformation_and_cleaning_code, analysis_code_for_computational_results, master_script_or_precise_step_by_step, setup_program_or_environment, top_level_readme, program_to_output_map, software_hardware_runtime, data_citations, licenses_and_redistribution_rights, trusted_repository_plan, non_public_data_constraints, ethics_irb_or_rct_if_applicable]
 required_manifest_fields: [package_id, status, standard_alignment, data_availability, code_entrypoint, environment, result_registry, provenance, licenses, reproducibility]
 required_package_artifacts: [README_replication.md, README_data.md, Makefile, requirements.txt, environment.yml, code/99_make_all.py, evidence/result_index.csv, evidence/result_registry.csv]
 allowed_statuses: [draft, internal_review, ready_for_human_review, submitted, blocked]
-non_goals: [certify_AEA_acceptance, waive_data_license_or_confidentiality_constraints, replace_human_policy_review]
+p_and_p_2026_guidance: {compliance_check_scope: "limited compared with peer-reviewed AEA journals", requirement: "package must still be fully compliant with the AEA Data and Code Availability Policy", repository_note: "AEA Data and Code Repository strongly encouraged; GitHub alone is not a trusted archive"}
+non_goals: [certify_AEA_acceptance, waive_data_license_or_confidentiality_constraints, replace_human_policy_review, certify_data_editor_acceptance]
 """,
     "templates/aea_data_package_manifest.yml": """package_id: "AEA-PACKAGE-001"
 status: draft
-standard_alignment: {external_standard: "AEA Data Editor", reviewed_against_policy_url: "https://aeadataeditor.github.io/", reviewed_at: ""}
+standard_alignment: {external_standard: "AEA Data Editor", reviewed_against_policy_url: "https://www.aeaweb.org/journals/data/data-code-policy", policy_version: "February 2026", p_and_p_2026_guidance_url: "https://aeadataeditor.github.io/posts/2026-01-19-preparing-pandp-replication-packages", reviewed_at: ""}
+aea_2026_alignment: {data_availability_statement: draft, raw_data_or_exception: draft, analysis_data_or_reproducible_build: draft, data_provenance_access_costs: draft, transformation_and_cleaning_code: draft, analysis_code_for_computational_results: draft, master_script_or_precise_step_by_step: draft, setup_program_or_environment: draft, top_level_readme: draft, program_to_output_map: draft, software_hardware_runtime: draft, data_citations: draft, licenses_and_redistribution_rights: draft, trusted_repository_plan: draft, non_public_data_constraints: draft, ethics_irb_or_rct_if_applicable: not_applicable_or_pending}
 data_availability: {statement_path: "data/README_data.md", public_data: [], restricted_data: [], synthetic_or_demo_data: []}
 code_entrypoint: {command: "make all", master_script: "code/99_make_all.py"}
 environment: {requirements_file: "requirements.txt", environment_file: "environment.yml", container_file: ""}

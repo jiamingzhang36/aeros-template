@@ -1,6 +1,6 @@
 version: 1
 task_id: T002_data_feasibility
-generated_at: '2026-06-25T15:13:25+00:00'
+generated_at: '2026-07-04T13:48:31+00:00'
 contract_path: tasks/execution/T002_data_feasibility.yml
 run_report_path: ''
 allowed_skills:
@@ -15,19 +15,9 @@ recommended_skills:
 - summary-stats-table
 required_skill_classes:
 - data_scouting
-skill_waivers:
-- skill_class: recommended_skills
-  scope: mechanical_revalidation
-  reason: Runtime wrote this receipt during mechanical revalidation of existing artifacts;
-    no external skill was invoked.
-  progress_label: mechanical_hygiene
-- skill_class: data_scouting
-  scope: equivalent_recorded_skills
-  reason: 'Data scouting was performed and recorded in discovery/data_inventory.csv
-    (real sources D001-D004 with skills_used: data-inventory, policy-timeline, describe-data,
-    data-quality-checker). The formal ''data_scouting'' skill class was not invoked
-    by name; this waiver records the equivalent completed work. Owner-reviewable.'
-  progress_label: equivalent_work_recorded
+skill_obligations: []
+skill_waivers: []
 skills_used: []
 invocations: []
-verdict: pass
+missing_skill_decision: true
+verdict: fail

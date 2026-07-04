@@ -1,6 +1,6 @@
-version: 4
+version: 5
 task_id: T002_data_feasibility
-generated_at: '2026-06-25T15:13:25+00:00'
+generated_at: '2026-07-04T13:48:31+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -43,6 +43,10 @@ actual_outputs:
   sha256: ''
   bytes: 0
   entries: 6
+staging_artifact_paths:
+- audits/data_audit_report.md
+substantive_evidence_paths:
+- discovery/feasibility_memo.md
 checks_required:
 - check_git_guardrails.py
 - check_data_inventory.py
@@ -63,32 +67,32 @@ check_attestations:
 - name: check_git_guardrails.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_git_guardrails.py
   exit_code: 0
-  elapsed_seconds: 0.685
+  elapsed_seconds: 2.771
 - name: check_data_inventory
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_data_inventory.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.06
+  elapsed_seconds: 0.415
 - name: check_data_contract.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_data_contract.py
   exit_code: 0
-  elapsed_seconds: 0.089
+  elapsed_seconds: 0.423
 - name: check_agent_run_report.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
   exit_code: 0
-  elapsed_seconds: 0.184
+  elapsed_seconds: 0.425
 evidence_receipt_required: true
 evidence_receipt_path: evidence/receipts/T002_data_feasibility_human_review_receipt.md
 evidence_receipt_exists: true
@@ -103,7 +107,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: 36ed46fbbc5ea086a549a1ee8c436089330475e3b6068177356419560eb37608
+input_fingerprint: ebfb0aaf5df642892078c81ca80fd6cce4a3bad88ab73aa23b39ff923cf3906f
 output_fingerprint: 438dd29fa219f29278b022475f5c8b1e409f54eb07e00e4aae35a7bd6531025b
 dependency_fingerprint: dc9f4155ced327658084d9382c421e6eacd7b301e62c317c2bcc2fc540682aae
 completion_verdict: pass

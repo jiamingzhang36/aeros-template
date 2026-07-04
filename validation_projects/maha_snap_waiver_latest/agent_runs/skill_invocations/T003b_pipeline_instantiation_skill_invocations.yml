@@ -1,6 +1,6 @@
 version: 1
 task_id: T003b_pipeline_instantiation
-generated_at: '2026-06-24T14:32:32+00:00'
+generated_at: '2026-07-04T14:56:49+00:00'
 contract_path: tasks/execution/T003b_pipeline_instantiation.yml
 run_report_path: ''
 allowed_skills:
@@ -12,12 +12,24 @@ recommended_skills:
 - data-merge-audit
 - replication-check
 required_skill_classes: []
+skill_obligations: []
 skill_waivers:
-- skill_class: recommended_skills
-  scope: mechanical_revalidation
-  reason: Runtime wrote this receipt during mechanical revalidation of existing artifacts;
-    no external skill was invoked.
-  progress_label: mechanical_hygiene
+- skill_class: code-review-econ
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: input_changed.'
+  waiver_scope: fingerprint_refresh_only
+- skill_class: data-merge-audit
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: input_changed.'
+  waiver_scope: fingerprint_refresh_only
+- skill_class: replication-check
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: input_changed.'
+  waiver_scope: fingerprint_refresh_only
 skills_used: []
 invocations: []
+missing_skill_decision: false
 verdict: pass

@@ -1,15 +1,15 @@
 # Human Gate Decision Packet: G11
 
-Generated: 2026-06-24T14:32:06+00:00
+Generated: 2026-07-04T18:58:41+00:00
 Stage: discovery
-Current gate: G10
+Current gate: G11
 Gate status: approved
-Candidate gate: discovery / G11
+Candidate gate: execution / G11
 Earned claim ceiling: none
 
 ## Recommendation
 
-Approve G11 if the human reviewer accepts the evidence packet.
+G11 is already human-approved and current criteria still pass.
 
 ## Gate Criteria Status
 
@@ -37,7 +37,6 @@ None. All criteria through the target gate passed.
 ### Passed Runtime Tasks
 
 - D001a_framing
-- D001b_framework_search
 - D002_data_scouting
 - D003_design_options
 - D004_variable_construction

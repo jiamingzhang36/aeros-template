@@ -348,7 +348,7 @@ skills:
     - Use for exploratory diagnostics only.
     - Any statistic used in paper text must be registered through result_index.csv.
     human_gate_required: false
-    tier: advisory
+    tier: optional
     default_use: false
   feature_engineering:
     name: feature-engineering
@@ -368,7 +368,7 @@ skills:
     - Proposed features must be pre-analysis candidates unless already locked.
     - Do not choose variables by statistical significance.
     human_gate_required: true
-    tier: advisory
+    tier: optional
     default_use: false
   regression_table:
     name: regression-table
@@ -387,7 +387,7 @@ skills:
     - Regression outputs must be registered in result_index.csv before supporting claims.
     - Tables must preserve pre-specified estimands and controls.
     human_gate_required: true
-    tier: advisory
+    tier: optional
     default_use: true
   robustness_suite:
     name: robustness-suite
@@ -407,7 +407,7 @@ skills:
     - Surface robustness families and threats; do not decide identification quality.
     - Distinguish pre-specified robustness from exploratory sensitivity checks.
     human_gate_required: true
-    tier: advisory
+    tier: optional
     default_use: true
   placebo_test:
     name: placebo-test
@@ -427,7 +427,7 @@ skills:
     - Placebos are diagnostic evidence, not proof of identification.
     - Failed or ambiguous placebo checks must remain visible to the claim audit.
     human_gate_required: true
-    tier: advisory
+    tier: optional
     default_use: true
   replication_check:
     name: replication-check
@@ -603,7 +603,7 @@ skills:
     - Policy dates must include source snapshot/date and ambiguity notes.
     - Treatment timing needs human approval before becoming protected definition.
     human_gate_required: true
-    tier: advisory
+    tier: optional
     default_use: false
   econ_principles_check:
     name: econ-principles-check
@@ -623,5 +623,5 @@ skills:
     - Use to surface economic logic, mechanism plausibility, and interpretation risks.
     - Formal claims still require evidence registry and human gate approval.
     human_gate_required: true
-    tier: advisory
+    tier: optional
     default_use: true

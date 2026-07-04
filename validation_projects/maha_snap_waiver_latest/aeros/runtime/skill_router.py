@@ -138,6 +138,9 @@ def validate_skill_contracts(project_root: Path, contracts: dict[str, tuple[Cont
     """Validate task-level skill declarations, independent of run receipts."""
     failures: list[str] = []
     skill_map = load_core_skill_map(project_root)
+    from .skill_obligation import validate_skill_coverage
+
+    failures.extend(validate_skill_coverage(project_root, contracts))
     for task_id, (contract, _path) in sorted(contracts.items()):
         allowed = set(allowed_skills(contract))
         rec = set(recommended_skills(project_root, contract))

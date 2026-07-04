@@ -1,1 +1,35 @@
 paper_id,primary_function,secondary_functions,reading_depth,status,extraction_card,can_support_gap_claim,can_support_method_claim,can_support_data_claim,notes
+P001,gap-verification,,full_text,included,yes,yes,no,no,Full-text extraction-card-backed AEROS literature pass.
+P002,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P003,theory-mechanism,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P004,gap-verification,,full_text,included,yes,yes,no,no,Full-text extraction-card-backed AEROS literature pass.
+P005,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P006,gap-verification,,full_text,included,yes,yes,no,no,Full-text extraction-card-backed AEROS literature pass.
+P007,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P008,theory-mechanism,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P009,data-measurement,,full_text,included,yes,no,no,yes,Full-text extraction-card-backed AEROS literature pass.
+P010,background-institutional,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P011,background-institutional,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P012,gap-verification,,full_text,included,yes,yes,no,no,Full-text extraction-card-backed AEROS literature pass.
+P013,gap-verification,,full_text,included,yes,yes,no,no,Full-text extraction-card-backed AEROS literature pass.
+P014,data-measurement,,full_text,included,yes,no,no,yes,Full-text extraction-card-backed AEROS literature pass.
+P015,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P016,theory-mechanism,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P017,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P018,data-measurement,,full_text,included,yes,no,no,yes,Full-text extraction-card-backed AEROS literature pass.
+P019,theory-mechanism,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P020,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P021,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P022,theory-mechanism,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P023,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P024,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P025,theory-mechanism,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P026,method-identification,,full_text,included,yes,no,yes,no,Full-text extraction-card-backed AEROS literature pass.
+P027,data-measurement,,full_text,included,yes,no,no,yes,Full-text extraction-card-backed AEROS literature pass.
+P028,background-institutional,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P029,background-institutional,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P030,gap-verification,,full_text,included,yes,yes,no,no,Full-text extraction-card-backed AEROS literature pass.
+P031,background-institutional,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P032,background-institutional,,full_text,included,yes,no,no,no,Full-text extraction-card-backed AEROS literature pass.
+P900,method-identification,,abstract,title_abstract_screened,no,no,no,no,Discovery-only framing-deck anchor required by D001b/METHOD1. Not full-text extracted and not used in synthesis.
+P901,theory-mechanism,,abstract,title_abstract_screened,no,no,no,no,Discovery-only framing-deck anchor required by D001b/MECH1. Not full-text extracted and not used in synthesis.

@@ -251,6 +251,7 @@ Lane rules:
 
 - Stay in the active lane for the whole run unless the human explicitly asks to switch lanes.
 - Before a chat-driven work burst that may edit files, prefer starting a scoped session with `aeros session start --lane <lane> --objective "..."`.
+- When the work is a known intermediate workflow, add `--workflow <preset>` instead of hand-expanding prefixes. Current presets include `recapture_source_pool`, `claim_audit`, `writing_guardrail`, `chrome_assisted_review`, and `source_promotion_queue`.
 - If a session is active, stay inside `SESSION_CONTRACT.yml` until the stop condition or run `aeros session audit`.
 - Off-scope changes reported by `aeros session audit` are `SCOPE_DRIFT`, `CLAIM_SCOPE_DRIFT`, or `AUTHORITY_DRIFT`. Do not call the work complete until the drift is reverted, explicitly human-approved, or moved into `harness/improvement_backlog.yml` as deferred work.
 - A session scope is a guardrail, not authority. It cannot approve gates, upgrade claims, or turn route/check work into `SUBSTANTIVE_PRODUCED`.
@@ -294,8 +295,10 @@ In an active or adopted research project, data state drives the next action. Do 
 - In goal/continue mode, a data-oriented request must follow `harness/goal_mode_policy.yml`: attempt safe data acquisition first, then either produce a data/source/probe artifact or stop with an honest blocker/source-discovery receipt.
 - Local-cache-safe data repair may run only when a queue item is `auto_rerunnable` and has an explicit `run_command`.
 - Official-source, API, credentialed, scraping, source-date-sensitive, or LLM-extraction work must be blocked for approval or receipt until the human accepts the source snapshot and terms/credential implications.
-- A passed task must produce a substantive allowed output; logs alone are not completion.
+- A passed task must produce a real allowed output outside runtime logs. Final evidence belongs in `substantive_evidence_paths`; route/review/queue preparation belongs in `staging_artifact_paths`.
 - A task is not complete merely because the run report is filled. A passed task requires a version-2 completion attestation with actual outputs, file hashes when applicable, check commands, exit codes, and an explicit `does_not_prove` boundary.
+- Completion receipts distinguish `staging_artifact_paths` from `substantive_evidence_paths`. Staging artifacts such as `work/`, Chrome/OCR review notes, recapture pools, source-promotion queues, audits, and quality reports may justify `ROUTE_READY`, but they do not by themselves prove substantive research progress.
+- Use `substantive_evidence_paths` only for canonical data, full-text extraction, registered result, paper edit, or approved evidence artifacts that materially change the research substance.
 - Completion attestation is mechanical only. It proves that declared task outputs and checks exist; it does not prove scientific validity, identification quality, claim support, or human gate approval.
 - If a task declares `recommended_skills` or `required_skill_classes`, the skill receipt must record either the invoked skill(s) or a waiver explaining why the skill was not used.
 
@@ -399,6 +402,19 @@ For active research projects, data feasibility should be tested with a small pro
 - Do not run full collection into `data/raw/` before a passing small probe unless a human records an explicit receipt-backed exception.
 - Do not upgrade claims or draft paper conclusions from probe evidence alone; a probe establishes feasibility, not final support.
 
+## Broad Capture Rules
+
+Use broad capture for early lead collection, not for evidence admission.
+
+- `execution_mode: broad_capture` means wide search, lead sweep, or source-group probing only.
+- Broad capture may write isolated lead surfaces such as `work/leads/` and `data/backfill/*_lead_queue.csv` / `data/backfill/*_candidate_queue.csv`.
+- Broad capture uses lightweight receipts and batch-only audit. Do not require a full run report for every individual lead.
+- Broad capture must not write `data/raw/`, `data/intermediate/`, `data/processed/`, `evidence/claim_registry.md`, `paper/`, release, approval, or replication artifacts.
+- Leads and candidate queues are not evidence, not canonical data, not claim support, and not paper-facing progress.
+- Promotion from lead/candidate queues into staging, intermediate, processed, canonical, claim, or paper surfaces requires a separate promotion action with the normal AEROS audit level.
+- Broad-capture lead queues should carry `lead_id`, `source_url`, `captured_at`, `capture_method`, `why_potentially_relevant`, `route`, `dedupe_key`, `promotion_status`, `ttl_days`, and `promotion_requirements`.
+- If broad-capture queues become stale or saturated, stop collecting new leads and promote, reject, or refresh existing leads before continuing.
+
 ## Data Backfill Rules
 
 When a coverage, denominator, source, or variable gap is discovered, do not leave it as an informal note.
@@ -437,6 +453,13 @@ Backfill is the bridge between governance automation and data repair automation.
 - Backlog entries must include `created_at`, `updated_at`, `status`, `priority`, `area`, `issue`, `proposed_fix`, and `owner`.
 - Do not leave important improvement ideas only in chat.
 - When resolving a backlog item, update `status`, `resolved_at`, and `resolution_commit`.
+- Harness runs should produce harness-observed receipts in `outputs/harness_receipts/`. These receipts are generated by `checks/run_harness_checks.py` from observed check exit codes, output tails, and source-file hashes; agent-written completion receipts may cite them but must not pretend self-attestation is equivalent to harness observation.
+- Harness-observed receipts prove only the observed check run and file hashes. They do not prove research validity, data truth, claim support, paper readiness, or gate approval.
+- Protected research-authority paths must not be committed silently from agent work. Use `tools/install_aeros_git_hooks.zsh` to install the optional local pre-commit guard; the hook blocks protected staged files unless a human explicitly sets `AEROS_ALLOW_PROTECTED_COMMIT=1` for an approved protected commit.
+- The protected-path hook is enforcement for commit boundaries, not scientific approval. Human gates, claim rules, and evidence checks still govern whether the protected edit is substantively acceptable.
+- `decisions/update_ledger_chain.jsonl` is the local hash chain for update-ledger tracking. Keep it synchronized with `decisions/update_ledger.md`; it detects local drift but is not a signed transparency log and does not protect against a malicious actor who rewrites both files.
+- Use `templates/evidence_sufficiency_audit.yml` and `harness/evidence_sufficiency_audit_policy.yml` when a gate packet, completion claim, or release packet needs to explain the governance evidence basis. The eight dimensions are record-sufficiency fields, not proof of scientific truth.
+- AEA replication alignment follows `harness/aea_replication_policy.yml`. AEROS can check package fields against the February 2026 AEA Data and Code policy and P&P guidance, but it cannot certify AEA acceptance or waive data/license/IRB constraints.
 
 ## Operating Dashboard Discipline
 
@@ -579,3 +602,33 @@ For each update, record:
 - next check on a real project
 
 Use `templates/update_ledger_entry.md` for new entries. If an update only changes logs or formatting, say so; do not describe it as research capability progress.
+
+## Execution Mode, Source IDs, and Canonical Staging
+
+Before starting ambiguous or multi-step work, run or mentally apply `aeros mode recommend --lane <lane> --intent "<short intent>"`. The mode is advisory: it right-sizes governance, but it does not approve gates, certify claims, or make research progress by itself.
+
+Keep source IDs stable across `docs/data_contract.yml`, `discovery/data_inventory.csv`, provenance JSON, and result registry records. If a source changes identity, create a new source ID rather than silently reusing an old one.
+
+Before committing project work with raw captures or staging files, prefer `aeros artifact stage --canonical --exclude-raw-staging` and review the output. Raw API responses, browser captures, and `work/` staging files should not be mixed into canonical commits unless the human explicitly asks.
+
+## Skill Obligation Layer
+
+For skill-eligible tasks, do not leave skill use implicit. Check the task contract for `skill_obligations`, `required_skill_classes`, `allowed_skills`, and `recommended_skills`. Use the smallest relevant skill when it helps; if no skill is used, record an explicit waiver or blocker with `skill_class`, `reason`, `scope`, and `progress_label`.
+
+Skill use and skill waivers are audit evidence only. They do not approve gates, certify claims, prove identification quality, or convert `ROUTE_READY` into `SUBSTANTIVE_PRODUCED`.
+
+## Task Mode, Output Intent, and Improvement Harvest
+
+Before non-trivial project work, classify the task shape with `aeros mode classify --lane <lane> --intent "<short intent>"`. Use the result to choose the lightest matching workflow preset; do not treat the classifier as execution authority or evidence admission.
+
+For source/data outputs, declare output intent where practical: `probe_only`, `staging_artifact`, `canonical_candidate`, `canonical_update`, or `audit_note`. Do not promote staging artifacts into canonical evidence without the appropriate data contract, provenance, or human review path.
+
+For route-sensitive work such as denominator capture, negative-seed discovery, source recapture, or official registry expansion, check `discovery/route_decision.yml` before collecting more sources. A pending route means the next action is a route packet or human decision, not more source accumulation.
+
+Use `aeros improve harvest` to collect framework-improvement candidates from local receipts and logs. Harvest output is advisory backlog input only; it does not modify gates, claims, or project state.
+
+Before opening a project task, prefer `aeros task preflight --lane <lane> --intent "<short intent>"`. Treat the packet as the operating envelope for that turn: task mode, route, skill obligations, output intents, allowed paths, and must-not-touch paths.
+
+Use `aeros sync doctor --project <path>` before judging a downstream project's behavior against the latest template. If the doctor reports missing or outdated capabilities, sync/roll out the template first or describe the project as running an older AEROS surface.
+
+For source capture, distinguish permission tiers. Public/local staging capture with `probe_only`, `staging_artifact`, or `audit_note` outputs may proceed without repeated human approval when it writes only staging/audit paths. Browser/portal/batch capture should use one bounded route/session approval. Credentials, API keys, paid sources, privacy/IRB/ToS uncertainty, `data/raw`, canonical updates, claims, papers, releases, and approvals require human approval.

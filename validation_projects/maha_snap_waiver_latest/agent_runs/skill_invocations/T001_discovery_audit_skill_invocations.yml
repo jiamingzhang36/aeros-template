@@ -1,6 +1,6 @@
 version: 1
 task_id: T001_discovery_audit
-generated_at: '2026-06-24T14:23:17+00:00'
+generated_at: '2026-07-04T13:48:29+00:00'
 contract_path: tasks/execution/T001_discovery_audit.yml
 run_report_path: ''
 allowed_skills:
@@ -10,12 +10,9 @@ recommended_skills:
 - academic-research-suite
 - pre-submission-audit
 required_skill_classes: []
-skill_waivers:
-- skill_class: recommended_skills
-  scope: mechanical_revalidation
-  reason: Runtime wrote this receipt during mechanical revalidation of existing artifacts;
-    no external skill was invoked.
-  progress_label: mechanical_hygiene
+skill_obligations: []
+skill_waivers: []
 skills_used: []
 invocations: []
-verdict: pass
+missing_skill_decision: true
+verdict: fail

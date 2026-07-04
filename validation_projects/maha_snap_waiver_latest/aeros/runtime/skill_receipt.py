@@ -64,6 +64,12 @@ def write_skill_invocation_receipt(
     allowed = set(str(s).strip() for s in (contract.raw.get("allowed_skills") or []) if str(s).strip())
     recommended = sorted(str(s).strip() for s in (contract.raw.get("recommended_skills") or []) if str(s).strip())
     required_classes = sorted(str(s).strip() for s in (contract.raw.get("required_skill_classes") or []) if str(s).strip())
+    try:
+        from .skill_obligation import infer_skill_obligations
+
+        obligations = sorted(infer_skill_obligations(project_root, contract))
+    except Exception:
+        obligations = sorted(str(s).strip() for s in (contract.raw.get("skill_obligations") or []) if str(s).strip())
     waivers = [w for w in (skill_waivers or contract.raw.get("skill_waivers") or []) if isinstance(w, dict)]
     records: list[dict[str, Any]] = []
     for name in sorted({s for s in skills_used if s and s != "none" and s != "n/a"}):
@@ -79,16 +85,7 @@ def write_skill_invocation_receipt(
             "human_gate_required": bool(meta.get("human_gate_required", False)),
             "aeros_constraints": meta.get("aeros_constraints", []),
         })
-    if recommended and not records and not waivers:
-        waivers = [{
-            "skill_class": "recommended_skills",
-            "scope": "mechanical_revalidation",
-            "reason": (
-                "Runtime wrote this receipt during mechanical revalidation of existing "
-                "artifacts; no external skill was invoked."
-            ),
-            "progress_label": "mechanical_hygiene",
-        }]
+    missing_skill_decision = bool((recommended or obligations or required_classes) and not records and not waivers)
     payload = {
         "version": 1,
         "task_id": contract.task_id,
@@ -98,10 +95,12 @@ def write_skill_invocation_receipt(
         "allowed_skills": sorted(allowed),
         "recommended_skills": recommended,
         "required_skill_classes": required_classes,
+        "skill_obligations": obligations,
         "skill_waivers": waivers,
         "skills_used": [r["skill_name"] for r in records],
         "invocations": records,
-        "verdict": "fail" if any(not r["known_to_aeros"] or not r["allowed_by_contract"] for r in records) else "pass",
+        "missing_skill_decision": missing_skill_decision,
+        "verdict": "fail" if missing_skill_decision or any(not r["known_to_aeros"] or not r["allowed_by_contract"] for r in records) else "pass",
     }
     path = receipt_path(project_root, contract.task_id)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -138,6 +137,8 @@ def validate_skill_invocations(project_root: Path, contracts: dict[str, tuple[Co
                 failures.append(f"{task_id}: skill {name!r} is not allowed by task contract")
         if payload.get("verdict") == "fail":
             failures.append(f"{task_id}: skill invocation receipt verdict is fail")
+        if payload.get("missing_skill_decision"):
+            failures.append(f"{task_id}: skill obligation/recommendation has neither invocation nor explicit waiver")
         if required_classes:
             used = set(payload.get("skills_used") or [])
             used_stages = {str(skill_map.get(name, {}).get("aeros_stage", "")).strip() for name in used}

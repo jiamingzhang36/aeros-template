@@ -415,5 +415,61 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-06-25"
-    resolution_commit: "pending"
+    resolution_commit: "16bd7ed"
     notes: "Validated 2026-06-25: TEMPLATE inactive PASS; CMPD (G7,G10 approved + green) PASS; MAHA (G10 approved + red) FAILs naming the 4 failing checks. Wired into run_harness_checks + sync. Does not auto-fix or auto-withdraw; the human must repair the work or withdraw the approval."
+  - id: AEROS-IMPROVE-031
+    created_at: "2026-06-25"
+    updated_at: "2026-06-25"
+    status: resolved
+    priority: medium
+    area: harness-bookkeeping
+    source: recurring_session_friction
+    issue: "check_update_ledger required EVERY recent commit to be referenced in the ledger, so bookkeeping/validation-project commits that touch no framework code (e.g. b12222e MAHA G10 approval, backfill commits) repeatedly turned the template harness red -- the most frequent false-red of the session."
+    proposed_fix: "Scope the requirement to framework-touching commits only (aeros/ checks/ harness/ templates/ tools/) via _commit_touches_framework; exempt bookkeeping/validation/docs/project-artifact commits. Preserves rationale enforcement for real framework changes; does not weaken any integrity check."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-25"
+    resolution_commit: "3025c69"
+    notes: "Minimal correct scoping, not the full ledger->projection generation (deferred). Validated: framework commit still required; b12222e and backfill commits no longer trip the check."
+  - id: AEROS-IMPROVE-032
+    created_at: "2026-06-25"
+    updated_at: "2026-06-25"
+    status: resolved
+    priority: high
+    area: sync
+    source: real_project_validation_maha
+    issue: "sync_aeros_latest.zsh manifest-wiring inserted required_files entries at hardcoded key-indent+2, ignoring existing list indentation. On MAHA (items at key indent) this produced malformed project_manifest.yml, cascading into 8+ harness failures via cockpit/context/stale/graph which all parse the manifest."
+    proposed_fix: "Detect and match existing list-item indentation when inserting (fallback key+2 for empty lists). Verified on 4-space/6-space/empty fixtures; old logic reproduced the exact parse error."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-06-25"
+    resolution_commit: "pending"
+    notes: "Found 2026-06-25 when a sync into MAHA broke its manifest (inflated 7->20 fails). MAHA manifest repaired in place; this fixes the root cause so no future synced project is corrupted."
+  - id: AEROS-IMPROVE-033
+    created_at: "2026-07-03"
+    updated_at: "2026-07-03"
+    status: open
+    priority: high
+    area: evidence-sufficiency
+    source: post_commit_review
+    issue: "Evidence sufficiency audit v1 is currently template/policy checked only. This risks repeating the DEMM-Bench failure mode where a schema-valid governance container is mistaken for substantive evidence sufficiency."
+    proposed_fix: "Use CMPD or the next active real-project gate packet as the first rollout fixture: fill audits/evidence_sufficiency_audit.yml from actual gate artifacts and verify that actor, authority, action, policy, decision_basis, resource_access, lifecycle, and verification_strength can be reconstructed from project evidence."
+    owner: human
+    target_gate: G7
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Do not close from template checks alone; close only after a real project gate packet consumes the audit record."
+  - id: AEROS-IMPROVE-034
+    created_at: "2026-07-04"
+    updated_at: "2026-07-04"
+    status: open
+    priority: low
+    area: context-governance
+    source: freeze_discipline_correction
+    issue: "The Context Compiler communication-budget layer was added after the runtime freeze without first showing, via control_tax or rollout data, that verbose communication was a measured bottleneck. The idea is useful, but it created a new runtime module, template, check, profile entry, and sync-doctor surface during a freeze-and-rollout window."
+    proposed_fix: "Defer dense communication / output-only communication budget until control_tax or real-project rollout data shows communication verbosity is a measurable bottleneck. If reintroduced, implement as a smaller projection over existing context/cockpit output rather than a new runtime/check surface."
+    owner: human
+    target_gate: G0
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Backlogged after reverting the 2026-07-04 Context Compiler communication-budget feature. Keep the principle 'compress communication, not evidence' as design guidance, not an active framework surface, until measured need is shown."

@@ -1,6 +1,6 @@
-version: 4
+version: 5
 task_id: T001_discovery_audit
-generated_at: '2026-06-24T14:23:17+00:00'
+generated_at: '2026-07-04T13:48:29+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -8,8 +8,8 @@ outcome_kind: complete
 contract_status: passed
 verification_level: checks_passed_with_artifact_hashes
 progress_domain: research
-progress_class: substantive
-progress_label: SUBSTANTIVE_PRODUCED
+progress_class: routing
+progress_label: ROUTE_READY
 authority_status: no_new_authority
 work_lane: ''
 contract_path: tasks/execution/T001_discovery_audit.yml
@@ -35,7 +35,10 @@ actual_outputs:
   type: directory
   sha256: ''
   bytes: 0
-  entries: 5
+  entries: 6
+staging_artifact_paths:
+- audits/discovery_audit_report.md
+substantive_evidence_paths: []
 checks_required:
 - check_discovery_completeness.py
 - check_design_selection.py
@@ -56,37 +59,37 @@ check_attestations:
 - name: check_discovery_completeness.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_discovery_completeness.py
   exit_code: 0
-  elapsed_seconds: 0.094
+  elapsed_seconds: 0.262
 - name: check_design_selection
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_design_selection.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.073
+  elapsed_seconds: 0.184
 - name: check_claim_registry.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_registry.py
   exit_code: 0
-  elapsed_seconds: 0.086
+  elapsed_seconds: 0.744
 - name: check_agent_run_report.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
   exit_code: 0
-  elapsed_seconds: 0.125
+  elapsed_seconds: 0.731
 evidence_receipt_required: true
 evidence_receipt_path: evidence/receipts/T001_discovery_audit_human_review_receipt.md
 evidence_receipt_exists: true
 evidence_delta_ref: ''
-substantive_progress: true
+substantive_progress: false
 protected_definition_change_declared: false
 claim_change_declared: false
 human_decision_needed: false
@@ -96,7 +99,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: 2cf4d73500fb7d1e8acf22221f8a87e6c9dab820209e1d84e4adfc3c26128bb6
+input_fingerprint: cdde57199dc3a9bf0298892808484c2f1e152c92b690ed270ae6a14ca437900f
 output_fingerprint: d98deeef87e6980f1674e44091505f96c17b74daa836998e5bf02c571c0ecf1e
 dependency_fingerprint: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
 completion_verdict: pass

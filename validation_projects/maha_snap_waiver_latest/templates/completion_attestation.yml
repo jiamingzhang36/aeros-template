@@ -1,4 +1,4 @@
-version: 3
+version: 5
 task_id: T000
 generated_at: ""
 completion_mode: agent_run
@@ -17,6 +17,8 @@ actual_outputs:
     exists: false
     type: missing
     sha256: ""
+staging_artifact_paths: []
+substantive_evidence_paths: []
 checks_required: []
 check_attestations:
   - name: check_example.py
@@ -25,6 +27,10 @@ check_attestations:
     exit_code: 0
     elapsed_seconds: 0.0
 evidence_delta_ref: ""
+skill_invocation_ref: ""
+skill_obligations: []
+skill_waivers: []
+output_intents: {}
 substantive_progress: false
 does_not_prove:
   - scientific validity

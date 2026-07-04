@@ -29,6 +29,9 @@ class Contract:
     allowed_skills: list[str]
     recommended_skills: list[str]
     required_skill_classes: list[str]
+    skill_obligations: list[str]
+    skill_waivers: list[dict[str, Any]]
+    output_intents: dict[str, str]
     output_contract: dict[str, Any]
     max_retries: int
     escalate_if: list[str]
@@ -76,6 +79,9 @@ def load_contract(path: str | Path) -> Contract:
         allowed_skills=list(data.get("allowed_skills", []) or []),
         recommended_skills=list(data.get("recommended_skills", []) or []),
         required_skill_classes=list(data.get("required_skill_classes", []) or []),
+        skill_obligations=list(data.get("skill_obligations", []) or []),
+        skill_waivers=list(data.get("skill_waivers", []) or []),
+        output_intents=dict(data.get("output_intents", {}) or {}),
         output_contract=dict(data.get("output_contract", {}) or {}),
         max_retries=int(retry.get("max_retries", 1)),
         escalate_if=list(data.get("escalate_if", []) or []),

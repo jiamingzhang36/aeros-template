@@ -1,6 +1,6 @@
-version: 4
+version: 5
 task_id: T003a_protocol_design
-generated_at: '2026-06-24T14:32:21+00:00'
+generated_at: '2026-07-04T14:56:18+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -35,7 +35,10 @@ actual_outputs:
   type: directory
   sha256: ''
   bytes: 0
-  entries: 5
+  entries: 6
+staging_artifact_paths: []
+substantive_evidence_paths:
+- execution/protocol/main_execution_protocol.md
 checks_required:
 - check_execution_protocol.py
 - check_agent_run_report.py
@@ -50,18 +53,18 @@ check_attestations:
 - name: check_execution_protocol
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_execution_protocol.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.117
+  elapsed_seconds: 0.907
 - name: check_agent_run_report.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
   exit_code: 0
-  elapsed_seconds: 0.206
+  elapsed_seconds: 0.705
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -76,7 +79,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: 5d87da1826d44d175262fa5fdf5b8bcca815f0f9b1c1f713076b183bf3069b72
+input_fingerprint: 418bc30bbb431480d7476b203a4bfb8a1a880ed2db54079d3333360899476a55
 output_fingerprint: 3c4b92612591e5c6702bb46a54bd08ec04ab6ef5160f17137cf558dfd9898dc3
 dependency_fingerprint: 1043a459b70ebc4d7f76efd54e1673b45d1108ef1661ac9f95556716e116f456
 completion_verdict: pass

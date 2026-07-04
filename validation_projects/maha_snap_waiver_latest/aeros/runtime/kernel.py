@@ -950,12 +950,20 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
                 tools_used=sorted({name for rec in attempts_log for name, _, _ in rec.checks}),
             )
             skill_receipt = write_skill_invocation_receipt(
-                project_root, contract, skills_used=[], run_report_path=None
+                project_root,
+                contract,
+                skills_used=list(contract.raw.get("skills_used") or []),
+                skill_waivers=list(contract.raw.get("skill_waivers") or []),
+                run_report_path=None,
             )
             temp_run.skill_receipt_path = skill_receipt.relative_to(project_root).as_posix()
             report_path = write_run_report(project_root, temp_run)
             skill_receipt = write_skill_invocation_receipt(
-                project_root, contract, skills_used=[], run_report_path=report_path
+                project_root,
+                contract,
+                skills_used=list(contract.raw.get("skills_used") or []),
+                skill_waivers=list(contract.raw.get("skill_waivers") or []),
+                run_report_path=report_path,
             )
             entry = state_mod.task_entry(state, contract.task_id)
             receipt = write_completion_receipt(

@@ -70,6 +70,8 @@ def default_policy() -> dict[str, Any]:
         "agent_runs/",
         "outputs/logs/",
         "outputs/context/",
+        "evidence/delta_log.jsonl",
+        "aeros/state/global_state.yml",
         "decisions/revision_log.md",
         "decisions/update_ledger.md",
         "harness/improvement_backlog.yml",
@@ -135,6 +137,73 @@ def default_policy() -> dict[str, Any]:
                 "forbidden_prefixes": ["data/raw/", "paper/draft.md", "evidence/claim_registry.md"],
             },
         },
+        "workflow_presets": {
+            "recapture_source_pool": {
+                "description": "Recover and review candidate source pools without promoting them to canonical evidence.",
+                "allowed_prefixes": [
+                    "work/recapture_",
+                    "audits/source_recapture/",
+                    "quality_reports/source_recapture/",
+                    "source_snapshots/",
+                    "evidence/delta_log.jsonl",
+                ],
+                "allowed_actions": ["source recapture", "chrome-assisted review", "source-promotion queue"],
+                "forbidden_prefixes": ["evidence/claim_registry.md", "decisions/approvals/"],
+            },
+            "claim_audit": {
+                "description": "Audit claim support and deltas without collecting new raw data.",
+                "allowed_prefixes": [
+                    "audits/claim/",
+                    "audits/advisory/",
+                    "evidence/research_graph.yml",
+                    "evidence/delta_log.jsonl",
+                    "quality_reports/claim_audit/",
+                ],
+                "allowed_actions": ["claim audit", "support-chain review", "delta audit"],
+                "forbidden_prefixes": ["data/raw/", "decisions/approvals/"],
+            },
+            "writing_guardrail": {
+                "description": "Bounded paper/TeX edits and guardrail reports tied to existing claims and numbers.",
+                "allowed_prefixes": [
+                    "paper/",
+                    "output/tex/",
+                    "outputs/tex/",
+                    "quality_reports/writing/",
+                    "audits/writing/",
+                    "evidence/delta_log.jsonl",
+                ],
+                "allowed_actions": ["bounded writing edit", "number/claim guardrail", "tex compile review"],
+                "forbidden_prefixes": ["data/raw/", "evidence/claim_registry.md", "decisions/approvals/"],
+            },
+            "chrome_assisted_review": {
+                "description": "Browser-assisted source review that produces staging notes, screenshots, or queues.",
+                "allowed_prefixes": [
+                    "work/chrome_review/",
+                    "work/recapture_",
+                    "audits/chrome_assisted_review/",
+                    "quality_reports/chrome_assisted_review/",
+                    "source_snapshots/",
+                    "evidence/delta_log.jsonl",
+                ],
+                "allowed_actions": ["chrome-assisted review", "source locator check", "manual page audit"],
+                "forbidden_prefixes": ["evidence/claim_registry.md", "decisions/approvals/"],
+            },
+            "source_promotion_queue": {
+                "description": "Promote reviewed staging sources into explicit queues without claiming final evidence.",
+                "allowed_prefixes": [
+                    "work/source_promotion/",
+                    "audits/source_promotion/",
+                    "quality_reports/source_promotion/",
+                    "data/backfill/",
+                    "discovery/data_inventory.csv",
+                    "docs/data_sources.md",
+                    "evidence/delta_log.jsonl",
+                    "aeros/state/global_state.yml",
+                ],
+                "allowed_actions": ["source promotion queue", "backfill queue update", "global state refresh"],
+                "forbidden_prefixes": ["paper/", "evidence/claim_registry.md", "decisions/approvals/"],
+            },
+        },
     }
 
 
@@ -152,6 +221,7 @@ def start_session(
     *,
     lane: str,
     objective: str,
+    workflow: str = "",
     max_actions: int = 2,
     allowed_actions: list[str] | None = None,
     dry_run: bool = False,
@@ -160,17 +230,51 @@ def start_session(
         raise ValueError(f"unknown lane: {lane}")
     policy = load_policy(project_root)
     lane_policy = (policy.get("lanes") or {}).get(lane) or {}
+    workflow = str(workflow or "").strip()
+    workflow_policy = {}
+    if workflow:
+        workflow_policy = ((policy.get("workflow_presets") or {}).get(workflow) or {})
+        if not workflow_policy:
+            known = ", ".join(sorted((policy.get("workflow_presets") or {}).keys()))
+            raise ValueError(f"unknown workflow preset: {workflow}; known presets: {known}")
+
+    def _dedupe(items: list[str]) -> list[str]:
+        seen: set[str] = set()
+        out: list[str] = []
+        for item in items:
+            value = str(item or "").strip()
+            if value and value not in seen:
+                seen.add(value)
+                out.append(value)
+        return out
+
+    default_actions = ["aeros cockpit", "aeros next", "lane-scoped action"]
+    merged_actions = _dedupe(
+        list(allowed_actions or default_actions)
+        + list(workflow_policy.get("allowed_actions") or [])
+    )
+    merged_allowed = _dedupe(
+        list(policy.get("common_allowed_prefixes") or [])
+        + list(lane_policy.get("allowed_prefixes") or [])
+        + list(workflow_policy.get("allowed_prefixes") or [])
+    )
+    merged_forbidden = _dedupe(
+        list(lane_policy.get("forbidden_prefixes") or [])
+        + list(workflow_policy.get("forbidden_prefixes") or [])
+    )
     payload = {
         "version": "0.1",
         "policy": "AEROS-SESSION-SCOPE-001",
         "active": True,
         "started_at": _now(),
         "active_lane": lane,
+        "active_workflow": workflow,
+        "workflow_description": str(workflow_policy.get("description", "") or ""),
         "objective": objective,
         "max_actions": max(1, int(max_actions or 1)),
-        "allowed_actions": allowed_actions or ["aeros cockpit", "aeros next", "lane-scoped action"],
-        "allowed_prefixes": list(policy.get("common_allowed_prefixes") or []) + list(lane_policy.get("allowed_prefixes") or []),
-        "forbidden_prefixes": list(lane_policy.get("forbidden_prefixes") or []),
+        "allowed_actions": merged_actions,
+        "allowed_prefixes": merged_allowed,
+        "forbidden_prefixes": merged_forbidden,
         "stop_condition": "Stop at human gate, blocker, no-progress, max_actions, or first off-scope diff.",
         "completion_label_rule": "Use CHECK_PASS, ROUTE_READY, or SUBSTANTIVE_PRODUCED.",
         "does_not_prove": DOES_NOT_PROVE,
@@ -213,6 +317,26 @@ def _classify_artifact(rel: str, active_lane: str, allowed: bool, forbidden: boo
     if rel.startswith(("aeros/", "checks/", "harness/", "templates/", "tools/")) or rel in {"AGENTS.md", "project_manifest.yml"}:
         owner_lane = "aeros-dev"
         artifact_type = "harness_control"
+    elif rel == "aeros/state/global_state.yml":
+        owner_lane = "bookkeeping"
+        artifact_type = "derived_state_view"
+        semantic_class = "bookkeeping_only" if allowed else "scope_drift"
+    elif rel == "evidence/delta_log.jsonl":
+        owner_lane = "bookkeeping"
+        artifact_type = "evidence_delta_log"
+        semantic_class = "bookkeeping_only" if allowed else "scope_drift"
+    elif rel.startswith("work/"):
+        owner_lane = active_lane if allowed else "staging"
+        artifact_type = "staging_artifact"
+    elif rel.startswith("quality_reports/"):
+        owner_lane = active_lane if allowed else "analysis"
+        artifact_type = "quality_report"
+    elif rel.startswith("audits/"):
+        owner_lane = active_lane if allowed else "claim"
+        artifact_type = "audit_artifact"
+    elif rel.startswith(("output/tex/", "outputs/tex/")):
+        owner_lane = "paper"
+        artifact_type = "tex_artifact"
     elif rel.startswith(("data/", "docs/data")) or rel.startswith("discovery/data"):
         owner_lane = "data"
         artifact_type = "data_artifact"
@@ -327,6 +451,7 @@ def format_session_status(session: dict[str, Any]) -> str:
         "",
         f"active: {session.get('active', False)}",
         f"active_lane: {session.get('active_lane', '')}",
+        f"active_workflow: {session.get('active_workflow', '')}",
         f"objective: {session.get('objective', '')}",
         f"max_actions: {session.get('max_actions', '')}",
         f"stop_condition: {session.get('stop_condition', '')}",

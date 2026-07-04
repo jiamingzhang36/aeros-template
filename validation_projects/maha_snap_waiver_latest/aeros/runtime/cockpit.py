@@ -8,6 +8,7 @@ from typing import Any
 from .context_bundle import build_context_bundle, format_context_bundle, write_context_bundle
 from .context_graph import build_context_graph, write_context_graph
 from .milestones import format_simple_status
+from .control_tax import build_control_tax, format_control_tax_dashboard, write_control_tax_dashboard
 
 
 def build_cockpit(root: Path, *, lane: str = "project", check_profile: str = "smoke") -> dict[str, Any]:
@@ -26,6 +27,7 @@ def build_cockpit(root: Path, *, lane: str = "project", check_profile: str = "sm
             "nodes": len(graph.get("nodes") or []),
             "edges": len(graph.get("edges") or []),
         },
+        "control_tax": build_control_tax(root),
         "next_action": next_action,
         "fast_check_command": f"python3 checks/run_harness_checks.py --profile {check_profile} --timeout 20",
         "does_not_prove": [
@@ -53,6 +55,13 @@ def format_cockpit(cockpit: dict[str, Any]) -> str:
         f"context_stale: {stale.get('stale', False)} ({stale.get('status', 'unknown')})",
         f"context_graph: {cockpit.get('context_graph_summary', {}).get('nodes', 0)} node(s), {cockpit.get('context_graph_summary', {}).get('edges', 0)} edge(s)",
         "",
+        "## Control Tax",
+        f"control_actions: {(cockpit.get('control_tax') or {}).get('summary', {}).get('control_actions', 0)}",
+        f"substantive_actions: {(cockpit.get('control_tax') or {}).get('summary', {}).get('substantive_actions', 0)}",
+        f"route_actions: {(cockpit.get('control_tax') or {}).get('summary', {}).get('route_actions', 0)}",
+        f"human_decisions: {(cockpit.get('control_tax') or {}).get('summary', {}).get('human_decisions', 0)}",
+        f"accepted_artifacts: {(cockpit.get('control_tax') or {}).get('summary', {}).get('accepted_artifacts', 0)}",
+        "",
         "## Recommended Next",
         f"action: {next_action.get('recommended_next_action', '')}",
         f"why: {next_action.get('why_this_next', '')}",
@@ -74,7 +83,7 @@ def format_cockpit(cockpit: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def write_cockpit(root: Path, *, lane: str = "project", check_profile: str = "smoke") -> tuple[Path, Path, Path]:
+def write_cockpit(root: Path, *, lane: str = "project", check_profile: str = "smoke") -> tuple[Path, Path, Path, Path]:
     cockpit = build_cockpit(root, lane=lane, check_profile=check_profile)
     md_path = root / "outputs/context/cockpit.md"
     json_path = root / "outputs/context/cockpit.json"
@@ -83,4 +92,5 @@ def write_cockpit(root: Path, *, lane: str = "project", check_profile: str = "sm
     json_path.write_text(json.dumps(cockpit, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     bundle_path, _ = write_context_bundle(root, cockpit["context"])
     graph_path = write_context_graph(root, lane=lane)
-    return md_path, bundle_path, graph_path
+    control_tax_md, _ = write_control_tax_dashboard(root)
+    return md_path, bundle_path, graph_path, control_tax_md

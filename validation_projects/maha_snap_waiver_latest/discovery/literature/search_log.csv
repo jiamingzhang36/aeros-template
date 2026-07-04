@@ -1,1 +1,2 @@
 date,agent,source,search_query,results_found,useful_results,not_useful_results,follow_up,notes
+2026-07-04,Codex,MAHA local extraction-card corpus,formal_literature_task_materialization,32,32,0,none,No new external search; user-approved AEROS pass materialized already-opened full-text cards.

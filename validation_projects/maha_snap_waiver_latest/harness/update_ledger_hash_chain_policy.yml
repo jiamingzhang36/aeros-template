@@ -1,0 +1,39 @@
+version: "0.1"
+policy: AEROS-UPDATE-LEDGER-HASH-CHAIN-001
+principle: >
+  The update ledger should be paired with a local append-style hash chain so
+  silent edits to ledger-tracking artifacts are mechanically detectable.
+chain_file: decisions/update_ledger_chain.jsonl
+genesis: GENESIS
+single_writer:
+  module: aeros.runtime.ledger_hash_chain
+  function: append_chain_record
+  rule: "new hash-chain events must be appended with the single writer; correcting a committed mistake requires an appended correction record, not rewriting an existing committed record"
+correction_policy:
+  committed_record_error: append_correction_record
+  must_not_rewrite_committed_records: true
+  correction_record_must_name:
+    - corrected_entry_id
+    - corrected_commit
+    - reason
+historical_rewrite_exceptions:
+  - commit: "5736fad"
+    reason: "2026-07-03 local schema repair for an already-reviewed observed-writes ledger-chain record; accepted once, future repairs must append correction records"
+record_required_fields:
+  - version
+  - seq
+  - entry_id
+  - subject
+  - subject_sha256
+  - prev_hash
+  - payload
+  - entry_hash
+protected_subjects:
+  - decisions/update_ledger.md
+verification_strength: local_hash_chain_over_observed_subject_file
+does_not_prove:
+  - malicious actor cannot rewrite both ledger and chain
+  - scientific validity
+  - claim support
+  - gate approval
+  - external transparency

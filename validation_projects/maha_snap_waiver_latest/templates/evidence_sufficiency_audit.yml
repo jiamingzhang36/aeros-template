@@ -1,0 +1,38 @@
+version: "0.1"
+audit_id: ESA-TEMPLATE
+artifact_id: ""
+artifact_path: ""
+artifact_type: ""
+dimensions:
+  actor:
+    value: ""
+    note: "Who or what produced, reviewed, or approved this artifact."
+  authority:
+    value: ""
+    note: "The authority level: agent, harness, human gate, external source, or journal/data editor."
+  action:
+    value: ""
+    note: "The action performed, observed, or approved."
+  policy:
+    value: ""
+    note: "The AEROS policy/check/gate/external standard that governs this record."
+  decision_basis:
+    value: ""
+    note: "The source files, outputs, hashes, checks, or human evidence used as the basis."
+  resource_access:
+    value: ""
+    note: "Credentials, licenses, source access, data-use constraints, or public-access status."
+  lifecycle:
+    value: ""
+    note: "Draft, candidate, validated, admitted, superseded, blocked, or released."
+  verification_strength:
+    value: "self_attested"
+    note: "How strong the verification is: self_attested, schema_valid, hash_observed, independent_rerun, etc."
+overall_assessment: draft
+does_not_prove:
+  - scientific validity
+  - identification quality
+  - claim support
+  - data truth
+  - publication readiness
+

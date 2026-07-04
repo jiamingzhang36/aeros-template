@@ -1,7 +1,7 @@
-version: 4
+version: 5
 task_id: D001a_framing
-generated_at: '2026-06-25T15:49:55+00:00'
-completion_mode: manual_recover
+generated_at: '2026-07-04T18:58:30+00:00'
+completion_mode: revalidation
 claimed_status: passed
 declared_outcome: complete
 outcome_kind: complete
@@ -28,6 +28,9 @@ actual_outputs:
   type: file
   sha256: 4b73bd94ff7c287f6fd3f31476ff5c32058976bc04a7b2327fa76a447b9dfd24
   bytes: 3778
+staging_artifact_paths: []
+substantive_evidence_paths:
+- discovery/literature/framing_deck.yml
 checks_required:
 - check_framing_deck.py
 checks_run:
@@ -39,11 +42,11 @@ check_attestations:
 - name: check_framing_deck
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_framing_deck.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.082
+  elapsed_seconds: 0.053
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -58,7 +61,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: cb136056fc57c71641f9c070c4fc874af984420d13e8aa30e0e8a273a76f7e38
+input_fingerprint: b2493d53b23dae68d63dc21f4a65f3f2bc2321f0e069f2d50f6be15554e4b10f
 output_fingerprint: f53a64b7b24e7965d46e8fc377141df8172cd9f98fd950116d930cfb58a9e0d2
 dependency_fingerprint: 826bbe9cfb7ee976ca2821144e04eaa4d652266b0839c4380705ba7d6841d595
 completion_verdict: pass

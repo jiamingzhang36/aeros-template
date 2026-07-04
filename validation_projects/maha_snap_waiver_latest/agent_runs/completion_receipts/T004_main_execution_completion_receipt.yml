@@ -1,6 +1,6 @@
-version: 4
+version: 5
 task_id: T004_main_execution
-generated_at: '2026-06-24T14:32:32+00:00'
+generated_at: '2026-07-04T14:56:28+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -43,6 +43,11 @@ actual_outputs:
   type: file
   sha256: a8e553b45583a8a31ed8ea6c5aba436639174cf71cbaa2c0a57faab3f586ffa0
   bytes: 1525
+staging_artifact_paths: []
+substantive_evidence_paths:
+- outputs/
+- evidence/result_index.csv
+- evidence/claim_registry.md
 checks_required:
 - check_number_registry.py
 - check_number_scan.py
@@ -69,48 +74,48 @@ check_attestations:
 - name: check_number_registry
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_number_registry.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.084
+  elapsed_seconds: 0.386
 - name: check_number_scan
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_number_scan.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.084
+  elapsed_seconds: 0.434
 - name: check_provenance.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_provenance.py
   exit_code: 0
-  elapsed_seconds: 0.107
+  elapsed_seconds: 0.248
 - name: check_claim_registry.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_registry.py
   exit_code: 0
-  elapsed_seconds: 0.092
+  elapsed_seconds: 1.681
 - name: check_claim_ceiling
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_ceiling.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.077
+  elapsed_seconds: 0.61
 - name: check_claim_method_consistency.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_method_consistency.py
   exit_code: 0
-  elapsed_seconds: 0.133
+  elapsed_seconds: 1.423
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -125,8 +130,8 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: bb85f7f77322ba32d4d59fdc9a350e806d7d575a39161304de5f4a77a36eb3f7
+input_fingerprint: a88f8343e027f6bcf5551928dcfc91ec23ff6f2dc27f02b23d19a16a2cefef0e
 output_fingerprint: 4cd2c24530aafba80f0bec8880f87e93ab1748cba5d5b58518b93a5348abd7de
-dependency_fingerprint: 5bd11212ed52f280c334e06d836d9b495d3d3a1a52220c20076ffa02505d7c23
+dependency_fingerprint: fa28a813830192ef01bc726a0e749385bf5e1fe434dc5ce9ba5a22af7dceb393
 completion_verdict: pass
 failures: []

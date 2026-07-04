@@ -64,6 +64,37 @@ def _semantic_scope_fixture(rel_path: str, expected_verdict: str, expected_class
     return failures
 
 
+def _workflow_scope_fixture() -> list[str]:
+    failures: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="aeros_session_workflow_") as tmp_name:
+        tmp = Path(tmp_name)
+        failures.extend(_init_git_fixture(tmp))
+        if failures:
+            return failures
+        try:
+            _path, payload = start_session(
+                tmp,
+                lane="data",
+                workflow="recapture_source_pool",
+                objective="recapture fixture",
+                dry_run=False,
+            )
+        except Exception as exc:
+            return [f"workflow preset start failed: {exc}"]
+        if payload.get("active_workflow") != "recapture_source_pool":
+            failures.append("workflow preset not recorded in session payload")
+        if not any(str(item).startswith("work/recapture_") for item in payload.get("allowed_prefixes") or []):
+            failures.append("workflow preset did not merge recapture work prefix")
+        if "source recapture" not in (payload.get("allowed_actions") or []):
+            failures.append("workflow preset did not merge allowed action")
+        _write_text(tmp / "work/recapture_demo/source_note.md", "candidate source staging note\n")
+        _write_text(tmp / "audits/source_recapture/demo.md", "source recapture audit\n")
+        audit = audit_session(tmp)
+        if not audit.ok:
+            failures.append(f"workflow preset fixture should pass, got {audit.verdict}: {audit.off_scope_files}")
+    return failures
+
+
 def main() -> int:
     root = Path.cwd()
     policy = load_policy(root)
@@ -75,6 +106,22 @@ def main() -> int:
             failures.append(f"lane {lane} has no allowed_prefixes")
         if "forbidden_prefixes" not in lane_policy:
             failures.append(f"lane {lane} missing forbidden_prefixes")
+    workflow_presets = policy.get("workflow_presets") or {}
+    for required in [
+        "recapture_source_pool",
+        "claim_audit",
+        "writing_guardrail",
+        "chrome_assisted_review",
+        "source_promotion_queue",
+    ]:
+        preset = workflow_presets.get(required) or {}
+        if not preset:
+            failures.append(f"workflow preset missing {required}")
+            continue
+        if not preset.get("allowed_prefixes"):
+            failures.append(f"workflow preset {required} has no allowed_prefixes")
+        if not preset.get("allowed_actions"):
+            failures.append(f"workflow preset {required} has no allowed_actions")
     common = policy.get("common_allowed_prefixes") or []
     for required in ["SESSION_CONTRACT.yml", "agent_runs/", "outputs/logs/", "decisions/revision_log.md"]:
         if required not in common:
@@ -104,6 +151,7 @@ def main() -> int:
         failures.append(f"active session audit has invalid verdict {audit.verdict!r}")
     failures.extend(_semantic_scope_fixture("paper/draft.md", "CLAIM_SCOPE_DRIFT", "claim_scope_drift"))
     failures.extend(_semantic_scope_fixture("evidence/claim_registry.md", "AUTHORITY_DRIFT", "authority_drift"))
+    failures.extend(_workflow_scope_fixture())
     if failures:
         print("FAIL: session scope guard problems detected")
         for failure in failures:

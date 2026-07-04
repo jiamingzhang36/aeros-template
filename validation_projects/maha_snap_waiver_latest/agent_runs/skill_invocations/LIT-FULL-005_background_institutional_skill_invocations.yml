@@ -1,0 +1,18 @@
+version: 1
+task_id: LIT-FULL-005_background_institutional
+generated_at: '2026-07-04T19:18:41+00:00'
+contract_path: tasks/discovery/LIT_FULL_005_background_institutional.yml
+run_report_path: ''
+allowed_skills:
+- academic-research-suite
+- bib-manager
+recommended_skills:
+- academic-research-suite
+- bib-manager
+required_skill_classes: []
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail

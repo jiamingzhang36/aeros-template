@@ -1,0 +1,27 @@
+version: 1
+policy: AEROS-ACTION-RECEIPT-001
+action_id: LIT-FULL-003_20260704
+generated_at: 2026-07-04T00:00:00+00:00
+action_mode: literature_progress
+honest_progress_label: substantive_research_progress
+why_this_now: User explicitly approved formal AEROS literature tasks after the local full-text card layer was completed.
+summary: Materialized 32 full-text extraction-card-backed papers into the AEROS wrapper and generated function-specific synthesis plus citation-claim grounding audit.
+data_impact:
+  inventory_changed: false
+  source_verified: false
+  data_rows_changed: false
+  coverage_changed: false
+  backfill_queue_changed: false
+  probe_completed: false
+research_impact:
+  claim_ceiling_changed: false
+  gate_candidate_changed: false
+  evidence_graph_changed: true
+  result_registered: false
+evidence_paths:
+  - discovery/literature/paper_registry.csv
+  - discovery/literature/extraction_cards/
+  - discovery/literature/synthesis/
+causal_attribution:
+  would_progress_without_this_action: false
+  dependency_type: validating

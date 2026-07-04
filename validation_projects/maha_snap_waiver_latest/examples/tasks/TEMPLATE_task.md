@@ -1,8 +1,19 @@
 ---
 task_class: standard
 work_lane: data   # data | literature | analysis | claim | writing | compliance | harness
-allowed_skills: []
-recommended_skills: []
+allowed_skills:
+  - data-inventory
+  - data-quality-checker
+  - data-merge-audit
+recommended_skills:
+  - data-inventory
+required_skill_classes:
+  - data_source
+skill_obligations:
+  - data_source
+skill_waivers: []
+output_intents:
+  discovery/data_inventory.csv: canonical_candidate
 ---
 # Task Template
 
@@ -69,6 +80,7 @@ TBD
 
 - Expected output exists.
 - Required checks pass or failures are documented.
+- Skill obligations are satisfied by `skills_used` or an explicit waiver/blocker.
 - Agent run report is complete.
 - Version-2 completion receipt exists and passes.
 - Completion receipt records substantive allowed outputs, output hashes for files, check commands, exit codes, and `does_not_prove` boundaries.

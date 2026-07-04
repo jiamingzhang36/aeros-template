@@ -1,0 +1,44 @@
+version: "0.1"
+policy: AEROS-EVIDENCE-SUFFICIENCY-AUDIT-001
+principle: >
+  Governance evidence must state what it can answer. A valid audit record covers
+  actor, authority, action, policy, decision basis, resource access, lifecycle,
+  and verification strength. This is a sufficiency-of-record audit, not a claim
+  that the research conclusion is true.
+required_dimensions:
+  - actor
+  - authority
+  - action
+  - policy
+  - decision_basis
+  - resource_access
+  - lifecycle
+  - verification_strength
+allowed_verification_strength:
+  - self_attested
+  - schema_valid
+  - file_exists
+  - hash_observed
+  - source_identity_matched
+  - independent_rerun
+  - human_reviewed
+minimum_for_gate_packet:
+  - actor
+  - authority
+  - action
+  - policy
+  - decision_basis
+  - verification_strength
+minimum_for_completion_claim:
+  - actor
+  - action
+  - decision_basis
+  - lifecycle
+  - verification_strength
+does_not_prove:
+  - scientific validity
+  - identification quality
+  - claim support
+  - data truth
+  - publication readiness
+

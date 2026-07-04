@@ -1,6 +1,6 @@
-version: 4
+version: 5
 task_id: D001b_framework_search
-generated_at: '2026-06-25T15:10:46+00:00'
+generated_at: '2026-07-04T19:04:42+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -15,7 +15,7 @@ work_lane: ''
 contract_path: tasks/discovery/D001b_framework_search.yml
 automation_class: auto_rerunnable
 gate_status: pending
-run_report_path: ''
+run_report_path: agent_runs/D001b_framework_search_20260704_185831.md
 skill_invocation_receipt_path: agent_runs/skill_invocations/D001b_framework_search_skill_invocations.yml
 allowed_outputs_expected:
 - discovery/literature/paper_registry.csv
@@ -30,18 +30,23 @@ actual_outputs:
 - path: discovery/literature/paper_registry.csv
   exists: true
   type: file
-  sha256: db9086ca89b324cc72e0be250afe771cb8403e6e3b2966fc4361d8e26dfeb219
-  bytes: 242
+  sha256: ff50b8f390c96ab1ed86b82d3798b9bb9ba5313fb56cf001fcb6a62c09796aef
+  bytes: 20131
 - path: discovery/literature/search_log.csv
   exists: true
   type: file
-  sha256: 5e931b75484008dffbccdab4c65bc159bbf61e277c492671a81824e32a2a57da
-  bytes: 95
+  sha256: bdcd8ae87e1996decdd21eb73ae1977f6bab1747f3ef37e6c98cf99d283e562f
+  bytes: 294
 - path: discovery/literature/citation_audit.md
   exists: true
   type: file
-  sha256: 1519a8d3edc6b070abe6e2cf6f2872ebaf11c8fd0b202e9ed8831f78ed145dfc
-  bytes: 224
+  sha256: 13aaad03e6846c99e406f54e99c609d2d30fae14d74b464f16ca6b17e8d782f6
+  bytes: 7083
+staging_artifact_paths: []
+substantive_evidence_paths:
+- discovery/literature/paper_registry.csv
+- discovery/literature/search_log.csv
+- discovery/literature/citation_audit.md
 checks_required:
 - check_literature_registry.py
 - check_citation_audit.py
@@ -62,33 +67,33 @@ check_attestations:
 - name: check_literature_registry
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_registry.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.057
+  elapsed_seconds: 0.04
 - name: check_citation_audit.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_citation_audit.py
   exit_code: 0
-  elapsed_seconds: 0.086
+  elapsed_seconds: 0.081
 - name: check_literature_functions.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_functions.py
   exit_code: 0
-  elapsed_seconds: 0.105
+  elapsed_seconds: 0.08
 - name: check_anchors_in_registry
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_anchors_in_registry.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.072
+  elapsed_seconds: 0.089
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -103,8 +108,8 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: cf42c11ca45c45c847a7c7a04145ad8c03311cf87b492fdede09dc160b58264a
-output_fingerprint: 24cc73f0863bcb59fe548807336449b881be7d57eff71893483406435d2a64ee
-dependency_fingerprint: 34ee35d0ad68a421833ac26d987636efa07fb192072a4e0889ef689b9f6c3cb2
+input_fingerprint: 605fddfd55d883c3ec2280feebdd0ea430eb7d4b1be894c04c71d7fb073988a1
+output_fingerprint: 6a472ca58935f01bbff6c48d6f04cb8ccf82a7cd99d93171aa017aa986a5d88b
+dependency_fingerprint: e5617e2fc4a414dfbf6efc71fa87bc6bf6e8518f04f9b8f65bb5a06f5b3cf6d9
 completion_verdict: pass
 failures: []

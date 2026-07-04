@@ -21,12 +21,32 @@ profiles:
       - check_evidence_units.py
       - check_parser_benchmark.py
       - check_session_scope.py
+      - check_skill_coverage.py
+      - check_execution_mode.py
+      - check_task_mode.py
+      - check_task_preflight.py
+      - check_source_capture_permission.py
+      - check_broad_capture_firewall.py
       - check_execution_profiles.py
+      - check_source_id_consistency.py
+      - check_artifact_stage.py
+      - check_output_intent.py
+      - check_source_capture_permission.py
+      - check_route_early_gate.py
+      - check_improve_harvest.py
+      - check_sync_doctor.py
+      - check_update_ledger_hash_chain.py
+      - check_harness_observed_receipts.py
+      - check_protected_path_hook.py
+      - check_evidence_sufficiency_audit.py
       - check_readiness_vector.py
+      - check_discovery_route_decision.py
       - check_stale_triage.py
       - check_context_bundle.py
       - check_context_graph.py
       - check_cockpit.py
+      - check_control_tax_dashboard.py
+      - check_write_audit.py
       - check_reconcile.py
       - check_sqlite_journal.py
       - check_approval_freshness.py
@@ -40,11 +60,14 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_data_inventory.py
+      - check_discovery_route_decision.py
       - check_estimand_data_contract.py
       - check_data_first_readiness.py
       - check_data_probe.py
+      - check_broad_capture_firewall.py
       - check_data_backfill_queue.py
       - check_action_receipts.py
+      - check_skill_coverage.py
       - check_goal_mode_data_progress.py
       - check_noop_runs.py
   lane:literature:
@@ -54,6 +77,7 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_literature_tools.py
+      - check_skill_coverage.py
       - check_literature_adapters.py
       - check_literature_fulltext_execution.py
       - check_evidence_units.py
@@ -66,6 +90,7 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_estimand_cards.py
+      - check_skill_coverage.py
       - check_identification_gate.py
       - check_analysis_ledger.py
       - check_preanalysis_happens_before.py
@@ -91,6 +116,7 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_number_registry.py
+      - check_skill_coverage.py
       - check_number_scan.py
       - check_claim_numbers_bound.py
       - check_table_cell_sources.py
@@ -103,10 +129,19 @@ profiles:
       - check_action_spec.py
       - check_context_bundle.py
       - check_aea_replication_alignment.py
+      - check_evidence_sufficiency_audit.py
+      - check_skill_coverage.py
       - check_replication_package.py
       - check_data_availability_present.py
       - check_compliance_gate.py
       - check_approval_freshness.py
+  aea:
+    description: "AEA-style replication package alignment profile; advisory only and not a submission certificate."
+    checks:
+      - check_aea_replication_alignment.py
+      - check_replication_package.py
+      - check_data_availability_present.py
+      - check_provenance.py
   full:
     description: "Complete internal harness."
     checks: all
@@ -114,3 +149,4 @@ non_goals:
   - "No profile may weaken gate exit criteria."
   - "No profile may convert ROUTE_READY into SUBSTANTIVE_PRODUCED."
   - "No profile may hide a failed full harness when preparing release or publication."
+  - "Keyword classifiers are advisory guardrails only; do not treat them as semantic understanding."
