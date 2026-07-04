@@ -1,6 +1,6 @@
 version: 5
 task_id: LIT-FULL-004_data_measurement
-generated_at: '2026-07-04T19:18:31+00:00'
+generated_at: '2026-07-04T20:53:49+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -43,8 +43,8 @@ actual_outputs:
 - path: discovery/literature/synthesis/data_measurement_synthesis.md
   exists: true
   type: file
-  sha256: eb6c015da915064a11ba7f92fc2385e2170adfd4a0f6af9fcb8183de0641fff1
-  bytes: 1182
+  sha256: a8e7571a6eef724a86e9fe7718c20e878cb1fb4192dc2fcd07f1b283c71156d1
+  bytes: 1188
 - path: agent_runs/
   exists: true
   type: directory
@@ -73,14 +73,14 @@ check_attestations:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_fulltext_execution.py
   exit_code: 0
-  elapsed_seconds: 0.427
+  elapsed_seconds: 0.07
 - name: check_literature_tools.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_tools.py
   exit_code: 0
-  elapsed_seconds: 2.828
+  elapsed_seconds: 0.644
 evidence_receipt_required: true
 evidence_receipt_path: agent_runs/action_receipts/LIT-FULL-004_data_measurement.yml
 evidence_receipt_exists: true
@@ -96,7 +96,7 @@ does_not_prove:
 - claim support
 - human gate approval
 input_fingerprint: 4ca4acd5ded16554f4ed922e1bef4e39ee5c6c2f11f9f8101b1c8b8c0f549e21
-output_fingerprint: d4216cc9f1e278eccfa054ea98d78d6ac00b018f863512d7587c0c4a28df81c0
+output_fingerprint: 2a15bdff0050839e282e5712a7dfc88c65e9c5d19afa112e408f1cc47aba5fab
 dependency_fingerprint: b46b3f16910e9eb5466d8793050ba037fe63fc34153403b07624a673442544f9
 completion_verdict: pass
 failures: []

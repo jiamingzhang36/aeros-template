@@ -1,6 +1,6 @@
 version: 1
 task_id: LIT-SYNTH-001_function_specific_synthesis
-generated_at: '2026-07-04T19:18:51+00:00'
+generated_at: '2026-07-04T20:53:56+00:00'
 contract_path: tasks/discovery/LIT_SYNTH_001_function_specific_synthesis.yml
 run_report_path: ''
 allowed_skills:

@@ -1,6 +1,6 @@
 version: 1
 task_id: LIT-FULL-003_theory_mechanism
-generated_at: '2026-07-04T19:18:20+00:00'
+generated_at: '2026-07-04T20:53:41+00:00'
 contract_path: tasks/discovery/LIT_FULL_003_theory_mechanism.yml
 run_report_path: ''
 allowed_skills:

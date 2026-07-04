@@ -1,6 +1,6 @@
 version: 1
 task_id: LIT-FULL-004_data_measurement
-generated_at: '2026-07-04T19:18:31+00:00'
+generated_at: '2026-07-04T20:53:49+00:00'
 contract_path: tasks/discovery/LIT_FULL_004_data_measurement.yml
 run_report_path: ''
 allowed_skills:

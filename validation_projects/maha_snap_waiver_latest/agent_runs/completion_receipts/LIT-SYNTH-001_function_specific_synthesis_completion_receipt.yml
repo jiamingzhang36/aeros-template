@@ -1,6 +1,6 @@
 version: 5
 task_id: LIT-SYNTH-001_function_specific_synthesis
-generated_at: '2026-07-04T19:18:51+00:00'
+generated_at: '2026-07-04T20:53:56+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -46,13 +46,13 @@ actual_outputs:
 - path: discovery/literature/synthesis/theory_mechanism_synthesis.md
   exists: true
   type: file
-  sha256: 8aa43c812fcfc50cc9ee7ead329346dd6960f4a796495ed47931e070eb253945
-  bytes: 1401
+  sha256: 05ca586a8e332bca9b30ba3f134e9dc20a6599b64333289141750125f8a55462
+  bytes: 1407
 - path: discovery/literature/synthesis/data_measurement_synthesis.md
   exists: true
   type: file
-  sha256: eb6c015da915064a11ba7f92fc2385e2170adfd4a0f6af9fcb8183de0641fff1
-  bytes: 1182
+  sha256: a8e7571a6eef724a86e9fe7718c20e878cb1fb4192dc2fcd07f1b283c71156d1
+  bytes: 1188
 - path: discovery/literature/synthesis/background_institutional_synthesis.md
   exists: true
   type: file
@@ -88,14 +88,14 @@ check_attestations:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_fulltext_execution.py
   exit_code: 0
-  elapsed_seconds: 0.379
+  elapsed_seconds: 0.061
 - name: check_literature_tools.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_tools.py
   exit_code: 0
-  elapsed_seconds: 2.003
+  elapsed_seconds: 0.571
 evidence_receipt_required: true
 evidence_receipt_path: agent_runs/action_receipts/LIT-SYNTH-001.yml
 evidence_receipt_exists: true
@@ -110,8 +110,8 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: bd5e5dde0186b690787725c3f34303e310bd9f65804b940c6d6a590f9253c0b6
-output_fingerprint: 4dd800a0561716343cb8a26288897e276e838e449e40194216a34b828495e363
-dependency_fingerprint: b48963965e230aabd70fd12c665cc98973874692d480ec9274284103e6851eb7
+input_fingerprint: 44eafa86129f35298c127e77b766d1e5402c289cf6929dadffd8315bebbf0511
+output_fingerprint: dbaa03d00cd7bae3bbf0994bed605d98f7be8cab0180ebfc1795942de6994db4
+dependency_fingerprint: 18486512ee7dcf2b1e807c255aff310e1637cd4b8d8fa8b040ec043f59c5e536
 completion_verdict: pass
 failures: []

@@ -1,6 +1,6 @@
 version: 5
 task_id: LIT-PAPER-001_literature_positioning
-generated_at: '2026-07-04T19:19:05+00:00'
+generated_at: '2026-07-04T20:54:17+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -63,14 +63,14 @@ check_attestations:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_fulltext_execution.py
   exit_code: 0
-  elapsed_seconds: 0.403
+  elapsed_seconds: 0.109
 - name: check_literature_tools.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_tools.py
   exit_code: 0
-  elapsed_seconds: 3.493
+  elapsed_seconds: 0.716
 evidence_receipt_required: true
 evidence_receipt_path: agent_runs/action_receipts/LIT-PAPER-001.yml
 evidence_receipt_exists: true
@@ -85,8 +85,8 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: 39ca6818662ad127bbd084feddc544428681049b5a7480bff7dd6c3fb9941acd
+input_fingerprint: 9b9f35bdbc07b882d2b7e5e2649ef30723053a5fd380892c982dc9d7e387e495
 output_fingerprint: faa5ef58afd04db586cd917d90192f883ff616a7a03165653fd853ba553fa3ea
-dependency_fingerprint: 5640726474772dbe945b93a7045c16bd00b786ce3ed3d4ffc2af5da39ba81b3e
+dependency_fingerprint: f810e1935bc7ddd75bf44a53e3b401f15623bc02408d619607fd80b449613fd7
 completion_verdict: pass
 failures: []
