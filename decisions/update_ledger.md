@@ -1979,7 +1979,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 **Next check**: Run verifier py_compile, protected hook check, smoke/full harness, then backfill this pending entry and append a final hash-chain record.
 ### 2026-07-04 — Add context compiler communication budget
 
-**Commit(s)**: `pending`
+**Commit(s)**: `1641f44`
 
 **Scope:** template framework only.
 
