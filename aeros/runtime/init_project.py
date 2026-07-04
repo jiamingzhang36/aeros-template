@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
+import subprocess
 
 
 DIRS = [
@@ -929,6 +931,34 @@ This project was initialized with `aeros init`.
 }
 
 
+def _template_root() -> Path:
+    env = os.environ.get("AEROS_TEMPLATE_ROOT")
+    if env:
+        return Path(env).expanduser().resolve()
+    return Path(__file__).resolve().parents[2]
+
+
+def _sync_framework_into(root: Path) -> None:
+    """Vendor the current AEROS framework into an initialized project."""
+    template_root = _template_root()
+    sync_script = template_root / "tools" / "sync_aeros_latest.zsh"
+    if not sync_script.exists():
+        note = root / "AEROS_INIT_SYNC_WARNING.md"
+        note.write_text(
+            "# AEROS init sync warning\n\n"
+            "The scaffold was created, but AEROS runtime/checks could not be "
+            "vendored because tools/sync_aeros_latest.zsh was not found next "
+            "to the template checkout. Set AEROS_TEMPLATE_ROOT to a full "
+            "aeros-template checkout and run `tools/sync_aeros_latest.zsh "
+            "<project>` manually.\n",
+            encoding="utf-8",
+        )
+        return
+    env = os.environ.copy()
+    env.setdefault("AEROS_TEMPLATE_ROOT", str(template_root))
+    subprocess.run(["zsh", str(sync_script), str(root)], check=True, env=env)
+
+
 def init_project(path: str | Path, *, force: bool = False) -> Path:
     root = Path(path).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
@@ -948,4 +978,5 @@ def init_project(path: str | Path, *, force: bool = False) -> Path:
         if not marker.exists():
             marker.write_text("", encoding="utf-8")
 
+    _sync_framework_into(root)
     return root

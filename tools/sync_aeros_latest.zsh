@@ -15,7 +15,9 @@
 # To keep a project's customized AGENTS.md across syncs, drop an empty marker file
 # named `.aeros_sync_keep_agents` in that project's root.
 set -euo pipefail
-SRC="/Users/jiamingzhang/aeros-template"
+SCRIPT_DIR="${0:A:h}"
+SRC="${AEROS_TEMPLATE_ROOT:-${SCRIPT_DIR:h}}"
+export AEROS_TEMPLATE_ROOT="$SRC"
 AEROS_SYNC_PYTHON="${AEROS_SYNC_PYTHON:-}"
 if [ -z "$AEROS_SYNC_PYTHON" ]; then
   if [ -x "/Users/jiamingzhang/opt/anaconda3/bin/python" ]; then
@@ -114,7 +116,7 @@ import os
 from pathlib import Path
 import yaml
 
-src = Path("/Users/jiamingzhang/aeros-template")
+src = Path(os.environ["AEROS_TEMPLATE_ROOT"])
 targets = [Path(p) for p in os.environ.get("AEROS_SYNC_TARGETS", "").splitlines() if p.strip()]
 
 source_meta = {}
@@ -191,7 +193,7 @@ PY
 import os
 from pathlib import Path
 
-src = Path("/Users/jiamingzhang/aeros-template")
+src = Path(os.environ["AEROS_TEMPLATE_ROOT"])
 targets = [Path(p) for p in os.environ.get("AEROS_SYNC_TARGETS", "").splitlines() if p.strip()]
 
 REQUIRED_FILES = [
@@ -384,7 +386,7 @@ import os
 from pathlib import Path
 import yaml
 
-src = Path("/Users/jiamingzhang/aeros-template")
+src = Path(os.environ["AEROS_TEMPLATE_ROOT"])
 targets = [Path(p) for p in os.environ.get("AEROS_SYNC_TARGETS", "").splitlines() if p.strip()]
 template_path = src / "discovery" / "route_decision.yml"
 template = yaml.safe_load(template_path.read_text(encoding="utf-8")) or {}

@@ -2084,3 +2084,11 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: pending targeted checks: `check_manuscript_citation_interpretation.py`, `check_manuscript_citation_faithfulness.py`, `check_literature_tools.py`, `check_sync_doctor.py`, ledger checks, and smoke harness.
 - **Does not prove**: cited sources are true; human interpretation is correct beyond the recorded evidence basis; every uncited sentence is grounded; final paper is submission-ready.
 
+## 2026-07-04 — Make aeros init plug-and-play and sync MAHA
+
+- **Commit(s)**: pending
+- **Change type**: framework / init / sync / rollout
+- **Action**: Changed `aeros init` so a new project is immediately vendored with the current AEROS runtime/checks through the canonical sync script; removed hardcoded template-root assumptions from sync by deriving the template root from the script path and exporting `AEROS_TEMPLATE_ROOT`; repaired the global `aeros` console script by installing the template package in editable mode; vendored the current framework into `/Users/jiamingzhang/Desktop/MAHA` while preserving its project-local `AGENTS.md`.
+- **Validation**: Global `aeros --help` works; scratch `aeros init` project contains `aeros/` and `checks/` and passes smoke harness; MAHA project root passes smoke harness.
+- **Does not prove**: MAHA research claims are supported; MAHA literature citations are grounded; downstream projects are committed; protected git hooks are installed in every repo; full project-specific harnesses beyond smoke are green.
+
