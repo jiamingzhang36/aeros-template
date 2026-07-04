@@ -3,10 +3,10 @@ stage: discovery
 depends_on:
 - D001b_framework_search
 gate: G0
-automation_class: approval_required
+automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: agent_runs/action_receipts/LIT-FULL-004_data_measurement.yml
-gate_status: blocked_requires_approval
+gate_status: done_human_verified_with_receipt
 required_skill_classes: []
 allowed_skills:
 - academic-research-suite

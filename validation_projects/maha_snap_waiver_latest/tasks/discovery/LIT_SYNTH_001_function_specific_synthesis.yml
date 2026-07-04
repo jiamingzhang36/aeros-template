@@ -7,10 +7,10 @@ depends_on:
 - LIT-FULL-004_data_measurement
 - LIT-FULL-005_background_institutional
 gate: G0
-automation_class: approval_required
+automation_class: receipt_audited
 evidence_receipt_required: true
 receipt_path: agent_runs/action_receipts/LIT-SYNTH-001.yml
-gate_status: blocked_requires_approval
+gate_status: done_human_verified_with_receipt
 required_skill_classes: []
 allowed_skills:
 - academic-research-suite
