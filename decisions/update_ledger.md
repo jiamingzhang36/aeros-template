@@ -2086,7 +2086,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-04 — Make aeros init plug-and-play and sync MAHA
 
-- **Commit(s)**: pending
+- **Commit(s)**: `d9b7417`
 - **Change type**: framework / init / sync / rollout
 - **Action**: Changed `aeros init` so a new project is immediately vendored with the current AEROS runtime/checks through the canonical sync script; removed hardcoded template-root assumptions from sync by deriving the template root from the script path and exporting `AEROS_TEMPLATE_ROOT`; repaired the global `aeros` console script by installing the template package in editable mode; vendored the current framework into `/Users/jiamingzhang/Desktop/MAHA` while preserving its project-local `AGENTS.md`.
 - **Validation**: Global `aeros --help` works; scratch `aeros init` project contains `aeros/` and `checks/` and passes smoke harness; MAHA project root passes smoke harness.
