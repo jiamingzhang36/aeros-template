@@ -1,0 +1,164 @@
+{
+  "checks": [
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 4.333,
+      "exit_code": 0,
+      "name": "checks/check_next_action.py",
+      "output_tail": [
+        "PASS: next action is valid (ROUTE_READY / data)"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.035,
+      "exit_code": 0,
+      "name": "checks/check_action_spec.py",
+      "output_tail": [
+        "PASS: ActionSpec invariants are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.1,
+      "exit_code": 0,
+      "name": "checks/check_context_bundle.py",
+      "output_tail": [
+        "PASS: context bundle plumbing is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.292,
+      "exit_code": 0,
+      "name": "checks/check_literature_tools.py",
+      "output_tail": [
+        "PASS: literature registry is valid (32 row(s) checked)",
+        "PASS: literature function classifications and existing function matrix rows are consistent",
+        "PASS: extraction card template and registry-linked cards are valid",
+        "PASS: synthesis files cite only extraction-card-backed paper IDs",
+        "PASS: citation audit covers papers requiring audit and includes faithfulness fields",
+        "PASS: gap memos are grounded in extracted gap-verification papers",
+        "PASS: literature full-text execution valid (32 verified full-text extraction(s))",
+        "PASS: literature checks passed"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.641,
+      "exit_code": 0,
+      "name": "checks/check_skill_coverage.py",
+      "output_tail": [
+        "PASS: skill coverage obligations are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.069,
+      "exit_code": 0,
+      "name": "checks/check_literature_adapters.py",
+      "output_tail": [
+        "PASS: literature adapter plumbing is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.029,
+      "exit_code": 0,
+      "name": "checks/check_literature_fulltext_execution.py",
+      "output_tail": [
+        "PASS: literature full-text execution valid (32 verified full-text extraction(s))"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.039,
+      "exit_code": 0,
+      "name": "checks/check_evidence_units.py",
+      "output_tail": [
+        "PASS: EvidenceUnit/ResultAdmission records are valid (1 evidence unit(s), 1 admission record(s))"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.037,
+      "exit_code": 0,
+      "name": "checks/check_parser_benchmark.py",
+      "output_tail": [
+        "PASS: parser benchmark scaffold is valid (3 local fixture(s) executed)"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.024,
+      "exit_code": 0,
+      "name": "checks/check_citation_audit.py",
+      "output_tail": [
+        "PASS: citation audit covers papers requiring audit and includes faithfulness fields"
+      ],
+      "status": "pass"
+    }
+  ],
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3",
+    "checks/run_harness_checks.py",
+    "--profile",
+    "lane:literature",
+    "--timeout",
+    "120"
+  ],
+  "does_not_prove": [
+    "scientific validity",
+    "data truth",
+    "literature full-text sufficiency",
+    "claim support",
+    "gate approval",
+    "paper readiness",
+    "absence of malicious code outside the observed checks"
+  ],
+  "failures": 0,
+  "generated_at": "2026-07-04T19:03:25Z",
+  "generated_by": "checks/run_harness_checks.py",
+  "profile": "lane:literature",
+  "receipt_id": "HARNESS-lane-literature-20260704T190325Z",
+  "receipt_type": "harness_observed_check_run",
+  "status": "pass",
+  "storage": "project_outputs",
+  "subjects": [
+    {
+      "exists": true,
+      "path": "project_manifest.yml",
+      "sha256": "21a0996b17c5ec897c1be3de5f22e5841fe0925e106091f4dcc25fe37e2cf1b9",
+      "size_bytes": 17022
+    },
+    {
+      "exists": true,
+      "path": "harness/check_profiles.yml",
+      "sha256": "c7652ac9866d1cd5e41a031dcedc59b375e3f0f17b3a8e7576eb200b7ecd99a1",
+      "size_bytes": 5305
+    },
+    {
+      "exists": true,
+      "path": "decisions/update_ledger.md",
+      "sha256": "b5894b0d0001de16070413714163b0cb9f6c53596ac4778a548bc9ecc691562d",
+      "size_bytes": 90798
+    },
+    {
+      "exists": true,
+      "path": "AGENTS.md",
+      "sha256": "a0de5b5ce3538e1ec216afac174baf3f08dded551d41e57c2d0978465dfb0b4e",
+      "size_bytes": 50826
+    }
+  ],
+  "verification_strength": "harness_observed_exit_codes_and_file_hashes",
+  "version": 1
+}

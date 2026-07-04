@@ -1,0 +1,102 @@
+version: 5
+task_id: LIT-FULL-002_method_identification
+generated_at: '2026-07-04T19:18:07+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/discovery/LIT_FULL_002_method_identification.yml
+automation_class: receipt_audited
+gate_status: done_human_verified_with_receipt
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/LIT-FULL-002_method_identification_skill_invocations.yml
+allowed_outputs_expected:
+- discovery/literature/paper_registry.csv
+- discovery/literature/extraction_cards/
+- discovery/literature/synthesis/method_identification_synthesis.md
+- agent_runs/
+allowed_outputs_found:
+- discovery/literature/paper_registry.csv
+- discovery/literature/extraction_cards/
+- discovery/literature/synthesis/method_identification_synthesis.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: discovery/literature/paper_registry.csv
+  exists: true
+  type: file
+  sha256: ff50b8f390c96ab1ed86b82d3798b9bb9ba5313fb56cf001fcb6a62c09796aef
+  bytes: 20131
+- path: discovery/literature/extraction_cards/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 33
+- path: discovery/literature/synthesis/method_identification_synthesis.md
+  exists: true
+  type: file
+  sha256: a176846969b420197a3917e11b8d0843aa7225e2eab9a649c7f8de293031c4e5
+  bytes: 1475
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 10
+staging_artifact_paths: []
+substantive_evidence_paths:
+- discovery/literature/paper_registry.csv
+- discovery/literature/extraction_cards/
+- discovery/literature/synthesis/method_identification_synthesis.md
+checks_required:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+checks_run:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+checks_passed:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+checks_failed: []
+check_attestations:
+- name: check_literature_fulltext_execution.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_fulltext_execution.py
+  exit_code: 0
+  elapsed_seconds: 0.185
+- name: check_literature_tools.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_tools.py
+  exit_code: 0
+  elapsed_seconds: 2.548
+evidence_receipt_required: true
+evidence_receipt_path: agent_runs/action_receipts/LIT-FULL-002_method_identification.yml
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 4ca4acd5ded16554f4ed922e1bef4e39ee5c6c2f11f9f8101b1c8b8c0f549e21
+output_fingerprint: 5bb6e7404f7ce7e04eea0c493c85685b20a099a4b354fef9849ca221c39bff50
+dependency_fingerprint: b46b3f16910e9eb5466d8793050ba037fe63fc34153403b07624a673442544f9
+completion_verdict: pass
+failures: []

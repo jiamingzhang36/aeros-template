@@ -1,0 +1,117 @@
+version: 5
+task_id: LIT-SYNTH-001_function_specific_synthesis
+generated_at: '2026-07-04T19:18:51+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/discovery/LIT_SYNTH_001_function_specific_synthesis.yml
+automation_class: receipt_audited
+gate_status: done_human_verified_with_receipt
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/LIT-SYNTH-001_function_specific_synthesis_skill_invocations.yml
+allowed_outputs_expected:
+- discovery/literature/synthesis/gap_verification_synthesis.md
+- discovery/literature/synthesis/method_identification_synthesis.md
+- discovery/literature/synthesis/theory_mechanism_synthesis.md
+- discovery/literature/synthesis/data_measurement_synthesis.md
+- discovery/literature/synthesis/background_institutional_synthesis.md
+- agent_runs/
+allowed_outputs_found:
+- discovery/literature/synthesis/gap_verification_synthesis.md
+- discovery/literature/synthesis/method_identification_synthesis.md
+- discovery/literature/synthesis/theory_mechanism_synthesis.md
+- discovery/literature/synthesis/data_measurement_synthesis.md
+- discovery/literature/synthesis/background_institutional_synthesis.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: discovery/literature/synthesis/gap_verification_synthesis.md
+  exists: true
+  type: file
+  sha256: 12f82537d69e7c49f5c3461cf8bd5d79b72acef3c1b08af018e373933474cdc3
+  bytes: 1484
+- path: discovery/literature/synthesis/method_identification_synthesis.md
+  exists: true
+  type: file
+  sha256: a176846969b420197a3917e11b8d0843aa7225e2eab9a649c7f8de293031c4e5
+  bytes: 1475
+- path: discovery/literature/synthesis/theory_mechanism_synthesis.md
+  exists: true
+  type: file
+  sha256: 8aa43c812fcfc50cc9ee7ead329346dd6960f4a796495ed47931e070eb253945
+  bytes: 1401
+- path: discovery/literature/synthesis/data_measurement_synthesis.md
+  exists: true
+  type: file
+  sha256: eb6c015da915064a11ba7f92fc2385e2170adfd4a0f6af9fcb8183de0641fff1
+  bytes: 1182
+- path: discovery/literature/synthesis/background_institutional_synthesis.md
+  exists: true
+  type: file
+  sha256: 88ac5bd51417066c8671472da5a8c91987532ed2bbb8e1a6a6908a1894bd81eb
+  bytes: 1173
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 10
+staging_artifact_paths: []
+substantive_evidence_paths:
+- discovery/literature/synthesis/gap_verification_synthesis.md
+- discovery/literature/synthesis/method_identification_synthesis.md
+- discovery/literature/synthesis/theory_mechanism_synthesis.md
+- discovery/literature/synthesis/data_measurement_synthesis.md
+- discovery/literature/synthesis/background_institutional_synthesis.md
+checks_required:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+checks_run:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+checks_passed:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+checks_failed: []
+check_attestations:
+- name: check_literature_fulltext_execution.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_fulltext_execution.py
+  exit_code: 0
+  elapsed_seconds: 0.379
+- name: check_literature_tools.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_tools.py
+  exit_code: 0
+  elapsed_seconds: 2.003
+evidence_receipt_required: true
+evidence_receipt_path: agent_runs/action_receipts/LIT-SYNTH-001.yml
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: bd5e5dde0186b690787725c3f34303e310bd9f65804b940c6d6a590f9253c0b6
+output_fingerprint: 4dd800a0561716343cb8a26288897e276e838e449e40194216a34b828495e363
+dependency_fingerprint: b48963965e230aabd70fd12c665cc98973874692d480ec9274284103e6851eb7
+completion_verdict: pass
+failures: []

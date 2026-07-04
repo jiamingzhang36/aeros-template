@@ -1,0 +1,92 @@
+version: 5
+task_id: LIT-PAPER-001_literature_positioning
+generated_at: '2026-07-04T19:19:05+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/discovery/LIT_PAPER_001_literature_positioning.yml
+automation_class: receipt_audited
+gate_status: done_human_verified_with_receipt
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/LIT-PAPER-001_literature_positioning_skill_invocations.yml
+allowed_outputs_expected:
+- discovery/literature/synthesis/paper_literature_positioning.md
+- discovery/literature/synthesis/literature_review_draft.md
+- agent_runs/
+allowed_outputs_found:
+- discovery/literature/synthesis/paper_literature_positioning.md
+- agent_runs/
+allowed_outputs_missing:
+- discovery/literature/synthesis/literature_review_draft.md
+actual_outputs:
+- path: discovery/literature/synthesis/paper_literature_positioning.md
+  exists: true
+  type: file
+  sha256: f05645b9a9c62631e387475252c85f72df14982fc01f6f8b7c6f6284aff65ae7
+  bytes: 876
+- path: discovery/literature/synthesis/literature_review_draft.md
+  exists: false
+  type: missing
+  sha256: ''
+  bytes: 0
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 10
+staging_artifact_paths: []
+substantive_evidence_paths:
+- discovery/literature/synthesis/paper_literature_positioning.md
+checks_required:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+checks_run:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+checks_passed:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+checks_failed: []
+check_attestations:
+- name: check_literature_fulltext_execution.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_fulltext_execution.py
+  exit_code: 0
+  elapsed_seconds: 0.403
+- name: check_literature_tools.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_literature_tools.py
+  exit_code: 0
+  elapsed_seconds: 3.493
+evidence_receipt_required: true
+evidence_receipt_path: agent_runs/action_receipts/LIT-PAPER-001.yml
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 39ca6818662ad127bbd084feddc544428681049b5a7480bff7dd6c3fb9941acd
+output_fingerprint: faa5ef58afd04db586cd917d90192f883ff616a7a03165653fd853ba553fa3ea
+dependency_fingerprint: 5640726474772dbe945b93a7045c16bd00b786ce3ed3d4ffc2af5da39ba81b3e
+completion_verdict: pass
+failures: []
