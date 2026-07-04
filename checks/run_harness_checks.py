@@ -50,6 +50,7 @@ CHECKS = [
     "check_adversarial_benchmark.py",
     "check_stale_triage.py",
     "check_context_bundle.py",
+    "check_context_governance.py",
     "check_context_graph.py",
     "check_cockpit.py",
     "check_control_tax_dashboard.py",

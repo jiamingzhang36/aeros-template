@@ -221,10 +221,16 @@ Every substantial run must classify what kind of progress it made before calling
 Use `aeros context` to assemble compact project context before long or ambiguous work.
 
 - `aeros context --brief` is the default starting snapshot for an agent turn.
+- `aeros context compile` is the Context Compiler view: it separates Goal, State, Evidence, Decision, and Noise context before work begins.
+- Raw tool output should not enter the main context by default. Compress it first into claims, evidence, uncertainty, blockers, and next actions.
 - `aeros context --lane <lane>` should be used before lane-specific work so data, literature, method, claim, and writing context do not blur together.
 - Context bundles are derived summaries, not evidence. They do not prove task completion, data access, full-text review, empirical validity, claim support, paper readiness, or gate approval.
 - Read files listed under `Files To Read If Needed` only when the next action requires them; do not bulk-read the project to feel safe.
 - If context, `aeros next`, and the user's request disagree, stop and surface the conflict rather than silently switching lanes.
+- Context is not storage; context is active attention allocation. Store raw material in ledgers/artifacts, and keep the main working context short, source-anchored, and task-aligned.
+- Use dense communication by default: compress status updates, summaries, and review comments when detail is not requested.
+- Dense communication is output-only. Do not compress or paraphrase code, commands, errors, file paths, URLs, DOIs, claim IDs, evidence IDs, result IDs, hashes, direct quotes, human gate decisions, legal/compliance boundaries, or methodological caveats.
+- Do not rewrite source-of-truth rule files into compressed style. If a shorter working view is useful, generate a derived brief instead of replacing the full policy text.
 
 ## Work Lane Rules
 
@@ -497,6 +503,7 @@ Backfill is the bridge between governance automation and data repair automation.
 - Use `python3 -m aeros.cli check --profile smoke` for small-step validation and lane profiles (`lane:data`, `lane:literature`, `lane:method`, `lane:claim`, `lane:writing`, `lane:compliance`) for focused validation.
 - Full harness remains the release/internal-control layer. A smoke or lane profile reduces latency; it does not weaken gates, prove substantive progress, or replace full release checks.
 - If `aeros context --stale` reports stale context, regenerate with `aeros cockpit --write` or `aeros context --write` before continuing from saved context artifacts.
+- If `aeros context audit` fails, fix the context boundary before relying on a saved context file.
 - Treat `outputs/context/context_graph.yml` as a navigation graph only. It must not support claims, approve gates, mark tasks stale, or replace `evidence/research_graph.yml`.
 - AEROS may autonomously move until it encounters authority, but it must not manufacture a paper. The bounded controller consumes deterministic `aeros next` output, records stop reasons, and does not approve gates, upgrade claims, certify identification, or release artifacts.
 

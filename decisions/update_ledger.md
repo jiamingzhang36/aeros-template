@@ -1977,3 +1977,37 @@ committed, backfill this pending entry and append a final hash-chain record.
 **Drift risk**: Crossref and OpenAlex metadata can disagree on dates, titles, or working-paper/published-version records. REVIEW rows still require human resolution. Automatic TLS fallback is limited to advisory metadata retrieval and must not be treated as source-content verification.
 
 **Next check**: Run verifier py_compile, protected hook check, smoke/full harness, then backfill this pending entry and append a final hash-chain record.
+### 2026-07-04 — Add context compiler communication budget
+
+**Commit(s)**: `pending`
+
+**Scope:** template framework only.
+
+**North star:** AEROS should reduce the cost of truthful research progress by keeping agent context short, source-anchored, and aligned with the current objective.
+
+**Action**: Added a Context Compiler / communication-budget layer that separates Goal, State, Evidence, Decision, Noise, Next Action, Attention Contract, and Communication Budget. The new dense-communication policy compresses status updates, summaries, context briefs, and review comments while preserving code, commands, errors, paths/URLs/DOIs, claim/evidence/result IDs, hashes, direct quotes, source evidence, methodological caveats, human gate decisions, and compliance boundaries.
+
+**Alignment**: Borrows the useful lesson from output-compression tools such as Caveman--shorter agent communication can reduce reading cost--without compressing source-of-truth evidence or research artifacts. This keeps AEROS aligned with the principle that context is active attention allocation, not storage, evidence, or authority.
+
+**Non-goal**: Does not install an external communication-style plugin, rewrite source-of-truth policy files into compressed style, certify claim support, prove paper readiness, approve gates, or reduce provider billing.
+
+**Drift risk**: Dense output can hide uncertainty if applied to caveats, evidence, or human decisions. The policy therefore keeps compression output-only and requires exact preservation of identifiers, commands, hashes, quotes, and source-evidence boundaries.
+
+**Validation**
+- `python3 checks/check_context_governance.py`
+- `python3 checks/check_context_bundle.py`
+- `python3 checks/check_sync_doctor.py`
+- `python3 checks/check_harness_profiles.py`
+- `python3 -m aeros.cli context audit --lane project`
+- `python3 -m aeros.cli context compile --lane project`
+- `python3 checks/run_harness_checks.py --timeout 30`
+
+**Does not prove**
+- scientific validity
+- source evidence correctness
+- claim support
+- paper readiness
+- gate approval
+- external token/cost savings
+
+**Next check**: If committed, backfill this pending entry and append a final hash-chain record.

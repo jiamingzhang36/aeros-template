@@ -239,11 +239,14 @@ layers:
     - decisions/decision_log.md
     - decisions/revision_log.md
     - harness/context_budget.yml
+    - harness/context_governance.yml
     - harness/context_graph_policy.yml
     - harness/check_profiles.yml
     - harness/stale_triage_policy.yml
     - templates/CONTEXT_BUNDLE.md
+    - templates/CONTEXT_BRIEF.md
     - CONTEXT_BUNDLE.md
+    - CONTEXT_BRIEF.md
     - decisions/update_ledger.md
   agent_execution:
     required_dirs:
@@ -366,6 +369,7 @@ checks:
   write_audit: checks/check_write_audit.py
   context_graph: checks/check_context_graph.py
   context_bundle: checks/check_context_bundle.py
+  context_governance: checks/check_context_governance.py
   operating_dashboard: checks/check_operating_dashboard.py
   next_action: checks/check_next_action.py
   action_spec: checks/check_action_spec.py
