@@ -2044,7 +2044,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ### 2026-07-04 — Add submission research driver citation grounding
 
-**Commit(s)**: `pending`
+**Commit(s)**: `7e379c8`
 
 **Scope:** template framework only.
 
@@ -2077,7 +2077,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-04 — Add manuscript citation interpretation records
 
-- **Commit(s)**: pending
+- **Commit(s)**: `7e379c8`
 - **Change type**: framework / submission driver / literature grounding
 - **Action**: Added a sentence-level literature interpretation record layer for manuscript citations. Each cited manuscript sentence must now map to a registry paper, full-text extraction support, and a human-approved interpretation record with source passage, support relation, scope match, claim-strength match, limitations/contradictory-evidence checks, and review verdict.
 - **Why**: Existing tools and recent citation-verification work show that bibliography existence and extraction-card presence are not enough; hallucination prevention requires claim-source alignment at the sentence/passage level.
