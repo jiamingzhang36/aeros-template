@@ -2013,7 +2013,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 **Next check**: If committed, backfill this pending entry and append a final hash-chain record.
 ### 2026-07-04 — Revert context compiler communication budget during runtime freeze
 
-**Commit(s)**: `pending`
+**Commit(s)**: `afadb19`
 
 **Scope:** template framework only.
 
