@@ -459,3 +459,17 @@ entries:
     resolved_at: ""
     resolution_commit: ""
     notes: "Do not close from template checks alone; close only after a real project gate packet consumes the audit record."
+  - id: AEROS-IMPROVE-034
+    created_at: "2026-07-04"
+    updated_at: "2026-07-04"
+    status: open
+    priority: low
+    area: context-governance
+    source: freeze_discipline_correction
+    issue: "The Context Compiler communication-budget layer was added after the runtime freeze without first showing, via control_tax or rollout data, that verbose communication was a measured bottleneck. The idea is useful, but it created a new runtime module, template, check, profile entry, and sync-doctor surface during a freeze-and-rollout window."
+    proposed_fix: "Defer dense communication / output-only communication budget until control_tax or real-project rollout data shows communication verbosity is a measurable bottleneck. If reintroduced, implement as a smaller projection over existing context/cockpit output rather than a new runtime/check surface."
+    owner: human
+    target_gate: G0
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Backlogged after reverting the 2026-07-04 Context Compiler communication-budget feature. Keep the principle 'compress communication, not evidence' as design guidance, not an active framework surface, until measured need is shown."

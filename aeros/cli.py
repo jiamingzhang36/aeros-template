@@ -31,7 +31,6 @@ from .runtime.collection import collect_prompt_grid, resolve_config
 from .runtime.contract import load_contract
 from .runtime.controller_loop import ControllerLoopArgs, format_run_until, run_until, run_until_json
 from .runtime.context_bundle import build_context_bundle, format_context_bundle, write_context_bundle
-from .runtime.context_compiler import audit_context_brief, build_context_brief, format_context_brief, write_context_brief
 from .runtime.cockpit import build_cockpit, format_cockpit, write_cockpit
 from .runtime.controller import run_iteration
 from .runtime import identity
@@ -410,33 +409,6 @@ def _cmd_status(args: argparse.Namespace) -> int:
 
 def _cmd_context(args: argparse.Namespace) -> int:
     root = _project_root()
-    mode = getattr(args, "context_command", "show") or "show"
-    if mode in {"compile", "brief", "audit"}:
-        brief = build_context_brief(root, lane=args.lane or "project")
-        if mode == "audit":
-            failures = audit_context_brief(brief)
-            if args.json:
-                print(json.dumps({"status": "FAIL" if failures else "PASS", "failures": failures, "brief": brief}, indent=2, ensure_ascii=False))
-            elif failures:
-                print("FAIL: context governance problems detected")
-                for failure in failures:
-                    print(f"- {failure}")
-            else:
-                print("PASS: context governance and compiler boundaries are valid")
-            if args.write:
-                md_path, json_path = write_context_brief(root, brief)
-                print(f"wrote {md_path.relative_to(root)}")
-                print(f"wrote {json_path.relative_to(root)}")
-            return 1 if failures else 0
-        if args.json:
-            print(json.dumps(brief, indent=2, ensure_ascii=False))
-        else:
-            print(format_context_brief(brief))
-        if args.write:
-            md_path, json_path = write_context_brief(root, brief)
-            print(f"wrote {md_path.relative_to(root)}")
-            print(f"wrote {json_path.relative_to(root)}")
-        return 0
     bundle = build_context_bundle(root, lane=args.lane or "project", brief=args.brief)
     if args.stale:
         stale = bundle.get("context_staleness") or {}
@@ -1569,13 +1541,11 @@ def main(argv: list[str] | None = None) -> int:
     readiness.add_argument("--json", action="store_true", help="emit machine-readable readiness JSON")
     readiness.set_defaults(func=_cmd_readiness)
 
-    context_p = sub.add_parser("context", help="show compact source-anchored context or compile a high-signal context brief")
-    context_p.add_argument("context_command", nargs="?", choices=["show", "compile", "brief", "audit"], default="show",
-                           help="show the legacy context bundle, compile/brief a Context Compiler brief, or audit context governance")
+    context_p = sub.add_parser("context", help="show a compact source-anchored context bundle")
     context_p.add_argument("--lane", default="project", choices=["project", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"], help="context lane to focus")
     context_p.add_argument("--brief", action="store_true", help="emit a shorter context bundle")
     context_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
-    context_p.add_argument("--write", action="store_true", help="write CONTEXT_BUNDLE/CONTEXT_BRIEF artifacts for the selected mode")
+    context_p.add_argument("--write", action="store_true", help="write CONTEXT_BUNDLE.md and outputs/context/context_bundle.json")
     context_p.add_argument("--stale", action="store_true", help="only report whether the written context bundle is stale")
     context_p.set_defaults(func=_cmd_context)
 

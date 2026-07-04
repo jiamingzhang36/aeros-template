@@ -2011,3 +2011,33 @@ committed, backfill this pending entry and append a final hash-chain record.
 - external token/cost savings
 
 **Next check**: If committed, backfill this pending entry and append a final hash-chain record.
+### 2026-07-04 — Revert context compiler communication budget during runtime freeze
+
+**Commit(s)**: `pending`
+
+**Scope:** template framework only.
+
+**North star:** During the runtime freeze, new framework surfaces must be admitted only when they unblock rollout, reduce measured control tax, harden an existing authority boundary, or satisfy an already-declared benchmark need.
+
+**Action**: Reverted the freeze-breaking Context Compiler / communication-budget feature introduced in `1641f44` and recorded the idea as `AEROS-IMPROVE-034` for later reconsideration. The correction removes the new runtime module, context-governance check, context-governance policy file, context brief templates, profile wiring, manifest wiring, sync-doctor capability, and AGENTS dense-communication rule while preserving append-only update-ledger history.
+
+**Alignment**: Restores the architecture/runtime freeze discipline: useful ideas are backlogged unless rollout data or control-tax evidence shows they are needed now. This keeps attention on CMPD rollout and measured friction instead of adding another advisory surface.
+
+**Non-goal**: Does not claim that dense communication is a bad idea, does not rewrite pushed git history, does not remove historical ledger-chain records, and does not change AEROS evidence, claim, gate, or execution semantics.
+
+**Drift risk**: Reverting the feature preserves freeze discipline but may lose a short-term readability improvement. Reconsider only after control_tax or real-project rollout data identifies communication verbosity as a measurable bottleneck.
+
+**Validation**
+- `python3 checks/check_update_ledger.py`
+- `python3 checks/check_update_ledger_hash_chain.py`
+- `python3 checks/check_improvement_backlog.py`
+- `python3 checks/run_harness_checks.py --profile smoke --timeout 20`
+
+**Does not prove**
+- scientific validity
+- CMPD rollout success
+- external token/cost savings
+- communication verbosity is or is not a bottleneck
+- dense communication should never be implemented
+
+**Next check**: If committed, backfill this pending entry and append a final hash-chain record.

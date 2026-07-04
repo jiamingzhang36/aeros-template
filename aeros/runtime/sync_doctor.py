@@ -31,7 +31,6 @@ CAPABILITIES: dict[str, list[str]] = {
     "task_preflight": ["aeros/runtime/task_preflight.py", "checks/check_task_preflight.py"],
     "control_tax_dashboard": ["aeros/runtime/control_tax.py", "checks/check_control_tax_dashboard.py", "aeros/runtime/cockpit.py"],
     "write_audit": ["aeros/runtime/write_audit.py", "checks/check_write_audit.py", "aeros/cli.py"],
-    "context_governance": ["aeros/runtime/context_compiler.py", "harness/context_governance.yml", "templates/CONTEXT_BRIEF.md", "checks/check_context_governance.py", "aeros/cli.py"],
 }
 
 CAPABILITY_EXEMPT_CHECKS: dict[str, str] = {
@@ -53,7 +52,6 @@ CAPABILITY_EXEMPT_CHECKS: dict[str, str] = {
     "check_compliance_gate.py": "release/compliance gate invariant",
     "check_cockpit.py": "operator view invariant; covered by framework sync as a whole",
     "check_context_bundle.py": "operator context invariant; covered by framework sync as a whole",
-    "check_context_governance.py": "covered by context_governance capability",
     "check_context_graph.py": "operator context invariant; covered by framework sync as a whole",
     "check_data_availability_present.py": "paper data-availability invariant",
     "check_data_backfill_queue.py": "project data queue invariant",
