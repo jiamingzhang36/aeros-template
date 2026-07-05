@@ -1,0 +1,117 @@
+version: 5
+task_id: T004_result_validation
+generated_at: '2026-07-05T02:17:29+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: routing
+progress_label: ROUTE_READY
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T004_result_validation.yml
+automation_class: receipt_audited
+gate_status: needs_receipt_audit
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T004_result_validation_skill_invocations.yml
+allowed_outputs_expected:
+- audits/result_validation_report.md
+- agent_runs/
+allowed_outputs_found:
+- audits/result_validation_report.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: audits/result_validation_report.md
+  exists: true
+  type: file
+  sha256: f5e47d57a1fb7e3edeff0b38b50bad133046389cca8c557fc0c1a40d6bdcf8ab
+  bytes: 3726
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 7
+staging_artifact_paths:
+- audits/result_validation_report.md
+substantive_evidence_paths: []
+checks_required:
+- check_number_registry.py
+- check_number_scan.py
+- check_output_reproducibility.py
+- check_provenance.py
+- check_agent_run_report.py
+checks_run:
+- check_number_registry
+- check_number_scan
+- check_output_reproducibility.py
+- check_provenance.py
+- check_agent_run_report.py
+checks_passed:
+- check_number_registry
+- check_number_scan
+- check_output_reproducibility.py
+- check_provenance.py
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_number_registry
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_registry.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.095
+- name: check_number_scan
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_scan.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.097
+- name: check_output_reproducibility.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_output_reproducibility.py
+  exit_code: 0
+  elapsed_seconds: 0.114
+- name: check_provenance.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_provenance.py
+  exit_code: 0
+  elapsed_seconds: 0.123
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.137
+evidence_receipt_required: true
+evidence_receipt_path: evidence/receipts/T004_result_validation_human_review_receipt.md
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: false
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 937c7b5ccfdac5d1713536510dd486b1df14f00d4329ddb9a5b4ce9e85046a21
+output_fingerprint: 35edabc960ea05b52df506d1ba62e05c0e28a6b987bfc187594c0fa89271eff2
+dependency_fingerprint: bf0fa0c6f73aeff413478f2f79c3aac2a7e3e1209803a9f404e27dea37ecd690
+completion_verdict: pass
+failures: []

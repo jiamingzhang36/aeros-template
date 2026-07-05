@@ -1,6 +1,6 @@
 version: 5
 task_id: T004_main_execution
-generated_at: '2026-07-05T02:10:53+00:00'
+generated_at: '2026-07-05T02:18:04+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -36,8 +36,8 @@ actual_outputs:
 - path: evidence/result_index.csv
   exists: true
   type: file
-  sha256: ea5f674c81f6a86c2d01c24e70eb60c8c551720bb56b7b88080b506171ba9d41
-  bytes: 521
+  sha256: f4346a83edea67154ee3dc87265b42f0adfdaaedaa38c45d4fa9e6ecc5354164
+  bytes: 1227
 - path: evidence/claim_registry.md
   exists: true
   type: file
@@ -78,7 +78,7 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_registry.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.152
+  elapsed_seconds: 0.091
 - name: check_number_scan
   passed: true
   command:
@@ -86,21 +86,21 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_scan.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.188
+  elapsed_seconds: 0.079
 - name: check_provenance.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_provenance.py
   exit_code: 0
-  elapsed_seconds: 0.205
+  elapsed_seconds: 0.089
 - name: check_claim_registry.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_registry.py
   exit_code: 0
-  elapsed_seconds: 0.152
+  elapsed_seconds: 0.078
 - name: check_claim_ceiling
   passed: true
   command:
@@ -108,14 +108,14 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_ceiling.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.147
+  elapsed_seconds: 0.1
 - name: check_claim_method_consistency.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_method_consistency.py
   exit_code: 0
-  elapsed_seconds: 0.273
+  elapsed_seconds: 0.12
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -131,7 +131,7 @@ does_not_prove:
 - claim support
 - human gate approval
 input_fingerprint: 444789269d06be4178fab1910a761a39f85df58b5d312ee9729fc6b97ad7e3f7
-output_fingerprint: 952b7117da3d165c1f7f3c38a2b90642457e535d351d4b03cda59e7fba1cc2c9
+output_fingerprint: 2aaffaffa09b8ab881ca9406e77dc92e313e3a108f38bfbb2ce4741da737e1f1
 dependency_fingerprint: d5af6c53eccaf8b44f35b89bd3fb73afeaab610feae61e8cc71cb31859f41df4
 completion_verdict: pass
 failures: []
