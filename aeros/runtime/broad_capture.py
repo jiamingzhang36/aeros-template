@@ -227,6 +227,8 @@ def summarize_broad_capture(root: Path, *, today: date | None = None) -> dict[st
     candidate_status = 0
     blocker_distribution: dict[str, int] = {}
     validation_failures: list[str] = []
+    duplicate_lead_count = 0
+    seen_dedupe_keys: set[str] = set()
     for path in lead_paths:
         validation = validate_lead_queue(path, today=today)
         validation_failures.extend(validation.failures)
@@ -239,20 +241,38 @@ def summarize_broad_capture(root: Path, *, today: date | None = None) -> dict[st
                 promoted += 1
             if status == "candidate":
                 candidate_status += 1
+            dedupe_key = str(row.get("dedupe_key", "")).strip()
+            if dedupe_key:
+                if dedupe_key in seen_dedupe_keys:
+                    duplicate_lead_count += 1
+                seen_dedupe_keys.add(dedupe_key)
             blocker = str(row.get("promotion_blocker", "")).strip() or "none"
             blocker_distribution[blocker] = blocker_distribution.get(blocker, 0) + 1
     for path in candidate_paths:
         total_candidates += len(read_csv_rows(path))
     denominator = total_leads or 1
+    lead_to_candidate_rate = round((candidate_status + total_candidates) / denominator, 4)
+    duplicate_lead_rate = round(duplicate_lead_count / denominator, 4)
+    capture_saturation_stop = bool(total_leads >= 20 and (lead_to_candidate_rate < 0.05 or stale_leads / denominator > 0.5 or duplicate_lead_rate > 0.5))
+    if capture_saturation_stop:
+        recommended_next_action = "triage/dedupe/promote existing leads before more broad_capture"
+    elif total_leads == 0:
+        recommended_next_action = "run a bounded broad_capture lead sweep"
+    else:
+        recommended_next_action = "continue broad_capture only if current candidate queue has been triaged"
     return {
         "status": "PASS" if not validation_failures else "FAIL",
         "lead_queue_count": len(lead_paths),
         "candidate_queue_count": len(candidate_paths),
         "total_leads": total_leads,
         "total_candidates": total_candidates,
-        "lead_to_candidate_rate": round((candidate_status + total_candidates) / denominator, 4),
+        "lead_to_candidate_rate": lead_to_candidate_rate,
         "candidate_to_staging_rate": round(promoted / denominator, 4),
         "stale_lead_count": stale_leads,
+        "duplicate_lead_count": duplicate_lead_count,
+        "duplicate_lead_rate": duplicate_lead_rate,
+        "capture_saturation_stop": capture_saturation_stop,
+        "recommended_next_action": recommended_next_action,
         "promotion_blocker_distribution": blocker_distribution,
         "validation_failures": validation_failures,
         "does_not_prove": DOES_NOT_PROVE,

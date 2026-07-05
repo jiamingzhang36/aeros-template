@@ -5,7 +5,9 @@ literature risks into review packets and checks. It does not certify that a
 paper is true. The strongest guarantee it can enforce is narrower: every
 manuscript sentence that cites a source must be traceable to a registered paper,
 a full-text/extraction card, and a human-approved interpretation record that
-shows how the cited source supports the sentence.
+shows how the cited source supports the sentence. Citation grounding is tiered:
+plain bibliographic pointers are non-blocking, interpretive citations are
+advisory unless weak, and claim-bearing citations are blocking until grounded.
 """
 
 from __future__ import annotations
@@ -39,6 +41,41 @@ VALID_SCOPE_VALUES = {"match", "partial", "mismatch", "unclear", "not_applicable
 VALID_CLAIM_STRENGTH = {"pass", "weak", "fail"}
 VALID_REVIEW_VERDICTS = {"faithful", "weak", "overclaimed", "unsupported"}
 VALID_HUMAN_STATUS = {"pending", "approved", "rejected"}
+VALID_CITATION_GROUNDING_TIERS = {"tier_0_bibliographic", "tier_1_interpretive", "tier_2_claim_bearing"}
+CLAIM_BEARING_MARKERS = (
+    " we find",
+    " we show",
+    " our result",
+    " our estimate",
+    " effect",
+    " impact",
+    " caus",
+    " identification",
+    " mechanism",
+    " policy implication",
+    " statistically significant",
+    " robust",
+    " supports our",
+    " treatment",
+    " coefficient",
+)
+INTERPRETIVE_MARKERS = (
+    "finds",
+    "shows",
+    "argues",
+    "documents",
+    "uses",
+    "estimates",
+    "reports",
+    "demonstrates",
+    "suggests",
+    "literature",
+    "evidence",
+    "method",
+    "data",
+    "limitation",
+)
+NONBLOCKING_SUPPORT_STATUSES = {"faithful", "bibliographic"}
 
 
 @dataclass
@@ -55,6 +92,9 @@ class CitationFaithfulnessRow:
     support_relation: str
     review_verdict: str
     human_status: str
+    citation_grounding_tier: str
+    mismatch_type: str
+    blocking: bool
     support_status: str
     required_action: str
     notes: str
@@ -255,6 +295,43 @@ def _scope_failures(scope_match: Any) -> tuple[list[str], list[str]]:
     return hard, weak
 
 
+def _citation_grounding_tier(sentence: str, record_data: dict[str, Any] | None = None) -> str:
+    if isinstance(record_data, dict):
+        explicit = str(record_data.get("citation_grounding_tier") or "").strip().lower()
+        if explicit in VALID_CITATION_GROUNDING_TIERS:
+            return explicit
+    lowered = f" {_normalise_sentence(sentence).lower()} "
+    if any(marker in lowered for marker in CLAIM_BEARING_MARKERS):
+        return "tier_2_claim_bearing"
+    if any(marker in lowered for marker in INTERPRETIVE_MARKERS):
+        return "tier_1_interpretive"
+    return "tier_0_bibliographic"
+
+
+def _mismatch_type_from_notes(notes: list[str]) -> str:
+    joined = "; ".join(notes).lower()
+    buckets: list[str] = []
+    mapping = [
+        ("geography", "geography_mismatch"),
+        ("population", "population_mismatch"),
+        ("time_period", "time_period_mismatch"),
+        ("method", "method_mismatch"),
+        ("outcome", "outcome_mismatch"),
+        ("claim_strength", "claim_strength_mismatch"),
+        ("overclaim", "overclaim"),
+        ("unsupported", "unsupported"),
+        ("contradicts", "contradiction"),
+        ("scope_match", "scope_mismatch"),
+        ("full-text extraction", "missing_extraction"),
+        ("interpretation record", "missing_interpretation"),
+        ("paper_registry", "unmapped_citation"),
+    ]
+    for needle, bucket in mapping:
+        if needle in joined and bucket not in buckets:
+            buckets.append(bucket)
+    return ";".join(buckets) if buckets else "none"
+
+
 def _interpretation_status(
     root: Path,
     record_entry: tuple[Path, dict[str, Any]] | None,
@@ -383,6 +460,9 @@ def build_citation_faithfulness_rows(root: Path | str = Path.cwd()) -> list[Cita
                 continue
             for key in keys:
                 sid = _stable_sentence_id(rel, sentence, key)
+                record_entry = records.get((sid, key))
+                record_data = record_entry[1] if record_entry else None
+                tier = _citation_grounding_tier(sentence, record_data)
                 paper_id = bib_map.get(key, "")
                 card_status = "missing"
                 card_path = ""
@@ -396,17 +476,28 @@ def build_citation_faithfulness_rows(root: Path | str = Path.cwd()) -> list[Cita
                 human_status = ""
                 support_status = "unsupported"
                 required_action = "map citation key to paper_registry and create interpretation record"
+                blocking = False
                 notes: list[str] = []
 
                 if not paper_id:
+                    blocking = True
                     notes.append("citation key is not mapped to a paper_registry row")
+                elif tier == "tier_0_bibliographic":
+                    card_status = "not_required"
+                    interpretation_status = "not_required"
+                    support_relation = "bibliographic_only"
+                    review_verdict = "not_required"
+                    human_status = "not_required"
+                    support_status = "bibliographic"
+                    required_action = "none"
+                    notes.append("bibliographic citation: registry mapping is sufficient; no claim support is inferred")
                 else:
                     card_status, card_path, card_notes = _extraction_support_status(root, paper_id)
                     if card_status != "faithful":
                         notes.append(card_notes)
                     interpretation_status, interpretation_action, interpretation_notes, interpretation_path, support_relation, review_verdict, human_status = _interpretation_status(
                         root,
-                        records.get((sid, key)),
+                        record_entry,
                         sentence_id=sid,
                         manuscript_path=rel,
                         sentence=sentence,
@@ -416,19 +507,26 @@ def build_citation_faithfulness_rows(root: Path | str = Path.cwd()) -> list[Cita
                     if interpretation_status != "faithful":
                         notes.append(interpretation_notes)
 
-                if paper_id and card_status == "faithful" and interpretation_status == "faithful":
-                    support_status = "faithful"
-                    required_action = "none"
-                    notes.append("citation has registry mapping, extraction support, and approved interpretation record")
-                elif paper_id and card_status == "faithful" and interpretation_status == "weak":
-                    support_status = "weak"
-                    required_action = interpretation_action
-                elif not paper_id:
-                    support_status = "unsupported"
-                else:
-                    support_status = interpretation_status if interpretation_status in FAILED_INTERPRETATION_VERDICTS | WEAK_INTERPRETATION_VERDICTS else "unsupported"
-                    required_action = interpretation_action
+                    if card_status == "faithful" and interpretation_status == "faithful":
+                        support_status = "faithful"
+                        required_action = "none"
+                        notes.append("citation has registry mapping, extraction support, and approved interpretation record")
+                    elif card_status == "faithful" and interpretation_status == "weak":
+                        support_status = "weak"
+                        required_action = interpretation_action
+                    elif card_status == "weak" or interpretation_status == "weak":
+                        support_status = "weak"
+                        required_action = interpretation_action if interpretation_status != "faithful" else "strengthen extraction support notes"
+                    else:
+                        support_status = interpretation_status if interpretation_status in FAILED_INTERPRETATION_VERDICTS | WEAK_INTERPRETATION_VERDICTS else "unsupported"
+                        required_action = interpretation_action
 
+                    if tier == "tier_2_claim_bearing" and support_status != "faithful":
+                        blocking = True
+
+                mismatch_type = _mismatch_type_from_notes(notes)
+                if tier == "tier_1_interpretive" and support_status not in NONBLOCKING_SUPPORT_STATUSES and required_action == "none":
+                    required_action = "review interpretive citation grounding before final submission"
                 rows.append(CitationFaithfulnessRow(
                     sentence_id=sid,
                     manuscript_path=rel,
@@ -442,18 +540,25 @@ def build_citation_faithfulness_rows(root: Path | str = Path.cwd()) -> list[Cita
                     support_relation=support_relation,
                     review_verdict=review_verdict,
                     human_status=human_status,
+                    citation_grounding_tier=tier,
+                    mismatch_type=mismatch_type,
+                    blocking=blocking,
                     support_status=support_status,
                     required_action=required_action,
                     notes="; ".join(n for n in notes if n),
                 ))
     return rows
 
-
 def build_citation_faithfulness(root: Path | str = Path.cwd()) -> dict[str, Any]:
     rows = build_citation_faithfulness_rows(root)
-    failures = [asdict(row) for row in rows if row.support_status != "faithful"]
-    weak = [asdict(row) for row in rows if row.support_status == "weak"]
-    missing_interpretation = [asdict(row) for row in rows if row.interpretation_status == "interpretation_record_missing"]
+    failures = [asdict(row) for row in rows if row.blocking]
+    weak = [asdict(row) for row in rows if not row.blocking and row.support_status not in NONBLOCKING_SUPPORT_STATUSES]
+    missing_interpretation = [
+        asdict(row)
+        for row in rows
+        if row.citation_grounding_tier != "tier_0_bibliographic" and row.interpretation_status == "interpretation_record_missing"
+    ]
+    tier_counts = {tier: sum(1 for row in rows if row.citation_grounding_tier == tier) for tier in sorted(VALID_CITATION_GROUNDING_TIERS)}
     return {
         "status": "pass" if not failures else "fail",
         "rows": [asdict(row) for row in rows],
@@ -462,17 +567,21 @@ def build_citation_faithfulness(root: Path | str = Path.cwd()) -> dict[str, Any]
         "summary": {
             "total_cited_sentences": len(rows),
             "faithful": sum(1 for row in rows if row.support_status == "faithful"),
+            "bibliographic": sum(1 for row in rows if row.support_status == "bibliographic"),
             "weak": len(weak),
             "failed": len(failures),
+            "blocking_failures": len(failures),
+            "nonblocking_weak": len(weak),
             "missing_interpretation_records": len(missing_interpretation),
+            "tier_counts": tier_counts,
         },
         "does_not_prove": [
             "cited sources are true",
             "human interpretation records are correct beyond their recorded review basis",
+            "tier classification is a substitute for human manuscript judgment",
             "submission readiness outside citation grounding",
         ],
     }
-
 
 def _source_project(root: Path) -> Path | None:
     # Environment variable is intentionally avoided here so checks stay deterministic
@@ -561,17 +670,21 @@ def build_submission_driver(root: Path | str = Path.cwd()) -> dict[str, Any]:
     root = Path(root)
     citation_rows = build_citation_faithfulness_rows(root)
     wrapper = build_literature_wrapper_sync_report(root)
-    failures = [row for row in citation_rows if row.support_status != "faithful"]
-    weak = [row for row in citation_rows if row.support_status == "weak"]
-    missing_interpretation = [row for row in citation_rows if row.interpretation_status == "interpretation_record_missing"]
+    failures = [row for row in citation_rows if row.blocking]
+    weak = [row for row in citation_rows if not row.blocking and row.support_status not in NONBLOCKING_SUPPORT_STATUSES]
+    missing_interpretation = [
+        row for row in citation_rows
+        if row.citation_grounding_tier != "tier_0_bibliographic" and row.interpretation_status == "interpretation_record_missing"
+    ]
+    tier_counts = {tier: sum(1 for row in citation_rows if row.citation_grounding_tier == tier) for tier in sorted(VALID_CITATION_GROUNDING_TIERS)}
     priorities: list[dict[str, str]] = []
     if failures:
         priorities.append({
             "priority": "P0",
-            "action": "run manuscript citation interpretation audit",
+            "action": "run manuscript citation grounding audit",
             "command": "python3 checks/check_manuscript_citation_interpretation.py",
-            "reason": "manuscript cited sentences are not all backed by approved interpretation records",
-            "stop_condition": "every cited sentence has registry mapping, extraction support, and faithful approved interpretation record",
+            "reason": "claim-bearing cited sentences are not all backed by approved interpretation records",
+            "stop_condition": "every tier_2_claim_bearing citation has registry mapping, extraction support, and faithful approved interpretation record",
         })
     if wrapper.status == "fail":
         priorities.append({
@@ -580,6 +693,14 @@ def build_submission_driver(root: Path | str = Path.cwd()) -> dict[str, Any]:
             "command": "python3 checks/check_literature_wrapper_sync.py",
             "reason": "source project has extraction cards not visible in the wrapper",
             "stop_condition": "wrapper source-card gap is zero or explicitly waived",
+        })
+    if weak:
+        priorities.append({
+            "priority": "P1",
+            "action": "review non-blocking interpretive citation weaknesses",
+            "command": "python3 -m aeros.cli paper citation-faithfulness",
+            "reason": "tier_1/background citation weaknesses should be resolved before final submission but do not block research execution",
+            "stop_condition": "non-blocking weak citation count is zero or explicitly accepted by human review",
         })
     if not priorities:
         priorities.append({
@@ -595,9 +716,13 @@ def build_submission_driver(root: Path | str = Path.cwd()) -> dict[str, Any]:
             "rows": [asdict(row) for row in citation_rows],
             "total_cited_sentences": len(citation_rows),
             "faithful": sum(1 for row in citation_rows if row.support_status == "faithful"),
+            "bibliographic": sum(1 for row in citation_rows if row.support_status == "bibliographic"),
             "weak": len(weak),
             "failed": len(failures),
+            "blocking_failures": len(failures),
+            "nonblocking_weak": len(weak),
             "missing_interpretation_records": len(missing_interpretation),
+            "tier_counts": tier_counts,
         },
         "literature_wrapper_sync": asdict(wrapper),
         "recommended_priorities": priorities,
@@ -605,10 +730,10 @@ def build_submission_driver(root: Path | str = Path.cwd()) -> dict[str, Any]:
             "cited sources are true",
             "paper claims are scientifically valid",
             "human interpretation records are correct beyond their recorded review basis",
+            "citation tier inference replaces human submission judgment",
             "submission readiness outside citation/literature visibility risks",
         ],
     }
-
 
 def write_submission_driver(root: Path | str = Path.cwd(), *, write: bool = True) -> dict[str, Any]:
     root = Path(root)
@@ -633,6 +758,9 @@ def write_submission_driver(root: Path | str = Path.cwd(), *, write: bool = True
         "support_relation",
         "review_verdict",
         "human_status",
+        "citation_grounding_tier",
+        "mismatch_type",
+        "blocking",
         "support_status",
         "required_action",
         "notes",
@@ -658,9 +786,11 @@ def format_submission_driver(report: dict[str, Any]) -> str:
         "## Manuscript citation faithfulness",
         f"- cited sentence rows: {citation['total_cited_sentences']}",
         f"- faithful: {citation['faithful']}",
-        f"- weak: {citation['weak']}",
-        f"- failed: {citation['failed']}",
+        f"- bibliographic only: {citation.get('bibliographic', 0)}",
+        f"- weak non-blocking: {citation.get('nonblocking_weak', citation['weak'])}",
+        f"- blocking failures: {citation.get('blocking_failures', citation['failed'])}",
         f"- missing interpretation records: {citation['missing_interpretation_records']}",
+        f"- tier counts: {citation.get('tier_counts', {})}",
         "",
         "## Literature wrapper sync",
         f"- status: {wrapper['status']}",

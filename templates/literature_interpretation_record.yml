@@ -8,6 +8,7 @@ manuscript_path: "paper/main.tex"
 manuscript_sentence: "Replace with the exact cited manuscript sentence."
 citation_key: "replace_bib_key"
 paper_id: "P000"
+citation_grounding_tier: "tier_2_claim_bearing"  # tier_0_bibliographic | tier_1_interpretive | tier_2_claim_bearing
 
 source_passage:
   page_or_section: "page/section/table/appendix locator"
@@ -24,6 +25,7 @@ scope_match:
   outcome: "match"
 
 claim_strength_match: "pass"  # pass | weak | fail
+mismatch_type: []       # e.g., geography_mismatch, causal_strength_mismatch, unsupported
 overclaim_flags: []
 limitations_checked: false
 contradictory_evidence_checked: false

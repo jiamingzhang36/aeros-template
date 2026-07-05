@@ -19,7 +19,7 @@ forbidden_prefixes:
   - paper/
   - evidence/claim_registry.md
 stop_condition: "Stop at human gate, blocker, no-progress, max_actions, or first off-scope diff."
-completion_label_rule: "Use CHECK_PASS, ROUTE_READY, or SUBSTANTIVE_PRODUCED."
+completion_label_rule: "Use CHECK_PASS, CAPTURE_LOGGED, ROUTE_READY, or SUBSTANTIVE_PRODUCED."
 semantic_audit_outputs:
   - changed_artifacts
   - owner_lane

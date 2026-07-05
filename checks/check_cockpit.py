@@ -26,7 +26,7 @@ def main() -> int:
         if "--profile smoke" not in str(cockpit.get("fast_check_command", "")):
             failures.append("cockpit fast check does not use smoke profile")
         label = (cockpit.get("next_action") or {}).get("status_label")
-        if label not in {"CHECK_PASS", "ROUTE_READY", "SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}:
+        if label not in {"CHECK_PASS", "CAPTURE_LOGGED", "ROUTE_READY", "SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}:
             failures.append(f"cockpit next_action has invalid status label {label!r}")
     for marker in ["AEROS COCKPIT", "Control Tax", "Recommended Next", "Does Not Prove", "navigation view"]:
         if marker not in rendered:

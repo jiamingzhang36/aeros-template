@@ -164,7 +164,7 @@ principle: Right-size governance before running; modes advise/check scope but do
 modes:
   smoke_test: {profile: smoke, max_actions: 1, requires_human_decision: false, allowed_progress_label: CHECK_PASS}
   bounded_probe: {profile: lane:data, max_actions: 3, requires_human_decision: false, allowed_progress_label: ROUTE_READY}
-  broad_capture: {profile: lane:data, max_actions: 5, requires_human_decision: false, allowed_progress_label: ROUTE_READY, receipt_level: lightweight, audit_level: batch_only, claim_surface: none_by_construction}
+  broad_capture: {profile: lane:data, max_actions: 5, requires_human_decision: false, allowed_progress_label: CAPTURE_LOGGED, receipt_level: lightweight, audit_level: batch_only, claim_surface: none_by_construction}
   source_capture: {profile: lane:data, max_actions: 5, requires_human_decision: false, allowed_progress_label: ROUTE_READY}
   paper_release: {profile: full, max_actions: 1, requires_human_decision: true, allowed_progress_label: DECISION_RECORDED}
   expensive_api_run: {profile: lane:data, max_actions: 1, requires_human_decision: true, allowed_progress_label: ROUTE_READY}
@@ -405,6 +405,7 @@ policy: AEROS-STATUS-LABELS-001
 principle: "Distinguish mechanical checks, route readiness, and substantive progress."
 labels:
   CHECK_PASS: {meaning: "Mechanical checks passed."}
+  CAPTURE_LOGGED: {meaning: "Early lead/candidate capture was logged without evidence admission."}
   ROUTE_READY: {meaning: "A route, packet, queue, or plan is ready."}
   SUBSTANTIVE_PRODUCED: {meaning: "A real research artifact changed project substance."}
 final_response_rule:

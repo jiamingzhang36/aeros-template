@@ -13,6 +13,15 @@ labels:
       - "Data was acquired."
       - "Literature was fully reviewed."
       - "A result or claim is substantively supported."
+  CAPTURE_LOGGED:
+    meaning: Early lead/candidate capture was logged inside non-promotable surfaces.
+    may_claim:
+      - "Leads or candidates were captured into isolated queues."
+      - "The capture did not touch canonical data, claims, paper, or release surfaces."
+    must_not_claim:
+      - "A route is ready."
+      - "Evidence was admitted."
+      - "Data, claims, or paper content are supported."
   ROUTE_READY:
     meaning: A plan, queue, approval packet, route audit, or execution packet is ready.
     may_claim:
@@ -40,6 +49,6 @@ labels:
 final_response_rule:
   required: true
   instruction: >
-    When reporting task outcomes, end with one of CHECK_PASS, ROUTE_READY,
+    When reporting task outcomes, end with one of CHECK_PASS, CAPTURE_LOGGED, ROUTE_READY,
     SUBSTANTIVE_PRODUCED, or DECISION_RECORDED. Use the weakest honest label.
     SUBSTANTIVE_DONE is a deprecated compatibility alias only.

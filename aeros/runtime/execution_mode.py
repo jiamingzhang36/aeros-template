@@ -44,7 +44,7 @@ DEFAULT_MODES: dict[str, dict[str, Any]] = {
         "max_provider_calls": 0,
         "max_cost_usd": 0,
         "requires_human_decision": False,
-        "allowed_progress_label": "ROUTE_READY",
+        "allowed_progress_label": "CAPTURE_LOGGED",
         "receipt_level": "lightweight",
         "audit_level": "batch_only",
         "claim_surface": "none_by_construction",

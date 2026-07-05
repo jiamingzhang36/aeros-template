@@ -63,6 +63,14 @@ VERIFICATION_STRENGTHS = {
     "externally_reproduced",
 }
 
+PROMOTION_STATUSES = {
+    "not_promotable",
+    "promotable_with_checks",
+    "review_ready",
+    "human_approved",
+    "stale_review_required",
+}
+
 DOES_NOT_PROVE = [
     "that the preset is scientifically optimal",
     "that a task has run",
@@ -161,6 +169,18 @@ def _verification_strength(artifact_level: str, execution_mode: str, authority_s
     return "harness_observed"
 
 
+def _promotion_status(artifact_level: str, execution_mode: str, authority_surface: str, output_intents: list[str]) -> str:
+    if artifact_level in {"lead", "candidate", "staging"}:
+        return "not_promotable"
+    if "canonical_candidate" in output_intents or artifact_level == "canonical_candidate":
+        return "review_ready"
+    if artifact_level in {"claim", "paper", "release"} or authority_surface in {"claim", "paper", "release"}:
+        return "human_approved" if execution_mode == "paper_release" else "review_ready"
+    if artifact_level in {"canonical", "result"}:
+        return "promotable_with_checks"
+    return "stale_review_required"
+
+
 def _allowed_outputs(task_mode: str, task_spec: dict[str, Any]) -> list[str]:
     workflow = str(task_spec.get("workflow_preset") or "")
     if task_mode == "broad_capture" or workflow == "broad_capture_leads":
@@ -224,6 +244,7 @@ def compiled_mode_map(root: Path) -> dict[str, Any]:
         execution_budget = _execution_budget(execution_mode)
         verification_strength = _verification_strength(artifact_level, execution_mode, authority_surface)
         output_intents = list(task_spec.get("allowed_output_intents") or [])
+        promotion_status = _promotion_status(artifact_level, execution_mode, authority_surface, output_intents)
         check_profile = execution_spec.get("check_profile") or execution_spec.get("profile") or ""
         row_contradictions: list[str] = []
         if execution_mode not in execution_modes:
@@ -254,6 +275,7 @@ def compiled_mode_map(root: Path) -> dict[str, Any]:
                 "authority_surface": authority_surface,
                 "execution_budget": execution_budget,
                 "verification_strength": verification_strength,
+                "promotion_status": promotion_status,
                 "output_intents": output_intents,
                 "allowed_outputs": _allowed_outputs(task_mode, task_spec),
                 "forbidden_outputs": _forbidden_outputs(task_mode, artifact_level),
@@ -271,6 +293,7 @@ def compiled_mode_map(root: Path) -> dict[str, Any]:
             "authority_surface": sorted(AUTHORITY_SURFACES),
             "execution_budget": sorted(EXECUTION_BUDGETS),
             "verification_strength": sorted(VERIFICATION_STRENGTHS),
+            "promotion_status": sorted(PROMOTION_STATUSES),
         },
         "presets": rows,
         "policy_surfaces": [
@@ -303,6 +326,7 @@ def format_compiled_mode_map(report: dict[str, Any]) -> str:
                 f"- authority_surface: {row.get('authority_surface')}",
                 f"- execution_budget: {row.get('execution_budget')}",
                 f"- verification_strength: {row.get('verification_strength')}",
+                f"- promotion_status: {row.get('promotion_status')}",
                 f"- workflow_preset: {row.get('workflow_preset') or 'none'}",
                 f"- execution_mode: {row.get('execution_mode')}",
                 f"- check_profile: {row.get('check_profile') or 'none'}",

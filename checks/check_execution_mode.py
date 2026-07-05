@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import json
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -57,7 +59,7 @@ def main() -> int:
         if report.get("mode") != "bounded_probe":
             failures.append("data probe without git status should remain bounded_probe")
     compiled = compiled_mode_map(Path.cwd())
-    required_fields = {"artifact_level", "effect_class", "authority_surface", "execution_budget", "verification_strength"}
+    required_fields = {"artifact_level", "effect_class", "authority_surface", "execution_budget", "verification_strength", "promotion_status"}
     if len(compiled.get("policy_surfaces") or []) < 4:
         failures.append("compiled mode map must name multiple policy surfaces")
     cross_checks = set(compiled.get("cross_checks_run") or [])
@@ -76,6 +78,25 @@ def main() -> int:
         failures.append("compiled broad_capture row missing five-field projection")
     elif broad_row.get("artifact_level") != "lead" or broad_row.get("authority_surface") != "none":
         failures.append("compiled broad_capture row should be lead/none")
+    elif broad_row.get("promotion_status") != "not_promotable":
+        failures.append("compiled broad_capture row should be not_promotable")
+    proc = subprocess.run(
+        [sys.executable, "-m", "aeros.cli", "inspect", "modes", "--compiled", "--json"],
+        cwd=Path.cwd(),
+        text=True,
+        capture_output=True,
+    )
+    if proc.returncode != 0:
+        failures.append("aeros inspect modes --compiled --json failed: " + (proc.stderr or proc.stdout).strip())
+    else:
+        try:
+            payload = json.loads(proc.stdout)
+        except json.JSONDecodeError as exc:
+            failures.append(f"inspect modes JSON was invalid: {exc}")
+        else:
+            inspect_rows = payload.get("presets") or []
+            if not inspect_rows or "promotion_status" not in inspect_rows[0]:
+                failures.append("inspect modes JSON did not expose promotion_status")
     if failures:
         print("FAIL: execution mode problems detected")
         for failure in failures:

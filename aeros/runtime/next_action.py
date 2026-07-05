@@ -20,7 +20,7 @@ from .kernel import discover_contracts
 from .stale_triage import triage_item_for_task
 
 
-VALID_LABELS = {"CHECK_PASS", "ROUTE_READY", "SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}
+VALID_LABELS = {"CHECK_PASS", "CAPTURE_LOGGED", "ROUTE_READY", "SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}
 LANE_ORDER = ["data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"]
 STAGES = ["discovery", "execution"]
 

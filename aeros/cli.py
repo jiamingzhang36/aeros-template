@@ -1396,6 +1396,13 @@ def _cmd_mode_compiled(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_inspect(args: argparse.Namespace) -> int:
+    if getattr(args, "inspect_command", "") == "modes" and getattr(args, "compiled", False):
+        return _cmd_mode_compiled(args)
+    print("usage: aeros inspect modes --compiled", file=sys.stderr)
+    return 2
+
+
 def _cmd_artifact_stage(args: argparse.Namespace) -> int:
     from .runtime.artifact_stage import format_artifact_stage_report, stage_canonical_artifacts
 
@@ -2063,6 +2070,13 @@ def main(argv: list[str] | None = None) -> int:
     iterate.add_argument("--max-retries", type=int, default=None,
                          help="override each task's retry_policy.max_retries")
     iterate.set_defaults(func=_cmd_iterate)
+
+    inspect_p = sub.add_parser("inspect", help="read-only inspection views")
+    inspect_sub = inspect_p.add_subparsers(dest="inspect_command", required=True)
+    inspect_modes_p = inspect_sub.add_parser("modes", help="inspect compiled mode/control surfaces")
+    inspect_modes_p.add_argument("--compiled", action="store_true", required=True, help="show read-only five-field compiled mode map")
+    inspect_modes_p.add_argument("--json", action="store_true")
+    inspect_modes_p.set_defaults(func=_cmd_inspect)
 
     mode_p = sub.add_parser("mode", help="recommend right-sized execution mode")
     mode_sub = mode_p.add_subparsers(dest="mode_command", required=True)

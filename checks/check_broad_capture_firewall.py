@@ -116,6 +116,10 @@ def main() -> int:
             failures.append("broad capture metrics did not count lead/candidate queues")
         if summary.get("stale_lead_count") != 1:
             failures.append("broad capture metrics did not count stale leads")
+        if summary.get("duplicate_lead_count") != 0 or summary.get("duplicate_lead_rate") != 0:
+            failures.append("broad capture duplicate metrics should be zero in the fixture")
+        if "capture_saturation_stop" not in summary or "recommended_next_action" not in summary:
+            failures.append("broad capture metrics missing saturation/next-action fields")
 
     if failures:
         print("FAIL: broad capture firewall problems detected")

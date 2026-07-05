@@ -30,6 +30,7 @@ allowed_declared_outcomes:
   - hygiene
 outcome_labels:
   CHECK_PASS: Mechanical checks, schemas, receipts, or harness validations passed.
+  CAPTURE_LOGGED: Early non-promotable lead/candidate capture was logged without admitting evidence.
   ROUTE_READY: A plan, queue, approval packet, route audit, or execution packet is ready.
   SUBSTANTIVE_PRODUCED: A real source snapshot, data artifact, full-text extraction, result, paper edit, or approved decision changed the research substance.
   DECISION_RECORDED: A governance decision was recorded; it is not research-substantive output by itself.
@@ -48,7 +49,7 @@ passed_task_rule:
   requires:
     - at least one allowed output outside runtime logs
     - final evidence uses substantive_evidence_paths
-    - staging/review/queue work uses staging_artifact_paths and ROUTE_READY
+    - lead/candidate capture uses staging_artifact_paths and CAPTURE_LOGGED; staging/review/queue work uses staging_artifact_paths and ROUTE_READY
     - progress_class is substantive or routing
     - progress_label is SUBSTANTIVE_PRODUCED or ROUTE_READY
     - file outputs include sha256

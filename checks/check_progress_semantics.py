@@ -38,9 +38,13 @@ def main() -> int:
     labels = status.get("labels") or {}
     if "DECISION_RECORDED" not in labels:
         failures.append("status policy missing DECISION_RECORDED")
+    if "CAPTURE_LOGGED" not in labels:
+        failures.append("status policy missing CAPTURE_LOGGED")
     final_rule = str((status.get("final_response_rule") or {}).get("instruction", ""))
     if "DECISION_RECORDED" not in final_rule:
         failures.append("final response rule must mention DECISION_RECORDED")
+    if "CAPTURE_LOGGED" not in final_rule:
+        failures.append("final response rule must mention CAPTURE_LOGGED")
 
     completion = _load(COMPLETION_POLICY)
     minimal = set(completion.get("minimal_attestation_fields") or [])
@@ -58,6 +62,8 @@ def main() -> int:
     labels_policy = completion.get("outcome_labels") or {}
     if "DECISION_RECORDED" not in labels_policy:
         failures.append("completion policy missing DECISION_RECORDED outcome label")
+    if "CAPTURE_LOGGED" not in labels_policy:
+        failures.append("completion policy missing CAPTURE_LOGGED outcome label")
     decision_text = str(labels_policy.get("DECISION_RECORDED", "")).lower()
     if "not" not in decision_text or "substantive" not in decision_text:
         failures.append("DECISION_RECORDED must state that it is not research-substantive output")

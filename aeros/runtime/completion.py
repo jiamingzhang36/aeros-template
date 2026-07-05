@@ -328,7 +328,7 @@ def validate_completion_receipts(project_root: Path, contracts: dict[str, tuple[
                     pass
                 else:
                     failures.append(f"{task_id}: completion receipt progress_class is not substantive or staging-routing")
-            if payload.get("progress_label") not in {"SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE", "ROUTE_READY"}:
+            if payload.get("progress_label") not in {"SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE", "CAPTURE_LOGGED", "ROUTE_READY"}:
                 failures.append(f"{task_id}: completion receipt progress_label is not an allowed completion label")
             if not payload.get("authority_status"):
                 failures.append(f"{task_id}: completion receipt authority_status missing")
