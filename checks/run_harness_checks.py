@@ -31,6 +31,7 @@ CHECKS = [
     "check_source_capture_permission.py",
     "check_broad_capture_firewall.py",
     "check_next_action.py",
+    "check_drive.py",
     "check_action_spec.py",
     "check_execution_envelope.py",
     "check_agent_envelope.py",

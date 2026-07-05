@@ -33,6 +33,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "write_audit": ["aeros/runtime/write_audit.py", "checks/check_write_audit.py", "aeros/cli.py"],
     "submission_research_driver": ["aeros/runtime/submission_driver.py", "checks/check_manuscript_citation_faithfulness.py",
         "checks/check_manuscript_citation_interpretation.py", "checks/check_literature_wrapper_sync.py", "aeros/cli.py"],
+    "drive": ["aeros/runtime/drive.py", "checks/check_drive.py", "aeros/cli.py"],
 }
 
 CAPABILITY_EXEMPT_CHECKS: dict[str, str] = {

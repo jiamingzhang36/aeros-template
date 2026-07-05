@@ -445,6 +445,30 @@ def _cmd_next(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_drive(args: argparse.Namespace) -> int:
+    from .runtime.drive import build_drive_report, format_drive_report, write_drive_report
+
+    root = _project_root()
+    report = build_drive_report(
+        root,
+        goal=getattr(args, "goal", "auto") or "auto",
+        lane=getattr(args, "lane", "") or "",
+        execute=bool(getattr(args, "execute", False)),
+    )
+    if getattr(args, "json", False):
+        print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+    else:
+        print(format_drive_report(report))
+    if getattr(args, "write", False):
+        md, js = write_drive_report(root, report)
+        print(f"wrote {md.relative_to(root)}")
+        print(f"wrote {js.relative_to(root)}")
+    execution = report.get("execution") or {}
+    if execution.get("attempted") and execution.get("status") == "fail":
+        return 1
+    return 0
+
+
 def _cmd_claim_vector(args: argparse.Namespace) -> int:
     from .runtime.claim_vector import compile_claim_vector, format_claim_vector
 
@@ -1608,6 +1632,14 @@ def main(argv: list[str] | None = None) -> int:
     next_p.add_argument("--write", action="store_true", help="write NEXT_ACTION.md")
     next_p.add_argument("--json", action="store_true", help="emit machine-readable next action with full ActionSpec")
     next_p.set_defaults(func=_cmd_next)
+
+    drive_p = sub.add_parser("drive", help="choose and optionally execute one useful safe next objective")
+    drive_p.add_argument("--goal", default="auto", choices=["auto", "capture", "broad-capture", "promote", "source-promotion", "literature", "fulltext", "citation-risk", "submission", "data-probe", "probe"], help="optional objective override")
+    drive_p.add_argument("--lane", default="", choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"], help="optional lane preference for auto mode")
+    drive_p.add_argument("--execute", action="store_true", help="execute only allowlisted read-only/dry-run commands")
+    drive_p.add_argument("--write", action="store_true", help="write outputs/context/drive_packet.md and .json")
+    drive_p.add_argument("--json", action="store_true", help="emit machine-readable drive packet")
+    drive_p.set_defaults(func=_cmd_drive)
 
     session = sub.add_parser("session", help="start/status/audit a lane-scoped chat session")
     session_sub = session.add_subparsers(dest="session_command", required=True)
