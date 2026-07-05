@@ -1,7 +1,7 @@
-version: 4
+version: 5
 task_id: T004b_robustness_plan
-generated_at: '2026-06-24T14:32:56+00:00'
-completion_mode: manual_recover
+generated_at: '2026-07-05T01:05:06+00:00'
+completion_mode: revalidation
 claimed_status: passed
 declared_outcome: complete
 outcome_kind: complete
@@ -35,7 +35,10 @@ actual_outputs:
   type: directory
   sha256: ''
   bytes: 0
-  entries: 5
+  entries: 10
+staging_artifact_paths: []
+substantive_evidence_paths:
+- docs/robustness_checklist.md
 checks_required:
 - check_claim_ceiling.py
 - check_agent_run_report.py
@@ -50,18 +53,18 @@ check_attestations:
 - name: check_claim_ceiling
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_ceiling.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.083
+  elapsed_seconds: 0.05
 - name: check_agent_run_report.py
   passed: true
   command:
-  - /Users/jiamingzhang/opt/anaconda3/bin/python3
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
   exit_code: 0
-  elapsed_seconds: 0.129
+  elapsed_seconds: 0.082
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -78,6 +81,6 @@ does_not_prove:
 - human gate approval
 input_fingerprint: 1f7d2ceda5e037fd60ebdea71d0cabc8be27cd741473ad0ce0b2a8e1b25f4805
 output_fingerprint: d65bc694b3c7c47b32c8a3363040c7c0e7f74cc245dfb584999cb0a2fd2dc3d4
-dependency_fingerprint: 8888cafe23df52f7ab8c6d4d1b48fb25d6526b8c85baa78930af872d2288ec5d
+dependency_fingerprint: 499473317a2d04780087a35c055c93a413eb70707bb25ab952c62c476fa7bd72
 completion_verdict: pass
 failures: []

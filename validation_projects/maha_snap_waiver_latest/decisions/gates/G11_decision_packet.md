@@ -1,7 +1,7 @@
 # Human Gate Decision Packet: G11
 
-Generated: 2026-07-04T18:58:41+00:00
-Stage: discovery
+Generated: 2026-07-05T01:05:13+00:00
+Stage: execution
 Current gate: G11
 Gate status: approved
 Candidate gate: execution / G11
@@ -37,10 +37,18 @@ None. All criteria through the target gate passed.
 ### Passed Runtime Tasks
 
 - D001a_framing
+- D001b_framework_search
 - D002_data_scouting
 - D003_design_options
 - D004_variable_construction
 - D005_data_probe
+- LIT-FULL-001_gap_verification
+- LIT-FULL-002_method_identification
+- LIT-FULL-003_theory_mechanism
+- LIT-FULL-004_data_measurement
+- LIT-FULL-005_background_institutional
+- LIT-PAPER-001_literature_positioning
+- LIT-SYNTH-001_function_specific_synthesis
 - T001_discovery_audit
 - T002_data_feasibility
 - T003_design_audit
@@ -221,7 +229,7 @@ Approve only if novelty and impact hold; the green checks cover the rest.
 
 ## Human Actions
 
-- Approve: `aeros gate approve G11 --stage discovery --owner <name> --note <why>`
-- Block: `aeros gate block G11 --stage discovery --owner <name> --reason <why>`
+- Approve: `aeros gate approve G11 --stage execution --owner <name> --note <why>`
+- Block: `aeros gate block G11 --stage execution --owner <name> --reason <why>`
 - Revise: edit the relevant artifacts or task contracts, then rerun `aeros iterate`.
 - Stop: record the reason in `decisions/issue_log.csv` or the project log.

@@ -1,6 +1,6 @@
 version: 1
 task_id: T004_main_execution
-generated_at: '2026-07-04T14:56:28+00:00'
+generated_at: '2026-07-05T01:05:06+00:00'
 contract_path: tasks/execution/T004_main_execution.yml
 run_report_path: ''
 allowed_skills:
@@ -13,8 +13,23 @@ recommended_skills:
 - summary-stats-table
 required_skill_classes: []
 skill_obligations: []
-skill_waivers: []
+skill_waivers:
+- skill_class: code-review-econ
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: output_changed.'
+  waiver_scope: fingerprint_refresh_only
+- skill_class: regression-table
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: output_changed.'
+  waiver_scope: fingerprint_refresh_only
+- skill_class: summary-stats-table
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: output_changed.'
+  waiver_scope: fingerprint_refresh_only
 skills_used: []
 invocations: []
-missing_skill_decision: true
-verdict: fail
+missing_skill_decision: false
+verdict: pass

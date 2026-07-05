@@ -1,6 +1,6 @@
 version: 1
 task_id: T004b_robustness_plan
-generated_at: '2026-06-24T14:32:56+00:00'
+generated_at: '2026-07-05T01:05:06+00:00'
 contract_path: tasks/execution/T004b_robustness_plan.yml
 run_report_path: ''
 allowed_skills:
@@ -14,12 +14,29 @@ recommended_skills:
 - placebo-test
 - robustness-suite
 required_skill_classes: []
+skill_obligations: []
 skill_waivers:
-- skill_class: recommended_skills
-  scope: mechanical_revalidation
-  reason: Runtime wrote this receipt during mechanical revalidation of existing artifacts;
-    no external skill was invoked.
-  progress_label: mechanical_hygiene
+- skill_class: causal-id-review
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: dependency_output_changed.'
+  waiver_scope: fingerprint_refresh_only
+- skill_class: did-checklist
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: dependency_output_changed.'
+  waiver_scope: fingerprint_refresh_only
+- skill_class: placebo-test
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: dependency_output_changed.'
+  waiver_scope: fingerprint_refresh_only
+- skill_class: robustness-suite
+  waiver_reason: 'Task was not re-run by an external worker because existing allowed
+    outputs passed the task''s required checks during AEROS revalidation. No skill-derived
+    evidence is being claimed for this refresh. Staleness trigger: dependency_output_changed.'
+  waiver_scope: fingerprint_refresh_only
 skills_used: []
 invocations: []
+missing_skill_decision: false
 verdict: pass

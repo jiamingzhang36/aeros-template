@@ -1,6 +1,6 @@
 version: 5
 task_id: T001_discovery_audit
-generated_at: '2026-07-04T13:48:29+00:00'
+generated_at: '2026-07-05T01:02:31+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -35,7 +35,7 @@ actual_outputs:
   type: directory
   sha256: ''
   bytes: 0
-  entries: 6
+  entries: 10
 staging_artifact_paths:
 - audits/discovery_audit_report.md
 substantive_evidence_paths: []
@@ -62,7 +62,7 @@ check_attestations:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_discovery_completeness.py
   exit_code: 0
-  elapsed_seconds: 0.262
+  elapsed_seconds: 0.064
 - name: check_design_selection
   passed: true
   command:
@@ -70,21 +70,21 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_design_selection.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.184
+  elapsed_seconds: 0.052
 - name: check_claim_registry.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_claim_registry.py
   exit_code: 0
-  elapsed_seconds: 0.744
+  elapsed_seconds: 0.147
 - name: check_agent_run_report.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_latest/checks/check_agent_run_report.py
   exit_code: 0
-  elapsed_seconds: 0.731
+  elapsed_seconds: 0.096
 evidence_receipt_required: true
 evidence_receipt_path: evidence/receipts/T001_discovery_audit_human_review_receipt.md
 evidence_receipt_exists: true
@@ -99,7 +99,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: cdde57199dc3a9bf0298892808484c2f1e152c92b690ed270ae6a14ca437900f
+input_fingerprint: 1be28777d5b0742634e0a80a40e46ccb021a1682a978adc366bd4551775409d7
 output_fingerprint: d98deeef87e6980f1674e44091505f96c17b74daa836998e5bf02c571c0ecf1e
 dependency_fingerprint: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
 completion_verdict: pass
