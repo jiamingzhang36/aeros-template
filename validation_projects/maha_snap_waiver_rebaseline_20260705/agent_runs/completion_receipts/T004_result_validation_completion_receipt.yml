@@ -1,6 +1,6 @@
 version: 5
 task_id: T004_result_validation
-generated_at: '2026-07-05T02:17:29+00:00'
+generated_at: '2026-07-05T02:28:18+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -66,7 +66,7 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_registry.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.095
+  elapsed_seconds: 0.46
 - name: check_number_scan
   passed: true
   command:
@@ -74,28 +74,28 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_scan.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.097
+  elapsed_seconds: 0.363
 - name: check_output_reproducibility.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_output_reproducibility.py
   exit_code: 0
-  elapsed_seconds: 0.114
+  elapsed_seconds: 0.241
 - name: check_provenance.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_provenance.py
   exit_code: 0
-  elapsed_seconds: 0.123
+  elapsed_seconds: 0.413
 - name: check_agent_run_report.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_agent_run_report.py
   exit_code: 0
-  elapsed_seconds: 0.137
+  elapsed_seconds: 0.315
 evidence_receipt_required: true
 evidence_receipt_path: evidence/receipts/T004_result_validation_human_review_receipt.md
 evidence_receipt_exists: true
@@ -110,7 +110,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: 937c7b5ccfdac5d1713536510dd486b1df14f00d4329ddb9a5b4ce9e85046a21
+input_fingerprint: 4691ed10db3e6f17ab92585e14fd1eb57f1ea3e72cb189c8efeaf444fa604054
 output_fingerprint: 35edabc960ea05b52df506d1ba62e05c0e28a6b987bfc187594c0fa89271eff2
 dependency_fingerprint: bf0fa0c6f73aeff413478f2f79c3aac2a7e3e1209803a9f404e27dea37ecd690
 completion_verdict: pass

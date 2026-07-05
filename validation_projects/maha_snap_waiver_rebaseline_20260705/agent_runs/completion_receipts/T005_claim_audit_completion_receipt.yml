@@ -1,0 +1,117 @@
+version: 5
+task_id: T005_claim_audit
+generated_at: '2026-07-05T02:28:40+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: routing
+progress_label: ROUTE_READY
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T005_claim_audit.yml
+automation_class: receipt_audited
+gate_status: needs_receipt_audit
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T005_claim_audit_skill_invocations.yml
+allowed_outputs_expected:
+- audits/claim_audit_report.md
+- agent_runs/
+allowed_outputs_found:
+- audits/claim_audit_report.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: audits/claim_audit_report.md
+  exists: true
+  type: file
+  sha256: 1bf93b231009a2d7f49f3bd5a24f2c1d7d69f226772d84d77b842d0201fe82da
+  bytes: 3234
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 7
+staging_artifact_paths:
+- audits/claim_audit_report.md
+substantive_evidence_paths: []
+checks_required:
+- check_claim_registry.py
+- check_claim_ceiling.py
+- check_claim_method_consistency.py
+- check_research_graph.py
+- check_agent_run_report.py
+checks_run:
+- check_claim_registry.py
+- check_claim_ceiling
+- check_claim_method_consistency.py
+- check_research_graph
+- check_agent_run_report.py
+checks_passed:
+- check_claim_registry.py
+- check_claim_ceiling
+- check_claim_method_consistency.py
+- check_research_graph
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_claim_registry.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_registry.py
+  exit_code: 0
+  elapsed_seconds: 1.148
+- name: check_claim_ceiling
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_ceiling.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.976
+- name: check_claim_method_consistency.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_method_consistency.py
+  exit_code: 0
+  elapsed_seconds: 0.77
+- name: check_research_graph
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_research_graph.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.342
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.737
+evidence_receipt_required: true
+evidence_receipt_path: evidence/receipts/T005_claim_audit_human_review_receipt.md
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: false
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 0c1ab1f232f9ca8680a39e32fdfcef981665a73ad1aec9d85034f52eec9cdc15
+output_fingerprint: 4aa57af17d4dba9c7edfac5961faed19f7891a3d01f000ef562b6be458b2a0e9
+dependency_fingerprint: 60dae459a576daaf1c262cbc20d840ae88985cf25afc475fc7897182f69831a5
+completion_verdict: pass
+failures: []

@@ -1,0 +1,170 @@
+version: 1
+generated_at: '2026-07-05T02:24:28.481417+00:00'
+derived_from:
+  claim_registry_sha256: 917ca0a5654345cdbd68e9f0a7d6b976a17a22f792f60585a71130260d1f4700
+  evidence_ledger_sha256: ''
+  result_index_sha256: 996c1dfd8700fc4005263ee0f664b094f0cc2d81388317f8041bcc97ccb9ed9d
+  provenance_files:
+    outputs/.provenance/R001.json: 93c377c54a8693befcd5c6cd463493d2c2f628093fd845db6a1e709de2499ca9
+    outputs/.provenance/R002.json: 8b370ced20cafabd53710ccfd4e3cc7a1992f3a312626c303d68953b62ed0351
+    outputs/.provenance/R003.json: 297d9d3e7323c15dd5ad7328207044e9a79c337eac41a3a5fe265d8c03e9f73b
+    outputs/.provenance/R004.json: c8bffaa1d8c1d4aff9e8a789b6ce9f7b778a074dfebf3de2d5ebc08741eb7d0e
+nodes:
+- id: outputs/context/r001_policy_rule_measurement.md
+  type: artifact
+  derived: true
+- id: outputs/context/r002_approval_risk_boundary.md
+  type: artifact
+  derived: true
+- id: outputs/context/r003_nielsen_ex_ante_boundary.md
+  type: artifact
+  derived: true
+- id: outputs/context/r004_feasibility_and_nonclaims.md
+  type: artifact
+  derived: true
+- id: C001
+  type: claim
+  derived: true
+- id: C002
+  type: claim
+  derived: true
+- id: C003
+  type: claim
+  derived: true
+- id: provenance:R001
+  type: provenance
+  derived: true
+- id: provenance:R002
+  type: provenance
+  derived: true
+- id: provenance:R003
+  type: provenance
+  derived: true
+- id: provenance:R004
+  type: provenance
+  derived: true
+- id: R001
+  type: result
+  derived: true
+- id: R002
+  type: result
+  derived: true
+- id: R003
+  type: result
+  derived: true
+- id: R004
+  type: result
+  derived: true
+- id: manual AEROS execution-lock registry from docs/data_contract.yml, audits/data_audit_report.md,
+    audits/design_audit_report.md, and execution/protocol/main_execution_protocol.md
+  type: script_or_source
+  derived: true
+- id: manual AEROS execution-lock registry from docs/data_contract.yml, discovery/variable_construction.md,
+    audits/data_audit_report.md, and execution/protocol/main_execution_protocol.md
+  type: script_or_source
+  derived: true
+- id: manual AEROS execution-lock registry from docs/method_card.md, discovery/variable_construction.md,
+    audits/discovery_audit_report.md, and audits/design_audit_report.md
+  type: script_or_source
+  derived: true
+- id: manual AEROS execution-lock registry from docs/method_card.md, discovery/variable_construction.md,
+    docs/data_contract.yml, and audits/design_audit_report.md
+  type: script_or_source
+  derived: true
+edges:
+- from: C001
+  to: R001
+  type: claim_supported_by_result
+  source: derived
+  source_file: evidence/claim_registry.md
+- from: C001
+  to: R002
+  type: claim_supported_by_result
+  source: derived
+  source_file: evidence/claim_registry.md
+- from: C001
+  to: R003
+  type: claim_supported_by_result
+  source: derived
+  source_file: evidence/claim_registry.md
+- from: C001
+  to: R004
+  type: claim_supported_by_result
+  source: derived
+  source_file: evidence/claim_registry.md
+- from: C002
+  to: R002
+  type: claim_supported_by_result
+  source: derived
+  source_file: evidence/claim_registry.md
+- from: C003
+  to: R003
+  type: claim_supported_by_result
+  source: derived
+  source_file: evidence/claim_registry.md
+- from: R001
+  to: manual AEROS execution-lock registry from docs/method_card.md, discovery/variable_construction.md,
+    docs/data_contract.yml, and audits/design_audit_report.md
+  type: result_generated_by
+  source: derived
+  source_file: evidence/result_index.csv
+- from: R001
+  to: outputs/context/r001_policy_rule_measurement.md
+  type: result_has_artifact
+  source: derived
+  source_file: evidence/result_index.csv
+- from: R001
+  to: provenance:R001
+  type: result_has_provenance
+  source: derived
+  source_file: outputs/.provenance/R001.json
+- from: R002
+  to: manual AEROS execution-lock registry from docs/method_card.md, discovery/variable_construction.md,
+    audits/discovery_audit_report.md, and audits/design_audit_report.md
+  type: result_generated_by
+  source: derived
+  source_file: evidence/result_index.csv
+- from: R002
+  to: outputs/context/r002_approval_risk_boundary.md
+  type: result_has_artifact
+  source: derived
+  source_file: evidence/result_index.csv
+- from: R002
+  to: provenance:R002
+  type: result_has_provenance
+  source: derived
+  source_file: outputs/.provenance/R002.json
+- from: R003
+  to: manual AEROS execution-lock registry from docs/data_contract.yml, discovery/variable_construction.md,
+    audits/data_audit_report.md, and execution/protocol/main_execution_protocol.md
+  type: result_generated_by
+  source: derived
+  source_file: evidence/result_index.csv
+- from: R003
+  to: outputs/context/r003_nielsen_ex_ante_boundary.md
+  type: result_has_artifact
+  source: derived
+  source_file: evidence/result_index.csv
+- from: R003
+  to: provenance:R003
+  type: result_has_provenance
+  source: derived
+  source_file: outputs/.provenance/R003.json
+- from: R004
+  to: manual AEROS execution-lock registry from docs/data_contract.yml, audits/data_audit_report.md,
+    audits/design_audit_report.md, and execution/protocol/main_execution_protocol.md
+  type: result_generated_by
+  source: derived
+  source_file: evidence/result_index.csv
+- from: R004
+  to: outputs/context/r004_feasibility_and_nonclaims.md
+  type: result_has_artifact
+  source: derived
+  source_file: evidence/result_index.csv
+- from: R004
+  to: provenance:R004
+  type: result_has_provenance
+  source: derived
+  source_file: outputs/.provenance/R004.json
+human_assertions: []
+warnings: []

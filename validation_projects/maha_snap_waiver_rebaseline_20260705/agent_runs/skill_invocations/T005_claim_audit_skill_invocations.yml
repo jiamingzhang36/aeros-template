@@ -1,0 +1,22 @@
+version: 1
+task_id: T005_claim_audit
+generated_at: '2026-07-05T02:28:40+00:00'
+contract_path: tasks/execution/T005_claim_audit.yml
+run_report_path: ''
+allowed_skills:
+- causal-id-review
+- econ-principles-check
+- econ-write
+- results-narrator
+recommended_skills:
+- causal-id-review
+- econ-principles-check
+- econ-write
+- results-narrator
+required_skill_classes: []
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail
