@@ -1,6 +1,6 @@
 version: 5
 task_id: T004_main_execution
-generated_at: '2026-07-05T02:28:07+00:00'
+generated_at: '2026-07-05T02:33:18+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -78,7 +78,7 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_registry.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.459
+  elapsed_seconds: 0.364
 - name: check_number_scan
   passed: true
   command:
@@ -86,21 +86,21 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_scan.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.467
+  elapsed_seconds: 0.148
 - name: check_provenance.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_provenance.py
   exit_code: 0
-  elapsed_seconds: 0.225
+  elapsed_seconds: 0.222
 - name: check_claim_registry.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_registry.py
   exit_code: 0
-  elapsed_seconds: 0.17
+  elapsed_seconds: 0.166
 - name: check_claim_ceiling
   passed: true
   command:
@@ -108,14 +108,14 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_ceiling.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.702
+  elapsed_seconds: 0.139
 - name: check_claim_method_consistency.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_method_consistency.py
   exit_code: 0
-  elapsed_seconds: 0.951
+  elapsed_seconds: 0.201
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -131,7 +131,7 @@ does_not_prove:
 - claim support
 - human gate approval
 input_fingerprint: 444789269d06be4178fab1910a761a39f85df58b5d312ee9729fc6b97ad7e3f7
-output_fingerprint: 1d16f06bae23f39fa0be7f90ba4c273b33c81fa365f1016f5affb4cb144e909f
+output_fingerprint: 0014929702f4c5cab88f10539e14dc1f7accce3a7937fc6a70324b5a53db3b1b
 dependency_fingerprint: d5af6c53eccaf8b44f35b89bd3fb73afeaab610feae61e8cc71cb31859f41df4
 completion_verdict: pass
 failures: []
