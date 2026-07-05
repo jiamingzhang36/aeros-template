@@ -1,0 +1,23 @@
+version: 1
+task_id: T002_data_feasibility
+generated_at: '2026-07-05T02:02:19+00:00'
+contract_path: tasks/execution/T002_data_feasibility.yml
+run_report_path: ''
+allowed_skills:
+- data-inventory
+- data-merge-audit
+- data-quality-checker
+- describe-data
+- summary-stats-table
+recommended_skills:
+- data-merge-audit
+- data-quality-checker
+- summary-stats-table
+required_skill_classes:
+- data_scouting
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail

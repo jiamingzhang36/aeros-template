@@ -1,0 +1,20 @@
+version: 1
+task_id: T004_main_execution
+generated_at: '2026-07-05T02:02:38+00:00'
+contract_path: tasks/execution/T004_main_execution.yml
+run_report_path: ''
+allowed_skills:
+- code-review-econ
+- regression-table
+- summary-stats-table
+recommended_skills:
+- code-review-econ
+- regression-table
+- summary-stats-table
+required_skill_classes: []
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail

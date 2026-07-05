@@ -1,0 +1,7 @@
+{
+  "result_id": "R004",
+  "output_path": "outputs/context/r004_feasibility_and_nonclaims.md",
+  "created_at": "2026-07-05T02:12:00Z",
+  "script_or_source": "manual AEROS execution-lock registry from docs/data_contract.yml, audits/data_audit_report.md, audits/design_audit_report.md, and execution/protocol/main_execution_protocol.md",
+  "sha256": "0c320e5d11f9b7c7f7bcb58fb9d0470f5776a5fcdeb98b4eb37b591fe93ab6b4"
+}

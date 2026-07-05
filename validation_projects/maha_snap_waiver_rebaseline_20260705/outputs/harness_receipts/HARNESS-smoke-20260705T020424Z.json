@@ -1,0 +1,540 @@
+{
+  "checks": [
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 14.498,
+      "exit_code": 0,
+      "name": "checks/check_next_action.py",
+      "output_tail": [
+        "PASS: next action is valid (ROUTE_READY / data)"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.305,
+      "exit_code": 0,
+      "name": "checks/check_architecture_freeze.py",
+      "output_tail": [
+        "PASS: architecture freeze baseline is recorded"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.314,
+      "exit_code": 0,
+      "name": "checks/check_action_spec.py",
+      "output_tail": [
+        "PASS: ActionSpec invariants are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 12.418,
+      "exit_code": 0,
+      "name": "checks/check_execution_envelope.py",
+      "output_tail": [
+        "PASS: ExecutionEnvelope isolated-worktree enforcement is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.852,
+      "exit_code": 0,
+      "name": "checks/check_agent_envelope.py",
+      "output_tail": [
+        "[kernel] attempt 1/1: invoking agent (spent $0.0000/0.01, call cap $0.01)...",
+        "[kernel]   check check_allowed.py: PASS",
+        "[kernel] task T_AGENT_ALLOWED PASSED.",
+        "[kernel] run report -> agent_runs/T_AGENT_ALLOWED_20260705_020403.md (cost $0.0000, 1 call(s))",
+        "[kernel] completion receipt -> agent_runs/completion_receipts/T_AGENT_ALLOWED_completion_receipt.yml",
+        "[kernel] attempt 1/1: invoking agent (spent $0.0000/0.01, call cap $0.01)...",
+        "[kernel] agent envelope violation -> agent_runs/agent_envelope_audits/T_AGENT_DENIED_20260705_020403.json",
+        "[kernel] task T_AGENT_DENIED ESCALATED -> /private/var/folders/1q/5bbv7pvn117_jknmqmjzj5dm0000gn/T/aeros_agent_envelope_1n3lyqm2/decisions/escalations/T_AGENT_DENIED.md",
+        "[kernel] run report -> agent_runs/T_AGENT_DENIED_20260705_020403.md (cost $0.0000, 1 call(s))",
+        "[kernel] attempt 1/1: invoking agent (spent $0.0000/0.01, call cap $0.01)...",
+        "[kernel] agent envelope violation -> agent_runs/agent_envelope_audits/T_AGENT_UNDECLARED_20260705_020403.json",
+        "[kernel] task T_AGENT_UNDECLARED ESCALATED -> /private/var/folders/1q/5bbv7pvn117_jknmqmjzj5dm0000gn/T/aeros_agent_envelope_1n3lyqm2/decisions/escalations/T_AGENT_UNDECLARED.md",
+        "[kernel] run report -> agent_runs/T_AGENT_UNDECLARED_20260705_020403.md (cost $0.0000, 1 call(s))",
+        "PASS: AgentEnvelope audit mode is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.162,
+      "exit_code": 0,
+      "name": "checks/check_progress_semantics.py",
+      "output_tail": [
+        "PASS: progress domain/class semantics are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.554,
+      "exit_code": 0,
+      "name": "checks/check_claim_vector.py",
+      "output_tail": [
+        "PASS: ClaimVector advisory compiler is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.548,
+      "exit_code": 0,
+      "name": "checks/check_claim_upgrade.py",
+      "output_tail": [
+        "PASS: claim-upgrade recommendation is human-gated"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.596,
+      "exit_code": 0,
+      "name": "checks/check_paper_readiness.py",
+      "output_tail": [
+        "PASS: paper-readiness report is human-gated and non-authoritative"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.231,
+      "exit_code": 0,
+      "name": "checks/check_manuscript_citation_faithfulness.py",
+      "output_tail": [
+        "PASS: manuscript citation faithfulness traceability valid ({})"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.22,
+      "exit_code": 0,
+      "name": "checks/check_manuscript_citation_interpretation.py",
+      "output_tail": [
+        "PASS: no manuscript citations found; citation interpretation check inactive"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.35,
+      "exit_code": 0,
+      "name": "checks/check_literature_wrapper_sync.py",
+      "output_tail": [
+        "PASS: literature wrapper sync inactive (no source project configured)"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.191,
+      "exit_code": 0,
+      "name": "checks/check_evidence_units.py",
+      "output_tail": [
+        "PASS: EvidenceUnit/ResultAdmission records are valid (1 evidence unit(s), 1 admission record(s))"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.231,
+      "exit_code": 0,
+      "name": "checks/check_parser_benchmark.py",
+      "output_tail": [
+        "PASS: parser benchmark scaffold is valid (3 local fixture(s) executed)"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 1.265,
+      "exit_code": 0,
+      "name": "checks/check_session_scope.py",
+      "output_tail": [
+        "PASS: session scope guard is configured; semantic drift fixtures detected"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 2.89,
+      "exit_code": 0,
+      "name": "checks/check_skill_coverage.py",
+      "output_tail": [
+        "PASS: skill coverage obligations are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.388,
+      "exit_code": 0,
+      "name": "checks/check_execution_mode.py",
+      "output_tail": [
+        "PASS: execution modes are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.265,
+      "exit_code": 0,
+      "name": "checks/check_task_mode.py",
+      "output_tail": [
+        "PASS: task modes are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.471,
+      "exit_code": 0,
+      "name": "checks/check_task_preflight.py",
+      "output_tail": [
+        "PASS: task preflight is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.135,
+      "exit_code": 0,
+      "name": "checks/check_source_capture_permission.py",
+      "output_tail": [
+        "PASS: source capture permission tiers are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.314,
+      "exit_code": 0,
+      "name": "checks/check_broad_capture_firewall.py",
+      "output_tail": [
+        "PASS: broad capture firewall is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.298,
+      "exit_code": 0,
+      "name": "checks/check_execution_profiles.py",
+      "output_tail": [
+        "PASS: execution profiles are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.337,
+      "exit_code": 0,
+      "name": "checks/check_source_id_consistency.py",
+      "output_tail": [
+        "PASS: source-id consistency check passed"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.709,
+      "exit_code": 0,
+      "name": "checks/check_artifact_stage.py",
+      "output_tail": [
+        "PASS: artifact stage selector check passed"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.567,
+      "exit_code": 0,
+      "name": "checks/check_output_intent.py",
+      "output_tail": [
+        "PASS: output intents are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.388,
+      "exit_code": 0,
+      "name": "checks/check_source_capture_permission.py",
+      "output_tail": [
+        "PASS: source capture permission tiers are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.171,
+      "exit_code": 0,
+      "name": "checks/check_route_early_gate.py",
+      "output_tail": [
+        "PASS: route early gate is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.431,
+      "exit_code": 0,
+      "name": "checks/check_improve_harvest.py",
+      "output_tail": [
+        "PASS: improvement harvest is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.146,
+      "exit_code": 0,
+      "name": "checks/check_sync_doctor.py",
+      "output_tail": [
+        "PASS: sync doctor is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.7,
+      "exit_code": 0,
+      "name": "checks/check_update_ledger_hash_chain.py",
+      "output_tail": [
+        "PASS: update ledger hash chain is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.131,
+      "exit_code": 0,
+      "name": "checks/check_harness_observed_receipts.py",
+      "output_tail": [
+        "PASS: harness observed receipts are generated from observed check outputs and hashes"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.969,
+      "exit_code": 0,
+      "name": "checks/check_protected_path_hook.py",
+      "output_tail": [
+        "PASS: protected-path pre-commit hook blocks protected staged files by default"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.164,
+      "exit_code": 0,
+      "name": "checks/check_evidence_sufficiency_audit.py",
+      "output_tail": [
+        "PASS: evidence sufficiency audit policy is valid (template only)"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.459,
+      "exit_code": 0,
+      "name": "checks/check_readiness_vector.py",
+      "output_tail": [
+        "PASS: readiness vector is derivable"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.196,
+      "exit_code": 0,
+      "name": "checks/check_discovery_route_decision.py",
+      "output_tail": [
+        "PASS: discovery route decision scaffold is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 2.617,
+      "exit_code": 0,
+      "name": "checks/check_stale_triage.py",
+      "output_tail": [
+        "PASS: stale triage is valid (0 item(s))"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.498,
+      "exit_code": 0,
+      "name": "checks/check_context_bundle.py",
+      "output_tail": [
+        "PASS: context bundle plumbing is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.612,
+      "exit_code": 0,
+      "name": "checks/check_context_graph.py",
+      "output_tail": [
+        "PASS: context graph plumbing is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.661,
+      "exit_code": 0,
+      "name": "checks/check_cockpit.py",
+      "output_tail": [
+        "PASS: cockpit view is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.176,
+      "exit_code": 0,
+      "name": "checks/check_control_tax_dashboard.py",
+      "output_tail": [
+        "PASS: control-tax dashboard is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.613,
+      "exit_code": 0,
+      "name": "checks/check_write_audit.py",
+      "output_tail": [
+        "PASS: writes audit is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.367,
+      "exit_code": 0,
+      "name": "checks/check_reconcile.py",
+      "output_tail": [
+        "PASS: reconcile command is wired and boundary-labeled"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.146,
+      "exit_code": 0,
+      "name": "checks/check_sqlite_journal.py",
+      "output_tail": [
+        "PASS: SQLite journal derived index is valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.084,
+      "exit_code": 0,
+      "name": "checks/check_approval_freshness.py",
+      "output_tail": [
+        "PASS: no artifact-bound approval records"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.141,
+      "exit_code": 0,
+      "name": "checks/check_harness_profiles.py",
+      "output_tail": [
+        "PASS: check profiles are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.078,
+      "exit_code": 0,
+      "name": "checks/check_operating_dashboard.py",
+      "output_tail": [
+        "PASS: operating dashboard files are valid"
+      ],
+      "status": "pass"
+    },
+    {
+      "draft_warning_seen": false,
+      "elapsed_seconds": 0.261,
+      "exit_code": 0,
+      "name": "checks/check_work_lanes.py",
+      "output_tail": [
+        "PASS: work lanes are valid (analysis=9, claim=2, compliance=1, data=7, literature=9, writing=2)"
+      ],
+      "status": "pass"
+    }
+  ],
+  "command": [
+    "/Library/Frameworks/Python.framework/Versions/3.14/bin/python3",
+    "checks/run_harness_checks.py",
+    "--profile",
+    "smoke",
+    "--timeout",
+    "20"
+  ],
+  "does_not_prove": [
+    "scientific validity",
+    "data truth",
+    "literature full-text sufficiency",
+    "claim support",
+    "gate approval",
+    "paper readiness",
+    "absence of malicious code outside the observed checks"
+  ],
+  "failures": 0,
+  "generated_at": "2026-07-05T02:04:24Z",
+  "generated_by": "checks/run_harness_checks.py",
+  "profile": "smoke",
+  "receipt_id": "HARNESS-smoke-20260705T020424Z",
+  "receipt_type": "harness_observed_check_run",
+  "status": "pass",
+  "storage": "project_outputs",
+  "subjects": [
+    {
+      "exists": true,
+      "path": "project_manifest.yml",
+      "sha256": "6a26d01db7dda59a49048a84dc097f5365c3921ca30da70e141e660f2ce50fc9",
+      "size_bytes": 16639
+    },
+    {
+      "exists": true,
+      "path": "harness/check_profiles.yml",
+      "sha256": "18e682dfb5b329010bb09791abbbbd97fa9ea924570652b63e55c4b599e35f54",
+      "size_bytes": 5836
+    },
+    {
+      "exists": true,
+      "path": "decisions/update_ledger.md",
+      "sha256": "00ce9b7f4b1a8aaf03ba9cb049a35b42799bde385d30ffcf6d43f568568a30c0",
+      "size_bytes": 128430
+    },
+    {
+      "exists": true,
+      "path": "AGENTS.md",
+      "sha256": "a0de5b5ce3538e1ec216afac174baf3f08dded551d41e57c2d0978465dfb0b4e",
+      "size_bytes": 50826
+    }
+  ],
+  "verification_strength": "harness_observed_exit_codes_and_file_hashes",
+  "version": 1
+}

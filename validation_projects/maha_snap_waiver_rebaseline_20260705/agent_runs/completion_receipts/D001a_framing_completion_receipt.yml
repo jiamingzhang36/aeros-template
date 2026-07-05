@@ -1,6 +1,6 @@
 version: 5
 task_id: D001a_framing
-generated_at: '2026-07-05T01:42:36+00:00'
+generated_at: '2026-07-05T01:54:30+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -46,7 +46,7 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_framing_deck.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.07
+  elapsed_seconds: 0.143
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -61,7 +61,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: f41a44adda70109598f81a1c946bdb0fda419855ef0e197cc51962ee2da1e392
+input_fingerprint: 79a7a73f6b2278ee6fcaf9b083329aaada8bea356bfa7a5f989577f3fa6d886d
 output_fingerprint: 8e12a8963b39dd6e1b9774ca6e32258398532834181b73e232439a6e3efbdd25
 dependency_fingerprint: 826bbe9cfb7ee976ca2821144e04eaa4d652266b0839c4380705ba7d6841d595
 completion_verdict: pass

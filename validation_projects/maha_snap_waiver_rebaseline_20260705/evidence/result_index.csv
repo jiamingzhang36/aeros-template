@@ -1,0 +1,5 @@
+result_id,path,description,claim_ceiling,status
+R001,outputs/context/r001_policy_rule_measurement.md,Policy-rule measurement object and claim boundary,measurement,supported
+R002,outputs/context/r002_approval_risk_boundary.md,Public approval-risk diagnostic boundary,descriptive,supported
+R003,outputs/context/r003_nielsen_ex_ante_boundary.md,NielsenIQ ex-ante exposure boundary,measurement,supported
+R004,outputs/context/r004_feasibility_and_nonclaims.md,Feasibility and explicit non-claim boundary,measurement,supported

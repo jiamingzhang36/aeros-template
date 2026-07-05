@@ -1,6 +1,6 @@
 version: 5
 task_id: D003_design_options
-generated_at: '2026-07-05T01:42:44+00:00'
+generated_at: '2026-07-05T01:54:41+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -46,7 +46,7 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_design_options.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.064
+  elapsed_seconds: 0.155
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -61,7 +61,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: 2dbfe936d5b6b6c336ff7a2b6e9615e22541e06e6c583311a7e56ba66b125d2b
+input_fingerprint: 113de224c8c10f444dfdec48f783fc1aa23e4502cddc09e6f65ceb7e686b6a22
 output_fingerprint: b368d0a9b319fd37368a763f6946d5bdf3ecfb0e122ce6d437fa95171afdfd5d
 dependency_fingerprint: 5e7c415c1f095153aa9bfc40b6137e212039de5000aba3e291293984ea1ede14
 completion_verdict: pass

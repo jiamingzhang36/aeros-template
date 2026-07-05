@@ -1,0 +1,20 @@
+version: 1
+task_id: T003b_pipeline_instantiation
+generated_at: '2026-07-05T01:57:49+00:00'
+contract_path: tasks/execution/T003b_pipeline_instantiation.yml
+run_report_path: ''
+allowed_skills:
+- code-review-econ
+- data-merge-audit
+- replication-check
+recommended_skills:
+- code-review-econ
+- data-merge-audit
+- replication-check
+required_skill_classes: []
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail

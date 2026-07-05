@@ -1,6 +1,6 @@
 version: 5
 task_id: D001b_framework_search
-generated_at: '2026-07-05T01:42:05+00:00'
+generated_at: '2026-07-05T01:54:35+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -71,21 +71,21 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_literature_registry.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.042
+  elapsed_seconds: 0.152
 - name: check_citation_audit.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_citation_audit.py
   exit_code: 0
-  elapsed_seconds: 0.051
+  elapsed_seconds: 0.21
 - name: check_literature_functions.py
   passed: true
   command:
   - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_literature_functions.py
   exit_code: 0
-  elapsed_seconds: 0.075
+  elapsed_seconds: 0.385
 - name: check_anchors_in_registry
   passed: true
   command:
@@ -93,7 +93,7 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_anchors_in_registry.py
   - --json
   exit_code: 0
-  elapsed_seconds: 0.052
+  elapsed_seconds: 0.201
 evidence_receipt_required: false
 evidence_receipt_path: ''
 evidence_receipt_exists: false
@@ -108,7 +108,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: 8d940764427a03acaa20a83f4ee78e08d97aa1bf88b1b25c119be5eeda69690a
+input_fingerprint: 501c58a9da95420d0a7c6b9951b51513792b94ee4a53f7e5b266b83ce29cb5be
 output_fingerprint: 6a472ca58935f01bbff6c48d6f04cb8ccf82a7cd99d93171aa017aa986a5d88b
 dependency_fingerprint: c41ff4653cd7d494615e1bbf0b0e03514c6fee1940c50be4f385c25dc0f10f8a
 completion_verdict: pass

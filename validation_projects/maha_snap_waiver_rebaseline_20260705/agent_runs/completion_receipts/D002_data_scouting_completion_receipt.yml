@@ -1,6 +1,6 @@
 version: 5
 task_id: D002_data_scouting
-generated_at: '2026-07-05T01:32:44+00:00'
+generated_at: '2026-07-05T01:54:20+00:00'
 completion_mode: manual_recover
 claimed_status: passed
 declared_outcome: complete
@@ -46,7 +46,7 @@ check_attestations:
   - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_data_inventory.py
   - --json
   exit_code: 0
-  elapsed_seconds: 2.233
+  elapsed_seconds: 0.119
 evidence_receipt_required: true
 evidence_receipt_path: evidence/receipts/D002_data_scouting_human_review_receipt.md
 evidence_receipt_exists: true
@@ -61,7 +61,7 @@ does_not_prove:
 - identification quality
 - claim support
 - human gate approval
-input_fingerprint: 28d40e9c8ed03a013d5ad3647381b14eedeabd80e2eda0f13952cba1f2eea550
+input_fingerprint: b2fd54e97dab8010c9ac6d8d9f0c4836076487b79904087d2831b25cf8bb3521
 output_fingerprint: 9e43c79e64e870eb8a39eb54c11a46a4eca35bc7032bca79ce11edfd21edaea0
 dependency_fingerprint: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
 completion_verdict: pass

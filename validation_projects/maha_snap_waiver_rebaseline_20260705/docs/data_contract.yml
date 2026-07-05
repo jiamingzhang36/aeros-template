@@ -1,35 +1,73 @@
 data_contract:
-  status: draft
+  status: filled
+  raw_data:
+    directory: "data/raw"
+    policy: "Mirror wrapper does not ingest or modify MAHA raw data; source raw files remain in /Users/jiamingzhang/Desktop/MAHA and restricted NielsenIQ microdata remain controlled outside wrapper exports."
+  derived_data:
+    intermediate_directory: "data/intermediate"
+    clean_directory: "data/clean"
+    policy: "Wrapper records discovery metadata and aggregate/provenance hooks only. Paper-facing derived outputs remain in the MAHA source repository until explicitly registered."
+  units:
+    - state waiver / approval document
+    - state-event implementation document
+    - state / state-quarter policy feature
+    - state-year category spending aggregate
+    - household-month aggregate distribution summary
+  required_variables:
+    - name: policy_rule_vector
+      source_data_id: D003
+      status: constructible
+    - name: public_approval_status
+      source_data_id: D001
+      status: constructible
+    - name: policy_specific_exposure
+      source_data_id: D004
+      status: constructible_from_aggregate_outputs
+    - name: post_policy_purchase_response
+      source_data_id: D004
+      status: not_constructible_current_data
+  provenance:
+    requirement: "Every final claim must point to AEROS evidence/result IDs before G7/G10. Current discovery artifacts do not yet register final claims."
+  privacy:
+    restricted_data_boundary: "No household identifiers, purchase rows, household-month rows, or raw NielsenIQ microdata are exported through the wrapper."
+
 estimand_data_contract:
-  version: "0.1"
-  status: draft
-  research_question: ""
-  unit_of_observation: ""
-  population: ""
-  treatment_or_exposure: []
-  outcome: []
-  comparison: ""
-  time_window: ""
-  required_variation: ""
-  target_population: ""
-  estimand: ""
-  required_fields: []
-  required_variables: []
-  linkage_keys: []
-  join_keys: []
-  minimum_coverage: ""
-  maximum_missingness: ""
-  quality_thresholds: {}
-  probe_sampling_strategy: ""
-  probe_success_condition: ""
-  probe_stop_condition: ""
-  source_access_class: ""
-  license_class: ""
-  credential_requirement: ""
-  estimated_cost: ""
-  fallback_source: ""
-  minimum_probe_requirements: []
+  status: active
+  claim_id: "PAPER1_MEASUREMENT"
+  research_question: "Across U.S. states in the public SNAP food-restriction waiver approval-risk window, how heterogeneous are the approved/publicly-visible policy-rule designs, and what is the ex-ante exposure of pre-policy low-income-proxy purchase baskets to each state's policy-rule basket? (Measurement/descriptive; design option O1. Not causal, not welfare, not actual SNAP/EBT behavior.)"
+  unit_of_observation: "U.S. state, with state-by-category policy-rule vectors Policy_s,c; state-quarter for covariates; state-year category aggregates for exposure."
+  population: "U.S. states (plus DC) in the public SNAP food-restriction waiver approval-risk window, 2025-2026, on the frozen roster (2026-03-12 freeze; 2026-03-19 source check)."
+  treatment_or_exposure: "State-by-category restriction indicator vector Policy_s,c (which standardized food/beverage categories each approved or publicly-visible waiver rule restricts); RuleExposure on a common pooled basket and ActualExposure_s = sum_c Policy_s,c * Share_s,c."
+  outcome: "(1) public_approval_status: indicator that a state had a public USDA approval by the frozen roster date (non-approved public-risk states held right-censored). (2) policy_specific_exposure: share of pre-policy NielsenIQ low-income-proxy food/beverage spending inside each state's policy-rule basket."
+  comparison: "Across-state comparison of policy-rule design and ex-ante exposure within the public approval-risk set; rule-scope comparison via the common pooled basket. No causal/counterfactual comparison (per O1/O2 claim boundaries)."
+  time_window: "Policy and approval coding 2025-2026 (frozen roster 2026-03-12); pre-policy NielsenIQ exposure 2022-2024."
+  required_variation: "Cross-state variation in policy-rule design (which categories restricted) and in ex-ante basket exposure; for descriptive approval-risk concentration (O2), presence of both approved and non-approved public-risk states."
+  required_variables:
+    - "policy_rule_vector (D003)"
+    - "public_approval_status (D001)"
+    - "policy_specific_exposure (D004)"
+    - "state-quarter covariates / governor party benchmarks (D005)"
+  join_keys:
+    - "state (USPS/FIPS)"
+    - "state x standardized food/beverage category"
+    - "state-quarter (for covariates)"
+  minimum_coverage: "All public approval-risk states for document-coded policy/approval variables; ex-ante exposure limited to approved states present in NielsenIQ aggregate outputs (US+DC, currently excluding AK and HI, reported as not-covered rather than imputed)."
+  maximum_missingness: "Document-coded policy/approval variables: no imputation; states lacking document-grade evidence are held missing/right-censored. Exposure: states absent from NielsenIQ outputs are reported not-covered, not imputed. (Measurement design, not threshold-gated estimation.)"
+  quality_thresholds: "Viability gates from D003 design options: inventory_rows >= 5 (measurement viable) and public_sources >= 3 (descriptive concentration viable); document-grade evidence required before any claim registration (provenance requirement)."
+  probe_sampling_strategy: "Wrapper diagnostics over the MAHA source inventory: confirm D001-D004 present with public or granted aggregate access; verify the frozen roster against the canonical source manifest."
+  probe_success_condition: "Inventory present with >= 5 rows and >= 3 public sources; D001-D004 located with documented access; frozen-roster verification recorded."
+  probe_stop_condition: "Hold measurement if inventory < 5 rows or required D001-D004 sources are missing/unverifiable. Controlled household-cluster CI is deferred until the controlled DuckDB disk reconnects (a precision upgrade, not a measurement prerequisite)."
+  source_access_class: "Mixed: D001/D002 public; D003 granted project-derived; D004 NielsenIQ restricted (controlled workflow, aggregate-only exports)."
+  license_class: "Public documents (D001/D002); project-internal derived (D003); restricted NielsenIQ license with no household identifiers or purchase rows exported (D004)."
+  credential_requirement: "None for D001-D003 (public/granted). D004 requires controlled NielsenIQ access via the MAHA controlled workflow; no raw microdata passes through the wrapper."
+  estimated_cost: "$0 marginal: uses existing public documents and previously-produced NielsenIQ aggregate outputs; no new data purchase. Controlled household-cluster CI needs only compute on already-licensed data."
+  fallback_source: "If NielsenIQ exposure outputs are unavailable, fall back to the public-document administrative chronology plus policy taxonomy (O2 descriptive floor), which needs no restricted exposure data."
+  minimum_probe_requirements:
+    - "inventory_rows >= 5"
+    - "public_sources >= 3"
+    - "D001-D004 source IDs present"
   does_not_prove:
-    - data availability
+    - data availability beyond the listed public/restricted sources
     - identification quality
-    - claim support
+    - causal approval effects
+    - post-policy purchase, health, or welfare effects

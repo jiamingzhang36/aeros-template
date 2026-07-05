@@ -1,0 +1,106 @@
+version: 5
+task_id: T001_discovery_audit
+generated_at: '2026-07-05T02:02:08+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: routing
+progress_label: ROUTE_READY
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T001_discovery_audit.yml
+automation_class: receipt_audited
+gate_status: needs_receipt_audit
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T001_discovery_audit_skill_invocations.yml
+allowed_outputs_expected:
+- audits/discovery_audit_report.md
+- agent_runs/
+allowed_outputs_found:
+- audits/discovery_audit_report.md
+- agent_runs/
+allowed_outputs_missing: []
+actual_outputs:
+- path: audits/discovery_audit_report.md
+  exists: true
+  type: file
+  sha256: ed4d8839b5c416d18e93d2afa5c0054abd7fca8f6a41e83a795fd4e8671ca639
+  bytes: 1099
+- path: agent_runs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 7
+staging_artifact_paths:
+- audits/discovery_audit_report.md
+substantive_evidence_paths: []
+checks_required:
+- check_discovery_completeness.py
+- check_design_selection.py
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_run:
+- check_discovery_completeness.py
+- check_design_selection
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_passed:
+- check_discovery_completeness.py
+- check_design_selection
+- check_claim_registry.py
+- check_agent_run_report.py
+checks_failed: []
+check_attestations:
+- name: check_discovery_completeness.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_discovery_completeness.py
+  exit_code: 0
+  elapsed_seconds: 0.166
+- name: check_design_selection
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_design_selection.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.398
+- name: check_claim_registry.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_registry.py
+  exit_code: 0
+  elapsed_seconds: 0.384
+- name: check_agent_run_report.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_agent_run_report.py
+  exit_code: 0
+  elapsed_seconds: 0.513
+evidence_receipt_required: true
+evidence_receipt_path: evidence/receipts/T001_discovery_audit_human_review_receipt.md
+evidence_receipt_exists: true
+evidence_delta_ref: ''
+substantive_progress: false
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 96e04f1ba517e8f4f3f00f920db07d49e8b13b3bdd42e60e75c8307865db03b8
+output_fingerprint: d98deeef87e6980f1674e44091505f96c17b74daa836998e5bf02c571c0ecf1e
+dependency_fingerprint: 44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+completion_verdict: pass
+failures: []

@@ -1,0 +1,137 @@
+version: 5
+task_id: T004_main_execution
+generated_at: '2026-07-05T02:02:38+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/execution/T004_main_execution.yml
+automation_class: auto_rerunnable
+gate_status: pending
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/T004_main_execution_skill_invocations.yml
+allowed_outputs_expected:
+- outputs/
+- evidence/result_index.csv
+- evidence/claim_registry.md
+allowed_outputs_found:
+- outputs/
+- evidence/result_index.csv
+- evidence/claim_registry.md
+allowed_outputs_missing: []
+actual_outputs:
+- path: outputs/
+  exists: true
+  type: directory
+  sha256: ''
+  bytes: 0
+  entries: 9
+- path: evidence/result_index.csv
+  exists: true
+  type: file
+  sha256: ea5f674c81f6a86c2d01c24e70eb60c8c551720bb56b7b88080b506171ba9d41
+  bytes: 521
+- path: evidence/claim_registry.md
+  exists: true
+  type: file
+  sha256: 917ca0a5654345cdbd68e9f0a7d6b976a17a22f792f60585a71130260d1f4700
+  bytes: 1152
+staging_artifact_paths: []
+substantive_evidence_paths:
+- outputs/
+- evidence/result_index.csv
+- evidence/claim_registry.md
+checks_required:
+- check_number_registry.py
+- check_number_scan.py
+- check_provenance.py
+- check_claim_registry.py
+- check_claim_ceiling.py
+- check_claim_method_consistency.py
+checks_run:
+- check_number_registry
+- check_number_scan
+- check_provenance.py
+- check_claim_registry.py
+- check_claim_ceiling
+- check_claim_method_consistency.py
+checks_passed:
+- check_number_registry
+- check_number_scan
+- check_provenance.py
+- check_claim_registry.py
+- check_claim_ceiling
+- check_claim_method_consistency.py
+checks_failed: []
+check_attestations:
+- name: check_number_registry
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_registry.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.211
+- name: check_number_scan
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_number_scan.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.371
+- name: check_provenance.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_provenance.py
+  exit_code: 0
+  elapsed_seconds: 0.797
+- name: check_claim_registry.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_registry.py
+  exit_code: 0
+  elapsed_seconds: 0.524
+- name: check_claim_ceiling
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_ceiling.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.222
+- name: check_claim_method_consistency.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_claim_method_consistency.py
+  exit_code: 0
+  elapsed_seconds: 0.536
+evidence_receipt_required: false
+evidence_receipt_path: ''
+evidence_receipt_exists: false
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 444789269d06be4178fab1910a761a39f85df58b5d312ee9729fc6b97ad7e3f7
+output_fingerprint: fa100d7c0607a3f6d07c7e3311162ecc6e3de80e74afd8e767b5ba9f047c93d1
+dependency_fingerprint: d5af6c53eccaf8b44f35b89bd3fb73afeaab610feae61e8cc71cb31859f41df4
+completion_verdict: pass
+failures: []

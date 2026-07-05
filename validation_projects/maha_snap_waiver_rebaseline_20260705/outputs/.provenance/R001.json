@@ -1,0 +1,7 @@
+{
+  "result_id": "R001",
+  "output_path": "outputs/context/r001_policy_rule_measurement.md",
+  "created_at": "2026-07-05T02:12:00Z",
+  "script_or_source": "manual AEROS execution-lock registry from docs/method_card.md, discovery/variable_construction.md, docs/data_contract.yml, and audits/design_audit_report.md",
+  "sha256": "374eb2d52fe3e157af3a45db9a2373d2af9e034b1b231f8aa596985036e9a41b"
+}
