@@ -2102,7 +2102,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Run full harness before commit; if committed, backfill this pending entry and append a follow-up hash-chain record if the commit hash changes the ledger subject.
 ## 2026-07-05 — Add AEROS Drive MVP usefulness entrypoint
 
-- **Commit(s)**: pending
+- **Commit(s)**: `6aaa2c8`
 - **Change type**: framework / product entrypoint / usefulness layer
 - **Action**: Added `aeros drive` as a thin daily-use aggregator over existing deterministic AEROS signals: next action, task preflight, broad-capture summary, and submission citation/literature driver. The MVP chooses one objective, reports why it outranks alternatives, states expected artifacts and protected surfaces, and optionally executes only allowlisted read-only or dry-run commands. Added `check_drive.py`, smoke-profile coverage, and sync-doctor capability mapping.
 - **Why**: Recent real use showed AEROS was strong at guard/prove but weak at propulsion. `drive` is intended to reduce the need for the user to ask “next step?” by turning scattered advisory commands into one project-manager packet while preserving authority boundaries.
