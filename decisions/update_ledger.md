@@ -2122,7 +2122,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-05 — Add campaign contract circuit breaker
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `43e05f2`
 - **Change type**: framework / controller / campaign breaker
 - **Action**: Added `aeros campaign assess`, `aeros/runtime/campaign.py`, campaign contract/progress templates, and `check_campaign_contract.py`. The new advisory circuit breaker reads a campaign contract plus marginal-yield progress ledger and escalates when repeated same-lane work shows low marginal yield, task-budget exhaustion, binding-constraint drift, unused batch sources, or collecting without rerunning the decision metric.
 - **Why**: Real autonomous loops repeatedly got stuck in local climbing: many tasks produced little yield, chased a non-binding constraint, or kept collecting without testing the decision metric. AEROS needed a deterministic way to ask whether continuing the campaign is still worth it, not only whether the latest artifact is well-formed.
