@@ -1,0 +1,22 @@
+version: 1
+task_id: T004b_robustness_plan
+generated_at: '2026-07-05T02:11:02+00:00'
+contract_path: tasks/execution/T004b_robustness_plan.yml
+run_report_path: ''
+allowed_skills:
+- causal-id-review
+- did-checklist
+- placebo-test
+- robustness-suite
+recommended_skills:
+- causal-id-review
+- did-checklist
+- placebo-test
+- robustness-suite
+required_skill_classes: []
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail
