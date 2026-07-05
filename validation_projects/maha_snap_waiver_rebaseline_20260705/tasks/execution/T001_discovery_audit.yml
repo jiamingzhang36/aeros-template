@@ -1,0 +1,50 @@
+task_id: T001_discovery_audit
+stage: execution
+gate: G3
+automation_class: receipt_audited
+evidence_receipt_required: true
+receipt_path: evidence/receipts/T001_discovery_audit_human_review_receipt.md
+gate_status: needs_receipt_audit
+allowed_skills:
+- academic-research-suite
+- pre-submission-audit
+recommended_skills:
+- academic-research-suite
+- pre-submission-audit
+goal: 'Audit the discovery layer before execution. Check whether the idea, literature
+  scope, data inventory, feasibility memo, selected design, method card, and claim
+  registry are internally consistent. Write a concise discovery audit report with
+  blockers and human decision items.
+
+  '
+inputs:
+- discovery/idea_memo.md
+- discovery/literature/paper_registry.csv
+- discovery/data_inventory.csv
+- discovery/feasibility_memo.md
+- discovery/design_selection.md
+- docs/method_card.md
+- evidence/claim_registry.md
+- project_manifest.yml
+allowed_outputs:
+- audits/discovery_audit_report.md
+- agent_runs/
+forbidden_actions:
+- Do not write anywhere under data/raw/.
+- Do not change protected definitions.
+- Do not strengthen claims or change project status.
+checks:
+- check_discovery_completeness.py
+- check_design_selection.py
+- check_claim_registry.py
+- check_agent_run_report.py
+depends_on: []
+retry_policy:
+  max_retries: 1
+escalate_if:
+- discovery files conflict with the selected design or claim registry
+- checks still fail after max_retries
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 480

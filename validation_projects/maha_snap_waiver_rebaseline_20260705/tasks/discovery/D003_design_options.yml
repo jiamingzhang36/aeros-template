@@ -1,0 +1,79 @@
+task_id: D003_design_options
+stage: discovery
+depends_on:
+- D001b_framework_search
+- D002_data_scouting
+- D005_data_probe
+gate: G3
+automation_class: auto_rerunnable
+evidence_receipt_required: false
+receipt_path: ''
+gate_status: pending
+allowed_skills:
+- causal-id-review
+- did-checklist
+- econ-principles-check
+- robustness-suite
+- placebo-test
+recommended_skills:
+- causal-id-review
+- did-checklist
+- econ-principles-check
+goal: "Produce a DECK of ranked candidate research designs in discovery/design_options.md,\
+  \ NOT a single committed design. Empirical design is data-contingent: hold several\
+  \ identification strategies as alternatives, each guarded by a checkable DATA-VIABILITY\
+  \ condition, and let the data (obtained later) decide which is used.\nRead the framing\
+  \ deck (frameworks + roles, esp. identification-threat cards), the data inventory,\
+  \ the gap rows in paper_registry.csv, and the existing design_sketch.md (treat it\
+  \ as the deep-dive on the strongest causal option).\nWrite design_options.md with\
+  \ this front matter:\n\n  ---\n  status: filled\n  options:\n    - id: O1\n    \
+  \  name: \"Candidate design name\"\n      project_type: causal      # causal|descriptive|measurement|prediction|policy-translation|mechanism\n\
+  \      identification: \"the estimator/variation, citing framing method cards (e.g.\
+  \ F04)\"\n      viability_condition: \"a CHECKABLE data diagnostic, e.g. enough\
+  \ treated units, comparable controls, or observed outcomes from a named data source\"\
+  \n      viability_test:            # the SAME condition in machine-adjudicable form\n\
+  \        metric: diagnostic_metric_name      # a named diagnostic measured later\n\
+  \        op: \">=\"                 # one of: >= <= > < == always\n        threshold:\
+  \ 5\n      max_claim: causal          # the STRONGEST claim this design could earn\
+  \ if viable:\n                                 #   descriptive | measurement | associational\
+  \ | causal\n      threats_addressed: [F06]   # framing identification-threat card\
+  \ ids this design handles\n      priority: 1                # unique integer; lower\
+  \ = tried first\n      is_fallback_floor: false\n      claim_boundary: \"what this\
+  \ option can / cannot claim\"\n    - id: O2\n      name: \"Alternative identification\
+  \ or measurement strategy\"\n      ...\n    - id: O_floor\n      name: \"Descriptive\
+  \ cross-jurisdiction event-study\"\n      is_fallback_floor: true\n      viability_condition:\
+  \ \"always viable (descriptive)\"\n      priority: 9\n  ---\n\nRequirements: - Provide\
+  \ at least THREE candidate designs plus exactly one fallback-floor design\n  (always\
+  \ viable, e.g. descriptive) so the project never has zero feasible designs.\n- Every\
+  \ causal/mechanism option's threats_addressed must cover ALL framing\n  identification-threat\
+  \ cards.\n- Each option's viability_condition must be a concrete data diagnostic\
+  \ that can be\n  evaluated once the data is obtained (name the data_id it is diagnosed\
+  \ from).\n- Add a \"## Selection Rule\" section: after data diagnostics, select\
+  \ the lowest-priority\n  option whose viability_condition holds; if only the floor\
+  \ holds, use it and downgrade\n  the claims accordingly.\n- Add one \"## Option\
+  \ <id>\" prose section per option.\n"
+inputs:
+- discovery/literature/framing_deck.yml
+- discovery/data_inventory.csv
+- discovery/literature/paper_registry.csv
+- discovery/design_sketch.md
+- project_manifest.yml
+allowed_outputs:
+- discovery/design_options.md
+forbidden_actions:
+- Do not write anywhere under data/raw/ (enforced by a hook).
+- Do not commit to a single design; produce ranked alternatives with data gates.
+- Do not invent new literature or data; ground options in the framing deck and data_inventory.
+- Do not call an option 'causal' unless it names identifying variation and addresses
+  the framing threat cards.
+- Do not overstate claim boundaries; for each option state what it CANNOT claim.
+checks:
+- check_design_options.py
+retry_policy:
+  max_retries: 2
+escalate_if:
+- no fallback-floor design, or a causal option ignores a framing threat card
+- checks still fail after max_retries
+budget:
+  max_agent_calls: 3
+  max_dollars: 1.5

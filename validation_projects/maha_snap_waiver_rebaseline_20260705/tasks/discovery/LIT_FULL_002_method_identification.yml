@@ -1,0 +1,49 @@
+task_id: LIT-FULL-002_method_identification
+stage: discovery
+depends_on:
+- D001b_framework_search
+gate: G0
+automation_class: approval_required
+evidence_receipt_required: true
+receipt_path: agent_runs/action_receipts/LIT-FULL-002_method_identification.yml
+gate_status: blocked_requires_approval
+allowed_skills:
+- academic-research-suite
+- bib-manager
+recommended_skills:
+- academic-research-suite
+- bib-manager
+goal: >
+  Execute substantive full-text extraction for the method-identification literature queue.
+  This is not registry cleanup. Select priority papers whose primary_function or
+  secondary_functions include method-identification, open the source/full text, read the
+  relevant sections or full paper, and update extraction cards so they record
+  full_text_obtained, extraction_depth=full_text_extraction, page/section-bound
+  direct evidence notes, and explicit can-support / cannot-support boundaries.
+inputs:
+- discovery/literature/paper_registry.csv
+- discovery/literature/extraction_cards/
+- discovery/literature/literature_rules.md
+- harness/literature_fulltext_policy.yml
+allowed_outputs:
+- discovery/literature/paper_registry.csv
+- discovery/literature/extraction_cards/
+- discovery/literature/synthesis/method_identification_synthesis.md
+- agent_runs/
+forbidden_actions:
+- Do not treat source-bound stubs as full-text extraction.
+- Do not write paper positioning or claim registry entries.
+- Do not claim the literature review is complete; this task covers only method-identification.
+- Do not fabricate page numbers, quotations, or full-text access.
+checks:
+- check_literature_fulltext_execution.py
+- check_literature_tools.py
+retry_policy:
+  max_retries: 1
+escalate_if:
+- full text cannot be obtained for all priority papers in the function queue
+- check_literature_fulltext_execution.py fails after one repair pass
+budget:
+  max_agent_calls: 4
+  max_dollars: 8.0
+  timeout_seconds: 1800

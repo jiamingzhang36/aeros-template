@@ -1,0 +1,212 @@
+# Skill Invocation Rules
+
+External economics skills can be useful, but AEROS only uses them through a task contract.
+
+## Invocation Order
+
+Before invoking or following an external skill, the agent must read:
+
+1. `AGENTS.md`
+2. the active stage `AGENTS.md`
+3. the active task file in `tasks/discovery/` or `tasks/execution/`
+4. `harness/skill_registry.md`
+5. `harness/practical_skill_menu.md`
+6. `harness/skill_map_core.yml`
+7. `harness/skill_map_reference.md`
+
+The task file and AEROS rules define the allowed files, outputs, and checks.
+
+## Skill Selection Rule
+
+Choose the smallest useful skill for the task.
+
+Default to `tier: core` skills.
+
+Prefer:
+
+- discovery skills before execution skills when the research question is still unsettled,
+- read-only review skills before editing skills when the risk is high,
+- source verification skills before writing skills when citations or literature claims are involved,
+- diagnostics and audit skills before robustness or model-changing skills,
+- writing skills only after claim boundaries are clear.
+
+Do not invoke a full paper-writing or full research pipeline skill when the task only asks for one stage.
+
+Use `tier: optional` skills only when the task clearly requires that specialized operation.
+
+Use `tier: reference` skills only as inspiration or review framing unless the human explicitly asks to run that workflow.
+
+## Discovery Skills
+
+Discovery skills may:
+
+- brainstorm research ideas,
+- suggest literature strands,
+- suggest possible data sources,
+- propose mechanisms,
+- propose possible designs.
+
+Discovery skills must not:
+
+- claim a gap without extracted closest literature,
+- claim feasibility without a real data source in `discovery/data_inventory.csv`,
+- propose a causal design without documented identifying variation and a probed data engineering path,
+- move speculative ideas into formal memos without verification.
+
+Exploratory outputs must be recorded in `discovery/idea_bank.csv` unless they are immediately rejected.
+
+## Literature Skills
+
+Literature skills may help search, organize, and summarize papers only under the source-grounded literature workflow.
+
+Required order:
+
+```text
+search -> registry -> citation audit -> full-text status -> extraction card -> synthesis
+```
+
+Rules:
+
+- Search outputs alone cannot support literature synthesis.
+- Abstract-only papers can only support abstract-based notes.
+- Full paper summaries require opened full text.
+- DOI is optional, but if it exists it must be recorded.
+- Papers promoted beyond search/screening require a stable source locator: DOI, official URL, working-paper page, database record, or private local PDF path.
+- Gap claims require extracted `gap-verification` papers.
+- Synthesis must cite `paper_id` values that have extraction cards.
+
+## Data Skills
+
+Data skills may fetch, clean, describe, or transform data only when the task permits those actions.
+
+Rules:
+
+- Never modify `data/raw/`.
+- Record real source, owner, access path, unit, coverage, variables, restrictions, and limitations.
+- Do not treat "possible data" as "available data".
+- Early data scouting should produce provisional evidence grades and next probes, not final feasibility conclusions.
+- Before a feasibility recommendation, consider relevant data skills and record use, non-use rationale, or blocked probes in `discovery/data_inventory.csv` and the feasibility memo.
+- Do not create analysis-ready claims from unvalidated data.
+
+## Data-First Skill Chain
+
+For data-lane tasks, use the smallest applicable prefix of this chain:
+
+```text
+data-inventory -> describe-data -> data-codebook -> data-quality-checker -> data-merge-audit -> diagnostics/summary-stats
+```
+
+Interpretation:
+
+- `data-inventory` establishes whether a source exists, who owns it, where it can be accessed, and what blocker remains.
+- `describe-data` applies only after a real sample, snapshot, extract, or documented schema exists.
+- `data-codebook` records variables, units, construction limits, and source-grounded definitions.
+- `data-quality-checker` records missingness, coverage, duplicates, impossible values, and other measurable diagnostics.
+- `data-merge-audit` applies only when linkage keys or joins are part of the design.
+- Diagnostics and summary statistics are downstream of a real artifact, not substitutes for source access.
+
+If a required data skill cannot run because there is no source, no access, no sample, no schema, missing credentials, or a human approval requirement, the task must record a waiver/blocker and the next probe. Do not turn a blocked skill into a completed data claim.
+
+## Skill Output Boundary
+
+Skill use is not task completion.
+
+A skill invocation receipt proves only that:
+
+- the skill was known to AEROS,
+- the task contract allowed it,
+- any missing required class was waived or blocked explicitly.
+
+It does not prove:
+
+- substantive data progress,
+- literature synthesis quality,
+- empirical validity,
+- identification quality,
+- claim support,
+- human gate approval.
+
+Substantive completion still requires task outputs, completion attestation, evidence deltas where applicable, and passing checks.
+
+## Econometrics and Analysis Skills
+
+Analysis skills may run R, Python, Stata, or other empirical workflows only in execution-stage tasks.
+
+Rules:
+
+- Do not change protected definitions without human approval.
+- Do not choose preferred specifications based on statistical significance.
+- Do not overwrite main results with robustness results.
+- Save logs and outputs in the paths required by the task.
+- Run relevant checks after execution.
+
+## Writing Skills
+
+Writing skills may draft, rewrite, or audit economics prose.
+
+Rules:
+
+- Drafted text must preserve the claim type in `evidence/claim_registry.md`.
+- Policy, causal, external-validity, and forecast language must follow `docs/language_constraints.md`.
+- Unsupported claims must be marked as unsupported or converted to placeholders.
+- Writing polish cannot hide uncertainty, sample limits, or identification limits.
+
+## Review and Replication Skills
+
+Review, code-audit, reproducibility, and pre-submission skills are useful late-stage checks.
+
+Rules:
+
+- Treat review outputs as findings, not automatic decisions.
+- Do not let a review skill directly rewrite protected definitions, preferred specifications, or claim language.
+- Convert review findings into `decisions/issue_log.csv` or an audit report.
+- Human approval is required before accepting or rejecting major reviewer-style recommendations.
+
+## Skill Conflict Rule
+
+If an external skill suggests an action that conflicts with AEROS, the agent must:
+
+1. follow AEROS,
+2. record the conflict in the run report,
+3. ask for human judgment if the conflict affects research design, data access, or claim strength.
+
+## Run Report Requirement
+
+When a task uses an external skill, the run report must list:
+
+- skill name,
+- source or local path,
+- task phase,
+- files read,
+- files modified,
+- outputs created,
+- AEROS constraints applied,
+- checks run,
+- unresolved human decisions.
+
+## Skill Invocation Receipt
+
+Every runtime task completion writes a skill invocation receipt in
+`agent_runs/skill_invocations/`.
+
+If no external skill was used, the receipt records an empty skill list. If a
+skill was used, the receipt must show that the skill is known to
+`harness/skill_map_core.yml` and allowed by the active task contract.
+
+Task contracts may declare `skill_obligations`, `required_skill_classes`, and
+`recommended_skills` for controller planning. Every recommended skill must exist
+in `harness/skill_map_core.yml` and must also appear in the task's
+`allowed_skills`.
+
+Recommendations and obligations are advisory for scientific authority: they do
+not approve a gate, certify a claim, or weaken checks. They are not optional for
+auditability: a skill-eligible task must either invoke/use an allowed skill,
+mark the class as required for the run, or record an explicit waiver/blocker
+with `skill_class`, `reason`, `scope`, and `progress_label`.
+
+Lightweight mechanical work may waive skill use when the run is limited to
+typos, one-line parser fixes, ledger hash backfills, or mechanical
+revalidation. The waiver must say that it does not prove substantive research
+progress.
+
+Do not treat a skill output as admissible if the skill invocation receipt fails.

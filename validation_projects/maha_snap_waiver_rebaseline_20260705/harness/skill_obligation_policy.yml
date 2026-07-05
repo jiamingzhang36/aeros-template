@@ -1,0 +1,47 @@
+version: "0.1"
+policy: AEROS-SKILL-OBLIGATION-001
+principle: >
+  Skill-eligible tasks must consider relevant professional skills and either
+  declare usable skills, mark the class required, or record an explicit waiver.
+  Skill obligations do not invoke skills, approve gates, certify claims, or
+  weaken AEROS checks.
+classes:
+  data_source:
+    skills: [data-inventory, data-quality-checker, data-merge-audit]
+    triggers: [data, source, probe, capture, inventory, denominator, gdp, schema]
+  literature:
+    skills: [academic-research-suite, lit-review-assistant]
+    triggers: [literature, citation, paper_registry, full-text, fulltext, synthesis]
+  writing:
+    skills: [econ-write, pre-submission-audit]
+    triggers: [paper, draft, writing, submission, referee, response]
+  causal_identification:
+    skills: [causal-id-review, did-checklist]
+    triggers: [identification, causal, did, event study, method_card, design]
+  replication:
+    skills: [code-review-econ, replication-check]
+    triggers: [replication, reproduc, provenance, pipeline, result_validation, code_review]
+allowed_waiver_classes:
+  - ledger_hash_only
+  - typo_only
+  - mechanical_revalidation
+  - single_line_parser_patch
+required_waiver_fields: [skill_class, reason, scope, progress_label]
+tiers:
+  core:
+    default_use: true
+    meaning: "default first-pass skills for normal AEROS work"
+  optional:
+    default_use: false
+    meaning: "task-specific skills used when clearly relevant"
+  reference:
+    default_use: false
+    meaning: "inspiration or review framing only unless the human explicitly asks"
+legacy_tier_aliases:
+  advisory: optional
+does_not_prove:
+  - skill invocation
+  - skill output correctness
+  - scientific validity
+  - claim support
+  - human gate approval

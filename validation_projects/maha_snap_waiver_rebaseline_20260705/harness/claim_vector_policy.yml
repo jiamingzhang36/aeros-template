@@ -1,0 +1,23 @@
+version: "0.1"
+policy: AEROS-CLAIM-VECTOR-001
+principle: >
+  ClaimVector is an advisory_only language-boundary compiler. It may map
+  evidence/admission/identification inputs to allowed and forbidden language,
+  but it must never write the claim registry, approve a gate, or certify
+  scientific truth.
+rules:
+  no_automatic_claim_upgrade:
+    - "no automatic claim upgrade"
+    - "A ClaimVector recommendation is not a supported claim."
+    - "Any upgrade still requires the normal claim registry update and human gate."
+  human_gate:
+    - "ClaimVector may recommend human review, not replace it."
+  forbidden_auto_authority:
+    - "No paper-ready judgment."
+    - "No release approval."
+    - "No scientific truth certification."
+does_not_prove:
+  - "scientific truth"
+  - "claim support"
+  - "gate approval"
+  - "paper readiness"

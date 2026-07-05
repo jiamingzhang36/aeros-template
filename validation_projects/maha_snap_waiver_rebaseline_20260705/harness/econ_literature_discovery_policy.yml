@@ -1,0 +1,129 @@
+version: "0.1"
+policy: AEROS-ECON-LIT-DISCOVERY-001
+principle: >
+  Economics literature discovery adapters may expand candidate papers, citation
+  neighborhoods, and working-paper version links. They produce discovery
+  artifacts only. Substantive synthesis still requires source-bound, full-text
+  extraction cards under the literature execution rules.
+adapters:
+  openalex:
+    role: metadata_and_citation_candidate_source
+    default_output:
+      - discovery/literature/search_log.csv
+      - discovery/literature/citation_graph_edges.csv
+    cannot_support:
+      - gap_claims
+      - method_claims
+      - findings_claims
+  zotero:
+    role: local_library_metadata_pdf_and_indexed_fulltext_route
+    default_output:
+      - discovery/literature/search_log.csv
+      - discovery/literature/paper_registry.csv
+      - discovery/literature/fulltext_ready_queue.csv
+      - discovery/literature/missing_fulltext_queue.csv
+    cannot_support:
+      - literature_synthesis_without_extraction_cards
+      - gap_claims
+      - method_claims
+      - findings_claims
+      - claim_support_without_full_text_extraction
+  citec_repec:
+    role: economics_citation_graph_candidate_source
+    default_output:
+      - discovery/literature/citation_graph_edges.csv
+      - discovery/literature/citation_audit.md
+      - discovery/literature/citation_snowball_queue.csv
+    cannot_support:
+      - gap_claims
+      - findings_claims
+  pybiblionet:
+    role: openalex_network_analysis_candidate_tool
+    default_output:
+      - discovery/literature/literature_network_notes.md
+      - discovery/literature/citation_graph_edges.csv
+    cannot_support:
+      - synthesis_without_full_text_cards
+  preprintresolver:
+    role: working_paper_to_published_version_resolver
+    default_output:
+      - discovery/literature/preprint_resolution_log.csv
+    manual_review_required: true
+    cannot_support:
+      - bulk_identity_overwrite
+      - final_bibliography_without_review
+      - gap_claims
+      - synthesis_without_full_text_cards
+required_artifacts_if_used:
+  - discovery/literature/search_log.csv
+  - discovery/literature/paper_registry.csv
+  - discovery/literature/citation_audit.md
+  - discovery/literature/citation_snowball_queue.csv
+  - discovery/literature/fulltext_ready_queue.csv
+  - discovery/literature/missing_fulltext_queue.csv
+optional_artifacts_if_used:
+  - discovery/literature/citation_graph_edges.csv
+  - discovery/literature/preprint_resolution_log.csv
+  - discovery/literature/literature_network_notes.md
+hard_boundaries:
+  - Metadata and citation graph discovery are not literature review completion.
+  - Working-paper resolution is an advisory candidate until a human or receipt confirms the identity.
+  - Full-text extraction cards remain the minimum unit for synthesis support.
+  - Zotero PDF/fulltext availability is a route to extraction, not extraction completion.
+  - In `paper_registry.csv`, `full_text_available=yes` means locally readable/indexed text, not merely a PDF attachment; PDF-only items stay in the fulltext-ready queue until parsed or OCRed.
+  - OA metadata, DOI landing pages, repository locators, and PDF URLs are not full text until fetched content passes content-type and target-paper identity verification.
+  - Candidate full-text URLs must remain `candidate_url_unverified` / `needs_verification` until they are shown not to be CAPTCHA, Cloudflare/security challenge, login wall, 404, SPA shell, or unrelated cache content.
+  - Local cache files may not be used for extraction unless their title/DOI/author evidence matches the target registry row; otherwise classify as `cache_mismatch`.
+  - Adapter output may generate a queue; it may not certify a gap.
+
+fulltext_candidate_verification:
+  role: route_integrity_not_literature_review
+  allowed_ready_availability:
+    - indexed_fulltext
+    - pdf_attachment_only
+    - candidate_url_unverified
+  blocker_reasons:
+    - metadata_only
+    - closed_oa
+    - security_challenge
+    - login_required
+    - captcha
+    - spa_shell
+    - not_pdf
+    - empty_response
+    - cache_mismatch
+    - doi_mismatch
+    - title_mismatch
+    - pdf_attachment_only
+    - needs_ocr
+    - manual_pdf_required
+  cannot_support:
+    - full_text_extraction_card
+    - literature_synthesis
+    - gap_claims
+    - method_claims
+    - claim_support
+  next_action_rule: >
+    If a URL or local file is only metadata/OA/cache-derived, classify it as a
+    route candidate or blocker. Do not write an extraction card until fetched
+    content is readable and matched to the target paper by DOI, title, author,
+    or a human-reviewed receipt.
+
+
+citation_faithfulness:
+  role: citation_existence_metadata_and_claim_alignment_audit
+  borrowed_patterns:
+    - CiteCheck: retrieval-grounded citation existence and metadata faithfulness
+    - HalluCiteChecker: lightweight hallucinated citation verification
+    - DeepSciVerify: claim-citation alignment with selective full-text escalation
+  required_output:
+    - discovery/literature/citation_audit.md
+    - discovery/literature/citation_snowball_queue.csv
+  cannot_support:
+    - scientific_truth
+    - identification_validity
+    - gap_claims_without_full_text
+    - synthesis_without_extraction_cards
+  escalation_rule: >
+    If metadata or abstract-level evidence is uncertain, escalate to full-text
+    extraction or mark claim support as not_checked/partial; do not infer support.

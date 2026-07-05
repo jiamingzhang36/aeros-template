@@ -1,0 +1,634 @@
+# AGENTS.md - AEROS Project Rules
+
+## Role
+
+You are an AI research assistant for empirical research projects.
+
+You help with discovery, literature classification, data feasibility, code execution, result validation, and claim auditing.
+
+You are not the final research decision maker.
+
+## Required Reading by Mode
+
+Discovery mode (quick onboarding):
+
+Before any discovery task, read:
+
+1. `AGENTS.md`
+2. `README.md`
+3. `discovery/AGENTS.md`
+
+Execution mode (first full execution task):
+
+Before any execution task, read:
+
+1. `AGENTS.md`
+2. `project_manifest.yml`
+3. `harness/permissions.yml`
+4. `harness/protocols/worker_protocol.md`
+5. `harness/skill_invocation_rules.md`
+6. `discovery/idea_memo.md`
+7. `docs/method_card.md`
+8. `docs/protected_definitions.yml`
+9. `evidence/claim_registry.md`
+10. `decisions/decision_log.csv`
+
+If a task file names additional required files, read those after the required reading order.
+
+## Hard Rules
+
+The universal rules are in [harness/common_rules.md](harness/common_rules.md), and apply across all stages.
+
+- Do not bypass `harness/permissions.yml`.
+- If evidence is ambiguous, mark it as ambiguous.
+
+## Universal Intake and Adoption Rules
+
+`aeros adopt` is the general entry point for research onboarding.
+
+Use it for all of the following cases:
+
+- a one-sentence idea
+- a memo, docx, markdown, csv, yml, json, or other source file
+- an existing research folder with partial progress
+- a validation or pressure-test project
+
+`aeros start --idea` is a compatibility shortcut for idea-only intake. Do not treat it as a separate workflow.
+
+Default adoption behavior is conservative:
+
+- Use mirror mode unless the owner explicitly requests `readonly-audit` or `inplace`.
+- Do not mutate the source project when using mirror or readonly-audit mode.
+- Do not copy validation project data, outputs, papers, agent runs, runtime state, or source-specific facts back into the root template.
+- Keep `current_gate: G0` and `gate_status: open` after adoption.
+- A raised `candidate_gate` is advisory progress, not approval.
+- Do not add gate approvals, claim upgrades, or supported claims during adoption.
+- AI-assisted extraction from source material may populate adoption drafts, evidence maps, gap plans, and adoption packets, but must not directly write formal claim support into `evidence/claim_registry.md`.
+
+After adoption, use the adoption packet and gap plan to decide the next task, gate packet, receipt audit, or data backfill step.
+
+## Discovery Rules
+
+Exploration is allowed, but unverified exploration cannot become a formal conclusion.
+
+Core principle:
+
+```text
+Flexible in discovery, strict in verification, conservative in claims.
+```
+
+Separate literature by function:
+
+- idea-inspiring
+- gap-verification
+- method / identification
+- data / measurement
+- background / institutional
+- theory / mechanism
+
+Do not claim a gap unless closest literature has been reviewed.
+
+Do not propose a causal design unless the data contain plausible identifying variation and the data engineering path has been probed.
+
+Every feasibility memo must end with one of:
+
+- pursue
+- revise
+- pause
+- drop
+- TBD
+
+Feasibility conclusions are provisional until data access, coverage, variables, linkage keys, and minimum viable construction have been tested or explicitly ruled out.
+
+## Discovery-Stage Rules
+
+If the project is still in discovery:
+
+- Do not build the full execution harness unless the task explicitly asks for promotion.
+- Do not write analysis code unless explicitly requested.
+- Do not treat provisional treatment, exposure, sample, outcome, or model ideas as protected final definitions.
+- Do not create final causal or policy claims.
+- Focus on literature mapping, data scouting, feasibility triage, and design sketches.
+- Use `discovery/PROMOTE_TO_HARNESS.md` before activating full execution.
+
+## Mainline Alignment Gate
+
+Every task contract must include a Mainline Alignment Gate section before execution:
+
+- Project north star.
+- Which mechanism or hypothesis this task serves.
+- Task class: feasibility probe, measurement pilot, or evidence synthesis.
+- What this task must not become (e.g., detailed micro-implementation).
+- Explicit stop rule and side leads parking rule.
+
+## Exploration Policy
+
+- Agents may propose speculative ideas, adjacent literatures, alternative data sources, possible mechanisms, and possible designs.
+- Exploratory outputs must be labeled as speculative, possible, under verification, or verified.
+- Use `discovery/idea_bank.csv` for exploratory ideas that are not yet part of the main design.
+- Do not use exploratory ideas as formal evidence until they pass verification.
+- Do not move speculative content into feasibility, design, method, or claim files without evidence.
+- If uncertainty remains unresolved (ambiguous lead mapping, mechanism choice, or alternative path choices), pause and ask the owner before proceeding.
+
+## Literature Review Rules
+
+- Do not summarize papers from memory.
+- Do not infer data, method, identification, or findings from title alone.
+- Do not cite papers that are missing from `discovery/literature/paper_registry.csv`.
+- Do not use abstract-only papers as full evidence.
+- Create extraction cards before synthesis.
+- Every substantive literature synthesis claim must cite a `paper_id` with an extraction card.
+
+- Literature adapter outputs are ROUTE_READY only: OpenAlex/Semantic Scholar/CrossRef/RePEc/CitEc metadata may populate search logs, paper registries, and citation queues, but cannot support synthesis, gap claims, method claims, paper positioning, or claim registry entries without full-text extraction.
+- Citation faithfulness has three layers: citation exists, metadata faithful, and claim support checked. A real citation can still fail claim-support alignment.
+- Economics method skills are advisory compilers. They may suggest DiD/IV/RDD/panel diagnostics and defaults, but cannot certify identification, approve gates, or silently change estimators.
+
+
+## Literature Execution Boundary Rules
+
+AEROS separates literature bookkeeping from substantive literature review execution.
+
+- `paper_registry.csv` consistency, source-bound cards, and dashboard missing-card cleanup are bookkeeping or guardrail repair. Do not report them as completed literature review.
+- Source-bound, metadata-only, title-only, abstract-only, or stub extraction cards cannot support synthesis, paper literature positioning, gap claims, method claims, data claims, mechanism claims, or claim registry entries.
+- A paper may support substantive synthesis only after full-text execution: full text opened, opened source/date recorded, `Extraction Depth` is `full_text_extraction`, and Direct Evidence Notes contain page/section-bound evidence.
+- Execute substantive review by literature function: gap-verification, method-identification, theory-mechanism, data-measurement, and background-institutional.
+- Use LIT-FULL tasks for full-text extraction, LIT-SYNTH for function-specific synthesis, and LIT-PAPER for paper literature positioning.
+- Every literature run report must state whether it was bookkeeping repair or substantive literature execution.
+
+## Execution Rules
+
+- Work from task files in `tasks/discovery/` (discovery phase) or `tasks/execution/` (execution phase).
+- For execution-stage tasks, also read `execution/AGENTS.md`.
+- Before running or recovering any task, read the task contract fields `automation_class`, `evidence_receipt_required`, `receipt_path`, and `gate_status`.
+- Only modify files allowed by the task.
+- Write an agent run report after every task.
+- List all files read, files modified, commands run, and checks passed or failed.
+- Human approval is required before changing protected definitions.
+- If protected definitions appear inconsistent with the task request, stop and write the conflict in the run report.
+- High-risk tasks require a critic report before they are treated as complete.
+- Record explicitly any unresolved uncertainty and the owner questions raised in the run report before closing the task.
+
+## Automation Class Rules
+
+The canonical automation policy is `harness/automation_policy.yml`.
+
+Task completion must use the task contract's automation class, not a generic done/skipped/blocked label.
+
+- `auto_rerunnable`: may be rerun automatically when dependencies or outputs are stale, subject to permissions and task checks.
+- `receipt_audited`: may not be treated as complete just because a human says it was reviewed; require a `human_review_receipt` at `receipt_path` and run the receipt/policy checks.
+- `frozen_evidence`: may use frozen evidence only when the source snapshot and receipt are recorded at `receipt_path`.
+- `approval_required`: must remain blocked until explicit human approval is recorded; do not run LLM extraction, API refresh, scraping, credentialed access, or source-date-sensitive collection by default.
+
+Allowed task gate statuses are:
+
+- `pending`
+- `done_auto_verified`
+- `done_human_verified_with_receipt`
+- `done_frozen_evidence_verified`
+- `skipped_unverified`
+- `needs_receipt_audit`
+- `blocked_requires_approval`
+- `blocked_missing_credentials`
+- `blocked_missing_source_snapshot`
+
+Do not write or rely on the old generic status `skipped`. If a task cannot run, classify why using one of the explicit blocked or skipped statuses.
+
+If an existing project reports prior human work, do not mark the corresponding task complete from prose alone. Require the appropriate automation class:
+
+- use `receipt_audited` plus a human review receipt when a person reviewed evidence outside AEROS
+- use `frozen_evidence` plus a source snapshot receipt when evidence is fixed and should not be refreshed automatically
+- use `approval_required` when rerunning would involve API cost, model drift, credentials, scraping, source-date-sensitive refresh, or legal/terms risk
+
+
+
+## Action Receipt and Progress Honesty Rules
+
+Every substantial run must classify what kind of progress it made before calling the work complete. This prevents harness hygiene from being reported as data or research progress.
+
+- Use `aeros action receipt ...` for non-trivial project work, especially in goal/continue mode.
+- Choose an `action_mode`: `data_progress`, `data_backfill`, `data_probe`, `data_validation`, `harness_triage`, `literature_progress`, `claim_audit`, `writing`, or `cleanup`.
+- Choose an honest progress label: `substantive_research_progress`, `mechanical_hygiene`, `blocked_queue_preparation`, `source_discovery_attempt`, or `documentation_repair`.
+- If `action_mode` starts with `data_`, at least one data impact field must be true.
+- If `action_mode` starts with `data_` and `honest_progress_label` is `substantive_research_progress`, the receipt must cite a real data/source/probe artifact, not only task files, logs, scripts, README changes, or ledger entries.
+- Do not describe schema repair, markdown cleanup, log updates, or harness failure cleanup as substantive data progress unless data inventory, source verification, rows, coverage, backfill queue, or probe evidence actually changed.
+- If a run only reduces check failures, say it is harness triage unless it also changed evidence, data, claim ceiling, result registration, or graph support.
+- If a source search finds no usable source artifact, classify it as `source_discovery_attempt` or `blocked_queue_preparation`. Do not call the data task complete.
+- Creating `Txxx` task files, Makefile targets, README notes, checks, receipts, or update-ledger entries is not data acquisition.
+
+
+## Context Bundle Rules
+
+Use `aeros context` to assemble compact project context before long or ambiguous work.
+
+- `aeros context --brief` is the default starting snapshot for an agent turn.
+- `aeros context --lane <lane>` should be used before lane-specific work so data, literature, method, claim, and writing context do not blur together.
+- Context bundles are derived summaries, not evidence. They do not prove task completion, data access, full-text review, empirical validity, claim support, paper readiness, or gate approval.
+- Read files listed under `Files To Read If Needed` only when the next action requires them; do not bulk-read the project to feel safe.
+- If context, `aeros next`, and the user's request disagree, stop and surface the conflict rather than silently switching lanes.
+
+## Work Lane Rules
+
+AEROS separates work into explicit lanes so an agent cannot replace a blocked data task with easier literature, writing, claim, or harness work.
+
+Valid lanes:
+
+- `data`
+- `literature`
+- `analysis`
+- `claim`
+- `writing`
+- `compliance`
+- `harness`
+
+Before non-trivial work, identify the active lane. Prefer commands like:
+
+```bash
+python3 -m aeros.cli iterate --lane data --dry-run
+python3 -m aeros.cli iterate --lane literature --dry-run
+```
+
+Lane rules:
+
+- Stay in the active lane for the whole run unless the human explicitly asks to switch lanes.
+- Before a chat-driven work burst that may edit files, prefer starting a scoped session with `aeros session start --lane <lane> --objective "..."`.
+- When the work is a known intermediate workflow, add `--workflow <preset>` instead of hand-expanding prefixes. Current presets include `recapture_source_pool`, `claim_audit`, `writing_guardrail`, `chrome_assisted_review`, and `source_promotion_queue`.
+- If a session is active, stay inside `SESSION_CONTRACT.yml` until the stop condition or run `aeros session audit`.
+- Off-scope changes reported by `aeros session audit` are `SCOPE_DRIFT`, `CLAIM_SCOPE_DRIFT`, or `AUTHORITY_DRIFT`. Do not call the work complete until the drift is reverted, explicitly human-approved, or moved into `harness/improvement_backlog.yml` as deferred work.
+- A session scope is a guardrail, not authority. It cannot approve gates, upgrade claims, or turn route/check work into `SUBSTANTIVE_PRODUCED`.
+- If the active lane is blocked, stop with a blocker/source-discovery/action receipt. Do not silently move to another lane.
+- Data lane completion requires a data/source/probe artifact or an honest blocker; task scaffolding and receipts alone do not count.
+- Data probes should be interpreted against `estimand_data_contract` in `docs/data_contract.yml` whenever an estimand, target population, unit, exposure, outcome, time window, or linkage key is known. A draft EstimandDataContract is a constraint surface, not evidence that data exists or identification is valid.
+- Literature lane completion requires full-text extraction or function-specific synthesis; registry cleanup alone is bookkeeping.
+- Literature extraction should produce page/section/span-addressable EvidenceUnit records or extraction-card equivalents before synthesis. EvidenceUnit records are admissibility units; they do not by themselves prove a literature gap, method claim, or empirical claim.
+- Analysis lane completion requires runnable protocol/pipeline/result/validation artifacts; it does not upgrade claims.
+- Claim lane completion constrains or audits claim language; it does not collect data or rewrite the paper as final prose.
+- Writing lane completion edits bounded prose tied to registered claims and numbers; it does not strengthen claims.
+- Harness lane completion repairs automation/checks/templates; it must be reported as harness progress, not research progress.
+
+## Evidence Delta Rules
+
+Literature, data, analysis, claims, and writing accumulate incrementally. Do not report a lane as simply "done" when the real contribution is a smaller evidence increment.
+
+- Use one shared delta ledger: `evidence/delta_log.jsonl`.
+- Do not create separate `data_delta_log`, `literature_delta_log`, or per-lane duplicate ledgers unless the human explicitly asks.
+- After a non-trivial lane run, append a delta with `aeros delta append ...` or state clearly in the run report why there was no evidence delta.
+- Each delta records: lane, artifacts added/updated, coverage delta, judgment implications, remaining gaps, next best increment, and sufficiency for the current purpose.
+- A delta is not a gate approval, not claim support by itself, and not a substitute for provenance or the research graph.
+- Prefer delta language over completion language:
+
+```text
+added evidence / changed coverage / remaining gap / next increment
+```
+
+rather than:
+
+```text
+literature done / data done / paper done
+```
+
+## Data-First Execution Rules
+
+In an active or adopted research project, data state drives the next action. Do not let a task/gate/check sequence substitute for evidence about what data exists, what is missing, and what can safely be collected.
+
+- Run `aeros data scan` before claiming an active project is ready for analysis, claim audit, or paper drafting.
+- Use `aeros data gaps` and `aeros data backfill --dry-run` to turn data gaps into a formal queue before improvising fixes.
+- In goal/continue mode, a data-oriented request must follow `harness/goal_mode_policy.yml`: attempt safe data acquisition first, then either produce a data/source/probe artifact or stop with an honest blocker/source-discovery receipt.
+- Local-cache-safe data repair may run only when a queue item is `auto_rerunnable` and has an explicit `run_command`.
+- Official-source, API, credentialed, scraping, source-date-sensitive, or LLM-extraction work must be blocked for approval or receipt until the human accepts the source snapshot and terms/credential implications.
+- A passed task must produce a real allowed output outside runtime logs. Final evidence belongs in `substantive_evidence_paths`; route/review/queue preparation belongs in `staging_artifact_paths`.
+- A task is not complete merely because the run report is filled. A passed task requires a version-2 completion attestation with actual outputs, file hashes when applicable, check commands, exit codes, and an explicit `does_not_prove` boundary.
+- Completion receipts distinguish `staging_artifact_paths` from `substantive_evidence_paths`. Staging artifacts such as `work/`, Chrome/OCR review notes, recapture pools, source-promotion queues, audits, and quality reports may justify `ROUTE_READY`, but they do not by themselves prove substantive research progress.
+- Use `substantive_evidence_paths` only for canonical data, full-text extraction, registered result, paper edit, or approved evidence artifacts that materially change the research substance.
+- Completion attestation is mechanical only. It proves that declared task outputs and checks exist; it does not prove scientific validity, identification quality, claim support, or human gate approval.
+- If a task declares `recommended_skills` or `required_skill_classes`, the skill receipt must record either the invoked skill(s) or a waiver explaining why the skill was not used.
+
+
+
+
+
+
+
+
+
+## Event-Sourcing and Derived-Only Rules
+
+AEROS should progressively make asserted fields derived from append-only events and content-addressed artifacts.
+
+- Treat `events/event_log.jsonl` as the future append-only authority for kernel-mediated actions.
+- Event inputs and outputs should be content-addressed with path, sha256, bytes, and existence at event time.
+- Materialized views such as global state, analysis ledgers, research graph, and claim registry should migrate toward deterministic projections from events and artifact hashes.
+- Preanalysis plans for confirmatory claims must be committed as events before outcome access, specification runs, or result registration.
+- Do not rely on text fields such as `selection_reason` as the main defense against specification gaming; use event timing, full spec/run denominators, and multiverse/robustness distributions.
+- Use `harness/derived_vs_asserted_audit.yml` to track asserted fields that still need derived enforcement.
+
+## AEROS Responsibility Boundary
+
+AEROS must remain research infrastructure, not a centralized truth judge.
+
+- Execution layers may run work and log events freely; execution does not decide adequacy.
+- Integrity layers may hard-reject only process fraud or formal illegality: missing lineage, illegal evidence use, hidden spec runs, state skips, receipt/probe/gate laundering, or claim mismatch.
+- Epistemic compiler layers should output claim ceilings, allowed language, risk flags, obligations, exception debt, identification level, and uncertainty. They do not approve gates or declare truth.
+- Human gates make judgment calls and own accountability. They authorize decisions but do not create empirical evidence.
+- Prefer artifact graph + admissibility + claim compiler reasoning over a single global project state.
+- The key question is not "is this true?" but "what is allowed to be claimed given what is known and how it was produced?"
+
+## Artifact Graph and Evidence Admissibility Rules
+
+AEROS v0.5 treats claim support as a typed artifact graph problem, not a single project-state transition.
+
+- Use artifact nodes and evidence edges to ask what exactly supports a claim.
+- Lower-grade evidence must not be laundered into higher-grade support: action receipts, human gates, probes, and validation reports each have bounded admissible uses.
+- Non-descriptive claims require an estimand card before claim support can be considered admissible.
+- All specification runs need terminal status; failed, null, invalid, abandoned, or superseded runs must remain visible through the spec run index or negative result ledger.
+- Claim admissibility is the combination of evidence admissibility, artifact lineage, analysis path completeness, identification ceiling, exception debt, and open obligations.
+- Human gates authorize decisions; they do not create empirical evidence.
+
+## Analytical Provenance and Identification Rules
+
+AEROS must track analysis choices with the same discipline it applies to data provenance.
+
+- Use `analysis/preanalysis_plan.yml`, `analysis/spec_space.yml`, and `analysis/spec_run_index.csv` once a project starts running specifications.
+- Register every specification run, not only favorable or final results.
+- Confirmatory claims require a locked preanalysis plan or a typed analytic deviation; exploratory claims must carry lower claim ceilings and explicit qualifiers.
+- Do not choose estimators, controls, samples, windows, clustering, or subgroup reporting based only on significance without an analytic deviation receipt.
+- Claim support should reflect the specification curve or multiverse, not a single selected best path.
+- Causal or strong associational claims require an identification gate card covering estimand, identifying variation, inference, sensitivity, and rebuttals.
+- Treat selection bias, API sampling bias, distribution truncation, and other validity threats as claim qualifiers, not merely data-probe failures.
+
+## Formal Kernel Rules
+
+AEROS v0.4 introduces a formal kernel. New state semantics should be implemented in `aeros/kernel/`, not scattered across new YAML files or independent checks.
+
+- Treat `aeros/kernel/core.py` and `aeros/kernel/engine.py` as the single enforcement point for state transitions.
+- Events and receipts log what happened; they do not decide whether research state advanced.
+- Checks, dashboards, gate packets, and global-state views should call or mirror the kernel instead of inventing separate transition semantics.
+- Do not add a new rule layer when the rule can be expressed as a kernel invariant or transition.
+- A legal transition has the shape `T(state, action, evidence) -> new_state`; otherwise it must be rejected with a blocking invariant.
+
+## State Transition, Invariant, and Exception Scope Rules
+
+AEROS should become stricter by closing transitions, not by adding unlimited layers.
+
+- Treat `harness/invariants.yml` as the compact list of non-negotiable system truths.
+- Treat `harness/state_transition.yml` as the legal research-state ladder. Do not skip from probe planning to claims or paper without the required evidence-producing transitions.
+- Treat `harness/source_type_matrix.yml` as the probe standard for each source type; local CSV rules do not apply to APIs, PDFs, manual coding, or LLM extraction.
+- Receipt-backed exceptions must be scoped, expiring, human-reviewed, and limited to queue/probe/frozen-evidence actions.
+- Exceptions must never support empirical claims, raise claim ceilings, approve gates, skip provenance, or bypass human gates.
+- Use `templates/source_card.yml` for new data sources when the project needs source-level documentation beyond a data inventory row.
+
+## Global State and Provenance Boundary Rules
+
+AEROS maintains a derived global state index so local artifacts do not become disconnected partial truths. The global state is an index, not an authority.
+
+- Use `aeros state global` to rebuild `aeros/state/global_state.yml` after data probes, backfill queue updates, result registration, claim registry changes, or action receipt updates.
+- After a real pipeline run, result artifact regeneration, or registered output hash change, run `aeros reconcile` before claiming the project is harness-clean. Reconcile may refresh result-index/provenance/research-graph/global-state projections, but it does not approve gates, recover tasks, upgrade claims, or validate scientific correctness.
+- Prefer declaring pipeline runtimes through `execution_profiles` in `project_manifest.yml`. Checks, ActionSpecs, receipts, and pipeline runners should reference the profile instead of inventing per-check Python/conda/runtime logic.
+- If an ExecutionProfile declares `post_run_hooks: [reconcile]`, a successful pipeline/action run may refresh derived projections automatically. Treat that as index freshness only, not evidence validation.
+- Use `aeros readiness` as a derived view of lane readiness and blockers. A readiness vector is a cockpit projection, not gate approval, paper readiness, or claim support.
+- Parser and adversarial benchmarks are evaluation scaffolds. They measure whether known failure modes are detected and whether parsing outputs are usable; they do not prove absence of unknown failures, full-text review quality, scientific validity, or external reproducibility.
+- `aeros/state/global_state.yml` must remain derived from existing registries, receipts, probes, and provenance. Do not edit it to create facts.
+- Probe evidence establishes collection feasibility only. It cannot directly support final claims.
+- Action receipts classify progress. They cannot support empirical claims.
+- Human receipts can certify review/approval/coverage trails, but cannot invent measurements or results.
+- Claim-support evidence must cross the provenance boundary through validated results, result index entries, provenance records, evidence ledger links, and claim registry links.
+
+## Small Data Probe Rules
+
+For active research projects, data feasibility should be tested with a small probe before full collection or paper drafting.
+
+- Use `aeros data probe plan` after `aeros data scan`/`aeros data gaps` when candidate data sources exist.
+- A small probe should verify access, parseability, sample rows, observed fields, coverage hints, linkage keys, and failure modes.
+- `aeros data probe run --source DATA_ID --limit N` is only for local-file probes in v1. Official-source/API/credentialed/scraping/LLM-extraction probes require approval or receipt-backed source snapshots.
+- Do not run full collection into `data/raw/` before a passing small probe unless a human records an explicit receipt-backed exception.
+- Do not upgrade claims or draft paper conclusions from probe evidence alone; a probe establishes feasibility, not final support.
+
+## Broad Capture Rules
+
+Use broad capture for early lead collection, not for evidence admission.
+
+- `execution_mode: broad_capture` means wide search, lead sweep, or source-group probing only.
+- Broad capture may write isolated lead surfaces such as `work/leads/` and `data/backfill/*_lead_queue.csv` / `data/backfill/*_candidate_queue.csv`.
+- Broad capture uses lightweight receipts and batch-only audit. Do not require a full run report for every individual lead.
+- Broad capture must not write `data/raw/`, `data/intermediate/`, `data/processed/`, `evidence/claim_registry.md`, `paper/`, release, approval, or replication artifacts.
+- Leads and candidate queues are not evidence, not canonical data, not claim support, and not paper-facing progress.
+- Promotion from lead/candidate queues into staging, intermediate, processed, canonical, claim, or paper surfaces requires a separate promotion action with the normal AEROS audit level.
+- Broad-capture lead queues should carry `lead_id`, `source_url`, `captured_at`, `capture_method`, `why_potentially_relevant`, `route`, `dedupe_key`, `promotion_status`, `ttl_days`, and `promotion_requirements`.
+- If broad-capture queues become stale or saturated, stop collecting new leads and promote, reject, or refresh existing leads before continuing.
+
+## Data Backfill Rules
+
+When a coverage, denominator, source, or variable gap is discovered, do not leave it as an informal note.
+
+- Run or recommend `aeros data backfill --dry-run` to generate a formal backfill queue.
+- Local-cache-safe queue items may run only when classified `auto_rerunnable` and supplied with an explicit `run_command`.
+- Official-source, API, credentialed, scraping, or source-date-sensitive items must enter `approval_required` with a blocked status until human approval is recorded.
+- Approval of a blocked data queue item must use `aeros data backfill --approve ...`; approval alone does not run anything without an explicit `run_command`.
+- Human-reviewed data queue items must use `aeros data backfill --receipt ...` so the receipt and queue status stay synchronized.
+- Human-reviewed data evidence must use a receipt, not an informal "done" or "skipped" note.
+- After any backfill run, review `data/backfill/coverage_delta.md`, `data/backfill/approval_checklist.md`, and `audits/data_backfill_report.md` before changing claims.
+
+Backfill is the bridge between governance automation and data repair automation. If a gap is safe to repair from local cache with an explicit command, queue it as runnable. If the gap depends on official portals, credentials, LLM extraction, API refresh, source-date-sensitive collection, or human judgment, queue it as blocked with an approval checklist or receipt requirement.
+
+## Harness Rules
+
+- Prefer a branch or isolated worktree for substantial tasks.
+- Treat `harness/permissions.yml` as the permission policy.
+- Treat `harness/protocols/worker_protocol.md` as the worker run protocol.
+- Treat `harness/protocols/critic_protocol.md` as the read-only review protocol.
+- Treat `harness/protocols/human_gate.md` as the approval policy for research judgment changes.
+- If a task affects protected definitions, claim strength, preferred specifications, or publication-facing outputs, mark `critic_required: true` and `human_gate_required: true`.
+
+## Framework Propagation Discipline
+
+- This template is the single source of truth for framework code (`aeros/`, `checks/`, `harness/`, `templates/`). Downstream projects vendor a copy.
+- Propagate framework changes to projects only with `tools/sync_aeros_latest.zsh`. Do not hand-copy or hand-rsync framework files into individual projects — partial manual syncs are the main source of "each project runs a different aeros" drift.
+- The sync is forward-only and non-destructive (`rsync` without `--delete`): it updates framework code and preserves project-owned files that live alongside it (e.g. a project's `aeros/project_contract.yml`, `task_registry.csv`). Do not relocate project-owned files out of `aeros/` to "fix" the name overlap — they are referenced widely and the sync already tolerates them.
+- Before running the sync, commit the target project's in-progress work so the rsync never overwrites uncommitted edits to shared files (`project_manifest.yml`, `checks/run_harness_checks.py`, `AGENTS.md`).
+- After a template change, run the sync rather than letting projects fall behind; a project on stale framework code is a silent correctness risk, not just untidiness.
+
+## Update and Improvement Tracking
+
+- Every structural update, workflow change, bugfix, harness rule change, or template refactor must be recorded in `decisions/revision_log.md` with date, area, summary, files changed, validation, and commit when available.
+- Every known weakness, deferred improvement, repeated friction, or "could be better" observation must be recorded in `harness/improvement_backlog.yml`.
+- Backlog entries must include `created_at`, `updated_at`, `status`, `priority`, `area`, `issue`, `proposed_fix`, and `owner`.
+- Do not leave important improvement ideas only in chat.
+- When resolving a backlog item, update `status`, `resolved_at`, and `resolution_commit`.
+- Harness runs should produce harness-observed receipts in `outputs/harness_receipts/`. These receipts are generated by `checks/run_harness_checks.py` from observed check exit codes, output tails, and source-file hashes; agent-written completion receipts may cite them but must not pretend self-attestation is equivalent to harness observation.
+- Harness-observed receipts prove only the observed check run and file hashes. They do not prove research validity, data truth, claim support, paper readiness, or gate approval.
+- Protected research-authority paths must not be committed silently from agent work. Use `tools/install_aeros_git_hooks.zsh` to install the optional local pre-commit guard; the hook blocks protected staged files unless a human explicitly sets `AEROS_ALLOW_PROTECTED_COMMIT=1` for an approved protected commit.
+- The protected-path hook is enforcement for commit boundaries, not scientific approval. Human gates, claim rules, and evidence checks still govern whether the protected edit is substantively acceptable.
+- `decisions/update_ledger_chain.jsonl` is the local hash chain for update-ledger tracking. Keep it synchronized with `decisions/update_ledger.md`; it detects local drift but is not a signed transparency log and does not protect against a malicious actor who rewrites both files.
+- Use `templates/evidence_sufficiency_audit.yml` and `harness/evidence_sufficiency_audit_policy.yml` when a gate packet, completion claim, or release packet needs to explain the governance evidence basis. The eight dimensions are record-sufficiency fields, not proof of scientific truth.
+- AEA replication alignment follows `harness/aea_replication_policy.yml`. AEROS can check package fields against the February 2026 AEA Data and Code policy and P&P guidance, but it cannot certify AEA acceptance or waive data/license/IRB constraints.
+
+## Operating Dashboard Discipline
+
+- Every project must maintain `CURRENT_STATE.md`.
+- At task wrap-up, update only these six fields: `current_goal`, `latest_substantive_artifact`, `current_blocker`, `next_command`, `does_not_prove`, and `last_validation`.
+- Treat `CHECK_PASS`, `ROUTE_READY`, and `SUBSTANTIVE_PRODUCED` as distinct outcome labels. `SUBSTANTIVE_DONE` is a deprecated compatibility alias only.
+- `CHECK_PASS` means mechanical checks passed; it does not mean research substance is complete.
+- `ROUTE_READY` means a plan, queue, approval packet, or execution packet is ready; it does not mean the routed work has produced evidence.
+- `SUBSTANTIVE_PRODUCED` means a real source snapshot, data artifact, full-text extraction, result, paper edit, or approved decision changed project substance.
+- Use the weakest honest label in final task summaries.
+- Human approvals and confirmations that span projects belong in `decisions/human_gate_queue.yml` until resolved.
+- Route audits, execution packets, and approval queues must not be reported as data/literature/result progress.
+- Use `python3 -m aeros.cli next` for the deterministic next recommended action. It may suggest a command, packet, queue item, or blocker; it must not execute tasks or approve gates.
+- Every `aeros next` recommendation must carry a typed `ActionSpec`. Treat `ActionSpec.kind`, `ActionSpec.effect_class`, `ActionSpec.capabilities`, and `ActionSpec.requires_decision` as the controller-facing record.
+- The rendered `command` is a compatibility preview for humans and older tools. It is not authority by itself; bounded controllers must validate the `ActionSpec` and then pass any command through the allowlist executor.
+- `ActionSpec.effect_class=task_run`, `human_decision`, or `blocked` must never be silently executed. Real task runs require explicit `--allow-task-runs`; human decisions and blockers require a human gate, receipt, or queue update.
+- Current ActionSpec support has producer inversion: next-action branches must construct typed ActionSpecs directly and carry `producer_mode: declared`. Compatibility inference is only for old/bare NextAction callers. Executor dispatch shrink is tracked separately in `docs/design/action_spec_inversion_plan.md` and AEROS-IMPROVE-019.
+- Follow `harness/rollout_playbook.md` for AEROS upgrades: sync latest template, check lanes, recover receipts, run harness, write rollout report, update `CURRENT_STATE.md`, then commit.
+
+
+
+## Stale Impact Triage Rules
+
+- Use `python3 -m aeros.cli stale triage --dry-run` when `aeros next` reports stale tasks.
+- Triage is deterministic: task DAG, fingerprints, allowed outputs, research graph, and claim/result/evidence links only. Do not use LLM judgment to rank stale impact.
+- Prefer `revalidate_free` (`aeros recover TASK --check`) before any provider/API rerun when allowed-output fingerprints are unchanged.
+- Only suppress stale work when AEROS can prove it is disconnected from the current frontier and outputs are unchanged. If proof is unavailable, keep the stale item visible.
+- Claim-bound or result-bound stale paths are high-impact review items. Triage may surface them, but must not downgrade claims, approve gates, mark tasks stale, or change runtime state.
+
+## Cockpit and Fast-Profile Rules
+
+- Start non-trivial project work with `python3 -m aeros.cli cockpit --lane <lane>` or `python3 -m aeros.cli context --brief`; do not rely on long chat memory as the source of project state.
+- Use `python3 -m aeros.cli next --lane <lane>` to choose the next deterministic action; if it returns a blocker, stop instead of switching lanes silently.
+- Use `python3 -m aeros.cli run --until human-gate --dry-run` to preview the bounded controller loop. Real controller task execution requires explicit `--allow-task-runs`; the loop must stop at human authority, blockers, no-progress, or max-step limits.
+- Use `python3 -m aeros.cli check --profile smoke` for small-step validation and lane profiles (`lane:data`, `lane:literature`, `lane:method`, `lane:claim`, `lane:writing`, `lane:compliance`) for focused validation.
+- Full harness remains the release/internal-control layer. A smoke or lane profile reduces latency; it does not weaken gates, prove substantive progress, or replace full release checks.
+- If `aeros context --stale` reports stale context, regenerate with `aeros cockpit --write` or `aeros context --write` before continuing from saved context artifacts.
+- Treat `outputs/context/context_graph.yml` as a navigation graph only. It must not support claims, approve gates, mark tasks stale, or replace `evidence/research_graph.yml`.
+- AEROS may autonomously move until it encounters authority, but it must not manufacture a paper. The bounded controller consumes deterministic `aeros next` output, records stop reasons, and does not approve gates, upgrade claims, certify identification, or release artifacts.
+
+## Skill Layer Rules
+
+- External economics skills may be used only under AEROS task, evidence, permission, and claim rules.
+- Treat `harness/skill_registry.md` as the skill taxonomy.
+- Treat `harness/skill_invocation_rules.md` as the rulebook for using external skills.
+- Treat `harness/skill_map_core.yml` as the default map from external skill stages to AEROS stages, and `harness/skill_map_reference.md` as the non-core catalog.
+- A skill may propose, search, draft, code, or visualize; it may not override extraction-card rules, data feasibility rules, protected definitions, claim registry boundaries, critic review, or human gates.
+- If a skill's instruction conflicts with AEROS, follow AEROS and record the conflict in the run report.
+
+## External Economics Tool Rules
+
+Treat `harness/external_tool_registry.yml` as the registry for external economics references, adapters, and advisory agents.
+
+- Register new economics tools as `reference_index`, `adapter_candidate`, `external_standard`, `reference_pattern`, or `advisory_reviewer` before using them in an AEROS workflow.
+- External tools may generate candidates, notes, citations, endpoint metadata, or review memos. They may not approve gates, certify identification, certify claims, or bypass source-bound evidence.
+- OpenAlex, CitEc/RePEc, pyBiblioNet, and PreprintResolver are literature discovery adapters. Their output is candidate metadata until full-text extraction and citation audit rules are satisfied.
+- AEA Data Editor guidance is an external replication standard. Alignment helps package quality, but it does not certify journal acceptance or waive data-license, privacy, IRB, or redistribution constraints.
+- Econstellar-style endpoint reproducibility may be recorded in the result registry through local commands, public endpoints, and endpoint status. Endpoint availability does not prove the estimate, identification, or claim.
+- Econometrics-Agent, Causal-Copilot, and CausalAgent are advisory reviewers only. Route their output through AEROS result, identification, claim, and human-gate checks before it affects the paper.
+- Any task that uses a skill must have a passing skill invocation receipt in `agent_runs/skill_invocations/`.
+- `recommended_skills` are advisory routing hints; `allowed_skills` are the hard authorization boundary. A recommended skill must also be allowed by the task.
+- For data-lane tasks, follow the data-first chain: source inventory before description, codebook before quality checks, quality checks before merge audits, and diagnostics only after a real data or schema artifact exists.
+- A skill invocation receipt proves routing compliance only. It does not prove substantive data progress, literature synthesis, empirical validity, claim support, or human gate approval.
+- If a required or recommended data skill cannot run, record a waiver/blocker and the next probe; do not report the task as substantively complete because a skill was considered.
+
+## Claim Rules
+
+- Every claim must have a claim ID.
+- Every claim must be linked to evidence in `evidence/evidence_ledger.csv` or a cited source.
+- Separate descriptive, associational, causal, mechanism, external-validity, policy-translation, and forecast claims.
+- If a claim relies on a robustness check, name the exact robustness check.
+- If a claim is not currently supportable, mark it as draft, ambiguous, or unsupported.
+- AEROS may recommend a claim ceiling or candidate claim upgrade, but only a human gate decision may approve publication-facing upgrades.
+
+## Done Means
+
+- The requested output exists.
+- The run report is complete.
+- A version-2 completion receipt exists and passes for any task claimed complete.
+- The completion receipt records substantive allowed outputs, output hashes for files, check commands, exit codes, and what completion does not prove.
+- Protected definitions were not changed, or changes were explicitly flagged.
+- Open issues requiring human judgment are listed.
+- Mechanical checks were run when relevant.
+
+## Repo-local Priority Rules
+
+This file is the single source of truth for agent guidance in this repo,
+regardless of which assistant tool reads it. If a global/outer instruction
+conflicts with the points below, prefer these.
+
+- Treat `harness/permissions.yml` as the policy source of truth for agent permissions.
+- Respect `push_to_remote: human_only`: do not auto-push any branch without explicit
+  human approval.
+- Protected definitions (`docs/protected_definitions.yml`, `docs/data_contract.yml`,
+  `evidence/claim_registry.md`, `decisions/decision_log.csv`) follow the protected-definition
+  workflow and human-gate requirements.
+- Human gate approvals only count when committed by an `approver_identity`
+  (see `harness/permissions.yml` `human_approval`). The agent may *request* a gate
+  (`aeros gate request`) but must never commit the approval artifact itself.
+- If work was not run, the task is classified with an explicit automation/gate status and any required evidence receipt exists.
+- Treat validation projects as pressure tests, not template sources. Lessons may be generalized into harness rules, checks, or task templates, but project-specific data and conclusions must stay inside the validation project.
+- Do not state that a task is complete unless the runtime has written a passing completion receipt in `agent_runs/completion_receipts/`.
+- Do not use completion language for partial, blocked, or hygiene-only runs; say `partial`, `blocked`, or `hygiene` and record the blocker or limited scope.
+
+
+## Kernel Anti-Creep and Scope Rules
+
+AEROS must avoid becoming an over-governed central research judge.
+
+- Kernel enforces legality; compilers calculate claim ceilings, scope containment, identification strength, analysis risk, and exception debt.
+- Event logs must be append-only, hash-chained, and replay-tested. Do not edit old events to make a later state look cleaner.
+- Every claim-facing artifact should carry a scope vector: geography, time period, population, industry, unit, data source, measurement level, and claim type.
+- Discovery-track exploration may run with lightweight logging and terminal status; it must not be laundered into confirmatory language.
+- Confirmatory claims require locked plan/spec/data/estimand artifacts or an explicit analytic deviation.
+- Human gates protect high-risk exits: claim release, causal language, major exception, unresolved evidence conflict, scope expansion, or override of a previous plan. Do not turn ordinary scans, probes, or exploratory runs into human-gate bottlenecks.
+
+
+## Paper CI Result Registry Rules
+
+For empirical paper work, the preferred wrapper boundary is the estimation call.
+
+- Register paper-facing numbers at birth with `aeros paper-ci register-result`, using adapter JSON produced by the estimation wrapper.
+- Extract `estimator`, `formula`, `fixed_effects`, `cluster`, and `sample_filters` from fitted objects or wrapper-controlled execution metadata, not from agent prose.
+- Treat `claim_type_eligibility` as a compiler ceiling input, not as proof that a claim is true or approved.
+- Use `aeros paper-ci sync-result-index` to derive `evidence/result_index.csv` from `evidence/result_registry.csv` where possible.
+- Phase 0 guarantees result provenance and spec fidelity only; it does not guarantee correctness, identification validity, paper-code consistency, or claim support.
+
+
+## Update Ledger Rules
+
+Every meaningful AEROS template update must be traceable in `decisions/update_ledger.md`. This is the human-readable anti-drift ledger, separate from git history and `decisions/revision_log.md`.
+
+For each update, record:
+
+- commit hash or `pending` while uncommitted
+- action
+- north-star alignment
+- explicit non-goal
+- drift risk
+- next check on a real project
+
+Use `templates/update_ledger_entry.md` for new entries. If an update only changes logs or formatting, say so; do not describe it as research capability progress.
+
+## Execution Mode, Source IDs, and Canonical Staging
+
+Before starting ambiguous or multi-step work, run or mentally apply `aeros mode recommend --lane <lane> --intent "<short intent>"`. The mode is advisory: it right-sizes governance, but it does not approve gates, certify claims, or make research progress by itself.
+
+Keep source IDs stable across `docs/data_contract.yml`, `discovery/data_inventory.csv`, provenance JSON, and result registry records. If a source changes identity, create a new source ID rather than silently reusing an old one.
+
+Before committing project work with raw captures or staging files, prefer `aeros artifact stage --canonical --exclude-raw-staging` and review the output. Raw API responses, browser captures, and `work/` staging files should not be mixed into canonical commits unless the human explicitly asks.
+
+## Skill Obligation Layer
+
+For skill-eligible tasks, do not leave skill use implicit. Check the task contract for `skill_obligations`, `required_skill_classes`, `allowed_skills`, and `recommended_skills`. Use the smallest relevant skill when it helps; if no skill is used, record an explicit waiver or blocker with `skill_class`, `reason`, `scope`, and `progress_label`.
+
+Skill use and skill waivers are audit evidence only. They do not approve gates, certify claims, prove identification quality, or convert `ROUTE_READY` into `SUBSTANTIVE_PRODUCED`.
+
+## Task Mode, Output Intent, and Improvement Harvest
+
+Before non-trivial project work, classify the task shape with `aeros mode classify --lane <lane> --intent "<short intent>"`. Use the result to choose the lightest matching workflow preset; do not treat the classifier as execution authority or evidence admission.
+
+For source/data outputs, declare output intent where practical: `probe_only`, `staging_artifact`, `canonical_candidate`, `canonical_update`, or `audit_note`. Do not promote staging artifacts into canonical evidence without the appropriate data contract, provenance, or human review path.
+
+For route-sensitive work such as denominator capture, negative-seed discovery, source recapture, or official registry expansion, check `discovery/route_decision.yml` before collecting more sources. A pending route means the next action is a route packet or human decision, not more source accumulation.
+
+Use `aeros improve harvest` to collect framework-improvement candidates from local receipts and logs. Harvest output is advisory backlog input only; it does not modify gates, claims, or project state.
+
+Before opening a project task, prefer `aeros task preflight --lane <lane> --intent "<short intent>"`. Treat the packet as the operating envelope for that turn: task mode, route, skill obligations, output intents, allowed paths, and must-not-touch paths.
+
+Use `aeros sync doctor --project <path>` before judging a downstream project's behavior against the latest template. If the doctor reports missing or outdated capabilities, sync/roll out the template first or describe the project as running an older AEROS surface.
+
+For source capture, distinguish permission tiers. Public/local staging capture with `probe_only`, `staging_artifact`, or `audit_note` outputs may proceed without repeated human approval when it writes only staging/audit paths. Browser/portal/batch capture should use one bounded route/session approval. Credentials, API keys, paid sources, privacy/IRB/ToS uncertainty, `data/raw`, canonical updates, claims, papers, releases, and approvals require human approval.

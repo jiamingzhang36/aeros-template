@@ -1,0 +1,6 @@
+version: "0.1"
+policy: AEROS-HUMAN-GATE-QUEUE-001
+items: []
+schema:
+  required_fields: [project, request, why_human_needed, after_approval_codex_can, risk_boundary, status]
+  allowed_statuses: [pending, approved, blocked, superseded, done]

@@ -1,0 +1,163 @@
+version: "0.1"
+policy: AEROS-CHECK-PROFILES-001
+principle: >
+  Check profiles reduce daily latency without weakening the full internal
+  harness. Profiles select which mechanical checks to run; they do not approve
+  gates, skip criteria, change state, or certify research substance.
+default_profile: full
+profiles:
+  smoke:
+    description: "Fast cockpit/context/next/lane/schema checks for every small step."
+    checks:
+      - check_next_action.py
+      - check_architecture_freeze.py
+      - check_action_spec.py
+      - check_execution_envelope.py
+      - check_agent_envelope.py
+      - check_progress_semantics.py
+      - check_claim_vector.py
+      - check_claim_upgrade.py
+      - check_paper_readiness.py
+      - check_manuscript_citation_faithfulness.py
+      - check_manuscript_citation_interpretation.py
+      - check_literature_wrapper_sync.py
+      - check_evidence_units.py
+      - check_parser_benchmark.py
+      - check_session_scope.py
+      - check_skill_coverage.py
+      - check_execution_mode.py
+      - check_task_mode.py
+      - check_task_preflight.py
+      - check_source_capture_permission.py
+      - check_broad_capture_firewall.py
+      - check_execution_profiles.py
+      - check_source_id_consistency.py
+      - check_artifact_stage.py
+      - check_output_intent.py
+      - check_source_capture_permission.py
+      - check_route_early_gate.py
+      - check_improve_harvest.py
+      - check_sync_doctor.py
+      - check_update_ledger_hash_chain.py
+      - check_harness_observed_receipts.py
+      - check_protected_path_hook.py
+      - check_evidence_sufficiency_audit.py
+      - check_readiness_vector.py
+      - check_discovery_route_decision.py
+      - check_stale_triage.py
+      - check_context_bundle.py
+      - check_context_graph.py
+      - check_cockpit.py
+      - check_control_tax_dashboard.py
+      - check_write_audit.py
+      - check_reconcile.py
+      - check_sqlite_journal.py
+      - check_approval_freshness.py
+      - check_harness_profiles.py
+      - check_operating_dashboard.py
+      - check_work_lanes.py
+  lane:data:
+    description: "Data-first readiness and no-empty-run checks."
+    checks:
+      - check_next_action.py
+      - check_action_spec.py
+      - check_context_bundle.py
+      - check_data_inventory.py
+      - check_discovery_route_decision.py
+      - check_estimand_data_contract.py
+      - check_data_first_readiness.py
+      - check_data_probe.py
+      - check_broad_capture_firewall.py
+      - check_data_backfill_queue.py
+      - check_action_receipts.py
+      - check_skill_coverage.py
+      - check_goal_mode_data_progress.py
+      - check_noop_runs.py
+  lane:literature:
+    description: "Literature discovery/extraction boundary checks."
+    checks:
+      - check_next_action.py
+      - check_action_spec.py
+      - check_context_bundle.py
+      - check_literature_tools.py
+      - check_skill_coverage.py
+      - check_literature_adapters.py
+      - check_literature_fulltext_execution.py
+      - check_literature_wrapper_sync.py
+      - check_manuscript_citation_faithfulness.py
+      - check_manuscript_citation_interpretation.py
+      - check_evidence_units.py
+      - check_parser_benchmark.py
+      - check_citation_audit.py
+  lane:method:
+    description: "Method/analysis advisory integrity checks."
+    checks:
+      - check_next_action.py
+      - check_action_spec.py
+      - check_context_bundle.py
+      - check_estimand_cards.py
+      - check_skill_coverage.py
+      - check_identification_gate.py
+      - check_analysis_ledger.py
+      - check_preanalysis_happens_before.py
+      - check_negative_result_ledger.py
+  lane:claim:
+    description: "Claim boundary and support graph checks."
+    checks:
+      - check_next_action.py
+      - check_action_spec.py
+      - check_context_bundle.py
+      - check_claim_registry.py
+      - check_claim_toulmin_schema.py
+      - check_claim_vector.py
+      - check_claim_upgrade.py
+      - check_paper_readiness.py
+      - check_claim_ceiling.py
+      - check_claim_method_consistency.py
+      - check_research_graph.py
+  lane:writing:
+    description: "Paper-facing number/provenance/writing checks."
+    checks:
+      - check_next_action.py
+      - check_action_spec.py
+      - check_context_bundle.py
+      - check_number_registry.py
+      - check_skill_coverage.py
+      - check_number_scan.py
+      - check_claim_numbers_bound.py
+      - check_table_cell_sources.py
+      - check_paper_package.py
+      - check_manuscript_citation_faithfulness.py
+      - check_manuscript_citation_interpretation.py
+      - check_paper_readiness.py
+  lane:compliance:
+    description: "Release, replication, and compliance checks."
+    checks:
+      - check_next_action.py
+      - check_action_spec.py
+      - check_context_bundle.py
+      - check_aea_replication_alignment.py
+      - check_manuscript_citation_faithfulness.py
+      - check_manuscript_citation_interpretation.py
+      - check_literature_wrapper_sync.py
+      - check_evidence_sufficiency_audit.py
+      - check_skill_coverage.py
+      - check_replication_package.py
+      - check_data_availability_present.py
+      - check_compliance_gate.py
+      - check_approval_freshness.py
+  aea:
+    description: "AEA-style replication package alignment profile; advisory only and not a submission certificate."
+    checks:
+      - check_aea_replication_alignment.py
+      - check_replication_package.py
+      - check_data_availability_present.py
+      - check_provenance.py
+  full:
+    description: "Complete internal harness."
+    checks: all
+non_goals:
+  - "No profile may weaken gate exit criteria."
+  - "No profile may convert ROUTE_READY into SUBSTANTIVE_PRODUCED."
+  - "No profile may hide a failed full harness when preparing release or publication."
+  - "Keyword classifiers are advisory guardrails only; do not treat them as semantic understanding."

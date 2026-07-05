@@ -1,0 +1,50 @@
+task_id: T003a_protocol_design
+stage: execution
+gate: G4
+automation_class: auto_rerunnable
+evidence_receipt_required: false
+receipt_path: ''
+gate_status: pending
+allowed_skills:
+- causal-id-review
+- did-checklist
+- robustness-suite
+- placebo-test
+- econ-principles-check
+recommended_skills:
+- causal-id-review
+- robustness-suite
+- econ-principles-check
+depends_on:
+- T003_design_audit
+goal: 'Convert the approved G3 method card into an executable protocol for the first
+  main execution run. Define the observation unit, collection grid, inputs, outputs,
+  exclusion rules, result IDs to be produced, and the exact claim boundary. This is
+  the bridge from research design to runnable pipeline.
+
+  '
+inputs:
+- discovery/design_selection.md
+- docs/method_card.md
+- discovery/variable_construction.md
+- docs/data_contract.yml
+- project_manifest.yml
+allowed_outputs:
+- execution/protocol/main_execution_protocol.md
+- agent_runs/
+forbidden_actions:
+- Do not collect data or run analysis in this task.
+- Do not write anywhere under data/raw/.
+- Do not strengthen claims beyond the method card claim ceiling.
+checks:
+- check_execution_protocol.py
+- check_agent_run_report.py
+retry_policy:
+  max_retries: 1
+escalate_if:
+- protocol lacks observation unit, output schema, exclusion rules, or claim boundary
+- checks still fail after max_retries
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 480

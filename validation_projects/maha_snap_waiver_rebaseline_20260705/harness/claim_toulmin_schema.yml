@@ -1,0 +1,25 @@
+version: 1
+policy: AEROS-CLAIM-TOULMIN-001
+principle: Claims are defeasible arguments with qualifiers and possible rebuttals, not just supported/unsupported labels.
+fields:
+  claim_id: stable identifier
+  claim_text: exact claim language
+  claim_type: descriptive | associational | causal | methodological | feasibility
+  mode: confirmatory | exploratory
+  strength: unsupported | ambiguous | supported | contradicted
+  qualifier: scope, assumptions, population, time period, estimand, and known limits
+  warrant: why the evidence supports the claim
+  backing: method/literature/design support for the warrant
+  supported_by: evidence/result/provenance ids
+  contradicted_by: evidence/result/provenance ids that weaken or refute the claim
+  rebuttal: known threats, alternative interpretations, or validity gaps
+  claim_ceiling: maximum language allowed after qualifiers/rebuttals
+rules:
+  - id: exploratory_claim_has_lower_ceiling
+    rule: exploratory claims cannot exceed ambiguous unless a human claim-upgrade gate approves a stronger ceiling.
+  - id: qualifier_required_for_nontrivial_claim
+    rule: every supported or ambiguous empirical claim must carry a qualifier.
+  - id: rebuttal_required_for_causal_claim
+    rule: causal claims must document rebuttals or state why none are known.
+  - id: contradicted_claim_not_supported
+    rule: a claim with unresolved contradicted_by evidence cannot be marked supported.

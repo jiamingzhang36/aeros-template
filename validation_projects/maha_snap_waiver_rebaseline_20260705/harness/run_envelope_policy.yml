@@ -1,0 +1,28 @@
+version: "0.1"
+policy: AEROS-RUN-ENVELOPE-001
+authority: runtime_integrity
+principle: >
+  Every `aeros run` path must pass through ExecutionEnvelope policy. Deterministic
+  local commands with declared `run.command` and `max_agent_calls: 0` execute in
+  an isolated git worktree and only declared allowed_outputs are copied back.
+coverage:
+  deterministic_local_run:
+    status: enforced
+    condition: "contract has run.command and budget.max_agent_calls == 0"
+    confinement: isolated_git_worktree
+    acceptance: "observed_writes subset of allowed_outputs and not under deny_roots"
+  agent_task_run:
+    status: policy_gated
+    condition: "budget.max_agent_calls > 0"
+    confinement: "not claimed as fully enveloped in v1"
+    acceptance: "requires ActionSpec/task policy and human/provider authority; future work must add provider-side isolated workspace before claiming full confinement"
+deny_roots:
+  - data/raw/
+  - decisions/approvals/
+  - aeros/state/
+does_not_prove:
+  - scientific validity
+  - claim support
+  - gate approval
+  - safe network/provider behavior
+  - full LLM-agent sandboxing

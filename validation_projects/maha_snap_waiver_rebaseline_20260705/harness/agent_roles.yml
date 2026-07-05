@@ -1,0 +1,41 @@
+version: "0.1"
+
+roles:
+  worker:
+    purpose: "Execute a scoped task under the task contract."
+    may_edit: true
+    must_write_run_report: true
+  critic:
+    purpose: "Review the worker run, diff, checks, and claim boundaries."
+    may_edit: false
+    must_write_critic_report: true
+  human_gate:
+    purpose: "Accept, reject, revise, or defer changes that affect research judgment."
+    may_edit: true
+    must_log_decision: true
+
+skills:
+  project_intake:
+    output: "audits/project_intake_report.md"
+    critic_required: false
+  data_audit:
+    output: "audits/data_audit_report.md"
+    critic_required: true
+  design_audit:
+    output: "audits/design_audit_report.md"
+    critic_required: true
+  robustness_runner:
+    output: "audits/robustness_audit_report.md"
+    critic_required: true
+  result_validation:
+    output: "audits/result_validation_report.md"
+    critic_required: true
+  claim_guardian:
+    output: "audits/claim_audit_report.md"
+    critic_required: true
+  referee_panel:
+    output: "audits/referee_panel_report.md"
+    critic_required: false
+  replication_package:
+    output: "audits/replication_package_report.md"
+    critic_required: true

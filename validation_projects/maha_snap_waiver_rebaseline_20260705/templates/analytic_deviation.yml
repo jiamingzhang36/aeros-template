@@ -1,0 +1,20 @@
+version: 1
+deviation_id: DEV-001
+deviation_type: estimator_change
+scope: one_spec_only
+preanalysis_plan_ref: analysis/preanalysis_plan.yml
+spec_id: ''
+reason: ''
+observed_after_results: false
+allowed_effect:
+  - mark_exploratory
+  - require_qualifier
+disallowed_effect:
+  - raise_claim_ceiling
+  - hide_unregistered_specs
+  - convert_exploratory_to_confirmatory
+  - approve_gate
+human_review_required: true
+decision_ref: ''
+expires_after: ''
+notes: ''

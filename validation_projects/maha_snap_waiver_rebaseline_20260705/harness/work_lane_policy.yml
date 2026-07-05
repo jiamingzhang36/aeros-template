@@ -1,0 +1,92 @@
+version: "0.1"
+policy: AEROS-WORK-LANE-ROUTER-001
+principle: >
+  AEROS work must run in an explicit lane. A lane is a work surface, not a
+  scientific verdict: data work should produce data/source/probe artifacts or
+  blockers; literature work should produce full-text extraction/synthesis;
+  analysis work should produce executable protocols/results; claim work should
+  constrain language; writing work should draft bounded prose; harness work
+  should repair automation without claiming research progress.
+
+lanes:
+  - data
+  - literature
+  - analysis
+  - claim
+  - writing
+  - compliance
+  - harness
+
+switch_gate:
+  rule: >
+    If the active lane is blocked, stop and report the blocker. Do not switch
+    lanes inside the same run unless the human explicitly asks for that switch.
+  required_report_language:
+    - active_lane
+    - blocker_or_artifact
+    - requested_lane_switch_if_any
+
+completion_definitions:
+  data:
+    complete_only_if:
+      - data/source/probe artifact exists
+      - or honest blocker/source-discovery receipt exists
+    cannot_substitute:
+      - task scaffolding
+      - receipt-only progress
+      - literature synthesis
+      - paper rewrite
+  literature:
+    complete_only_if:
+      - full-text extraction card or function-specific synthesis exists
+      - source/full-text status is recorded
+    cannot_substitute:
+      - paper registry cleanup alone
+      - data scouting
+      - paper rewrite
+  analysis:
+    complete_only_if:
+      - executable protocol, pipeline output, result registry, robustness artifact, or validation artifact exists
+    cannot_substitute:
+      - claim strengthening
+      - manuscript rewrite
+      - data/source discovery alone
+  claim:
+    complete_only_if:
+      - claim audit, claim registry boundary, claim ceiling, or language constraint artifact exists
+    cannot_substitute:
+      - new data collection
+      - paper prose polish
+  writing:
+    complete_only_if:
+      - paper/package prose changes remain bound to registered claims and numbers
+    cannot_substitute:
+      - claim upgrade
+      - data validation
+  compliance:
+    complete_only_if:
+      - terms/license/IRB/release artifact exists
+    cannot_substitute:
+      - paper/package polish
+      - claim upgrade
+  harness:
+    complete_only_if:
+      - framework code/check/policy/template changed and harness validates
+    cannot_substitute:
+      - data progress
+      - literature review
+      - analysis progress
+      - claim support
+
+forbidden_cross_lane_substitutions:
+  - data lane blocked -> literature cleanup
+  - data lane blocked -> task scaffolding
+  - literature lane blocked -> paper positioning
+  - analysis lane blocked -> claim upgrade
+  - claim lane blocked -> writing stronger prose
+  - harness lane cleanup -> substantive research progress
+
+enforced_by:
+  - checks/check_work_lanes.py
+  - checks/check_goal_mode_data_progress.py
+  - checks/check_action_receipts.py

@@ -1,0 +1,46 @@
+task_id: T003b_pipeline_instantiation
+stage: execution
+gate: G4
+automation_class: auto_rerunnable
+evidence_receipt_required: false
+receipt_path: ''
+gate_status: pending
+allowed_skills:
+- code-review-econ
+- replication-check
+- data-merge-audit
+recommended_skills:
+- code-review-econ
+- replication-check
+- data-merge-audit
+depends_on:
+- T003a_protocol_design
+goal: 'Instantiate the project pipeline entry point for the approved execution protocol.
+  The pipeline must be runnable in smoke mode, must not write raw data, and must document
+  the scripts that will generate registered outputs.
+
+  '
+inputs:
+- execution/protocol/main_execution_protocol.md
+- code/99_make_all.py
+- project_manifest.yml
+allowed_outputs:
+- code/99_make_all.py
+- execution/pipeline_manifest.yml
+- agent_runs/
+forbidden_actions:
+- Do not write anywhere under data/raw/.
+- Do not run final data collection unless the protocol explicitly approves it.
+- Do not register output files that the pipeline cannot reproduce.
+checks:
+- check_pipeline_runs.py
+- check_agent_run_report.py
+retry_policy:
+  max_retries: 1
+escalate_if:
+- pipeline smoke mode cannot run
+- checks still fail after max_retries
+budget:
+  max_agent_calls: 2
+  max_dollars: 1.0
+  timeout_seconds: 480

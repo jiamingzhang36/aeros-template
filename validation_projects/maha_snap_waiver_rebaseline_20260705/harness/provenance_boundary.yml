@@ -1,0 +1,51 @@
+version: 1
+policy: AEROS-PROVENANCE-BOUNDARY-001
+principle: Feasibility evidence and claim-support evidence are different provenance classes.
+rules:
+  - id: probe_cannot_support_claim
+    source_class: small_data_probe
+    may_directly_support_claim: false
+    allowed_use: feasibility, parser validation, source triage, coverage hint
+    forbidden_use: final claim support, causal conclusion, policy conclusion
+  - id: validated_result_can_support_claim
+    source_class: validated_result
+    may_directly_support_claim: true
+    requires:
+      - result_index entry
+      - provenance record
+      - evidence ledger link
+      - claim registry link
+  - id: human_receipt_cannot_create_data_fact
+    source_class: human_review_receipt
+    may_directly_support_claim: false
+    allowed_use: audit source review, terms review, coverage review, approval trail
+    forbidden_use: invented measurement, unobserved result, unsupported claim upgrade
+  - id: action_receipt_is_progress_metadata
+    source_class: action_receipt
+    may_directly_support_claim: false
+    allowed_use: progress classification, accountability, no-op prevention
+    forbidden_use: empirical support or claim adjudication
+  - id: receipt_backed_exception_scope_limited
+    source_class: receipt_backed_exception
+    may_directly_support_claim: false
+    allowed_use: allow a scoped queue/probe/frozen-evidence action only within its declared scope
+    forbidden_use: support empirical claims, raise claim ceiling, approve gates, skip provenance, or bypass human gates
+    required_fields:
+      - scope
+      - expires_after
+      - allowed_effect
+      - disallowed_effect
+      - human_review_required
+      - reason_category
+      - decision_ref
+  - id: analytic_deviation_cannot_upgrade_claim
+    source_class: analytic_deviation
+    may_directly_support_claim: false
+    allowed_use: mark specification as exploratory, require qualifier, or document deviation from preanalysis plan
+    forbidden_use: hide unregistered specifications, convert exploratory to confirmatory, raise claim ceiling, or approve gate
+  - id: preanalysis_plan_controls_confirmatory_claims
+    source_class: preanalysis_plan
+    may_directly_support_claim: false
+    allowed_use: define confirmatory specification space and selection rules before result inspection
+    forbidden_use: empirical support without result/provenance/evidence linkage
+

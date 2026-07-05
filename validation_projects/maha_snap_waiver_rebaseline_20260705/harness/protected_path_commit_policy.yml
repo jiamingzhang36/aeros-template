@@ -1,0 +1,34 @@
+version: "0.1"
+policy: AEROS-PROTECTED-PATH-COMMIT-001
+principle: >
+  Protected research-authority paths must not be committed by default from an
+  agent run. The pre-commit hook is a local enforcement layer for the highest
+  risk paths; it does not approve scientific changes or replace human gates.
+protected_paths:
+  exact:
+    - docs/protected_definitions.yml
+    - docs/data_contract.yml
+    - evidence/claim_registry.md
+    - decisions/decision_log.csv
+    - harness/permissions.yml
+  prefixes:
+    - data/raw/
+    - decisions/approvals/
+override:
+  env_var: AEROS_ALLOW_PROTECTED_COMMIT
+  allowed_value: "1"
+  rule: >
+    Use only after an explicit human approval, gate decision, or protected-path
+    review. The hook cannot verify scientific validity; it only prevents silent
+    protected-path commits.
+installation:
+  template: tools/hooks/pre-commit-aeros-protected-paths
+  installer: tools/install_aeros_git_hooks.zsh
+  auto_installed: false
+does_not_prove:
+  - scientific validity
+  - claim support
+  - human approval
+  - release readiness
+  - absence of off-repo side effects
+

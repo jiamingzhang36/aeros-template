@@ -1,0 +1,1 @@
+../examples/tasks/TEMPLATE_task.md

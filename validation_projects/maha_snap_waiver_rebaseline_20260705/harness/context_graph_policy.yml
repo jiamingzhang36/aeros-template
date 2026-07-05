@@ -1,0 +1,28 @@
+version: "0.1"
+policy: AEROS-CONTEXT-GRAPH-001
+principle: >
+  The context graph is a lightweight derived navigation index for agents. It is
+  not the research graph, not an evidence source, and not an authority for gates
+  or claims.
+node_types:
+  - project
+  - lane
+  - gate
+  - next_action
+  - blocker
+  - human_gate_item
+  - evidence_delta
+  - artifact_pointer
+edge_types:
+  - current_gate
+  - candidate_gate
+  - recommends
+  - blocked_by
+  - mentions
+  - recent_delta
+  - lane_focus
+boundaries:
+  - "Do not use context graph edges as claim support."
+  - "Do not mark tasks stale from context graph changes."
+  - "Do not approve or block gates from context graph output."
+  - "Use the research graph for evidence/claim relationships; use this graph only for navigation/context."

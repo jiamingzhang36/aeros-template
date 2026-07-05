@@ -1,0 +1,13 @@
+result_admission_id: RA-FIX-001
+result_id: R-FIX-001
+admitted_evidence_units:
+  - EU-FIX-001
+admission_status: needs_review
+authority: human_gate_required
+claim_effect: none
+limitations:
+  - "Fixture validates separation of machine facts from human admission."
+does_not_prove:
+  - "scientific truth"
+  - "claim support"
+  - "paper readiness"

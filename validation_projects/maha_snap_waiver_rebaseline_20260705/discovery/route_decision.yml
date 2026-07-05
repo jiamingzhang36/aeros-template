@@ -1,0 +1,118 @@
+version: "0.1"
+policy: AEROS-DISCOVERY-ROUTE-DECISION-001
+decision_status: pending
+selected_route: pending
+allowed_routes:
+  - negative_seed_first
+  - base_universe_first
+  - coverage_probe_first
+  - literature_gap_first
+  - data_access_first
+  - document_first
+  - registry_first
+  - hybrid
+route_rules:
+  negative_seed_first:
+    default_when:
+      - "illegal, disputed, enforcement, court, complaint, penalty, or scam-like phenomena"
+      - "positive base universes are likely incomplete, promotional, or strategically curated"
+    first_actions:
+      - "collect verified negative seeds from adjudication, enforcement, complaints, or official notices"
+      - "back-trace entities to business registries, CNIPA/IP, MOFCOM, or domain-specific base lists"
+    does_not_prove:
+      - "population coverage"
+      - "prevalence"
+      - "representativeness"
+  base_universe_first:
+    default_when:
+      - "a stable official population frame exists before outcome/event discovery"
+      - "coverage denominator is central to the estimand"
+    first_actions:
+      - "verify base universe coverage and time vintage"
+      - "sample records before enrichment"
+  coverage_probe_first:
+    default_when:
+      - "multiple plausible source families exist and access/coverage is unknown"
+    first_actions:
+      - "probe small source samples before choosing a collection route"
+  literature_gap_first:
+    default_when:
+      - "the empirical object is unclear and the first risk is novelty/framing"
+    first_actions:
+      - "map closest literatures and identify what evidence would be decision-relevant"
+  data_access_first:
+    default_when:
+      - "the idea depends on credentialed, licensed, API, portal, or non-public data"
+    first_actions:
+      - "resolve access, license, ToS, and reproducibility constraints before design lock"
+  document_first:
+    default_when:
+      - "the empirical object is primarily in documents, filings, judgments, PDFs, or web pages"
+    first_actions:
+      - "capture a small document sample and classify source reliability before constructing data"
+  registry_first:
+    default_when:
+      - "a registry or administrative index is the safest source of entity identity"
+    first_actions:
+      - "verify registry identity, vintage, and fields before enrichment or negative-seed expansion"
+  hybrid:
+    default_when:
+      - "no single source family can establish both coverage and outcome signals"
+    first_actions:
+      - "run bounded probes across source families and choose the next route from observed coverage"
+current_decision:
+  route: pending
+  rationale: ""
+  decided_by: ""
+  decided_at: ""
+  decision_ref: ""
+  first_next_action: "Run `aeros next --lane data` or create a route packet before source collection."
+route_hypotheses:
+  negative_seed_first:
+    hypothesis: "Negative seeds are the safest first observable unit when the phenomenon is illegal, disputed, enforcement-driven, complaint-driven, or strategically hidden."
+    falsification_probe: "If a bounded negative-seed sweep yields no verifiable cases or no back-traceable entities, pause before expanding and reconsider base_universe_first or document_first."
+    promotion_condition: "At least one verified seed group can be back-traced to stable entity/source identifiers without touching canonical data or claim artifacts."
+  base_universe_first:
+    hypothesis: "A stable official population frame exists and should define the denominator before outcome/event enrichment."
+    falsification_probe: "If vintage, coverage, or identifier fields cannot be verified in a bounded probe, do not continue enrichment; switch to coverage_probe_first or data_access_first."
+    promotion_condition: "The base universe has documented vintage, field definitions, and at least one sample record that can be independently re-located."
+  coverage_probe_first:
+    hypothesis: "Source-family coverage is the primary unknown, so small probes should precede route commitment."
+    falsification_probe: "If probes cannot identify coverage, access, and duplicate risks across candidate source families, keep route pending."
+    promotion_condition: "A route packet compares source families and records a proposed next route."
+  literature_gap_first:
+    hypothesis: "The first risk is conceptual novelty/framing rather than data access."
+    falsification_probe: "If scoped literature already pins down the gap and needed empirical object, move to data/source route selection."
+    promotion_condition: "Gap-verification and method-identification queues identify what data would be decision-relevant."
+  data_access_first:
+    hypothesis: "Access, license, credential, or ToS uncertainty dominates route choice."
+    falsification_probe: "If access cannot be resolved or bounded, block rather than collect substitute evidence."
+    promotion_condition: "A resource/access packet records permissions, constraints, and allowed collection scope."
+  document_first:
+    hypothesis: "The empirical object is primarily encoded in documents, filings, judgments, PDFs, or web pages."
+    falsification_probe: "If documents cannot be captured, parsed, or identity-matched in a bounded sample, do not scale document collection."
+    promotion_condition: "A small document sample has identity metadata, parseability status, and source reliability notes."
+  registry_first:
+    hypothesis: "A registry or administrative index is the safest identity anchor."
+    falsification_probe: "If registry vintage, identity, or key fields are unstable, avoid downstream enrichment until route review."
+    promotion_condition: "Registry source identity, vintage, and join keys are documented in staging/audit artifacts."
+  hybrid:
+    hypothesis: "No single source family can establish both coverage and outcome signals."
+    falsification_probe: "If bounded probes do not reveal complementary source roles, do not combine noisy sources by default."
+    promotion_condition: "A route packet names which source family supplies coverage, which supplies outcome/event signals, and what remains unverified."
+negative_seed_keywords:
+  - illegal
+  - scam
+  - fraud
+  - penalty
+  - enforcement
+  - complaint
+  - lawsuit
+  - court
+  - sanction
+  - violation
+does_not_prove:
+  - "that the selected route is scientifically correct"
+  - "that data access exists"
+  - "that negative seeds are representative"
+  - "that a gate is approved"

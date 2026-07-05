@@ -1,0 +1,35 @@
+version: 1
+policy: AEROS-ADMISSIBILITY-MATRIX-001
+principle: Claim language is capped by artifact type, intended use, analysis path, identification diagnostics, and exception debt.
+claim_types:
+  feasibility:
+    admissible_evidence: [probe_report, validation_report, source_pointer]
+    max_language: feasibility
+  descriptive:
+    admissible_evidence: [spec_run_result, validation_report, robustness_result]
+    max_language: descriptive
+  associational:
+    admissible_evidence: [spec_run_result, validation_report, robustness_result, estimand_card]
+    max_language: associational
+  causal:
+    admissible_evidence: [spec_run_result, validation_report, robustness_result, identification_diagnostic, estimand_card]
+    max_language: limited_causal
+inadmissible:
+  action_receipt: [feasibility, descriptive, associational, causal]
+  human_gate_decision: [feasibility, descriptive, associational, causal]
+  probe_report: [descriptive, associational, causal]
+  validation_report: [causal]
+language_levels:
+  none: []
+  feasibility:
+    allowed_phrases: ["is feasible to measure", "can be collected", "can be parsed"]
+  descriptive:
+    allowed_phrases: ["is higher/lower", "descriptive evidence", "observed difference"]
+  associational:
+    allowed_phrases: ["is associated with", "correlates with", "predicts"]
+  quasi_experimental_suggestive:
+    allowed_phrases: ["is consistent with an effect", "suggestive design-based evidence"]
+  limited_causal:
+    allowed_phrases: ["under the maintained identifying assumptions", "caused in this setting"]
+  strong_causal:
+    allowed_phrases: ["caused", "effect of"]

@@ -1,0 +1,40 @@
+version: 2
+policy: AEROS-CONSTITUTIONAL-INVARIANTS-001
+principle: Keep hard rules few, mechanical, and enforceable; epistemic judgment belongs to compilers and human gates, not kernel creep.
+invariants:
+  - id: no_event_no_progress
+    rule: no kernel-mediated progress may be claimed without an event or action receipt
+    enforced_by: [checks/check_event_log_replay.py, checks/check_action_receipts.py, checks/check_noop_runs.py]
+    severity: hard
+  - id: no_artifact_no_completion
+    rule: a completed task must produce a substantive allowed artifact, not logs alone
+    enforced_by: [checks/check_completion_receipts.py, checks/check_noop_runs.py]
+    severity: hard
+  - id: no_data_progress_without_data_artifact
+    rule: data-oriented goal/continue runs may not claim substantive data progress unless a real data, source snapshot, inventory, or probe artifact exists
+    enforced_by: [checks/check_action_receipts.py, checks/check_goal_mode_data_progress.py]
+    severity: hard
+  - id: no_hash_lineage_no_provenance
+    rule: provenance requires content-addressed inputs/outputs and append-only event hash chaining
+    enforced_by: [checks/check_event_log_replay.py, checks/check_provenance.py, checks/check_research_graph.py]
+    severity: hard
+  - id: receipt_not_empirical_evidence
+    rule: action receipts and human review receipts document work or review, not empirical facts
+    enforced_by: [checks/check_action_receipts.py, checks/check_provenance_boundary.py]
+    severity: hard
+  - id: probe_not_final_validation
+    rule: probes can support feasibility and blocker statements only, not final empirical claims
+    enforced_by: [checks/check_data_probe.py, checks/check_provenance_boundary.py, checks/check_exception_scope.py]
+    severity: hard
+  - id: exploratory_not_confirmatory
+    rule: exploratory analyses may run freely but cannot be laundered into confirmatory claims without locked plan or deviation record
+    enforced_by: [checks/check_preanalysis_happens_before.py, checks/check_claim_toulmin_schema.py, checks/check_analysis_ledger.py]
+    severity: hard
+  - id: claim_scope_within_evidence_scope
+    rule: claim scope may not exceed supporting evidence scope without downgrade, qualifier, or human-reviewed exception
+    enforced_by: [checks/check_claim_toulmin_schema.py, checks/check_artifact_admissibility.py]
+    severity: hard
+  - id: claim_language_within_identification_ceiling
+    rule: claim language may not exceed identification and admissibility compiler ceiling
+    enforced_by: [checks/check_claim_ceiling.py, checks/check_identification_gate.py, checks/check_artifact_admissibility.py]
+    severity: hard

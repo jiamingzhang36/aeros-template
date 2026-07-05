@@ -1,0 +1,98 @@
+task_id: D001b_framework_search
+stage: discovery
+depends_on:
+- D001a_framing
+gate: G0
+automation_class: auto_rerunnable
+evidence_receipt_required: false
+receipt_path: ''
+gate_status: pending
+allowed_skills:
+- lit-review-assistant
+- academic-research-suite
+- bib-manager
+recommended_skills:
+- lit-review-assistant
+- academic-research-suite
+- bib-manager
+goal: "Search for literature WITHIN the human-reasoned framing deck and register each\
+  \ paper in discovery/literature/paper_registry.csv, stratified by function. This\
+  \ is the \"apply\" step after the framing \"plan\": you do NOT invent the framing\
+  \ here — you fill the registry inside the frameworks the deck already approved.\n\
+  For each framework card in discovery/literature/framing_deck.yml whose decision\
+  \ is NOT 'drop', do three things:\n\n  1. VERIFY AND REGISTER ITS ANCHORS. Every\
+  \ seminal anchor named on the card\n     becomes a registry row only after it is\
+  \ resolved through OpenAlex or DOI.\n     If the deck marks an anchor verification_status:\
+  \ pending, search OpenAlex\n     by exact/near-exact title, author, and year; carry\
+  \ the resolved DOI or\n     OpenAlex URL/ID into the registry. If an anchor cannot\
+  \ be verified, do\n     not fabricate it; record the unresolved item in citation_audit.md\
+  \ and\n     continue with verified anchors. The row's primary_function = the card's\n\
+  \     function bucket.\n\n  2. FIND APPLIED / BRIDGE PAPERS within that framework:\
+  \ works that apply the\n     framework to the instantiated project domain or a close\
+  \ analogue\n     (e.g. for \"policy diffusion as identification threat\", papers\
+  \ applying\n     diffusion/event-history to comparable adoption settings). Use OpenAlex\
+  \ —\n     search the framework's terms AND/OR the citation neighborhood of the\n\
+  \     anchors (works that cite, or are cited by, the anchor).\n\n  3. Add TOPIC-SUBSTANTIVE\
+  \ papers for the gap-verification,\n     background-institutional, and data-measurement\
+  \ buckets: project-specific works matching the literature scope, outcomes, and measurement\
+  \ needs.\n\nEach registered paper's primary_function is the bucket of the framework\
+  \ strand that surfaced it, so classification follows from the search, not a guess.\n"
+inputs:
+- discovery/literature/framing_deck.yml
+- discovery/01_literature_scope.md
+- discovery/literature/paper_registry.csv
+- project_manifest.yml
+allowed_outputs:
+- discovery/literature/paper_registry.csv
+- discovery/literature/search_log.csv
+- discovery/literature/citation_audit.md
+forbidden_actions:
+- Do not write anywhere under data/raw/ (enforced by a hook).
+- Do not re-do the framing or change the deck; search only within non-dropped cards.
+- Do not summarize findings or write synthesis.
+- Do not set status beyond 'discovered' or 'title_abstract_screened'.
+- Do not set extraction_card=yes, used_in_synthesis=yes, or full_text_available=yes.
+- Do not invent citations. Every row needs a real, OpenAlex- or DOI-resolvable locator.
+- Every verified non-dropped deck anchor MUST appear as a registry row; unresolved
+  pending anchors must be named in citation_audit.md instead of fabricated.
+- 'evidence_basis must be one of: none | title | abstract | full_text | extraction_card.
+  For deck anchors verified via OpenAlex metadata use ''title''; record ''anchor from
+  framing_deck'' provenance in the notes column, NOT in evidence_basis.'
+output_contract:
+  registry_path: discovery/literature/paper_registry.csv
+  registry_columns:
+  - paper_id
+  - citation_key
+  - title
+  - authors
+  - year
+  - source
+  - doi
+  - url
+  - pdf_url
+  - primary_function
+  - secondary_functions
+  - reading_depth
+  - status
+  - full_text_available
+  - opened_source
+  - opened_date
+  - evidence_basis
+  - screening_decision
+  - extraction_card
+  - used_in_synthesis
+  - notes
+checks:
+- check_literature_registry.py
+- check_citation_audit.py
+- check_literature_functions.py
+- check_anchors_in_registry.py
+retry_policy:
+  max_retries: 2
+escalate_if:
+- any non-dropped deck anchor is missing from the registry after max_retries
+- checks still fail after max_retries
+budget:
+  max_agent_calls: 3
+  max_dollars: 6.0
+  timeout_seconds: 900

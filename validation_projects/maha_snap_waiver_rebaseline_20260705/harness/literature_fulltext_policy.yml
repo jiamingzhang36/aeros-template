@@ -1,0 +1,45 @@
+version: 1
+policy: AEROS-LITERATURE-FULLTEXT-001
+principle: Literature bookkeeping is not substantive literature review execution.
+boundaries:
+  bookkeeping_complete:
+    guarantees:
+      - registry rows are well-formed
+      - source locators exist
+      - extraction card files exist when declared
+      - function classifications are valid
+    does_not_guarantee:
+      - full text was opened
+      - paper was read deeply
+      - synthesis claims are supported
+      - paper literature positioning is ready
+  substantive_literature_execution:
+    requires:
+      - full_text_available: yes
+      - opened_source: nonempty locator or local PDF path
+      - opened_date: nonempty date
+      - evidence_basis: full_text or extraction_card
+      - extraction_depth: full_text_extraction
+      - direct_evidence_notes: page_or_section_bound
+      - supports_and_cannot_support: explicit
+      - function_specific_synthesis: required before paper positioning
+literature_functions:
+  - gap-verification
+  - method-identification
+  - theory-mechanism
+  - data-measurement
+  - background-institutional
+  - idea-inspiring
+execution_tasks:
+  - LIT-FULL-001_gap_verification
+  - LIT-FULL-002_method_identification
+  - LIT-FULL-003_theory_mechanism
+  - LIT-FULL-004_data_measurement
+  - LIT-FULL-005_background_institutional
+  - LIT-SYNTH-001_function_specific_synthesis
+  - LIT-PAPER-001_literature_positioning
+hard_rules:
+  - source_bound_stub cards cannot support synthesis
+  - abstract_only papers cannot support synthesis
+  - function-specific synthesis must cite verified full-text extraction cards
+  - paper literature positioning must not cite a paper as closest literature unless it has full-text extraction evidence

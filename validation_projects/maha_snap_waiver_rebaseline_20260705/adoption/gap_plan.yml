@@ -1,0 +1,7 @@
+candidate_gate: G10
+missing:
+- formal claim registry
+- compliance / release review
+recommended_next:
+- run result validation and claim audit
+- run compliance gate before public release

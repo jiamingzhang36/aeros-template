@@ -1,0 +1,35 @@
+data_contract:
+  status: draft
+estimand_data_contract:
+  version: "0.1"
+  status: draft
+  research_question: ""
+  unit_of_observation: ""
+  population: ""
+  treatment_or_exposure: []
+  outcome: []
+  comparison: ""
+  time_window: ""
+  required_variation: ""
+  target_population: ""
+  estimand: ""
+  required_fields: []
+  required_variables: []
+  linkage_keys: []
+  join_keys: []
+  minimum_coverage: ""
+  maximum_missingness: ""
+  quality_thresholds: {}
+  probe_sampling_strategy: ""
+  probe_success_condition: ""
+  probe_stop_condition: ""
+  source_access_class: ""
+  license_class: ""
+  credential_requirement: ""
+  estimated_cost: ""
+  fallback_source: ""
+  minimum_probe_requirements: []
+  does_not_prove:
+    - data availability
+    - identification quality
+    - claim support

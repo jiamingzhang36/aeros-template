@@ -1,0 +1,9 @@
+# Research anchor: 4 components, set ONCE at intake and then frozen (anti-drift).
+# Set status: locked once decided; after that it is a protected file.
+anchor:
+  status: locked           # draft | locked
+  locked_at: "2026-07-05"
+  topic: "How does the MAHA-era SNAP waiver regime convert a nationally uniform in-kind transfer into heterogeneous state-specific product restrictions, and what public approval and pre-policy purchase-basket exposure patterns are observable?"
+  claim_type: "descriptive"
+  identification: "Document-linked policy-rule measurement, public approval-risk-window diagnostics, and ex-ante NielsenIQ policy-rule microsimulation; no post-policy causal demand, welfare, health, or actual SNAP/EBT transaction effect is identified in Paper 1."
+  data: "USDA/FNS and state waiver documents, public state-quarter event history, approved-state implementation/modification records, state benchmark covariates, and aggregate 2022-2024 NielsenIQ Consumer Panel exposure outputs."

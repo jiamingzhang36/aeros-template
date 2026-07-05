@@ -1,0 +1,60 @@
+version: "0.1"
+policy: AEROS-PARSER-BENCHMARK-001
+principle: >
+  Parser quality must be measured by page-addressable EvidenceUnit production,
+  not by whether a PDF/HTML file merely parses without crashing.
+candidate_parsers:
+  primary: docling
+  fallback: mineru
+  hard_scan_benchmark: olmocr
+corpus_buckets:
+  - bucket: econ_pdf
+    target_count: 50
+  - bucket: scanned_pdf
+    target_count: 10
+  - bucket: tables
+    target_count: 10
+  - bucket: appendix_formula
+    target_count: 10
+  - bucket: policy_report
+    target_count: 10
+  - bucket: html_working_paper
+    target_count: 10
+fixture_cases:
+  - id: html_working_paper_synthetic
+    bucket: html_working_paper
+    path: tests/parser/html_working_paper_case.html
+    expected_title: "Adversarial Parser Benchmark Working Paper"
+    expected_doi: "10.0000/aeros.parser.fixture"
+    expected_table_text: "state estimate CA 0.42"
+    min_chars: 180
+  - id: false_fulltext_cloudflare_challenge
+    bucket: html_working_paper
+    path: tests/parser/false_fulltext_cloudflare.html
+    should_be_rejected: true
+    expected_negative_markers:
+      - "Checking if the site connection is secure"
+      - "Enable JavaScript and cookies"
+    forbidden_target_title: "Target Economics Article"
+    min_chars: 80
+  - id: false_fulltext_spa_shell
+    bucket: html_working_paper
+    path: tests/parser/false_fulltext_spa_shell.html
+    should_be_rejected: true
+    expected_negative_markers:
+      - "You need to enable JavaScript to run this app"
+      - "root"
+    forbidden_target_title: "Target Economics Article"
+    min_chars: 50
+metrics:
+  - page_addressability
+  - table_recovery
+  - citation_reference_recovery
+  - identity_match
+  - false_fulltext_rate
+  - parse_cost
+  - parse_latency
+  - human_correction_minutes
+non_goals:
+  - "Does not install or run parser adapters."
+  - "Does not treat OCR/parser success as full-text review."

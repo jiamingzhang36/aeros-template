@@ -1,0 +1,46 @@
+version: 1
+source_id: SOURCE_ID
+source_type: local_csv
+source_name: ""
+owner_or_provider: ""
+access:
+  status: unknown
+  path_or_url: ""
+  canonical_url: ""
+  source_snapshot: ""
+  retrieved_at: ""
+  terms_or_license: ""
+  credential_or_irb_constraint: ""
+coverage:
+  unit: ""
+  geography: ""
+  period: ""
+  population_or_frame: ""
+  expected_rows: ""
+schema:
+  key_variables: []
+  linkage_keys: []
+  outcome_candidates: []
+  treatment_or_exposure_candidates: []
+probe:
+  status: unknown
+  metadata_path: ""
+  scorecard_path: ""
+  failure_types: []
+  sample_rows: ""
+risks:
+  selection_bias: ""
+  missingness: ""
+  measurement_error: ""
+  temporal_or_geographic_sparsity: ""
+  parsing_or_extraction_instability: ""
+allowed_claim_use:
+  feasibility_only: true
+  descriptive_support_allowed: false
+  causal_support_allowed: false
+  notes: Probe/source-card evidence cannot support final empirical claims without validated results and provenance boundary crossing.
+receipts:
+  approval_or_exception: ""
+  human_review_receipt: ""
+  terms_review: ""
+notes: ""
