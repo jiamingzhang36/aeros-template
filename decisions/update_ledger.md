@@ -2112,7 +2112,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-05 — Make `aeros drive --goal citation-risk` actually read the manuscript
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `7c16021`
 - **Change type**: framework / drive execution engine / submission grounding
 - **Action**: Added `aeros/runtime/citation_radar.py`, a read-only engine that parses a manuscript's narrative author-year citations (`Author (2025)`, `(A and B 2011; C et al. 2016)`, including line-wrapped groups), matches them to `discovery/literature/paper_registry.csv` by year + author-token overlap (handling institutional authors such as USDA/Institute), and ranks cited sources by grounding risk (unknown-source > ungrounded > grounded, claim-bearing escalated). Wired the `drive --goal citation-risk` objective to this engine and to a new read-only `checks/check_citation_risk_radar.py` (fixture-guarded, always advisory/exit 0), registered in the citation profiles. Fixed `MANUSCRIPT_GLOBS` in `submission_driver.py` to include `docs/manuscript/*.md|*.tex` — the prior globs only matched a `docs/manuscript.md` file and were silently blind to manuscripts stored inside a `docs/manuscript/` directory.
 - **Why**: `drive --goal citation-risk` previously only recommended `check_manuscript_citation_interpretation.py`, which via the buggy glob could not see manuscripts under `docs/manuscript/` and only parsed pandoc `@key` citations. On a real narrative-cited manuscript it reported "0 citations, clean" — governance machinery that never touched the paper. The radar closes that gap: on a live manuscript it surfaces claim-bearing citations pinned to sources absent from the evidence base (e.g. a specific cost magnitude cited to an untracked survey).
