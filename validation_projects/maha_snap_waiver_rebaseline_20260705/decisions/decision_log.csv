@@ -1,2 +1,3 @@
 Date,Decision ID,Task ID,Agent Recommendation,Critic Verdict,Human Decision,Rationale,Owner,Follow-up
 2026-07-05T01:30:09+00:00,G3 Research Design-approve-2026-07-05T01:30:09+00:00,human_gate,,,approve G3 Research Design,,gagaggg36,
+2026-07-05T02:09:12+00:00,G4-approve-2026-07-05T02:09:12+00:00,human_gate,,,approve G4,"Human reviewer accepted the clean rebaseline G4 decision packet. Approval is limited to the execution-lock boundary: measurement/descriptive design, bounded result/provenance registry, and ex-ante exposure framing; it does not authorize T010, claim upgrades, empirical reruns, NielsenIQ raw-data work, poster edits, or manuscript claim changes.",gagaggg36,
