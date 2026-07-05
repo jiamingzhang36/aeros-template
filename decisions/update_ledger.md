@@ -2093,7 +2093,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: MAHA research claims are supported; MAHA literature citations are grounded; downstream projects are committed; protected git hooks are installed in every repo; full project-specific harnesses beyond smoke are green.
 ## 2026-07-04 — Compile modes, tier citation grounding, and mature broad-capture metrics
 
-- **Commit(s)**: pending
+- **Commit(s)**: `cf2070c`
 - **Change type**: framework / runtime compression / literature grounding / broad capture
 - **Action**: Added a read-only `aeros inspect modes --compiled` alias and expanded the compiled mode map with `promotion_status`, making mode inspection project-manager-readable without changing runtime authority. Changed broad-capture progress semantics from `ROUTE_READY` to `CAPTURE_LOGGED`, added duplicate/staleness/saturation metrics to lead queues, and tightened broad-capture checks around the low-audit capture firewall. Tiered manuscript citation grounding into `tier_0_bibliographic`, `tier_1_interpretive`, and `tier_2_claim_bearing`; bibliographic citations are non-blocking when registry-mapped, interpretive citations surface non-blocking weaknesses, and claim-bearing citations remain blocking until extraction support and an approved interpretation record exist.
 - **Why**: This implements the freeze-period compression principle: do not add a new governance surface when an existing five-field/control model can carry the distinction. Capture should be cheap and non-promotable; promotion and claim-bearing manuscript text should be expensive and grounded.
