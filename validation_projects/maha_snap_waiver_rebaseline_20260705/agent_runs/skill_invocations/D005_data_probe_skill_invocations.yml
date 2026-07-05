@@ -1,0 +1,22 @@
+version: 1
+task_id: D005_data_probe
+generated_at: '2026-07-05T01:42:40+00:00'
+contract_path: tasks/discovery/D005_data_probe.yml
+run_report_path: ''
+allowed_skills:
+- data-quality-checker
+- describe-data
+- quick-stats
+- summary-stats-table
+recommended_skills:
+- data-quality-checker
+- describe-data
+- quick-stats
+- summary-stats-table
+required_skill_classes: []
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail

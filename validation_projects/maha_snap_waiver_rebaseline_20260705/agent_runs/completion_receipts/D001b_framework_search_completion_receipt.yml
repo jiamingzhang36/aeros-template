@@ -1,0 +1,115 @@
+version: 5
+task_id: D001b_framework_search
+generated_at: '2026-07-05T01:42:05+00:00'
+completion_mode: manual_recover
+claimed_status: passed
+declared_outcome: complete
+outcome_kind: complete
+contract_status: passed
+verification_level: checks_passed_with_artifact_hashes
+progress_domain: research
+progress_class: substantive
+progress_label: SUBSTANTIVE_PRODUCED
+authority_status: no_new_authority
+work_lane: ''
+contract_path: tasks/discovery/D001b_framework_search.yml
+automation_class: auto_rerunnable
+gate_status: pending
+run_report_path: ''
+skill_invocation_receipt_path: agent_runs/skill_invocations/D001b_framework_search_skill_invocations.yml
+allowed_outputs_expected:
+- discovery/literature/paper_registry.csv
+- discovery/literature/search_log.csv
+- discovery/literature/citation_audit.md
+allowed_outputs_found:
+- discovery/literature/paper_registry.csv
+- discovery/literature/search_log.csv
+- discovery/literature/citation_audit.md
+allowed_outputs_missing: []
+actual_outputs:
+- path: discovery/literature/paper_registry.csv
+  exists: true
+  type: file
+  sha256: ff50b8f390c96ab1ed86b82d3798b9bb9ba5313fb56cf001fcb6a62c09796aef
+  bytes: 20131
+- path: discovery/literature/search_log.csv
+  exists: true
+  type: file
+  sha256: bdcd8ae87e1996decdd21eb73ae1977f6bab1747f3ef37e6c98cf99d283e562f
+  bytes: 294
+- path: discovery/literature/citation_audit.md
+  exists: true
+  type: file
+  sha256: 13aaad03e6846c99e406f54e99c609d2d30fae14d74b464f16ca6b17e8d782f6
+  bytes: 7083
+staging_artifact_paths: []
+substantive_evidence_paths:
+- discovery/literature/paper_registry.csv
+- discovery/literature/search_log.csv
+- discovery/literature/citation_audit.md
+checks_required:
+- check_literature_registry.py
+- check_citation_audit.py
+- check_literature_functions.py
+- check_anchors_in_registry.py
+checks_run:
+- check_literature_registry
+- check_citation_audit.py
+- check_literature_functions.py
+- check_anchors_in_registry
+checks_passed:
+- check_literature_registry
+- check_citation_audit.py
+- check_literature_functions.py
+- check_anchors_in_registry
+checks_failed: []
+check_attestations:
+- name: check_literature_registry
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_literature_registry.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.042
+- name: check_citation_audit.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_citation_audit.py
+  exit_code: 0
+  elapsed_seconds: 0.051
+- name: check_literature_functions.py
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_literature_functions.py
+  exit_code: 0
+  elapsed_seconds: 0.075
+- name: check_anchors_in_registry
+  passed: true
+  command:
+  - /Library/Frameworks/Python.framework/Versions/3.14/bin/python3
+  - /Users/jiamingzhang/aeros-template/validation_projects/maha_snap_waiver_rebaseline_20260705/checks/check_anchors_in_registry.py
+  - --json
+  exit_code: 0
+  elapsed_seconds: 0.052
+evidence_receipt_required: false
+evidence_receipt_path: ''
+evidence_receipt_exists: false
+evidence_delta_ref: ''
+substantive_progress: true
+protected_definition_change_declared: false
+claim_change_declared: false
+human_decision_needed: false
+open_issues: []
+does_not_prove:
+- scientific validity
+- identification quality
+- claim support
+- human gate approval
+input_fingerprint: 8d940764427a03acaa20a83f4ee78e08d97aa1bf88b1b25c119be5eeda69690a
+output_fingerprint: 6a472ca58935f01bbff6c48d6f04cb8ccf82a7cd99d93171aa017aa986a5d88b
+dependency_fingerprint: c41ff4653cd7d494615e1bbf0b0e03514c6fee1940c50be4f385c25dc0f10f8a
+completion_verdict: pass
+failures: []

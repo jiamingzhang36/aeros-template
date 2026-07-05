@@ -1,0 +1,23 @@
+version: 1
+task_id: D002_data_scouting
+generated_at: '2026-07-05T01:32:44+00:00'
+contract_path: tasks/discovery/D002_data_scouting.yml
+run_report_path: ''
+allowed_skills:
+- data-codebook
+- data-inventory
+- describe-data
+- policy-timeline
+recommended_skills:
+- data-codebook
+- data-inventory
+- describe-data
+- policy-timeline
+required_skill_classes:
+- data_scouting
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail

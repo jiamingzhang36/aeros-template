@@ -1,0 +1,23 @@
+version: 1
+task_id: D004_variable_construction
+generated_at: '2026-07-05T01:42:49+00:00'
+contract_path: tasks/discovery/D004_variable_construction.yml
+run_report_path: ''
+allowed_skills:
+- data-codebook
+- data-inventory
+- data-quality-checker
+- feature-engineering
+recommended_skills:
+- data-codebook
+- data-inventory
+- data-quality-checker
+- feature-engineering
+required_skill_classes:
+- data_scouting
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail

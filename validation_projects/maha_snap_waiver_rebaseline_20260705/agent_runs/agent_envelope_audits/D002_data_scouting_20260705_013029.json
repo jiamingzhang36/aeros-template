@@ -1,0 +1,29 @@
+{
+  "allowed_writes": [],
+  "denied_writes": [],
+  "does_not_prove": [
+    "full LLM-agent sandboxing",
+    "safe provider/network behavior",
+    "scientific validity",
+    "claim support",
+    "gate approval"
+  ],
+  "mode": "audit",
+  "observed_writes": [
+    "validation_projects/maha_snap_waiver_rebaseline_20260705/outputs/pending_tasks/D002_data_scouting_20260705_013029.md"
+  ],
+  "ok": false,
+  "preexisting_dirty_paths": [
+    "validation_projects/maha_snap_waiver_rebaseline_20260705/agent_runs/agent_envelope_audits/D002_data_scouting_20260705_013029.json",
+    "validation_projects/maha_snap_waiver_rebaseline_20260705/decisions/decision_log.csv",
+    "validation_projects/maha_snap_waiver_rebaseline_20260705/outputs/pending_tasks/D002_data_scouting_20260705_013028.md"
+  ],
+  "sensitive_writes": [],
+  "task_id": "D002_data_scouting",
+  "undeclared_writes": [
+    "validation_projects/maha_snap_waiver_rebaseline_20260705/outputs/pending_tasks/D002_data_scouting_20260705_013029.md"
+  ],
+  "violations": [
+    "undeclared_writes: validation_projects/maha_snap_waiver_rebaseline_20260705/outputs/pending_tasks/D002_data_scouting_20260705_013029.md"
+  ]
+}

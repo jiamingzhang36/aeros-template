@@ -1,0 +1,20 @@
+version: 1
+task_id: D001a_framing
+generated_at: '2026-07-05T01:42:36+00:00'
+contract_path: tasks/discovery/D001a_framing.yml
+run_report_path: ''
+allowed_skills:
+- academic-research-suite
+- econ-principles-check
+- research-ideation
+recommended_skills:
+- academic-research-suite
+- econ-principles-check
+- research-ideation
+required_skill_classes: []
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail

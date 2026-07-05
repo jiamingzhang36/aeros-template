@@ -1,0 +1,201 @@
+idea: "How does the MAHA-era SNAP waiver regime convert a nationally uniform in-kind transfer into heterogeneous state-specific product restrictions, and what public approval and pre-policy purchase-basket exposure patterns are observable?"
+cards:
+  - id: F01
+    function: gap-verification
+    framework: "Closest empirical SNAP-waiver text analysis"
+    rationale: "The closest rival literature is not generic SNAP restriction commentary but empirical work that codes state waiver proposals or approval letters; this determines whether Paper 1 contributes beyond a descriptive policy scan."
+    role: robustness-comparison
+    caveat: "If a published study already measures the same waiver-design, approval, implementation, and NielsenIQ exposure objects, the novelty claim would need to be sharply narrowed."
+    decision: proposed
+    anchors:
+      - author: "Chrisinger"
+        year: 2025
+        title: "Characteristics of state waivers to establish nutritional restrictions in the supplemental nutrition assistance program"
+        openalex_id: ""
+        doi: "10.1093/haschl/qxaf221"
+        verification_status: verified
+        kind: empirical
+
+  - id: F02
+    function: method-identification
+    framework: "State policy adoption and event-history analysis"
+    rationale: "The approval-risk module resembles state policy adoption/event-history work, but the current paper uses that literature mainly to discipline risk-set timing, censoring, and sparse-event interpretation."
+    role: measurement-strategy
+    caveat: "The current short wave and jointly selected request process prevent a full causal event-history design; the framework should improve timing discipline rather than invite overfitted adoption models."
+    decision: proposed
+    anchors:
+      - author: "Berry and Berry"
+        year: 1990
+        title: "State Lottery Adoptions as Policy Innovations: An Event History Analysis"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: empirical
+      - author: "Shipan and Volden"
+        year: 2008
+        title: "The Mechanisms of Policy Diffusion"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: empirical
+
+  - id: F03
+    function: theory-mechanism
+    framework: "In-kind transfers, fungibility, and benefit-design restrictions"
+    rationale: "MAHA-era waivers change the set of goods purchasable with an in-kind transfer rather than banning consumption; this makes cash fungibility, benefit flexibility, and equivalent-cash-value losses central to interpretation."
+    role: mechanism-tested
+    caveat: "Current Paper 1 measures rule exposure, not equivalent variation, actual SNAP benefit bindingness, or realized substitution; structural demand and welfare claims must stay outside the current claim ceiling."
+    decision: proposed
+    anchors:
+      - author: "Moffitt"
+        year: 1989
+        title: "Estimating the Value of an In-Kind Transfer: The Case of Food Stamps"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: empirical
+      - author: "Oberg and Musalem"
+        year: 2025
+        title: "Consumer Response to Monetary Subsidies: A Structural Demand Analysis of the Supplemental Nutrition Assistance Program"
+        openalex_id: ""
+        doi: "10.1287/mksc.2021.0374"
+        verification_status: verified
+        kind: empirical
+
+  - id: F04
+    function: method-identification
+    framework: "Policy diffusion and endogenous public-risk entry"
+    rationale: "State waiver visibility, request timing, and public approval-risk entry are likely shaped by common national shocks, strategic timing, coalition learning, and peer-state diffusion."
+    role: identification-threat
+    caveat: "Approval concentration cannot be interpreted as a causal effect of governor party unless endogenous public entry, request quality, and common federal-regime timing are addressed; current Paper 1 therefore keeps this module descriptive/associational."
+    decision: proposed
+    anchors:
+      - author: "Volden"
+        year: 2006
+        title: "States as Policy Laboratories: Emulating Success in the Children's Health Insurance Program"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: empirical
+      - author: "Manski"
+        year: 1993
+        title: "Identification of Endogenous Social Effects: The Reflection Problem"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: theory
+
+  - id: F05
+    function: data-measurement
+    framework: "Scanner-data policy-rule measurement and price/exposure accounting"
+    rationale: "The NielsenIQ section is strongest when treated as a measurement exercise: mapping heterogeneous legal rules into product categories and applying them to pre-policy purchase baskets."
+    role: measurement-strategy
+    caveat: "Nominal spending-share exposure is not a price-adjusted purchasing-power measure; county/time scanner price indexes and household bootstrap intervals are separate extensions."
+    decision: proposed
+    anchors:
+      - author: "Zhen, Finkelstein, Nonnemaker, Karns, and Todd"
+        year: 2019
+        title: "Scanner Data-Based Panel Price Indexes"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: data
+      - author: "USDA Food and Nutrition Service"
+        year: 2016
+        title: "Foods Typically Purchased by Supplemental Nutrition Assistance Program Households"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: data
+
+  - id: F06
+    function: background-institutional
+    framework: "SNAP purchase restriction experiments and simulations"
+    rationale: "Prior SNAP restriction studies motivate why restriction baskets, cash substitution, and category-specific substitution/leakage need to be separated from policy-text exposure."
+    role: motivation
+    caveat: "RCT and simulation evidence from earlier SNAP restriction designs cannot be imported as realized MAHA waiver effects; it can only motivate interpretation boundaries and counterfactual-basket choices."
+    decision: proposed
+    anchors:
+      - author: "Harnack, French, Oakes, Story, Jeffery, and Rydell"
+        year: 2016
+        title: "Effects of Subsidies and Prohibitions on Nutrition in a Food Benefit Program: A Randomized Clinical Trial"
+        openalex_id: ""
+        doi: "10.1001/jamainternmed.2016.5633"
+        verification_status: verified
+        kind: empirical
+      - author: "Andreyeva, Luedicke, Henderson, and Tripp"
+        year: 2012
+        title: "Grocery store beverage choices by participants in federal food assistance and nutrition programs"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: empirical
+
+  - id: F07
+    function: background-institutional
+    framework: "WIC food-package implementation and UPC/vendor lists as institutional analogy"
+    rationale: "WIC shows how food-benefit eligibility rules become operational through approved product lists, vendor systems, and substitution margins, which is a close analogy for SNAP retailer implementation friction."
+    role: motivation
+    caveat: "WIC is a different program with narrower eligible populations and stronger pre-existing product-list infrastructure, so it should anchor implementation logic rather than identify SNAP waiver effects."
+    decision: proposed
+    anchors:
+      - author: "National Academies of Sciences, Engineering, and Medicine"
+        year: 2017
+        title: "Review of WIC Food Packages: Improving Balance and Choice: Final Report"
+        openalex_id: ""
+        doi: "10.17226/23655"
+        verification_status: verified
+        kind: review
+      - author: "Hinnosaar"
+        year: 2023
+        title: "The Persistence of Healthy Behaviors in Food Purchasing"
+        openalex_id: ""
+        doi: "10.1287/mksc.2022.1396"
+        verification_status: verified
+        kind: empirical
+
+  - id: F08
+    function: theory-mechanism
+    framework: "Administrative burden and implementation friction"
+    rationale: "Approval letters are not realized restrictions: retailer readiness, product-list ambiguity, reporting requirements, and modification letters create later administrative margins."
+    role: mechanism-tested
+    caveat: "The current evidence observes public documents and target implementation dates, not full retailer compliance costs or checkout-level realization; mechanism language must remain illustrative unless direct implementation data are added."
+    decision: proposed
+    anchors:
+      - author: "Herd and Moynihan"
+        year: 2018
+        title: "Administrative Burden: Policymaking by Other Means"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: theory
+      - author: "Negoita, Papadopoulos, and others"
+        year: 2022
+        title: "Administrative burden in nutrition assistance program implementation"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: empirical
+
+  - id: F09
+    function: method-identification
+    framework: "Waiver federalism and federal-side selection"
+    rationale: "SNAP food restriction waivers are a federal-state approval instrument, so the approval-risk module must allow federal priorities, state proposal quality, and political alignment to jointly shape observed approvals."
+    role: identification-threat
+    caveat: "Governor party may proxy a broader political-administrative alignment under a single federal regime; it is not an exogenous treatment unless federal-side selection and state-side application selection can be separated."
+    decision: proposed
+    anchors:
+      - author: "Thompson and Burke"
+        year: 2007
+        title: "Executive Federalism and Medicaid Demonstration Waivers"
+        openalex_id: ""
+        doi: ""
+        verification_status: pending
+        kind: empirical
+      - author: "Palmer"
+        year: 2025
+        title: "Another Side of Waiver Federalism: Lessons from Federal Youth Workforce Policy"
+        openalex_id: ""
+        doi: "10.1093/publius/pjaf052"
+        verification_status: verified
+        kind: empirical

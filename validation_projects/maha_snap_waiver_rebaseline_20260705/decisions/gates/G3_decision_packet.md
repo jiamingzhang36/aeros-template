@@ -1,15 +1,15 @@
 # Human Gate Decision Packet: G3
 
-Generated: 2026-07-05T01:23:35+00:00
+Generated: 2026-07-05T01:43:04+00:00
 Stage: discovery
-Current gate: G2 Measurement / Variable Construction
-Gate status: auto_advanced
-Candidate gate: execution / G10
+Current gate: G3 Research Design
+Gate status: approved
+Candidate gate: discovery / G3
 Earned claim ceiling: none
 
 ## Recommendation
 
-Approve G3 if the human reviewer accepts the evidence packet.
+G3 is already human-approved and current criteria still pass.
 
 ## Gate Criteria Status
 
@@ -25,6 +25,15 @@ Approve G3 if the human reviewer accepts the evidence packet.
 None. All criteria through the target gate passed.
 
 ## Evidence Overview
+
+### Passed Runtime Tasks
+
+- D001a_framing
+- D001b_framework_search
+- D002_data_scouting
+- D003_design_options
+- D004_variable_construction
+- D005_data_probe
 
 ### Registered Results
 

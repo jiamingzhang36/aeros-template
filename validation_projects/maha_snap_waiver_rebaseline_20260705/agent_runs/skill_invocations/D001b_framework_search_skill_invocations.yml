@@ -1,0 +1,20 @@
+version: 1
+task_id: D001b_framework_search
+generated_at: '2026-07-05T01:42:05+00:00'
+contract_path: tasks/discovery/D001b_framework_search.yml
+run_report_path: ''
+allowed_skills:
+- academic-research-suite
+- bib-manager
+- lit-review-assistant
+recommended_skills:
+- academic-research-suite
+- bib-manager
+- lit-review-assistant
+required_skill_classes: []
+skill_obligations: []
+skill_waivers: []
+skills_used: []
+invocations: []
+missing_skill_decision: true
+verdict: fail
