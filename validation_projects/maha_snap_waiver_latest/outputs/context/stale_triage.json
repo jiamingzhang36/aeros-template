@@ -1,0 +1,82 @@
+{
+  "frontier_gate": "G11",
+  "frontier_rank": 11,
+  "stage": "execution",
+  "lane": "project",
+  "items": [
+    {
+      "task_id": "T004_main_execution",
+      "stage": "execution",
+      "lane": "analysis",
+      "gate": "G4",
+      "stale_reason": "output_changed",
+      "bucket": "rerun_required",
+      "impact_level": "high",
+      "impact_scope": "specific_claims",
+      "command": "python3 -m aeros.cli iterate --stage execution --lane analysis --to-next-gate --dry-run",
+      "rationale": "Stale item remains visible because output changed or frontier/claim irrelevance cannot be proven. Preview only. Specific claim-bound/result-bound path detected; human review may be needed if checks fail.",
+      "output_changed": true,
+      "volatile_only_outputs": false,
+      "input_changed": false,
+      "dependency_changed": false,
+      "frontier_connected": true,
+      "claim_bound": true,
+      "impacted_claims": [
+        "C001",
+        "C002",
+        "C003",
+        "C004"
+      ],
+      "downstream_frontier_tasks": [
+        "T008_paper_package_draft",
+        "T009_expanded_collection_design",
+        "T010_expanded_ai_output_collection",
+        "T011_expanded_result_validation",
+        "claim_bound_output"
+      ],
+      "allowed_outputs": [
+        "outputs/",
+        "evidence/result_index.csv",
+        "evidence/claim_registry.md"
+      ],
+      "impact_propagated_from": []
+    },
+    {
+      "task_id": "T004b_robustness_plan",
+      "stage": "execution",
+      "lane": "analysis",
+      "gate": "G5",
+      "stale_reason": "dependency_output_changed",
+      "bucket": "revalidate_free",
+      "impact_level": "medium",
+      "impact_scope": "none",
+      "command": "python3 -m aeros.cli recover T004b_robustness_plan --check",
+      "rationale": "Allowed-output fingerprint is unchanged; refresh via checks before spending provider/API budget.",
+      "output_changed": false,
+      "volatile_only_outputs": false,
+      "input_changed": false,
+      "dependency_changed": true,
+      "frontier_connected": true,
+      "claim_bound": false,
+      "impacted_claims": [],
+      "downstream_frontier_tasks": [
+        "T008_paper_package_draft",
+        "T009_expanded_collection_design",
+        "T010_expanded_ai_output_collection",
+        "T011_expanded_result_validation"
+      ],
+      "allowed_outputs": [
+        "docs/robustness_checklist.md",
+        "agent_runs/"
+      ],
+      "impact_propagated_from": []
+    }
+  ],
+  "does_not_prove": [
+    "checks pass",
+    "rerun necessity beyond deterministic dependencies",
+    "scientific validity",
+    "claim support",
+    "gate approval"
+  ]
+}
