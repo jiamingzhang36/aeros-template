@@ -79,6 +79,7 @@ CHECKS = [
     "check_literature_wrapper_sync.py",
     "check_manuscript_citation_faithfulness.py",
     "check_manuscript_citation_interpretation.py",
+    "check_citation_risk_radar.py",
     "check_external_tool_registry.py",
     "check_git_guardrails.py",
     "check_data_inventory.py",

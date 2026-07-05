@@ -30,6 +30,11 @@ MANUSCRIPT_GLOBS = [
     "paper/*.tex",
     "docs/manuscript*.md",
     "docs/manuscript*.tex",
+    # manuscripts commonly live *inside* a docs/manuscript/ directory; the bare
+    # globs above only match a docs/manuscript.md file, never files under the
+    # directory, so the driver was silently blind to real manuscripts.
+    "docs/manuscript/*.md",
+    "docs/manuscript/*.tex",
 ]
 INTERPRETATION_RECORD_DIR = Path("discovery/literature/interpretation_records")
 EXTRACTION_CARD_DIR = Path("discovery/literature/extraction_cards")

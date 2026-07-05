@@ -15,6 +15,7 @@ import subprocess
 from typing import Any
 
 from .broad_capture import summarize_broad_capture
+from .citation_radar import build_citation_radar
 from .next_action import NextAction, compute_next_action
 from .submission_driver import build_submission_driver
 from .task_preflight import build_task_preflight
@@ -147,19 +148,33 @@ def _goal_objective(root: Path, goal: str, lane: str) -> DriveObjective:
         action = compute_next_action(root, lane="literature")
         return _objective_from_next(action)
     if goal in {"citation-risk", "citation_risk", "submission"}:
+        radar = build_citation_radar(root, top=12)
+        if radar.active:
+            why = (
+                f"{radar.claim_bearing_at_risk} claim-bearing citation(s) and "
+                f"{radar.unknown} cited source(s) outside the evidence base are the top "
+                f"submission risk in {radar.manuscript}; grounding them outranks mechanical revalidation."
+            )
+            status = "RISKS_FOUND" if (radar.unknown or radar.ungrounded) else "CLEAN"
+        else:
+            why = (
+                "Submission-stage usefulness is highest when claim-bearing manuscript "
+                f"citations are checked against the evidence base ({radar.reason})."
+            )
+            status = "INACTIVE"
         return DriveObjective(
             objective_id="citation_risk",
-            objective="Run manuscript citation grounding risk radar.",
+            objective="Run the manuscript citation risk radar (author-year cites vs paper registry).",
             lane="writing",
-            why="Submission-stage usefulness is highest when claim-bearing manuscript citations are checked against extraction and interpretation records.",
-            command="python3 checks/check_manuscript_citation_interpretation.py",
-            stop_condition="Stop after blocking claim-bearing citation rows are listed, or after the check confirms no blocking grounding failures.",
-            expected_artifacts=("audits/submission_driver/manuscript_citation_faithfulness.csv",),
+            why=why,
+            command="python3 checks/check_citation_risk_radar.py",
+            stop_condition="Stop after the ranked risk list is produced; acting on findings (grounding or claim edits) needs human review.",
+            expected_artifacts=("audits/citation_radar/citation_risk_radar.json",),
             can_run_without_human=True,
             needs_human=False,
-            status_label="CHECK_PASS",
-            safety=("read-only check", "does not certify scientific truth or paper readiness"),
-            source="aeros.runtime.submission_driver",
+            status_label=status,
+            safety=("read-only radar", "does not certify scientific truth, edit the paper, or approve gates"),
+            source="aeros.runtime.citation_radar",
         )
     if goal in {"data-probe", "data_probe", "probe"}:
         return DriveObjective(
