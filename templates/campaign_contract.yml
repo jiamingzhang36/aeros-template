@@ -1,0 +1,20 @@
+# AEROS Campaign Contract template
+# Use this only when starting a repeated same-lane autonomous loop.
+# It asks whether continuing the campaign is still worth it; it does not approve gates or claims.
+version: 1
+campaign_id: example_campaign
+objective_metric: clean_restriction_events
+current_value: 0
+stop_condition: "define the decision-relevant win condition"
+stop_condition_met: false
+task_budget: 8
+expected_yield_per_task: 3
+marginal_yield_window: 3
+binding_constraint: numerator_size
+fallback_if_stalled: "batch-ingest structured sources or escalate to human"
+batch_source_available: false
+rerun_decision_metric_after_gain: 10
+does_not_prove:
+  - scientific validity
+  - claim support
+  - gate approval

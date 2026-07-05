@@ -36,6 +36,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "citation_risk_radar": ["aeros/runtime/citation_radar.py", "checks/check_citation_risk_radar.py",
         "aeros/runtime/drive.py"],
     "drive": ["aeros/runtime/drive.py", "checks/check_drive.py", "aeros/cli.py"],
+    "campaign_contract": ["aeros/runtime/campaign.py", "checks/check_campaign_contract.py", "templates/campaign_contract.yml", "templates/campaign_progress.csv", "aeros/cli.py"],
 }
 
 CAPABILITY_EXEMPT_CHECKS: dict[str, str] = {

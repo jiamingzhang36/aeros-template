@@ -445,6 +445,26 @@ def _cmd_next(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_campaign(args: argparse.Namespace) -> int:
+    from .runtime.campaign import assess_campaign, format_campaign_assessment, write_campaign_assessment
+
+    root = _project_root()
+    report = assess_campaign(
+        root,
+        contract_path=getattr(args, "contract", "") or None,
+        progress_path=getattr(args, "progress", "") or None,
+    )
+    if getattr(args, "json", False):
+        print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
+    else:
+        print(format_campaign_assessment(report))
+    if getattr(args, "write", False):
+        md, js = write_campaign_assessment(root, report)
+        print(f"wrote {md.relative_to(root)}")
+        print(f"wrote {js.relative_to(root)}")
+    return 0
+
+
 def _cmd_drive(args: argparse.Namespace) -> int:
     from .runtime.drive import build_drive_report, format_drive_report, write_drive_report
 
@@ -1632,6 +1652,15 @@ def main(argv: list[str] | None = None) -> int:
     next_p.add_argument("--write", action="store_true", help="write NEXT_ACTION.md")
     next_p.add_argument("--json", action="store_true", help="emit machine-readable next action with full ActionSpec")
     next_p.set_defaults(func=_cmd_next)
+
+    campaign = sub.add_parser("campaign", help="assess repeated-loop campaign contracts and marginal-yield breakers")
+    campaign_sub = campaign.add_subparsers(dest="campaign_command", required=True)
+    campaign_assess = campaign_sub.add_parser("assess", help="assess active campaign contract without executing work")
+    campaign_assess.add_argument("--contract", default="", help="campaign contract path, default campaigns/active_campaign.yml")
+    campaign_assess.add_argument("--progress", default="", help="campaign progress CSV path, default campaigns/campaign_progress.csv")
+    campaign_assess.add_argument("--write", action="store_true", help="write outputs/campaign/campaign_assessment.md and .json")
+    campaign_assess.add_argument("--json", action="store_true", help="emit machine-readable campaign assessment")
+    campaign_assess.set_defaults(func=_cmd_campaign)
 
     drive_p = sub.add_parser("drive", help="choose and optionally execute one useful safe next objective")
     drive_p.add_argument("--goal", default="auto", choices=["auto", "capture", "broad-capture", "promote", "source-promotion", "literature", "fulltext", "citation-risk", "submission", "data-probe", "probe"], help="optional objective override")

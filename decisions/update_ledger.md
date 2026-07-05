@@ -2119,3 +2119,13 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: `python3 -m py_compile aeros/runtime/citation_radar.py aeros/runtime/drive.py aeros/runtime/submission_driver.py checks/check_citation_risk_radar.py`; `python3 checks/check_citation_risk_radar.py`; `python3 -m aeros.cli drive --goal citation-risk`; `python3 checks/check_harness_profiles.py`; `python3 checks/run_harness_checks.py --profile smoke --timeout 40`.
 - **Does not prove**: cited sources are true or false; an "unknown-source" flag is a real error rather than a registry-coverage gap; author-year matching is exhaustive; claim-bearing keyword detection is complete; the paper is submission-ready; scientific validity; claim, gate, or release authority is granted.
 - **Next check**: Sync into a real project (MAHA) and confirm the ranked risk list is trustworthy on the live manuscript; backfill this pending entry with the commit hash and a chain record.
+
+## 2026-07-05 — Add campaign contract circuit breaker
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / controller / campaign breaker
+- **Action**: Added `aeros campaign assess`, `aeros/runtime/campaign.py`, campaign contract/progress templates, and `check_campaign_contract.py`. The new advisory circuit breaker reads a campaign contract plus marginal-yield progress ledger and escalates when repeated same-lane work shows low marginal yield, task-budget exhaustion, binding-constraint drift, unused batch sources, or collecting without rerunning the decision metric.
+- **Why**: Real autonomous loops repeatedly got stuck in local climbing: many tasks produced little yield, chased a non-binding constraint, or kept collecting without testing the decision metric. AEROS needed a deterministic way to ask whether continuing the campaign is still worth it, not only whether the latest artifact is well-formed.
+- **Validation**: pending targeted checks: `python3 checks/check_campaign_contract.py`, `python3 checks/check_drive.py`, `python3 checks/check_sync_doctor.py`, `python3 checks/run_harness_checks.py --profile smoke --timeout 20`.
+- **Does not prove**: scientific validity; campaign objective optimality; that a stopped campaign is useless; claim support; gate approval; paper readiness.
+- **Next check**: Use in a real CMPD/MAHA/SNAP repeated data/literature campaign and verify it stops a low-yield loop before another batch of same-kind tasks.
