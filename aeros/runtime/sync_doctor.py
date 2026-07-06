@@ -31,7 +31,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "task_preflight": ["aeros/runtime/task_preflight.py", "checks/check_task_preflight.py"],
     "control_tax_dashboard": ["aeros/runtime/control_tax.py", "checks/check_control_tax_dashboard.py", "aeros/runtime/cockpit.py"],
     "write_audit": ["aeros/runtime/write_audit.py", "checks/check_write_audit.py", "aeros/cli.py"],
-    "submission_research_driver": ["aeros/runtime/submission_driver.py", "aeros/runtime/citation_sentence_grounding.py", "checks/check_manuscript_citation_faithfulness.py",
+    "submission_research_driver": ["aeros/runtime/submission_driver.py", "aeros/runtime/citation_sentence_grounding.py", "harness/citation_function_requirements.yml", "checks/check_manuscript_citation_faithfulness.py",
         "checks/check_manuscript_citation_interpretation.py", "checks/check_literature_wrapper_sync.py", "aeros/cli.py"],
     "citation_risk_radar": ["aeros/runtime/citation_radar.py", "checks/check_citation_risk_radar.py",
         "aeros/runtime/drive.py"],

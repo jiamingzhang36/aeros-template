@@ -2158,4 +2158,13 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: pending targeted checks: `python3 checks/check_skill_layer.py`, `python3 checks/check_skill_coverage.py`, `python3 checks/check_sync_doctor.py`, and smoke harness.
 - **Does not prove**: legal access for any specific source; successful PDF download; PDF readability; identity match to the target paper; extraction-card correctness; citation faithfulness; claim support; gate approval.
 - **Next check**: Use on a real blocked full-text item and confirm it updates `fulltext_ready_queue.csv` or `missing_fulltext_queue.csv` without writing extraction cards or claims.
+## 2026-07-06 — Add citation function requirements to manuscript grounding
+
+- **Commit(s)**: pending
+- **Change type**: framework / literature grounding / citation-function compiler
+- **Action**: Added `harness/citation_function_requirements.yml` and upgraded sentence-level manuscript citation grounding so each cited sentence receives a `citation_function`, required/available evidence, source type, risk level, and citation-debt status. `check_manuscript_citation_faithfulness.py` now fixtures metadata/background citations, abstract-only result/number claims, and approved interpretation records. `aeros drive --goal citation-risk` now prioritizes sentence-level citation debt instead of only author-year registry risk.
+- **Why**: Reference existence and full-text availability are insufficient. AEROS needs function-specific evidence requirements so bibliography can stay broad while claim-bearing manuscript citations must be source-passage grounded.
+- **Validation**: pending targeted checks: `python3 checks/check_manuscript_citation_faithfulness.py`, `python3 checks/check_citation_risk_radar.py`, `python3 checks/check_sync_doctor.py`, and smoke harness.
+- **Does not prove**: citation-function inference is perfect; cited sources are true; human interpretation records are correct beyond their source passages; every uncited sentence is grounded; paper readiness; claim support; gate approval.
+- **Next check**: Run on a real manuscript and verify citation debt rows point to useful actions: recover full text, add extraction card, add interpretation record, weaken sentence, or replace citation.
 

@@ -16,6 +16,7 @@ from typing import Any
 
 from .broad_capture import summarize_broad_capture
 from .citation_radar import build_citation_radar
+from .citation_sentence_grounding import build_sentence_citation_grounding
 from .next_action import NextAction, compute_next_action
 from .submission_driver import build_submission_driver
 from .task_preflight import build_task_preflight
@@ -149,32 +150,36 @@ def _goal_objective(root: Path, goal: str, lane: str) -> DriveObjective:
         return _objective_from_next(action)
     if goal in {"citation-risk", "citation_risk", "submission"}:
         radar = build_citation_radar(root, top=12)
+        grounding = build_sentence_citation_grounding(root)
+        debt_count = int((grounding.get("counts") or {}).get("citation_debt_rows") or 0)
+        blocking_count = int((grounding.get("counts") or {}).get("blocking_rows") or 0)
         if radar.active:
             why = (
-                f"{radar.claim_bearing_at_risk} claim-bearing citation(s) and "
-                f"{radar.unknown} cited source(s) outside the evidence base are the top "
-                f"submission risk in {radar.manuscript}; grounding them outranks mechanical revalidation."
+                f"{radar.claim_bearing_at_risk} claim-bearing citation(s), "
+                f"{radar.unknown} cited source(s) outside the evidence base, and "
+                f"{debt_count} sentence-level citation debt row(s) are the top submission risk in "
+                f"{radar.manuscript}; grounding them outranks mechanical revalidation."
             )
-            status = "RISKS_FOUND" if (radar.unknown or radar.ungrounded) else "CLEAN"
+            status = "RISKS_FOUND" if (radar.unknown or radar.ungrounded or debt_count) else "CLEAN"
         else:
             why = (
-                "Submission-stage usefulness is highest when claim-bearing manuscript "
-                f"citations are checked against the evidence base ({radar.reason})."
+                "Submission-stage usefulness is highest when cited manuscript sentences are checked "
+                f"against function-specific evidence requirements ({radar.reason}); current citation debt rows={debt_count}."
             )
-            status = "INACTIVE"
+            status = "RISKS_FOUND" if blocking_count else "INACTIVE"
         return DriveObjective(
             objective_id="citation_risk",
-            objective="Run the manuscript citation risk radar (author-year cites vs paper registry).",
+            objective="Run manuscript citation risk and sentence-level citation-function grounding.",
             lane="writing",
             why=why,
-            command="python3 checks/check_citation_risk_radar.py",
-            stop_condition="Stop after the ranked risk list is produced; acting on findings (grounding or claim edits) needs human review.",
-            expected_artifacts=("audits/citation_radar/citation_risk_radar.json",),
+            command="python3 checks/check_manuscript_citation_faithfulness.py",
+            stop_condition="Stop after citation debt rows are visible; acting on findings (full-text recovery, extraction, interpretation, or claim edits) needs human review.",
+            expected_artifacts=("audits/citation_radar/citation_risk_radar.json", "audits/citation_debt_report.csv"),
             can_run_without_human=True,
             needs_human=False,
             status_label=status,
-            safety=("read-only radar", "does not certify scientific truth, edit the paper, or approve gates"),
-            source="aeros.runtime.citation_radar",
+            safety=("read-only/function-grounding advisory", "does not certify scientific truth, edit the paper, or approve gates"),
+            source="aeros.runtime.citation_radar+aeros.runtime.citation_sentence_grounding",
         )
     if goal in {"data-probe", "data_probe", "probe"}:
         return DriveObjective(

@@ -1,0 +1,131 @@
+version: "0.1"
+policy: AEROS-CITATION-FUNCTION-001
+principle: >
+  Bibliographies may be broad, but manuscript citations must be function-grounded.
+  The evidence requirement is determined by how the cited sentence uses the
+  source, not by whether the source merely appears in the registry.
+functions:
+  metadata_only:
+    meaning: "The citation only identifies that a work/source exists."
+    minimum_evidence: registry_metadata
+    required_evidence: [registry_metadata]
+    fulltext_required: false
+    interpretation_required: false
+    allowed_status: metadata_only_ok
+    blocking: false
+  background_pointer:
+    meaning: "The citation provides weak background orientation, not a substantive claim."
+    minimum_evidence: registry_metadata_or_abstract
+    required_evidence: [registry_metadata]
+    fulltext_required: false
+    interpretation_required: false
+    allowed_status: background_ok
+    blocking: false
+  related_literature:
+    meaning: "The citation places the paper in a literature or points to related work."
+    minimum_evidence: registry_metadata_or_extraction_card
+    required_evidence: [registry_metadata]
+    preferred_evidence: [extraction_card]
+    fulltext_required: false
+    interpretation_required: false
+    allowed_status: related_literature_ok
+    blocking: false
+  method_precedent:
+    meaning: "The citation supports a method, design, identification, or estimator statement."
+    minimum_evidence: method_section_extraction
+    required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
+    fulltext_required: true
+    interpretation_required: true
+    allowed_status: grounded
+    blocking: true
+  data_source:
+    meaning: "The citation supports a data-source, dataset, variable, or measurement statement."
+    minimum_evidence: data_or_source_snapshot
+    required_evidence: [registry_metadata, extraction_card]
+    preferred_evidence: [source_passage, approved_interpretation]
+    fulltext_required: true
+    interpretation_required: false
+    allowed_status: grounded_or_snapshot_backed
+    blocking: true
+  result_claim:
+    meaning: "The citation supports what a paper finds, estimates, shows, reports, or concludes."
+    minimum_evidence: result_passage_extraction
+    required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
+    fulltext_required: true
+    interpretation_required: true
+    allowed_status: grounded
+    blocking: true
+  mechanism_claim:
+    meaning: "The citation supports a mechanism, channel, explanation, or interpretation claim."
+    minimum_evidence: mechanism_passage_extraction
+    required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
+    fulltext_required: true
+    interpretation_required: true
+    allowed_status: grounded
+    blocking: true
+  number_fact:
+    meaning: "The citation supports a number, statistic, table value, magnitude, or percentage."
+    minimum_evidence: table_or_source_snapshot
+    required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
+    preferred_evidence: [table_or_page_locator]
+    fulltext_required: true
+    interpretation_required: true
+    allowed_status: grounded
+    blocking: true
+  policy_fact:
+    meaning: "The citation supports an institutional or policy fact. Official source snapshots are preferred."
+    minimum_evidence: official_source_snapshot_or_registry_metadata
+    required_evidence: [registry_metadata]
+    preferred_evidence: [official_source_snapshot]
+    fulltext_required: false
+    interpretation_required: false
+    allowed_status: policy_source_ok
+    blocking: false
+  legal_fact:
+    meaning: "The citation supports a legal/regulatory fact. Official legal source snapshots are preferred."
+    minimum_evidence: official_legal_snapshot_or_registry_metadata
+    required_evidence: [registry_metadata]
+    preferred_evidence: [official_source_snapshot]
+    fulltext_required: false
+    interpretation_required: false
+    allowed_status: legal_source_ok
+    blocking: false
+  literature_gap:
+    meaning: "The citation supports a claim about what the literature lacks or has established."
+    minimum_evidence: multi_paper_fulltext_synthesis
+    required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
+    preferred_evidence: [multi_paper_synthesis]
+    fulltext_required: true
+    interpretation_required: true
+    allowed_status: grounded
+    blocking: true
+status_labels:
+  pass:
+    - grounded
+    - metadata_only_ok
+    - background_ok
+    - related_literature_ok
+    - policy_source_ok
+    - legal_source_ok
+  debt:
+    - missing_fulltext
+    - missing_extraction
+    - missing_interpretation
+    - missing_passage
+    - abstract_only_too_strong
+    - source_unsuitable
+    - overclaimed
+    - unsupported
+    - source_unavailable
+    - needs_human_review
+safety:
+  - Do not require every registry paper to have full text.
+  - Do require every claim-bearing cited sentence to have source-passage grounding.
+  - Do not let PDF retrieval create extraction cards or claim support automatically.
+  - Do not treat LLM citation judgment as final authority.
+does_not_prove:
+  - scientific truth
+  - human interpretation correctness
+  - paper readiness
+  - claim support
+  - gate approval

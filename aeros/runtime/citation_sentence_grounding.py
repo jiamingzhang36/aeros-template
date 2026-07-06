@@ -2,8 +2,8 @@
 
 This module upgrades citation checking from registry/card existence to a
 sentence-level grounding queue. It parses manuscript sentences, extracts citation
-keys, maps each key to paper_registry rows and extraction cards, and requires
-claim-bearing sentences to have an approved human interpretation record.
+keys, maps each key to paper_registry rows and extraction cards, classifies the
+citation function, and checks the function-specific evidence requirement.
 
 It still does not prove scientific truth. It makes citation support auditable and
 blocks paper-readiness claims when a cited claim-bearing sentence lacks a
@@ -37,6 +37,7 @@ MANUSCRIPT_GLOBS = (
 REGISTRY = Path("discovery/literature/paper_registry.csv")
 EXTRACTION_DIR = Path("discovery/literature/extraction_cards")
 INTERPRETATION_DIR = Path("discovery/literature/interpretation_records")
+REQUIREMENTS = Path("harness/citation_function_requirements.yml")
 
 CLAIM_MARKERS = (
     "we find", "we show", "our result", "our estimate", "estimate", "estimated",
@@ -51,11 +52,27 @@ INTERPRETIVE_MARKERS = (
 APPROVED_FAITHFUL = {"faithful", "direct_support", "supports"}
 WEAK_VALUES = {"weak", "partial_support", "background_only"}
 BAD_VALUES = {"unsupported", "overclaimed", "contradicts", "mismatch", "fail"}
+STRONG_FUNCTIONS = {"method_precedent", "data_source", "result_claim", "mechanism_claim", "number_fact", "literature_gap"}
+
+DEFAULT_REQUIREMENTS: dict[str, dict[str, Any]] = {
+    "metadata_only": {"required_evidence": ["registry_metadata"], "blocking": False, "allowed_status": "metadata_only_ok"},
+    "background_pointer": {"required_evidence": ["registry_metadata"], "blocking": False, "allowed_status": "background_ok"},
+    "related_literature": {"required_evidence": ["registry_metadata"], "blocking": False, "allowed_status": "related_literature_ok"},
+    "method_precedent": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "approved_interpretation"], "blocking": True, "allowed_status": "grounded"},
+    "data_source": {"required_evidence": ["registry_metadata", "extraction_card"], "blocking": True, "allowed_status": "grounded_or_snapshot_backed"},
+    "result_claim": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "approved_interpretation"], "blocking": True, "allowed_status": "grounded"},
+    "mechanism_claim": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "approved_interpretation"], "blocking": True, "allowed_status": "grounded"},
+    "number_fact": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "approved_interpretation"], "blocking": True, "allowed_status": "grounded"},
+    "policy_fact": {"required_evidence": ["registry_metadata"], "blocking": False, "allowed_status": "policy_source_ok"},
+    "legal_fact": {"required_evidence": ["registry_metadata"], "blocking": False, "allowed_status": "legal_source_ok"},
+    "literature_gap": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "approved_interpretation"], "blocking": True, "allowed_status": "grounded"},
+}
 
 DOES_NOT_PROVE = [
     "that the cited source is true",
     "that human interpretation is correct beyond the recorded source passage",
     "that uncited manuscript claims are grounded",
+    "that citation-function inference is perfect",
     "that the paper is submission-ready",
     "that claim, gate, or release authority is granted",
 ]
@@ -72,6 +89,11 @@ class SentenceCitationGroundingRow:
     extraction_card: str
     interpretation_record: str
     claim_type: str
+    citation_function: str
+    required_evidence: str
+    available_evidence: str
+    source_type: str
+    risk_level: str
     support_status: str
     required_action: str
     blocking: bool
@@ -93,12 +115,30 @@ def _rel(root: Path, path: Path | str) -> str:
         return str(p)
 
 
+def _load_requirements(root: Path) -> dict[str, dict[str, Any]]:
+    path = root / REQUIREMENTS
+    if yaml is None or not path.exists():
+        return DEFAULT_REQUIREMENTS
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return DEFAULT_REQUIREMENTS
+    functions = data.get("functions") if isinstance(data, dict) else {}
+    if not isinstance(functions, dict):
+        return DEFAULT_REQUIREMENTS
+    merged = {key: dict(value) for key, value in DEFAULT_REQUIREMENTS.items()}
+    for key, value in functions.items():
+        if isinstance(value, dict):
+            merged[str(key)] = {**merged.get(str(key), {}), **value}
+    return merged
+
+
 def _manuscripts(root: Path) -> list[Path]:
     out: list[Path] = []
     for pattern in MANUSCRIPT_GLOBS:
         out.extend(p for p in root.glob(pattern) if p.is_file())
-    # Prefer main paper-ish names, but keep deterministic order.
     return sorted(set(out), key=lambda p: ("appendix" in p.name.lower(), str(p)))
+
 
 
 def _strip_tex_noise(text: str) -> str:
@@ -148,7 +188,6 @@ def _stable_sentence_id(path: str, line: int, sentence: str, key: str) -> str:
     payload = f"{path}\n{line}\n{sentence}\n{key}".encode("utf-8")
     return "S_" + hashlib.sha256(payload).hexdigest()[:12].upper()
 
-
 def _registry_rows(root: Path) -> tuple[dict[str, dict[str, str]], dict[str, str]]:
     path = root / REGISTRY
     by_pid: dict[str, dict[str, str]] = {}
@@ -169,7 +208,52 @@ def _registry_rows(root: Path) -> tuple[dict[str, dict[str, str]], dict[str, str
     return by_pid, by_key
 
 
-def _claim_type(sentence: str) -> str:
+def _source_type(row: dict[str, str]) -> str:
+    for col in ("source_type", "publication_type", "type", "source_kind"):
+        val = (row.get(col) or "").strip().lower()
+        if val:
+            return val
+    locator = " ".join((row.get(col) or "") for col in ("url", "source_or_path", "stable_url", "doi", "title")).lower()
+    if any(token in locator for token in ("usda", "fda", "epa", "gov", "regulation", "statute", "code of federal")):
+        return "official_source"
+    return "academic_paper"
+
+
+def _citation_function(sentence: str, row: dict[str, str]) -> str:
+    low = sentence.lower()
+    explicit = ""
+    for col in ("citation_function", "function"):
+        explicit = (row.get(col) or "").strip().lower()
+        if explicit:
+            return explicit
+    if any(marker in low for marker in ("gap", "little evidence", "few studies", "literature lacks", "understudied")):
+        return "literature_gap"
+    if any(marker in low for marker in ("table", "figure", "appendix", "billion", "million", "percent", "%", "$", "usd", "statistic", "share", "rate")) and any(ch.isdigit() for ch in low):
+        return "number_fact"
+    if any(marker in low for marker in ("mechanism", "channel", "pathway", "explanation", "why this", "because")):
+        return "mechanism_claim"
+    if any(marker in low for marker in ("method", "identification", "difference-in-differences", "did", "instrument", "iv", "event study", "estimator", "specification")):
+        return "method_precedent"
+    if any(marker in low for marker in ("dataset", "data source", "survey", "database", "measurement", "variable", "sample")):
+        return "data_source"
+    if any(marker in low for marker in CLAIM_MARKERS) or any(marker in low for marker in ("finds", "shows", "reports", "estimates", "documents", "demonstrates")):
+        return "result_claim"
+    if any(marker in low for marker in ("law", "legal", "statute", "regulation", "court", "rulemaking")):
+        return "legal_fact"
+    if any(marker in low for marker in ("agency", "official", "usda", "fda", "government")):
+        return "policy_fact"
+    if any(marker in low for marker in ("literature", "prior work", "related work", "studies", "scholars")):
+        return "related_literature"
+    if any(marker in low for marker in ("background", "context", "overview", "see also")):
+        return "background_pointer"
+    return "metadata_only"
+
+
+def _claim_type_for_function(function: str, sentence: str) -> str:
+    if function in STRONG_FUNCTIONS:
+        return "claim_bearing"
+    if function in {"metadata_only", "background_pointer"}:
+        return "bibliographic"
     low = sentence.lower()
     if any(marker in low for marker in CLAIM_MARKERS):
         return "claim_bearing"
@@ -250,7 +334,7 @@ def _verdict_from_record(record: dict[str, Any]) -> tuple[str, str]:
     if human not in {"approved", "yes", "true"}:
         return "needs_human_review", "interpretation record is not human-approved"
     if not passage:
-        return "needs_human_review", "approved interpretation record lacks source_passage"
+        return "missing_passage", "approved interpretation record lacks source_passage"
     if verdict in BAD_VALUES or relation in BAD_VALUES:
         return "overclaimed", "approved record marks support as unsupported/overclaimed/contradictory"
     if verdict in APPROVED_FAITHFUL or relation in APPROVED_FAITHFUL:
@@ -260,8 +344,126 @@ def _verdict_from_record(record: dict[str, Any]) -> tuple[str, str]:
     return "needs_human_review", "approved interpretation record has unclear support verdict"
 
 
+def _available_evidence(pid: str, row: dict[str, str], card_ok: bool, rec: dict[str, Any], record_status: str) -> set[str]:
+    available: set[str] = set()
+    if pid:
+        available.add("registry_metadata")
+    if any((row.get(col) or "").strip() for col in ("abstract", "summary")):
+        available.add("abstract")
+    if str(row.get("full_text_available") or row.get("fulltext_available") or "").strip().lower() in {"yes", "true", "indexed_fulltext"}:
+        available.add("fulltext_available")
+    if any((row.get(col) or "").strip() for col in ("source_snapshot", "snapshot_path", "source_or_path", "stable_url")):
+        available.add("source_snapshot")
+    if _source_type(row) == "official_source":
+        available.add("official_source_snapshot")
+    if card_ok:
+        available.add("extraction_card")
+    if rec:
+        available.add("interpretation_record")
+    if str(rec.get("source_passage") or rec.get("quoted_passage") or "").strip():
+        available.add("source_passage")
+    if record_status == "faithful":
+        available.add("approved_interpretation")
+    if any((rec.get(col) or "") for col in ("page", "table", "figure", "locator", "page_or_table")):
+        available.add("table_or_page_locator")
+    return available
+
+
+def _missing_status(function: str, missing: list[str], row: dict[str, str]) -> str:
+    if "registry_metadata" in missing:
+        return "source_unavailable"
+    if "extraction_card" in missing:
+        fulltext = str(row.get("full_text_available") or row.get("fulltext_available") or row.get("full_text_status") or "").strip().lower()
+        if fulltext in {"no", "false", "abstract_only", "missing", ""} and function in STRONG_FUNCTIONS:
+            return "abstract_only_too_strong"
+        return "missing_extraction"
+    if "source_passage" in missing:
+        return "missing_passage"
+    if "approved_interpretation" in missing:
+        return "missing_interpretation"
+    return "needs_human_review"
+
+
+def _risk_level(status: str, blocking: bool, function: str) -> str:
+    if blocking:
+        return "high" if function in {"result_claim", "mechanism_claim", "number_fact", "literature_gap"} else "medium"
+    if status in {"needs_human_review", "weak_support", "related_literature_ok"}:
+        return "medium"
+    return "low"
+
+
+def _evaluate_requirement(
+    *,
+    function: str,
+    requirement: dict[str, Any],
+    pid: str,
+    row: dict[str, str],
+    card_ok: bool,
+    card_note: str,
+    rec: dict[str, Any],
+    record_status: str,
+    record_note: str,
+) -> tuple[str, str, bool, str, str, str]:
+    required = [str(item) for item in requirement.get("required_evidence") or ["registry_metadata"]]
+    available = _available_evidence(pid, row, card_ok, rec, record_status)
+    missing = [item for item in required if item not in available]
+    blocks_when_missing = bool(requirement.get("blocking", function in STRONG_FUNCTIONS))
+    if missing:
+        status = _missing_status(function, missing, row)
+        if "extraction_card" in missing:
+            status = _missing_status(function, missing, row)
+        elif "approved_interpretation" in missing and not rec:
+            status = "missing_interpretation"
+        elif "source_passage" in missing and rec:
+            status = "missing_passage"
+        action = f"add required evidence for {function}: {', '.join(missing)}"
+        if status == "source_unavailable":
+            action = "add citation key to paper_registry or remove/replace the citation"
+        elif status == "abstract_only_too_strong":
+            action = "recover full text and create source-bound extraction before using this citation for a strong claim"
+        elif status == "missing_interpretation":
+            action = "create/approve interpretation record with source_passage and faithful verdict"
+        elif status == "missing_passage":
+            action = "add a concrete source_passage/page/table locator to the interpretation record"
+        note = f"missing evidence: {', '.join(missing)}"
+        if not card_ok and "extraction_card" in missing:
+            note = card_note
+        if "approved_interpretation" in missing or "source_passage" in missing:
+            note = record_note
+        blocking = blocks_when_missing
+        return status, action, blocking, note, ";".join(required), ";".join(sorted(available))
+    if record_status in {"overclaimed", "unsupported"}:
+        return "overclaimed", "weaken/remove sentence or replace citation", True, record_note, ";".join(required), ";".join(sorted(available))
+    if function in STRONG_FUNCTIONS and record_status == "weak_support":
+        return "overclaimed", "weaken the sentence or add a faithful source-passage interpretation", True, record_note, ";".join(required), ";".join(sorted(available))
+    status = str(requirement.get("allowed_status") or "grounded")
+    if status == "grounded_or_snapshot_backed":
+        status = "grounded"
+    return status, "none", False, "function-specific citation requirement satisfied", ";".join(required), ";".join(sorted(available))
+
+
+def write_citation_debt_report(root: Path | str, report: dict[str, Any], *, path: Path | None = None) -> Path:
+    root = Path(root)
+    out = path or (root / "audits" / "citation_debt_report.csv")
+    out.parent.mkdir(parents=True, exist_ok=True)
+    rows = report.get("rows") or []
+    fields = [
+        "sentence_id", "manuscript_path", "line", "manuscript_sentence", "citation_key",
+        "mapped_paper_id", "citation_function", "required_evidence", "available_evidence",
+        "source_type", "support_status", "risk_level", "required_action", "blocking", "notes",
+    ]
+    with out.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+        for row in rows:
+            if row.get("support_status") not in {"grounded", "metadata_only_ok", "background_ok", "related_literature_ok", "policy_source_ok", "legal_source_ok"} or row.get("blocking"):
+                writer.writerow({field: row.get(field, "") for field in fields})
+    return out
+
+
 def build_sentence_citation_grounding(root: Path | str = Path.cwd()) -> dict[str, Any]:
     root = Path(root)
+    requirements = _load_requirements(root)
     registry, by_key = _registry_rows(root)
     rows: list[SentenceCitationGroundingRow] = []
     manuscripts = _manuscripts(root)
@@ -271,42 +473,29 @@ def build_sentence_citation_grounding(root: Path | str = Path.cwd()) -> dict[str
             keys = _citation_keys(sentence)
             if not keys:
                 continue
-            ctype = _claim_type(sentence)
             for key in keys:
                 sid = _stable_sentence_id(rel, line, sentence, key)
                 pid = by_key.get(key, "")
                 reg_row = registry.get(pid, {}) if pid else {}
+                function = _citation_function(sentence, reg_row)
+                req = requirements.get(function, DEFAULT_REQUIREMENTS.get(function, DEFAULT_REQUIREMENTS["metadata_only"]))
+                ctype = _claim_type_for_function(function, sentence)
+                stype = _source_type(reg_row) if reg_row else "unknown"
                 card = _card_path(root, pid, reg_row) if pid else None
                 card_ok, card_note = _card_has_support(card)
                 rec_path, rec = _interpretation_record(root, sid, key)
                 record_status, record_note = _verdict_from_record(rec)
-
-                if not pid:
-                    support = "source_unavailable"
-                    action = "add citation key to paper_registry or remove/replace the citation"
-                    blocking = ctype == "claim_bearing"
-                    note = "citation key not found in paper registry"
-                elif not card_ok and ctype == "claim_bearing":
-                    support = "unsupported"
-                    action = "add source-bound extraction card before claiming citation support"
-                    blocking = True
-                    note = card_note
-                elif ctype == "claim_bearing" and record_status != "faithful":
-                    support = record_status if record_status != "missing" else "needs_human_review"
-                    action = "create/approve interpretation record with source_passage and faithful verdict"
-                    blocking = True
-                    note = record_note
-                elif ctype == "interpretive" and (not card_ok or record_status in {"overclaimed", "unsupported"}):
-                    support = "weak_support" if card_ok else "needs_human_review"
-                    action = "review interpretive citation before using it for synthesis or claim language"
-                    blocking = False
-                    note = card_note if not card_ok else record_note
-                else:
-                    support = "bibliographic" if ctype == "bibliographic" else "faithful"
-                    action = "none"
-                    blocking = False
-                    note = card_note if card_ok else "bibliographic citation mapped; no claim-bearing support asserted"
-
+                support, action, blocking, note, required, available = _evaluate_requirement(
+                    function=function,
+                    requirement=req,
+                    pid=pid,
+                    row=reg_row,
+                    card_ok=card_ok,
+                    card_note=card_note,
+                    rec=rec,
+                    record_status=record_status,
+                    record_note=record_note,
+                )
                 rows.append(SentenceCitationGroundingRow(
                     sentence_id=sid,
                     manuscript_path=rel,
@@ -317,28 +506,39 @@ def build_sentence_citation_grounding(root: Path | str = Path.cwd()) -> dict[str
                     extraction_card=_rel(root, card) if card else "",
                     interpretation_record=_rel(root, rec_path) if rec_path else "",
                     claim_type=ctype,
+                    citation_function=function,
+                    required_evidence=required,
+                    available_evidence=available,
+                    source_type=stype,
+                    risk_level=_risk_level(support, blocking, function),
                     support_status=support,
                     required_action=action,
                     blocking=blocking,
                     notes=note,
                 ))
 
+    pass_statuses = {"grounded", "metadata_only_ok", "background_ok", "related_literature_ok", "policy_source_ok", "legal_source_ok"}
     failures = [row for row in rows if row.blocking]
+    debt = [row for row in rows if row.blocking or row.support_status not in pass_statuses]
     counts = {
         "manuscripts": len(manuscripts),
         "citation_sentences": len({(r.manuscript_path, r.line, r.manuscript_sentence) for r in rows}),
         "citation_rows": len(rows),
         "claim_bearing_rows": sum(r.claim_type == "claim_bearing" for r in rows),
+        "citation_debt_rows": len(debt),
         "blocking_rows": len(failures),
         "unknown_or_unavailable": sum(r.support_status == "source_unavailable" for r in rows),
-        "weak_or_review_needed": sum(r.support_status in {"weak_support", "needs_human_review"} for r in rows),
+        "weak_or_review_needed": sum(r.support_status in {"weak_support", "needs_human_review", "missing_interpretation", "missing_passage"} for r in rows),
+        "by_function": {function: sum(r.citation_function == function for r in rows) for function in sorted({r.citation_function for r in rows})},
     }
     status = "inactive" if not manuscripts or not rows else ("fail" if failures else "pass")
     return {
-        "model": "AEROS-CITATION-SENTENCE-GROUNDING-001",
+        "model": "AEROS-CITATION-FUNCTION-001",
         "status": status,
         "counts": counts,
         "rows": [row.to_dict() for row in rows],
         "failures": [row.to_dict() for row in failures],
+        "citation_debt": [row.to_dict() for row in debt],
+        "debt_report_path": "audits/citation_debt_report.csv",
         "does_not_prove": DOES_NOT_PROVE,
     }
