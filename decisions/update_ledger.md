@@ -2132,7 +2132,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-05 — Enforce structured owner decisions in task preflight
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `ad46e3f`
 - **Change type**: framework / owner decision enforcement / preflight bridge
 - **Action**: Added deterministic owner-decision rule parsing from `decisions/decision_log.csv` structured `Follow-up` metadata. `do_not` patterns, binding constraints, stop conditions, campaign budgets, and supersession metadata are now machine-readable. `task preflight` reports `BLOCKED` when active owner `do_not` rules match the requested lane/task/intent, while surfacing non-blocking constraints for campaign/controller use.
 - **Why**: Prior owner decisions were recorded and fingerprinted but not executed. This bridges the gap between human direction and autonomous loop behavior: recorded decisions can now prevent repeated direction drift before work starts.
