@@ -2149,3 +2149,13 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: pending targeted checks: `python3 checks/check_manuscript_citation_faithfulness.py`, `python3 checks/check_manuscript_citation_interpretation.py`, `python3 checks/check_citation_risk_radar.py`, `python3 checks/check_sync_doctor.py`, and smoke harness.
 - **Does not prove**: cited sources are true; human interpretation is correct beyond recorded source passages; every uncited claim is grounded; author-year matching is exhaustive; paper readiness; claim support; gate approval.
 - **Next check**: Run inside MAHA/CMPD on a real manuscript and confirm claim-bearing citation sentences produce actionable rows rather than an empty `{}`.
+## 2026-07-06 — Add sci-download PDF retrieval skill bridge
+
+- **Commit(s)**: pending
+- **Change type**: framework / literature skills / full-text retrieval
+- **Action**: Added a local Codex `sci-download` skill wrapper and registered `Aut_Sci_Download` as an optional AEROS literature adapter candidate. Literature skill obligations now consider `sci-download` for DOI/PDF/full-text recovery, while the practical skill menu and external tool registry make the boundary explicit: retrieval can populate full-text queues and audits, but cannot create extraction cards, citation interpretations, claims, or gate approvals.
+- **Why**: Recent manuscript-grounding work made full-text availability a bottleneck. AEROS needs a legal/open/user-authorized PDF retrieval skill path, but it must preserve the capture/promotion boundary so "found PDF" does not become "supported citation".
+- **Validation**: pending targeted checks: `python3 checks/check_skill_layer.py`, `python3 checks/check_skill_coverage.py`, `python3 checks/check_sync_doctor.py`, and smoke harness.
+- **Does not prove**: legal access for any specific source; successful PDF download; PDF readability; identity match to the target paper; extraction-card correctness; citation faithfulness; claim support; gate approval.
+- **Next check**: Use on a real blocked full-text item and confirm it updates `fulltext_ready_queue.csv` or `missing_fulltext_queue.csv` without writing extraction cards or claims.
+

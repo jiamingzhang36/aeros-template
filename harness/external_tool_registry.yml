@@ -83,6 +83,25 @@ tools:
       - overwrite paper registry identity without receipt
       - certify final bibliography entries
       - approve gates
+aut_sci_download:
+  lane: literature
+  role: adapter_candidate
+  maturity: emerging_tool
+  url: "https://github.com/ShZhao27208/Aut_Sci_Download"
+  use_for:
+    - DOI, arXiv, PMID, PMCID, CNKI, and keyword-based paper PDF retrieval routing
+    - legal open-access or user-authorized full-text recovery
+    - full-text ready and missing-fulltext queue generation
+  evidence_output:
+    - discovery/literature/fulltext_ready_queue.csv
+    - discovery/literature/missing_fulltext_queue.csv
+    - audits/fulltext_retrieval/
+    - source_snapshots/literature/
+  must_not_do:
+    - bypass paywalls, CAPTCHA, login, robots, or terms-of-service restrictions
+    - treat a downloaded PDF or URL as an extraction card
+    - certify full-text identity without title, DOI, content-type, and readability verification
+    - approve literature synthesis, citation interpretation, claims, or gates
   aea_data_editor:
     lane: compliance
     role: external_standard

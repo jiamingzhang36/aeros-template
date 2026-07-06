@@ -129,6 +129,32 @@ skills:
     human_gate_required: false
     tier: core
     default_use: true
+sci_download:
+  name: sci-download
+  source: local_codex_skills
+  invocation: mcp_skill
+  external_stage: literature
+  aeros_stage: literature_fulltext_retrieval
+  use_status: allowed_with_constraints
+  allowed_outputs:
+  - discovery/literature/fulltext_ready_queue.csv
+  - discovery/literature/missing_fulltext_queue.csv
+  - audits/fulltext_retrieval/
+  - source_snapshots/literature/
+  - work/leads/
+  forbidden_outputs:
+  - paywall bypass
+  - CAPTCHA or login circumvention
+  - extraction card without identity and readability verification
+  - synthesis or claim support from downloaded PDF alone
+  aeros_constraints:
+  - Use only legal, open, or user-authorized access paths.
+  - PDF attachment, URL, or local file presence only creates a retrieval/readiness candidate, not evidence.
+  - Verify title, DOI, content type, and readability before full-text extraction.
+  - AEROS literature checks and manuscript grounding checks remain authoritative.
+  human_gate_required: true
+  tier: optional
+  default_use: false
   data_inventory:
     name: data-inventory
     source: local_codex_skills

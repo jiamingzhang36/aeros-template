@@ -25,7 +25,7 @@ Use these only when a task clearly needs the specialized operation.
 
 | Need | Optional skills |
 | --- | --- |
-| Bibliography and library work | `bib-manager`, `zotero` |
+| Bibliography, library, and PDF retrieval | `bib-manager`, `zotero`, `sci-download` |
 | Data documentation | `data-codebook`, `describe-data` |
 | Data linkage risks | `data-merge-audit` |
 | Panel diagnostics | `diagnostics-panel` |
@@ -54,6 +54,8 @@ These are useful patterns, but they should not be default operational choices.
 ## Rule of Thumb
 
 Use specialized skills for speed and convention.
+
+PDF retrieval guardrail: use `sci-download` only to locate legal/open/user-authorized full text and update full-text queues or retrieval audits. A found PDF is not an extraction card, citation interpretation, or claim support until identity, readability, and source-grounding checks pass.
 
 Use AEROS for admissibility.
 
