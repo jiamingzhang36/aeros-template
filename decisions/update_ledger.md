@@ -2160,7 +2160,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Use on a real blocked full-text item and confirm it updates `fulltext_ready_queue.csv` or `missing_fulltext_queue.csv` without writing extraction cards or claims.
 ## 2026-07-06 — Add citation function requirements to manuscript grounding
 
-- **Commit(s)**: pending
+- **Commit(s)**: `34e6711`
 - **Change type**: framework / literature grounding / citation-function compiler
 - **Action**: Added `harness/citation_function_requirements.yml` and upgraded sentence-level manuscript citation grounding so each cited sentence receives a `citation_function`, required/available evidence, source type, risk level, and citation-debt status. `check_manuscript_citation_faithfulness.py` now fixtures metadata/background citations, abstract-only result/number claims, and approved interpretation records. `aeros drive --goal citation-risk` now prioritizes sentence-level citation debt instead of only author-year registry risk.
 - **Why**: Reference existence and full-text availability are insufficient. AEROS needs function-specific evidence requirements so bibliography can stay broad while claim-bearing manuscript citations must be source-passage grounded.
