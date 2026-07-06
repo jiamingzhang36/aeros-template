@@ -2142,7 +2142,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-06 — Upgrade manuscript citation faithfulness to sentence-level grounding
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `5c7835e`
 - **Change type**: framework / literature grounding / anti-hallucination
 - **Action**: Added `aeros/runtime/citation_sentence_grounding.py` and upgraded `check_manuscript_citation_faithfulness.py` from shallow citation-asset presence toward sentence-level grounding. The checker now parses `.tex`/`.md` manuscript sentences, extracts citation keys, maps them to `paper_registry.csv`, links extraction cards, and blocks claim-bearing cited sentences unless they have source-bound extraction support plus an approved faithful interpretation record. Existing manuscript discovery was also extended to `tex/paper.tex` and `tex/*.tex`.
 - **Why**: Recent project use showed a dangerous false sense of safety: a clean citation check could mean only that no encoded structural error fired, not that paper sentences were actually supported by cited sources. The upgraded check makes unsupported/overclaimed citation-bearing manuscript sentences visible before paper-readiness claims.
