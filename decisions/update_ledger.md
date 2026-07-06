@@ -2151,7 +2151,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Run inside MAHA/CMPD on a real manuscript and confirm claim-bearing citation sentences produce actionable rows rather than an empty `{}`.
 ## 2026-07-06 — Add sci-download PDF retrieval skill bridge
 
-- **Commit(s)**: pending
+- **Commit(s)**: `dcb1884`
 - **Change type**: framework / literature skills / full-text retrieval
 - **Action**: Added a local Codex `sci-download` skill wrapper and registered `Aut_Sci_Download` as an optional AEROS literature adapter candidate. Literature skill obligations now consider `sci-download` for DOI/PDF/full-text recovery, while the practical skill menu and external tool registry make the boundary explicit: retrieval can populate full-text queues and audits, but cannot create extraction cards, citation interpretations, claims, or gate approvals.
 - **Why**: Recent manuscript-grounding work made full-text availability a bottleneck. AEROS needs a legal/open/user-authorized PDF retrieval skill path, but it must preserve the capture/promotion boundary so "found PDF" does not become "supported citation".
