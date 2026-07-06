@@ -2129,3 +2129,13 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: pending targeted checks: `python3 checks/check_campaign_contract.py`, `python3 checks/check_drive.py`, `python3 checks/check_sync_doctor.py`, `python3 checks/run_harness_checks.py --profile smoke --timeout 20`.
 - **Does not prove**: scientific validity; campaign objective optimality; that a stopped campaign is useless; claim support; gate approval; paper readiness.
 - **Next check**: Use in a real CMPD/MAHA/SNAP repeated data/literature campaign and verify it stops a low-yield loop before another batch of same-kind tasks.
+
+## 2026-07-05 — Enforce structured owner decisions in task preflight
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / owner decision enforcement / preflight bridge
+- **Action**: Added deterministic owner-decision rule parsing from `decisions/decision_log.csv` structured `Follow-up` metadata. `do_not` patterns, binding constraints, stop conditions, campaign budgets, and supersession metadata are now machine-readable. `task preflight` reports `BLOCKED` when active owner `do_not` rules match the requested lane/task/intent, while surfacing non-blocking constraints for campaign/controller use.
+- **Why**: Prior owner decisions were recorded and fingerprinted but not executed. This bridges the gap between human direction and autonomous loop behavior: recorded decisions can now prevent repeated direction drift before work starts.
+- **Validation**: pending targeted checks: `python3 checks/check_owner_decisions.py`, `python3 checks/check_task_preflight.py`, `python3 checks/check_sync_doctor.py`, `python3 checks/run_harness_checks.py --profile smoke --timeout 20`.
+- **Does not prove**: free-form rationale is understood; the owner decision is scientifically correct; blocked work is never useful; claim support; gate approval; paper readiness.
+- **Next check**: Add a real project owner decision such as `do_not: [parcel-price]` in `Follow-up` JSON and confirm preflight blocks a matching task before another autonomous loop begins.

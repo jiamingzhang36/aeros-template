@@ -16,6 +16,7 @@ except Exception:  # pragma: no cover
 
 from .contract import Contract
 from .output_intent import contract_output_intents
+from .owner_decisions import evaluate_owner_decision_rules
 from .skill_obligation import infer_skill_obligations, obligation_classes
 from .source_capture_permission import classify_source_capture_permission
 from .task_mode import infer_task_mode, load_contract_by_id
@@ -130,8 +131,23 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
         output_intents=output_intents,
         allowed_to_touch=allowed,
     )
+    owner_decisions = evaluate_owner_decision_rules(
+        root,
+        lane=lane or (contract.work_lane if contract else ""),
+        intent=intent,
+        task_id=task_id,
+    )
+    owner_blocks = list(owner_decisions.get("blocks") or [])
+    stop_reasons = [
+        "route is pending and task is route-sensitive",
+        "skill obligations cannot be used or waived",
+        "intended outputs do not fit allowed output intents",
+        "planned writes touch must_not_touch paths",
+    ]
+    if owner_blocks:
+        stop_reasons.insert(0, "owner decision do_not rule matched this task intent")
     return {
-        "status": "ADVISORY",
+        "status": "BLOCKED" if owner_blocks else "ADVISORY",
         "task_id": task_id,
         "lane": lane or (contract.work_lane if contract else ""),
         "intent": intent,
@@ -147,15 +163,14 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
         "skill_obligations": obligations,
         "output_intents": output_intents,
         "source_capture_permission": permission,
+        "owner_decision_status": owner_decisions.get("status"),
+        "owner_decision_blocks": owner_blocks,
+        "owner_decision_constraints": owner_decisions.get("constraints") or [],
+        "active_owner_decision_count": owner_decisions.get("active_rule_count", 0),
         "allowed_to_touch": allowed,
         "must_not_touch": must_not_touch,
-        "stop_before_work_if": [
-            "route is pending and task is route-sensitive",
-            "skill obligations cannot be used or waived",
-            "intended outputs do not fit allowed output intents",
-            "planned writes touch must_not_touch paths",
-        ],
-        "does_not_prove": DOES_NOT_PROVE,
+        "stop_before_work_if": stop_reasons,
+        "does_not_prove": DOES_NOT_PROVE + ["that free-form owner rationale has been semantically understood"],
     }
 
 
@@ -173,9 +188,15 @@ def format_task_preflight(report: dict[str, Any]) -> str:
         f"workflow_preset: {report.get('workflow_preset')}",
         f"execution_mode: {report.get('execution_mode')}",
         f"source_capture_permission: {(report.get('source_capture_permission') or {}).get('approval_required')}",
+        f"owner_decision_status: {report.get('owner_decision_status')}",
+        "",
+        "owner_decision_blocks:",
+    ]
+    lines.extend(f"- {item.get('decision_id')}: {item.get('pattern')}" for item in report.get("owner_decision_blocks") or [])
+    lines.extend([
         "",
         "skill_obligations:",
-    ]
+    ])
     lines.extend(f"- {item}" for item in report.get("skill_obligations") or [])
     lines.append("output_intents:")
     output_intents = report.get("output_intents")

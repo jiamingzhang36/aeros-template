@@ -28,6 +28,7 @@ CHECKS = [
     "check_execution_mode.py",
     "check_task_mode.py",
     "check_task_preflight.py",
+    "check_owner_decisions.py",
     "check_source_capture_permission.py",
     "check_broad_capture_firewall.py",
     "check_next_action.py",
