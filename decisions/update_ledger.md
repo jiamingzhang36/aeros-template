@@ -2139,3 +2139,13 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: pending targeted checks: `python3 checks/check_owner_decisions.py`, `python3 checks/check_task_preflight.py`, `python3 checks/check_sync_doctor.py`, `python3 checks/run_harness_checks.py --profile smoke --timeout 20`.
 - **Does not prove**: free-form rationale is understood; the owner decision is scientifically correct; blocked work is never useful; claim support; gate approval; paper readiness.
 - **Next check**: Add a real project owner decision such as `do_not: [parcel-price]` in `Follow-up` JSON and confirm preflight blocks a matching task before another autonomous loop begins.
+
+## 2026-07-06 — Upgrade manuscript citation faithfulness to sentence-level grounding
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / literature grounding / anti-hallucination
+- **Action**: Added `aeros/runtime/citation_sentence_grounding.py` and upgraded `check_manuscript_citation_faithfulness.py` from shallow citation-asset presence toward sentence-level grounding. The checker now parses `.tex`/`.md` manuscript sentences, extracts citation keys, maps them to `paper_registry.csv`, links extraction cards, and blocks claim-bearing cited sentences unless they have source-bound extraction support plus an approved faithful interpretation record. Existing manuscript discovery was also extended to `tex/paper.tex` and `tex/*.tex`.
+- **Why**: Recent project use showed a dangerous false sense of safety: a clean citation check could mean only that no encoded structural error fired, not that paper sentences were actually supported by cited sources. The upgraded check makes unsupported/overclaimed citation-bearing manuscript sentences visible before paper-readiness claims.
+- **Validation**: pending targeted checks: `python3 checks/check_manuscript_citation_faithfulness.py`, `python3 checks/check_manuscript_citation_interpretation.py`, `python3 checks/check_citation_risk_radar.py`, `python3 checks/check_sync_doctor.py`, and smoke harness.
+- **Does not prove**: cited sources are true; human interpretation is correct beyond recorded source passages; every uncited claim is grounded; author-year matching is exhaustive; paper readiness; claim support; gate approval.
+- **Next check**: Run inside MAHA/CMPD on a real manuscript and confirm claim-bearing citation sentences produce actionable rows rather than an empty `{}`.

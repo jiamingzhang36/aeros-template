@@ -26,6 +26,8 @@ except Exception:  # pragma: no cover - checks report this cleanly.
     yaml = None
 
 MANUSCRIPT_GLOBS = [
+    "tex/paper.tex",
+    "tex/*.tex",
     "paper/*.md",
     "paper/*.tex",
     "docs/manuscript*.md",

@@ -29,7 +29,7 @@ _CLAIM_WORDS = (
     "million", "more likely", "less likely", "estimate", "leads to", "results in",
 )
 # manuscript-name priority (higher wins) so we scan the draft, not audit reports
-_MANUSCRIPT_GLOBS = ("paper/*.md", "paper/*.tex", "docs/manuscript/*.md",
+_MANUSCRIPT_GLOBS = ("tex/paper.tex", "tex/*.tex", "paper/*.md", "paper/*.tex", "docs/manuscript/*.md",
                      "docs/manuscript/*.tex", "docs/manuscript*.md", "docs/manuscript*.tex")
 _REGISTRY_CANDIDATES = ("discovery/literature/paper_registry.csv",
                         "docs/manuscript/literature_extraction_cards_status.csv")
