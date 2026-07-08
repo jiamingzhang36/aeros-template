@@ -2169,7 +2169,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Run on a real manuscript and verify citation debt rows point to useful actions: recover full text, add extraction card, add interpretation record, weaken sentence, or replace citation.
 ## 2026-07-08 — Add risk-ranked research driver projection
 
-- **Commit(s)**: pending
+- **Commit(s)**: `852146f`
 - **Change type**: framework / research driver / risk-ranked next action
 - **Action**: Added a deterministic `research_risk` compiler and wired it into `aeros drive` and `aeros next` so manuscript citation debt, wrapper-literature visibility, and broad-capture saturation can outrank routine stale revalidation. Extended drive/task-preflight checks to fixture citation debt priority, broad-capture defaulting, and strict promotion boundaries.
 - **Why**: Recent real projects showed AEROS was good at guarding protected surfaces but weaker at proactively identifying the highest research risk. The driver should be light during capture, strict at promotion, and active at manuscript truth review.
