@@ -35,6 +35,11 @@ def main() -> int:
             failures.append("drive report does not declare AEROS-USEFUL-001 model")
         if "project_signals" not in report or "broad_capture" not in (report.get("project_signals") or {}):
             failures.append("drive report must include broad_capture project signal")
+        risk = report.get("research_risk") or {}
+        if risk.get("model") != "AEROS-RESEARCH-RISK-002":
+            failures.append("drive report must include AEROS-RESEARCH-RISK-002 research_risk projection")
+        if not isinstance(risk.get("risk_vector"), dict):
+            failures.append("drive report must include research risk vector")
         if "data/processed/" not in (report.get("what_this_does_not_touch") or []):
             failures.append("drive report must state protected data/processed boundary")
         if not report.get("does_not_prove"):
@@ -59,6 +64,40 @@ def main() -> int:
             failures.append("drive citation-risk --execute should run the read-only citation check")
         if execution.get("status") != "pass":
             failures.append("drive citation-risk execution should pass in template mode")
+
+    fixture_code = r"""
+from pathlib import Path
+import json, sys, tempfile
+sys.path.insert(0, str(Path.cwd()))
+from aeros.runtime.drive import build_drive_report
+with tempfile.TemporaryDirectory(prefix='aeros_drive_risk_') as raw:
+    root = Path(raw)
+    (root/'tex').mkdir(parents=True)
+    (root/'harness').mkdir(parents=True)
+    (root/'discovery/literature').mkdir(parents=True)
+    (root/'harness/citation_function_requirements.yml').write_text((Path.cwd()/'harness/citation_function_requirements.yml').read_text(), encoding='utf-8')
+    (root/'tex/paper.tex').write_text(r'We find a significant result \citep{p2025}.', encoding='utf-8')
+    (root/'discovery/literature/paper_registry.csv').write_text('paper_id,citation_key,title,full_text_available,extraction_card\nP001,p2025,Paper,abstract_only,\n', encoding='utf-8')
+    report = build_drive_report(root)
+    print(json.dumps(report))
+"""
+    proc3 = subprocess.run(
+        [sys.executable, "-c", fixture_code],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        timeout=30,
+    )
+    if proc3.returncode != 0:
+        failures.append("drive risk fixture failed: " + (proc3.stderr or proc3.stdout)[-1000:])
+    else:
+        payload = json.loads(proc3.stdout)
+        objective = payload.get("chosen_objective") or {}
+        risk = payload.get("research_risk") or {}
+        if objective.get("objective_id") != "submission_truth_risk":
+            failures.append(f"citation debt should outrank mechanical fallback, got {objective.get('objective_id')}")
+        if (risk.get("top_risk") or {}).get("risk_id") != "submission_truth_risk":
+            failures.append("research risk fixture did not rank submission_truth_risk first")
 
     if failures:
         print("FAIL: drive entrypoint problems detected")

@@ -18,6 +18,7 @@ from .controller import build_iterate_plan
 from .action_spec import declared_action_spec
 from .kernel import discover_contracts
 from .stale_triage import triage_item_for_task
+from .research_risk import compile_research_risk
 
 
 VALID_LABELS = {"CHECK_PASS", "CAPTURE_LOGGED", "ROUTE_READY", "SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}
@@ -547,6 +548,29 @@ def _claim_next(root: Path) -> NextAction | None:
 
 
 
+def _research_risk_next(root: Path, *, lane: str = "") -> NextAction | None:
+    report = compile_research_risk(root, lane=lane)
+    risk = report.get("top_risk")
+    if not isinstance(risk, dict) or int(risk.get("score") or 0) <= 0:
+        return None
+    return _next_action(
+        recommended_next_action=str(risk.get("recommended_action") or "Resolve top research risk."),
+        why_this_next=(
+            f"Research-risk ranking selected {risk.get('risk_id')} (score={risk.get('score')}, severity={risk.get('severity')}). "
+            f"{risk.get('why')} This outranks: {', '.join(risk.get('outranks') or [])}."
+        ),
+        lane=str(risk.get("lane") or lane or "project"),
+        status_label=str(risk.get("status_label") or "ROUTE_READY"),
+        command=str(risk.get("command") or "python3 -m aeros.cli next --json"),
+        stop_condition=str(risk.get("stop_condition") or "Stop after the risk is made actionable."),
+        spec_kind="research_risk_preview",
+        spec_effect_class="read_only",
+        source=str(risk.get("source") or "aeros.runtime.research_risk"),
+        blocked=False,
+        expected_outputs=tuple(str(item) for item in (risk.get("expected_artifacts") or ())),
+    )
+
+
 def _submission_driver_next(root: Path) -> NextAction | None:
     from .submission_driver import build_submission_driver
 
@@ -711,6 +735,10 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
             spec_effect_class="local_write_preview",
         )
 
+
+    risk_action = _research_risk_next(root, lane=lane)
+    if risk_action:
+        return risk_action
 
     if lane:
         action = _lane_specific_next(root, lane)

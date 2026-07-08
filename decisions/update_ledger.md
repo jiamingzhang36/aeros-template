@@ -2167,4 +2167,13 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: pending targeted checks: `python3 checks/check_manuscript_citation_faithfulness.py`, `python3 checks/check_citation_risk_radar.py`, `python3 checks/check_sync_doctor.py`, and smoke harness.
 - **Does not prove**: citation-function inference is perfect; cited sources are true; human interpretation records are correct beyond their source passages; every uncited sentence is grounded; paper readiness; claim support; gate approval.
 - **Next check**: Run on a real manuscript and verify citation debt rows point to useful actions: recover full text, add extraction card, add interpretation record, weaken sentence, or replace citation.
+## 2026-07-08 — Add risk-ranked research driver projection
+
+- **Commit(s)**: pending
+- **Change type**: framework / research driver / risk-ranked next action
+- **Action**: Added a deterministic `research_risk` compiler and wired it into `aeros drive` and `aeros next` so manuscript citation debt, wrapper-literature visibility, and broad-capture saturation can outrank routine stale revalidation. Extended drive/task-preflight checks to fixture citation debt priority, broad-capture defaulting, and strict promotion boundaries.
+- **Why**: Recent real projects showed AEROS was good at guarding protected surfaces but weaker at proactively identifying the highest research risk. The driver should be light during capture, strict at promotion, and active at manuscript truth review.
+- **Validation**: pending targeted checks: `python3 checks/check_drive.py`, `python3 checks/check_next_action.py`, `python3 checks/check_task_preflight.py`, `python3 checks/check_sync_doctor.py`, and smoke harness.
+- **Does not prove**: the ranked risk is scientifically optimal; citation-function inference is perfect; full project rollout improves usefulness; claim support; paper readiness; gate approval.
+- **Next check**: Run inside CMPD/MAHA/SNAP and verify the top recommendation matches the real PI/editor risk rather than a mechanical stale task.
 

@@ -18,6 +18,7 @@ from .broad_capture import summarize_broad_capture
 from .citation_radar import build_citation_radar
 from .citation_sentence_grounding import build_sentence_citation_grounding
 from .next_action import NextAction, compute_next_action
+from .research_risk import compile_research_risk
 from .submission_driver import build_submission_driver
 from .task_preflight import build_task_preflight
 
@@ -77,6 +78,26 @@ class DriveObjective:
             "safety": list(self.safety),
             "source": self.source,
         }
+
+
+def _objective_from_risk(risk: dict[str, Any]) -> DriveObjective:
+    return DriveObjective(
+        objective_id=str(risk.get("risk_id") or "research_risk"),
+        objective=str(risk.get("recommended_action") or "Resolve top research risk."),
+        lane=str(risk.get("lane") or "project"),
+        why=str(risk.get("why") or "A deterministic research-risk compiler ranked this as the highest current risk."),
+        command=str(risk.get("command") or "python3 -m aeros.cli next --json"),
+        stop_condition=str(risk.get("stop_condition") or "Stop after the risk is represented as an actionable queue item or explicit human decision."),
+        expected_artifacts=tuple(str(item) for item in (risk.get("expected_artifacts") or ())),
+        can_run_without_human=bool(risk.get("can_run_without_human", True)),
+        needs_human=bool(risk.get("needs_human", False)),
+        status_label=str(risk.get("status_label") or "ROUTE_READY"),
+        safety=(
+            "research-risk ranked advisory; does not approve gates or upgrade claims",
+            "recommended command is read-only or preflight-style unless explicitly reviewed",
+        ),
+        source=str(risk.get("source") or "aeros.runtime.research_risk"),
+    )
 
 
 def _objective_from_next(action: NextAction) -> DriveObjective:
@@ -201,11 +222,10 @@ def _goal_objective(root: Path, goal: str, lane: str) -> DriveObjective:
 
 
 def _auto_objective(root: Path, lane: str) -> DriveObjective:
-    submission = build_submission_driver(root)
-    citation = submission.get("citation_faithfulness") or {}
-    wrapper = submission.get("literature_wrapper_sync") or {}
-    if citation.get("blocking_failures") or wrapper.get("status") == "fail":
-        return _goal_objective(root, "citation-risk", lane)
+    risk_report = compile_research_risk(root, lane=lane)
+    top_risk = risk_report.get("top_risk")
+    if isinstance(top_risk, dict) and int(top_risk.get("score") or 0) > 0:
+        return _objective_from_risk(top_risk)
 
     broad = summarize_broad_capture(root)
     total_leads = int(broad.get("total_leads") or 0)
@@ -278,11 +298,13 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
         "command": objective.command,
     }
     status = "NEEDS_HUMAN" if objective.needs_human else ("EXECUTED" if execution.get("attempted") else "READY")
+    risk_report = compile_research_risk(root, lane=lane)
     return {
         "status": status,
         "model": "AEROS-USEFUL-001-drive-mvp",
         "goal": goal,
         "chosen_objective": objective.to_dict(),
+        "research_risk": risk_report,
         "execution": execution,
         "project_signals": {
             "broad_capture": broad_summary,

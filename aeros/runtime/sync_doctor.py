@@ -35,7 +35,7 @@ CAPABILITIES: dict[str, list[str]] = {
         "checks/check_manuscript_citation_interpretation.py", "checks/check_literature_wrapper_sync.py", "aeros/cli.py"],
     "citation_risk_radar": ["aeros/runtime/citation_radar.py", "checks/check_citation_risk_radar.py",
         "aeros/runtime/drive.py"],
-    "drive": ["aeros/runtime/drive.py", "checks/check_drive.py", "aeros/cli.py"],
+    "drive": ["aeros/runtime/drive.py", "aeros/runtime/research_risk.py", "checks/check_drive.py", "aeros/cli.py"],
     "campaign_contract": ["aeros/runtime/campaign.py", "checks/check_campaign_contract.py", "templates/campaign_contract.yml", "templates/campaign_progress.csv", "aeros/cli.py"],
     "owner_decision_rules": ["aeros/runtime/owner_decisions.py", "checks/check_owner_decisions.py", "aeros/runtime/task_preflight.py"],
 }

@@ -39,6 +39,14 @@ def main() -> int:
     public = build_task_preflight(ROOT, lane="data", intent="public official source snapshot")
     if (public.get("source_capture_permission") or {}).get("approval_required") != "none_for_staging_public_capture":
         failures.append("public staging source capture should not require human approval")
+    broad = build_task_preflight(ROOT, lane="data", intent="broad search all possible official source leads")
+    if broad.get("task_mode") != "broad_capture" or broad.get("execution_mode") != "broad_capture":
+        failures.append("broad source search should default to broad_capture mode")
+    if "lead_queue" not in (broad.get("output_intents") or []):
+        failures.append("broad_capture preflight should include lead_queue output intent")
+    promote = build_task_preflight(ROOT, lane="data", intent="promote source candidate to canonical processed data")
+    if promote.get("task_mode") == "broad_capture":
+        failures.append("promotion/canonical work must not remain in broad_capture mode")
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))
     elif failures:
