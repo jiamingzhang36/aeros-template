@@ -2179,7 +2179,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-09 — Fix research-driver rollout semantics
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `e2b898e`
 - **Change type**: framework / research-driver rollout repair / citation grounding
 - **Action**: Fixed the rollout issues surfaced by real MAHA and cultured-meat tests: read-only research-risk `ActionSpec` records no longer declare expected outputs; `aeros drive --execute` can report `blocked_found` when a truth check successfully surfaces a blocker; email addresses such as `name@msu.edu` are no longer parsed as manuscript citation keys; citation grounding now respects registry citation functions/source types so method/background/official-source routes are not over-promoted into core claim blockers; downstream `check_next_action.py` keeps expensive controller-loop fixtures scoped to the template.
 - **Why**: The rollout test showed the new driver was conceptually right but had operational friction: useful blocker discovery looked like command failure, read-only specs violated their own invariant, email addresses caused false citation debt, and downstream smoke profiles paid template-level controller-test costs.
