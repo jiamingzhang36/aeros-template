@@ -124,6 +124,42 @@ def _objective_from_next(action: NextAction) -> DriveObjective:
     )
 
 
+def _objective_from_current_work(context: dict[str, Any]) -> DriveObjective:
+    priorities = [str(item).strip() for item in (context.get("priority_order") or []) if str(item).strip()]
+    priority = priorities[0]
+    lane = str(context.get("active_lane") or "").strip().lower()
+    if lane not in {"data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"}:
+        lane = "analysis"
+    goal = str(context.get("active_goal") or "").strip()
+    source_path = str(context.get("source_path") or "CURRENT_WORK.yml")
+    return DriveObjective(
+        objective_id="current_work_priority",
+        objective=priority,
+        lane=lane,
+        why=(
+            "No higher-priority research risk is active, so AEROS selected the first "
+            f"operator-declared current-work priority. Active goal: {goal or '<not declared>'}."
+        ),
+        command=(
+            "python3 -m aeros.cli task preflight "
+            f"--lane {shlex.quote(lane)} --intent {shlex.quote(priority)} --json"
+        ),
+        stop_condition=(
+            "Stop after preflight reports allowed writes, skill obligations, and any human decision; "
+            "drive does not execute the research action."
+        ),
+        expected_artifacts=(),
+        can_run_without_human=True,
+        needs_human=False,
+        status_label="ROUTE_READY",
+        safety=(
+            "operator-declared priority is advisory routing context, not scientific authority",
+            "preflight only; does not edit research artifacts, approve gates, or upgrade claims",
+        ),
+        source=f"{source_path}#priority_order[0]",
+    )
+
+
 def _goal_objective(root: Path, goal: str, lane: str) -> DriveObjective:
     if goal in {"capture", "broad-capture", "broad_capture"}:
         summary = summarize_broad_capture(root)
@@ -227,6 +263,10 @@ def _auto_objective(root: Path, lane: str) -> DriveObjective:
     top_risk = risk_report.get("top_risk")
     if isinstance(top_risk, dict) and int(top_risk.get("score") or 0) > 0:
         return _objective_from_risk(top_risk)
+
+    current_work = load_current_work_context(root)
+    if not lane and current_work.get("status") == "active" and current_work.get("priority_order"):
+        return _objective_from_current_work(current_work)
 
     context_lane = preferred_lane(root, fallback="")
     if not lane and context_lane:

@@ -2221,3 +2221,17 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: citation-function inference is perfect; final citation packet judgments are scientifically correct; weak/background citations are sufficient for all future drafts; claim support; paper readiness; gate approval.
 - **Drift risk**: Route admissions can become too permissive if projects add broad `support_route_note` text without a real final citation packet or bounded-use language. Future checks should keep admissions narrow and report the admitted route in citation-debt summaries.
 - **Next check**: Roll this into the next project with a real manuscript citation debt surface and verify that unsupported result/number claims still block while bounded method/theory/data citations do not create noisy P0 debt.
+
+## 2026-07-09 — Compile current-work priority into the drive objective
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / research driver / current-work routing repair
+- **North star:** Reduce manual pushes by turning an operator-declared active priority into the next concrete, bounded recommendation.
+- **Alignment:** Keeps hard process failures and nonzero research risks ahead of current-work hints, but prevents a generic lane fallback from replacing the first active project priority when no higher risk exists.
+- **Action**: Added a deterministic `current_work_priority` drive objective. When `CURRENT_WORK.yml` is active, `priority_order` is nonempty, no explicit lane overrides it, and the research-risk compiler reports no nonzero top risk, `aeros drive` now selects `priority_order[0]` and renders a preflight-only command for that exact priority. Extended the current-work fixture to require the objective text, source path, and preflight boundary.
+- **Why**: MAHA rollout showed that active writing context prevented a wrong broad-capture fallback but still degraded into generic claim readiness instead of the declared current-status validation task. The driver was using the lane hint but not the ordered work objective.
+- **Validation**: pending targeted checks: `python3 checks/check_current_work_context.py`, `python3 checks/check_drive.py`, and smoke harness; then sync to MAHA and confirm the chosen objective is current-status validation.
+- **Non-goal**: Do not infer priorities with an LLM; do not execute the research task; do not let current-work hints override hard failures, human gates, or nonzero research risks.
+- **Does not prove**: the declared priority is scientifically optimal; the preflighted work has run; current-status sources are correct; claim support; paper readiness; gate approval.
+- **Drift risk**: A stale `CURRENT_WORK.yml` can produce a stale recommendation. Projects must keep the file short, dated through version control, and update or remove it when the active deliverable changes.
+- **Next check**: Use on MAHA and one non-writing project to verify that active priority routing reduces generic fallback without masking a real research-risk blocker.

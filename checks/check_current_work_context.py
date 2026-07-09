@@ -50,6 +50,14 @@ explicitly_deprioritized:
         objective = report.get("chosen_objective") or {}
         if objective.get("lane") == "data" or objective.get("objective_id") == "broad_capture":
             failures.append("drive ignored active writing context and chose broad_capture/data")
+        if objective.get("objective_id") != "current_work_priority":
+            failures.append("drive did not compile active priority_order[0] into a current-work objective")
+        if objective.get("objective") != "manuscript citation truth":
+            failures.append("drive did not select the first operator-declared current-work priority")
+        if "task preflight" not in str(objective.get("command") or ""):
+            failures.append("current-work objective must remain a preflight-only recommendation")
+        if objective.get("source") != "CURRENT_WORK.yml#priority_order[0]":
+            failures.append("current-work objective must expose its deterministic source")
         signals = report.get("project_signals") or {}
         if not isinstance(signals.get("current_work"), dict):
             failures.append("drive report does not surface current_work signal")
@@ -64,4 +72,3 @@ explicitly_deprioritized:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
