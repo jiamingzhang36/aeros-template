@@ -35,6 +35,8 @@ def main() -> int:
     cases = [
         ("", "tidy up the folder structure", "general_guardrail"),
         ("data", "broad search lead sweep into lead queue", "broad_capture"),
+        ("data", "广泛搜索政府来源，先抓取尽可能多的数据，不进入 processed/canonical/claim", "broad_capture"),
+        ("data", "撒网、收集线索，不触碰 claim_registry", "broad_capture"),
         ("data", "recapture sources in browser", "source_capture"),
         ("data", "repair denominator data inventory", "data_repair"),
         ("data", "audit claim ceiling", "claim_audit"),

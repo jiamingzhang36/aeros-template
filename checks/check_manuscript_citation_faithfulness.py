@@ -40,10 +40,10 @@ def _fixture_fail_then_pass() -> tuple[bool, list[str]]:
             encoding="utf-8",
         )
         (root / "discovery/literature/paper_registry.csv").write_text(
-            "paper_id,citation_key,title,full_text_available,extraction_card\n"
-            "P001,smith2020,Background,no,\n"
-            "P002,jones2021,Claim,yes,discovery/literature/extraction_cards/P002.md\n"
-            "P003,moran2025,Number,abstract_only,\n",
+            "paper_id,citation_key,title,full_text_available,extraction_card,citation_function\n"
+            "P001,smith2020,Background,no,,related_literature\n"
+            "P002,jones2021,Claim,yes,discovery/literature/extraction_cards/P002.md,related_literature\n"
+            "P003,moran2025,Number,abstract_only,,related_literature\n",
             encoding="utf-8",
         )
         (root / "discovery/literature/extraction_cards/P002.md").write_text(
@@ -61,6 +61,11 @@ def _fixture_fail_then_pass() -> tuple[bool, list[str]]:
             failures.append("fixture did not identify claim-bearing missing-interpretation row")
         if statuses.get("moran2025") != "abstract_only_too_strong":
             failures.append("abstract-only number_fact should fail as abstract_only_too_strong")
+        functions = {row.get("citation_key"): row.get("citation_function") for row in report.get("rows") or []}
+        if functions.get("jones2021") != "result_claim":
+            failures.append("sentence-level result claim should override registry related_literature label")
+        if functions.get("moran2025") != "number_fact":
+            failures.append("sentence-level number fact should override registry related_literature label")
         if any(row.get("citation_key") == "smith2020" and row.get("blocking") for row in report.get("rows") or []):
             failures.append("metadata/background citation should not block without full text")
         sentence_id = next((row.get("sentence_id") for row in fail_rows if row.get("citation_key") == "jones2021"), "")

@@ -46,6 +46,18 @@ def main() -> int:
     )
     if broad.get("approval_required") != "none_for_broad_lead_capture":
         failures.append(f"broad fixture required approval: {broad.get('approval_required')}")
+    if broad.get("allowed_without_human_approval") is not True:
+        failures.append("broad fixture was not allowed_without_human_approval")
+    broad_cn = classify_source_capture_permission(
+        ROOT,
+        lane="data",
+        task_mode="broad_capture",
+        intent="广泛搜索政府来源，先抓取尽可能多的数据，不进入 processed/canonical/claim",
+        output_intents=["lead_queue", "candidate_queue", "audit_note"],
+        allowed_to_touch=["work/leads/", "data/backfill/demo_lead_queue.csv", "data/backfill/demo_candidate_queue.csv"],
+    )
+    if broad_cn.get("approval_required") != "none_for_broad_lead_capture" or broad_cn.get("allowed_without_human_approval") is not True:
+        failures.append("Chinese broad-capture fixture should be green without human approval")
 
     yellow = classify_source_capture_permission(
         ROOT,

@@ -219,13 +219,8 @@ def _source_type(row: dict[str, str]) -> str:
     return "academic_paper"
 
 
-def _citation_function(sentence: str, row: dict[str, str]) -> str:
+def _sentence_citation_function(sentence: str) -> str:
     low = sentence.lower()
-    explicit = ""
-    for col in ("citation_function", "function"):
-        explicit = (row.get(col) or "").strip().lower()
-        if explicit:
-            return explicit
     if any(marker in low for marker in ("gap", "little evidence", "few studies", "literature lacks", "understudied")):
         return "literature_gap"
     if any(marker in low for marker in ("table", "figure", "appendix", "billion", "million", "percent", "%", "$", "usd", "statistic", "share", "rate")) and any(ch.isdigit() for ch in low):
@@ -247,6 +242,24 @@ def _citation_function(sentence: str, row: dict[str, str]) -> str:
     if any(marker in low for marker in ("background", "context", "overview", "see also")):
         return "background_pointer"
     return "metadata_only"
+
+
+def _citation_function(sentence: str, row: dict[str, str]) -> str:
+    """Classify the citation's sentence-level function.
+
+    Registry-level citation_function is only a default hint. A paper can be used
+    as background in one sentence and as a method/result/number support in
+    another; the sentence use must therefore override the registry label when it
+    carries a stronger function.
+    """
+    inferred = _sentence_citation_function(sentence)
+    if inferred != "metadata_only":
+        return inferred
+    for col in ("citation_function", "function"):
+        explicit = (row.get(col) or "").strip().lower()
+        if explicit:
+            return explicit
+    return inferred
 
 
 def _claim_type_for_function(function: str, sentence: str) -> str:

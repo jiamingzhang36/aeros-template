@@ -81,9 +81,18 @@ YELLOW_TEXT_MARKERS = (
 
 GREEN_TEXT_MARKERS = (
     "broad search",
+    "wide search",
     "lead sweep",
     "lead queue",
     "candidate queue",
+    "广泛搜索",
+    "广泛抓取",
+    "先抓取",
+    "先搜集",
+    "收集线索",
+    "搜集线索",
+    "撒网",
+    "线索",
     "public",
     "official",
     "openalex",
@@ -146,7 +155,21 @@ def classify_source_capture_permission(
     text = " ".join([lane, task_mode, intent, " ".join(outputs), " ".join(paths)]).lower()
     reasons: list[str] = []
 
-    broad_capture = task_mode == "broad_capture" or "broad_capture" in text or _has_any(text, ("broad search", "lead sweep", "lead queue", "candidate queue"))
+    broad_capture = task_mode == "broad_capture" or "broad_capture" in text or _has_any(text, (
+        "broad search",
+        "wide search",
+        "lead sweep",
+        "lead queue",
+        "candidate queue",
+        "广泛搜索",
+        "广泛抓取",
+        "先抓取",
+        "先搜集",
+        "收集线索",
+        "搜集线索",
+        "撒网",
+        "线索",
+    ))
 
     if any(intent in RED_INTENTS for intent in outputs) or _has_any(text, RED_TEXT_MARKERS) or _has_any(text, RED_PATH_MARKERS):
         tier = "red_human_required"
@@ -185,7 +208,10 @@ def classify_source_capture_permission(
         "status": "ADVISORY",
         "tier": tier,
         "approval_required": approval_required,
-        "allowed_without_human_approval": approval_required == "none_for_staging_public_capture",
+        "allowed_without_human_approval": approval_required in {
+            "none_for_staging_public_capture",
+            "none_for_broad_lead_capture",
+        },
         "rationale": reasons,
         "required_controls": [
             "write only declared staging/probe/audit outputs",

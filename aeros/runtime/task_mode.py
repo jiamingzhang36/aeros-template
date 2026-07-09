@@ -104,6 +104,27 @@ def load_contract_by_id(root: Path, task_id: str) -> Contract | None:
 def infer_task_mode(root: Path, *, task_id: str = "", lane: str = "", intent: str = "") -> dict[str, Any]:
     contract = load_contract_by_id(root, task_id)
     blob = f"{lane} {intent} {_contract_blob(contract)}".lower()
+    claim_boundary_only = any(
+        marker in blob
+        for marker in (
+            "do not enter claim",
+            "do not touch claim",
+            "do not write claim",
+            "not claim",
+            "not claim-supporting",
+            "no claim",
+            "without claim",
+            "不进入 claim",
+            "不要进入 claim",
+            "不触碰 claim",
+            "不要触碰 claim",
+            "不写 claim",
+            "不改 claim",
+            "不支持 claim",
+            "不进入processed/canonical/claim",
+            "不进入 processed/canonical/claim",
+        )
+    )
     if lane == "data":
         mode = "data_repair"
     elif lane == "claim":
@@ -114,7 +135,27 @@ def infer_task_mode(root: Path, *, task_id: str = "", lane: str = "", intent: st
         mode = "general_guardrail"
     reason = "defaulted to conservative guardrail from lane/task context"
 
-    if any(token in blob for token in ("broad search", "lead sweep", "lead queue", "candidate queue", "wide capture", "撒网", "线索")):
+    if any(token in blob for token in (
+        "broad search",
+        "wide search",
+        "wide capture",
+        "lead sweep",
+        "lead queue",
+        "candidate queue",
+        "collect leads",
+        "source leads",
+        "广泛搜索",
+        "广泛抓取",
+        "广泛搜",
+        "先抓取",
+        "先搜集",
+        "先收集",
+        "收集线索",
+        "搜集线索",
+        "撒网",
+        "线索",
+        "尽可能多",
+    )):
         mode, reason = "broad_capture", "early lead capture context detected"
     elif any(token in blob for token in ("wrong route", "route recovery", "negative seed", "base universe", "route_decision")):
         mode, reason = "route_recovery", "route decision or failed route context detected"
@@ -122,7 +163,7 @@ def infer_task_mode(root: Path, *, task_id: str = "", lane: str = "", intent: st
         mode, reason = "submission_readiness", "submission/release-facing context detected"
     elif any(token in blob for token in ("paper", "draft", "word", "tex", "writing", "response")):
         mode, reason = "writing_sync", "writing or document synchronization context detected"
-    elif any(token in blob for token in ("claim", "ceiling", "registry", "language constraint")):
+    elif any(token in blob for token in ("claim", "ceiling", "registry", "language constraint")) and not claim_boundary_only:
         mode, reason = "claim_audit", "claim audit or claim-boundary context detected"
     elif any(token in blob for token in ("recapture", "capture", "source snapshot", "chrome", "fulltext", "source_capture")):
         mode, reason = "source_capture", "source capture or recapture context detected"
