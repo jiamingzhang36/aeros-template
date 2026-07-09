@@ -2189,7 +2189,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-09 — Enforce skill use-or-waive proof and current-work routing context
 
-- **Commit(s)**: pending
+- **Commit(s)**: `103ffe6`
 - **Change type**: framework / skill obligation enforcement / research-driver context
 - **Action**: Added completion-level `skill_use_attestation` so skill-eligible tasks cannot pass without either a skill invocation receipt or explicit waiver. Extended task preflight with a `skill_use_contract` that lists required skill classes, candidate skills, waiver fields, and the pass rule. Added `CURRENT_WORK.yml` plus `aeros.runtime.current_work`, and wired current-work hints into `aeros next` and `aeros drive` so active writing/poster/submission work can outrank generic data-first or broad-capture fallback when no higher-priority red light exists. Registered both capabilities in sync doctor and harness profiles.
 - **Why**: Recent project use showed two remaining frictions: skills had moved from optional recommendation to default consideration, but task completion still did not require a concrete use-or-waive proof; and the research driver could still route active poster/manuscript work toward generic data/broad-capture defaults when the current project context was not visible.
