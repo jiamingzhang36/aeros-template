@@ -107,6 +107,7 @@ status_labels:
     - related_literature_ok
     - policy_source_ok
     - legal_source_ok
+    - route_admission_ok
   debt:
     - missing_fulltext
     - missing_extraction

@@ -68,6 +68,61 @@ def _fixture_fail_then_pass() -> tuple[bool, list[str]]:
             failures.append("sentence-level number fact should override registry related_literature label")
         if any(row.get("citation_key") == "smith2020" and row.get("blocking") for row in report.get("rows") or []):
             failures.append("metadata/background citation should not block without full text")
+
+        (root / "tex/paper.tex").write_text(
+            r"Prior work studies consumer acceptance and regulatory framing \citep{johnson2025future}. "
+            r"Because the EPV ratio is 8.1, we use Firth's penalized-likelihood logit \citep{firth1993}. "
+            r"A bounded method reference is allowed only as method background \citep{cameron2008}. "
+            r"Replacing the ideology measure with Shor--McCarty scores yields similar estimates \citep{shor2011}. "
+            r"We test the reflection hypothesis by adding a year trend \citep{manski1993}.",
+            encoding="utf-8",
+        )
+        (root / "discovery/literature/paper_registry.csv").write_text(
+            "paper_id,citation_key,title,primary_function,full_text_available,extraction_card,citation_function,support_route_note\n"
+            "P004,johnson2025future,Framing,gap-verification,yes,discovery/literature/extraction_cards/P004.md,related_literature,\n"
+            "P005,firth1993,Firth,method-identification,yes,discovery/literature/extraction_cards/P005.md,related_literature,\n"
+            "P006,cameron2008,Bootstrap,method-identification,no,,related_literature,Bounded method/theory/data reference only; does not support empirical CMPD claim\n"
+            "P007,shor2011,Ideological Mapping,data-measurement,no,,related_literature,Bounded method/theory/data reference only; does not support empirical CMPD claim\n"
+            "P008,manski1993,Reflection Problem,method-identification,no,,related_literature,Bounded method/theory/data reference only; does not support empirical CMPD claim\n",
+            encoding="utf-8",
+        )
+        (root / "discovery/literature/extraction_cards/P004.md").write_text(
+            "# P004\nSource passage: regulatory framing appears in public debates.\n",
+            encoding="utf-8",
+        )
+        (root / "discovery/literature/extraction_cards/P005.md").write_text(
+            "# P005\nSource passage: Firth penalized likelihood reduces small-sample bias.\n",
+            encoding="utf-8",
+        )
+        routed = build_sentence_citation_grounding(root)
+        routed_functions = {row.get("citation_key"): row.get("citation_function") for row in routed.get("rows") or []}
+        if routed_functions.get("johnson2025future") == "number_fact":
+            failures.append("citation-key years must not turn related-literature sentences into number_fact")
+        if routed_functions.get("johnson2025future") != "related_literature":
+            failures.append("related-literature sentence with citation-key digits should stay related_literature")
+        if routed_functions.get("firth1993") != "method_precedent":
+            failures.append("method sentence with EPV/table-like numbers should route to method_precedent")
+        if routed_functions.get("shor2011") != "data_source":
+            failures.append("measurement-score citation should route to data_source even when sentence reports own estimates")
+        if routed_functions.get("manski1993") != "method_precedent":
+            failures.append("reflection-hypothesis citation should route to method_precedent even when sentence says test")
+        routed_statuses = {row.get("citation_key"): row.get("support_status") for row in routed.get("rows") or []}
+        if routed_statuses.get("cameron2008") != "route_admission_ok":
+            failures.append("bounded method route admission should pass without pretending full-text support")
+
+        (root / "tex/paper.tex").write_text(
+            r"Smith (2020) is a prior study \citep{smith2020}. "
+            r"We find a significant policy effect on adoption \citep{jones2021}. "
+            r"The program cost $1.6 billion \citep{moran2025}.",
+            encoding="utf-8",
+        )
+        (root / "discovery/literature/paper_registry.csv").write_text(
+            "paper_id,citation_key,title,full_text_available,extraction_card,citation_function\n"
+            "P001,smith2020,Background,no,,related_literature\n"
+            "P002,jones2021,Claim,yes,discovery/literature/extraction_cards/P002.md,related_literature\n"
+            "P003,moran2025,Number,abstract_only,,related_literature\n",
+            encoding="utf-8",
+        )
         sentence_id = next((row.get("sentence_id") for row in fail_rows if row.get("citation_key") == "jones2021"), "")
         (root / f"discovery/literature/interpretation_records/{sentence_id}.yml").write_text(
             "human_status: approved\n"

@@ -2206,3 +2206,18 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: `python3 checks/check_task_mode.py`; `python3 checks/check_source_capture_permission.py`; `python3 checks/check_manuscript_citation_faithfulness.py`; `python3 checks/check_citation_risk_radar.py`; `python3 checks/check_drive.py`; `python3 checks/check_task_preflight.py`; `python3 checks/check_sync_doctor.py`.
 - **Does not prove**: citation-function inference is perfect; every cited sentence is substantively faithful; broad capture should ignore ToS/login/private-data risks; active-project rollout success; claim support; paper readiness; gate approval.
 - **Next check**: Sync into active projects and verify broad lead-search prompts route green without human approval while claim/number/method-bearing manuscript sentences are not hidden by registry-level related-literature labels.
+
+
+## 2026-07-09 — Repair sentence citation grounding route admissions
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / citation grounding / rollout bug fix
+- **North star:** Reduce false citation debt while preserving sentence-level anti-hallucination boundaries.
+- **Alignment:** Keeps manuscript citation truth as a P0 submission risk, but distinguishes true unsupported claims from bounded method/theory/data references and source-snapshot-backed facts already admitted by a final citation packet.
+- **Action**: Hardened sentence citation-function inference by stripping citation commands before classification, using word-boundary matching for short method markers such as `iv`/`did`, prioritizing method markers over broad mechanism words, and incorporating registry `primary_function` for data-measurement and method-identification citations. Added `route_admission_ok` for source snapshots, bounded method/theory/data route notes, and full-text extraction routes admitted by a final citation packet. Extended fixtures so citation-key years, EPV/table-like method sentences, Shor--McCarty score citations, Manski reflection-hypothesis citations, and bounded method waivers are tested.
+- **Why**: Cultured-meat rollout surfaced 53 blocking citation-debt rows, but many were false or already bounded by the 2026-07-06 final citation packet. The repair reduced the live manuscript from 53 blocking rows to 0 without granting claim support, paper readiness, or scientific truth.
+- **Validation**: `python3 checks/check_manuscript_citation_faithfulness.py`; `python3 checks/check_citation_risk_radar.py`; `python3 checks/check_sync_doctor.py`; `python3 checks/run_harness_checks.py --profile smoke --timeout 20`; plus the same smoke checks in cultured meat after vendored sync.
+- **Non-goal**: Do not certify cited sources as true; do not approve interpretation records; do not upgrade claims; do not declare the paper submission-ready; do not make every method citation require a full extraction card.
+- **Does not prove**: citation-function inference is perfect; final citation packet judgments are scientifically correct; weak/background citations are sufficient for all future drafts; claim support; paper readiness; gate approval.
+- **Drift risk**: Route admissions can become too permissive if projects add broad `support_route_note` text without a real final citation packet or bounded-use language. Future checks should keep admissions narrow and report the admitted route in citation-debt summaries.
+- **Next check**: Roll this into the next project with a real manuscript citation debt surface and verify that unsupported result/number claims still block while bounded method/theory/data citations do not create noisy P0 debt.

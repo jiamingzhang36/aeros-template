@@ -68,6 +68,16 @@ DEFAULT_REQUIREMENTS: dict[str, dict[str, Any]] = {
     "literature_gap": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "approved_interpretation"], "blocking": True, "allowed_status": "grounded"},
 }
 
+PASS_STATUSES = {
+    "grounded",
+    "metadata_only_ok",
+    "background_ok",
+    "related_literature_ok",
+    "policy_source_ok",
+    "legal_source_ok",
+    "route_admission_ok",
+}
+
 DOES_NOT_PROVE = [
     "that the cited source is true",
     "that human interpretation is correct beyond the recorded source passage",
@@ -219,16 +229,45 @@ def _source_type(row: dict[str, str]) -> str:
     return "academic_paper"
 
 
+def _semantic_sentence_text(sentence: str) -> str:
+    text = re.sub(
+        r"\\(?:cite|citet|citep|citealp|citeauthor|citeyear|parencite|textcite|autocite|footcite)(?:\[[^\]]*\])*\{[^}]*\}",
+        " ",
+        sentence,
+    )
+    text = re.sub(r"@[A-Za-z0-9_:\-.]+", " ", text)
+    text = re.sub(r"\\(?:label|ref|eqref)(?:\[[^\]]*\])?\{[^}]*\}", " ", text)
+    return re.sub(r"\s+", " ", text).strip().lower()
+
+
+def _has_word(text: str, word: str) -> bool:
+    return re.search(rf"\b{re.escape(word)}s?\b", text) is not None
+
+
 def _sentence_citation_function(sentence: str) -> str:
-    low = sentence.lower()
+    low = _semantic_sentence_text(sentence)
     if any(marker in low for marker in ("gap", "little evidence", "few studies", "literature lacks", "understudied")):
         return "literature_gap"
-    if any(marker in low for marker in ("table", "figure", "appendix", "billion", "million", "percent", "%", "$", "usd", "statistic", "share", "rate")) and any(ch.isdigit() for ch in low):
-        return "number_fact"
+    method_phrases = (
+        "difference-in-differences", "event study", "standard error",
+        "maximum-likelihood", "tf-idf", "smith-waterman", "fixed effect",
+    )
+    method_words = (
+        "method", "identification", "instrument", "iv", "did", "estimator",
+        "specification", "clustered", "bootstrap", "firth", "logit", "ols",
+        "lpm", "hazard", "equivalence", "alignment", "duration", "decomposition",
+    )
+    if any(marker in low for marker in method_phrases) or any(_has_word(low, marker) for marker in method_words):
+        return "method_precedent"
     if any(marker in low for marker in ("mechanism", "channel", "pathway", "explanation", "why this", "because")):
         return "mechanism_claim"
-    if any(marker in low for marker in ("method", "identification", "difference-in-differences", "did", "instrument", "iv", "event study", "estimator", "specification")):
-        return "method_precedent"
+    number_words = ("table", "figure", "appendix", "billion", "million", "percent", "usd", "statistic", "share", "rate")
+    if (
+        any(_has_word(low, marker) for marker in number_words)
+        or "%" in low
+        or r"\$" in low
+    ) and any(ch.isdigit() for ch in low):
+        return "number_fact"
     if any(marker in low for marker in ("dataset", "data source", "survey", "database", "measurement", "variable", "sample")):
         return "data_source"
     if any(marker in low for marker in CLAIM_MARKERS) or any(marker in low for marker in ("finds", "shows", "reports", "estimates", "documents", "demonstrates")):
@@ -253,6 +292,22 @@ def _citation_function(sentence: str, row: dict[str, str]) -> str:
     carries a stronger function.
     """
     inferred = _sentence_citation_function(sentence)
+    low = _semantic_sentence_text(sentence)
+    primary = " ".join(str(row.get(col) or "").lower() for col in ("primary_function", "secondary_functions", "citation_function"))
+    title = str(row.get("title") or "").lower()
+    if ("data" in primary or "measurement" in primary) and any(
+        marker in low for marker in ("score", "measure", "indicator", "index", "series", "variable")
+    ):
+        return "data_source"
+    if ("method" in primary or "identification" in primary) and any(
+        marker in low for marker in (
+            "hypothesis", "test", "problem", "model", "specification", "logit",
+            "ols", "estimator", "benchmark", "diagnostic", "reflection",
+        )
+    ):
+        return "method_precedent"
+    if "ideological mapping" in title and "score" in low:
+        return "data_source"
     if inferred != "metadata_only":
         return inferred
     for col in ("citation_function", "function"):
@@ -367,6 +422,8 @@ def _available_evidence(pid: str, row: dict[str, str], card_ok: bool, rec: dict[
         available.add("fulltext_available")
     if any((row.get(col) or "").strip() for col in ("source_snapshot", "snapshot_path", "source_or_path", "stable_url")):
         available.add("source_snapshot")
+    if _source_type(row) in {"official_source", "source_snapshot"}:
+        available.add("source_snapshot")
     if _source_type(row) == "official_source":
         available.add("official_source_snapshot")
     if card_ok:
@@ -380,6 +437,20 @@ def _available_evidence(pid: str, row: dict[str, str], card_ok: bool, rec: dict[
     if any((rec.get(col) or "") for col in ("page", "table", "figure", "locator", "page_or_table")):
         available.add("table_or_page_locator")
     return available
+
+
+def _route_admission(row: dict[str, str], function: str, card_ok: bool) -> tuple[bool, str]:
+    note = str(row.get("support_route_note") or row.get("notes") or "").strip().lower()
+    stype = _source_type(row)
+    if not note:
+        return False, ""
+    if stype in {"source_snapshot", "official_source"} and "supports only" in note:
+        return True, "source-snapshot route admission; bounded to the registered manuscript sentence"
+    if "bounded method/theory/data reference only" in note and function in {"method_precedent", "mechanism_claim", "data_source"}:
+        return True, "bounded method/theory/data route admission; does not support empirical CMPD claims"
+    if card_ok and "final citation packet" in note and function in STRONG_FUNCTIONS:
+        return True, "full-text extraction route admitted by final citation packet; bounded to the manuscript use"
+    return False, ""
 
 
 def _missing_status(function: str, missing: list[str], row: dict[str, str]) -> str:
@@ -422,6 +493,9 @@ def _evaluate_requirement(
     missing = [item for item in required if item not in available]
     blocks_when_missing = bool(requirement.get("blocking", function in STRONG_FUNCTIONS))
     if missing:
+        admitted, admission_note = _route_admission(row, function, card_ok)
+        if admitted:
+            return "route_admission_ok", "none", False, admission_note, ";".join(required), ";".join(sorted(available | {"route_admission"}))
         status = _missing_status(function, missing, row)
         if "extraction_card" in missing:
             status = _missing_status(function, missing, row)
@@ -469,7 +543,7 @@ def write_citation_debt_report(root: Path | str, report: dict[str, Any], *, path
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for row in rows:
-            if row.get("support_status") not in {"grounded", "metadata_only_ok", "background_ok", "related_literature_ok", "policy_source_ok", "legal_source_ok"} or row.get("blocking"):
+            if row.get("support_status") not in PASS_STATUSES or row.get("blocking"):
                 writer.writerow({field: row.get(field, "") for field in fields})
     return out
 
@@ -530,9 +604,8 @@ def build_sentence_citation_grounding(root: Path | str = Path.cwd()) -> dict[str
                     notes=note,
                 ))
 
-    pass_statuses = {"grounded", "metadata_only_ok", "background_ok", "related_literature_ok", "policy_source_ok", "legal_source_ok"}
     failures = [row for row in rows if row.blocking]
-    debt = [row for row in rows if row.blocking or row.support_status not in pass_statuses]
+    debt = [row for row in rows if row.blocking or row.support_status not in PASS_STATUSES]
     counts = {
         "manuscripts": len(manuscripts),
         "citation_sentences": len({(r.manuscript_path, r.line, r.manuscript_sentence) for r in rows}),
