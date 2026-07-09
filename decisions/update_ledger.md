@@ -2199,7 +2199,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-09 — Fix broad-capture routing and sentence-first citation grounding
 
-- **Commit(s)**: pending
+- **Commit(s)**: `32884c2`
 - **Change type**: framework / rollout bug fix / capture routing / citation grounding
 - **Action**: Fixed three rollout blockers surfaced by active-project diagnostics: broad Chinese search phrases such as “广泛搜索/广泛抓取/先搜集/撒网” now route to `broad_capture`; negative claim-boundary phrases such as “不进入 claim / 不触碰 claim” no longer trigger `claim_audit`; `green_broad_capture` now correctly sets `allowed_without_human_approval: true`; and sentence-level citation function classification now treats registry `citation_function` as a default hint rather than overriding sentence-specific method/result/mechanism/number use. Added fixtures for Chinese broad-capture routing, approval-free broad lead capture, and registry-related-literature labels being overridden by claim/number-bearing sentences.
 - **Why**: Real rollout diagnostics showed AEROS was still too heavy during early capture and too shallow during citation review: broad lead search could be misrouted into claim audit/route approval, and cultured-meat citation checks could pass because a registry-level `related_literature` label masked claim-bearing sentence use.
