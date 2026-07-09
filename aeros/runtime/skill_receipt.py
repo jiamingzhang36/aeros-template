@@ -108,6 +108,112 @@ def write_skill_invocation_receipt(
     return path
 
 
+def build_skill_use_attestation(
+    project_root: Path,
+    contract: Contract,
+    *,
+    skill_receipt_path: Path | str | None = None,
+) -> dict[str, Any]:
+    """Return the completion-level use-or-waive skill attestation.
+
+    This is deliberately stricter than mere recommendation coverage.  A passed
+    task that is skill-eligible must either point to a passing skill invocation
+    receipt or carry explicit waivers in the task contract.  The attestation is
+    still not a claim of skill quality; it only proves that the use/waive
+    decision is visible and machine-checkable.
+    """
+    skill_map = load_core_skill_map(project_root)
+    try:
+        from .skill_obligation import infer_skill_obligations
+
+        obligations = sorted(set(infer_skill_obligations(project_root, contract)))
+    except Exception:
+        obligations = sorted(str(s).strip() for s in (contract.raw.get("skill_obligations") or []) if str(s).strip())
+    required_classes = sorted(
+        {
+            str(s).strip()
+            for s in list(contract.raw.get("required_skill_classes") or []) + obligations
+            if str(s).strip()
+        }
+    )
+    recommended = sorted(str(s).strip() for s in (contract.raw.get("recommended_skills") or []) if str(s).strip())
+    allowed = sorted(str(s).strip() for s in (contract.raw.get("allowed_skills") or []) if str(s).strip())
+    contract_waivers = [w for w in (contract.raw.get("skill_waivers") or []) if isinstance(w, dict)]
+    receipt_rel = _rel(project_root, skill_receipt_path)
+    receipt_payload: dict[str, Any] = {}
+    receipt_present = False
+    if skill_receipt_path:
+        path = Path(skill_receipt_path)
+        if not path.is_absolute():
+            path = project_root / path
+        if path.exists():
+            receipt_present = True
+            try:
+                loaded = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+                if isinstance(loaded, dict):
+                    receipt_payload = loaded
+            except yaml.YAMLError:
+                receipt_payload = {"verdict": "fail", "unreadable": True}
+    skills_used = sorted(str(s).strip() for s in (receipt_payload.get("skills_used") or []) if str(s).strip())
+    receipt_waivers = [w for w in (receipt_payload.get("skill_waivers") or []) if isinstance(w, dict)]
+    waivers = receipt_waivers or contract_waivers
+    waiver_classes = {
+        str(w.get("skill_class", "")).strip()
+        for w in waivers
+        if isinstance(w, dict) and str(w.get("skill_class", "")).strip()
+    }
+    used_stages = {
+        str(skill_map.get(name, {}).get("aeros_stage", "")).strip()
+        for name in skills_used
+        if str(skill_map.get(name, {}).get("aeros_stage", "")).strip()
+    }
+    failures: list[str] = []
+    use_or_waive_required = bool(required_classes or recommended)
+    missing_classes = sorted(
+        cls for cls in required_classes
+        if cls not in waiver_classes and "all" not in waiver_classes and cls not in skills_used and cls not in used_stages
+    )
+    if use_or_waive_required and not receipt_present and not waivers:
+        failures.append("skill use-or-waive decision is required but no skill receipt or waiver is recorded")
+    if receipt_payload.get("unreadable"):
+        failures.append("skill invocation receipt is unreadable")
+    if receipt_payload.get("verdict") == "fail":
+        failures.append("skill invocation receipt verdict is fail")
+    if receipt_payload.get("missing_skill_decision"):
+        failures.append("skill invocation receipt reports a missing skill decision")
+    for cls in missing_classes:
+        failures.append(f"required skill class {cls!r} has neither invocation nor waiver")
+    if recommended and not skills_used and not waivers:
+        failures.append("recommended skills declared but no invocation or waiver is recorded")
+    verdict = "not_required"
+    if use_or_waive_required:
+        verdict = "fail" if failures else "pass"
+    return {
+        "version": 1,
+        "requirement": "use_or_waive",
+        "use_or_waive_required": use_or_waive_required,
+        "receipt_path": receipt_rel,
+        "receipt_present": receipt_present,
+        "required_skill_classes": required_classes,
+        "recommended_skills": recommended,
+        "allowed_skills": allowed,
+        "skills_used": skills_used,
+        "used_skill_classes": sorted(used_stages),
+        "skill_waivers": waivers,
+        "waiver_classes": sorted(waiver_classes),
+        "missing_skill_classes": missing_classes,
+        "missing_skill_decision": bool(failures) if use_or_waive_required else False,
+        "verdict": verdict,
+        "failures": failures,
+        "does_not_prove": [
+            "that the skill advice was correct",
+            "that the agent followed the skill perfectly",
+            "that research claims are supported",
+            "that a human gate is approved",
+        ],
+    }
+
+
 def validate_skill_invocations(project_root: Path, contracts: dict[str, tuple[Contract, Path]]) -> list[str]:
     failures: list[str] = []
     skill_map = load_core_skill_map(project_root)

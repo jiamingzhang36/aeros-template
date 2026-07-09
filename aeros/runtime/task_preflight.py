@@ -105,6 +105,26 @@ def _skill_obligations_from_text(root: Path, lane: str, intent: str) -> list[str
     return out
 
 
+def _skill_use_contract(root: Path, obligations: list[str]) -> dict[str, Any]:
+    classes = obligation_classes(root)
+    skills_by_class: dict[str, list[str]] = {}
+    for cls in obligations:
+        skills_by_class[cls] = sorted(str(item) for item in (classes.get(cls, {}).get("skills") or []) if str(item).strip())
+    return {
+        "use_or_waive_required": bool(obligations),
+        "required_skill_classes": sorted(obligations),
+        "candidate_skills_by_class": skills_by_class,
+        "waiver_required_fields": ["skill_class", "reason", "scope", "progress_label"],
+        "completion_receipt_field": "skill_use_attestation",
+        "pass_rule": "each required skill class must have a skill invocation receipt or explicit waiver before completion can pass",
+        "does_not_prove": [
+            "that skill advice is correct",
+            "that the agent followed every skill instruction perfectly",
+            "that claims, gates, or paper text are approved",
+        ],
+    }
+
+
 def _contract_allowed_to_touch(contract: Contract | None) -> list[str]:
     if not contract:
         return []
@@ -118,6 +138,7 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
     contract_intents = contract_output_intents(contract) if contract else {}
     output_intents: Any = contract_intents or list(mode.get("allowed_output_intents") or [])
     obligations = infer_skill_obligations(root, contract) if contract else _skill_obligations_from_text(root, lane, intent)
+    skill_use_contract = _skill_use_contract(root, obligations)
     allowed = _contract_allowed_to_touch(contract) or _workflow_allowed_prefixes(root, workflow)
     if not allowed:
         allowed = ["agent_runs/", "audits/", "outputs/context/", "work/"]
@@ -161,6 +182,7 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
         "workflow_preset": workflow,
         "execution_mode": mode.get("execution_mode"),
         "skill_obligations": obligations,
+        "skill_use_contract": skill_use_contract,
         "output_intents": output_intents,
         "source_capture_permission": permission,
         "owner_decision_status": owner_decisions.get("status"),
@@ -198,6 +220,14 @@ def format_task_preflight(report: dict[str, Any]) -> str:
         "skill_obligations:",
     ])
     lines.extend(f"- {item}" for item in report.get("skill_obligations") or [])
+    skill_use = report.get("skill_use_contract") or {}
+    lines.append("skill_use_contract:")
+    lines.append(f"- use_or_waive_required: {skill_use.get('use_or_waive_required')}")
+    lines.append(f"- pass_rule: {skill_use.get('pass_rule')}")
+    candidate_skills = skill_use.get("candidate_skills_by_class") or {}
+    if isinstance(candidate_skills, dict):
+        for cls, skills in candidate_skills.items():
+            lines.append(f"- {cls}: {skills}")
     lines.append("output_intents:")
     output_intents = report.get("output_intents")
     if isinstance(output_intents, dict):

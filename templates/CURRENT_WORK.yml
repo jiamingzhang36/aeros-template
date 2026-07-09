@@ -1,0 +1,22 @@
+version: 1
+purpose: >
+  Optional operator hint for AEROS next/drive ranking. This file records what
+  the human/project is actively trying to finish so deterministic routing does
+  not drift back to generic data-first or broad-capture defaults.
+
+active_goal: ""
+active_deliverable: ""
+active_lane: ""
+
+priority_order: []
+explicitly_deprioritized: []
+
+rules:
+  - "This is advisory routing context, not gate approval."
+  - "Hard harness failures, human gates, and research-risk blockers outrank this hint."
+  - "Use this to keep AEROS aligned with the current project phase, especially writing/poster/submission work."
+
+does_not_prove:
+  - "that the active goal is scientifically optimal"
+  - "that paper, claim, gate, or release authority is granted"
+  - "that lower-priority work is permanently cancelled"

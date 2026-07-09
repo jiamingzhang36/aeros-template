@@ -17,6 +17,7 @@ from typing import Any
 from .broad_capture import summarize_broad_capture
 from .citation_radar import build_citation_radar
 from .citation_sentence_grounding import build_sentence_citation_grounding
+from .current_work import load_current_work_context, preferred_lane
 from .next_action import NextAction, compute_next_action
 from .research_risk import compile_research_risk
 from .submission_driver import build_submission_driver
@@ -227,6 +228,10 @@ def _auto_objective(root: Path, lane: str) -> DriveObjective:
     if isinstance(top_risk, dict) and int(top_risk.get("score") or 0) > 0:
         return _objective_from_risk(top_risk)
 
+    context_lane = preferred_lane(root, fallback="")
+    if not lane and context_lane:
+        return _objective_from_next(compute_next_action(root, lane=context_lane))
+
     broad = summarize_broad_capture(root)
     total_leads = int(broad.get("total_leads") or 0)
     if lane in {"", "data"} and total_leads == 0:
@@ -316,6 +321,7 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
     }
     status = "NEEDS_HUMAN" if objective.needs_human else ("EXECUTED" if execution.get("attempted") else "READY")
     risk_report = compile_research_risk(root, lane=lane)
+    current_work = load_current_work_context(root)
     return {
         "status": status,
         "model": "AEROS-USEFUL-001-drive-mvp",
@@ -324,6 +330,7 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
         "research_risk": risk_report,
         "execution": execution,
         "project_signals": {
+            "current_work": current_work,
             "broad_capture": broad_summary,
             "submission_driver_status": build_submission_driver(root).get("status"),
             "preflight": preflight,

@@ -10,6 +10,7 @@ from typing import Any
 import yaml
 
 from .contract import Contract
+from .skill_receipt import build_skill_use_attestation
 
 RECEIPT_DIR = Path("agent_runs/completion_receipts")
 PROGRESS_DOMAINS = {"research", "runtime", "governance"}
@@ -196,6 +197,11 @@ def write_completion_receipt(
     report_rel = _rel(project_root, run_report_path) or latest_run_report(project_root, contract.task_id)
     receipt_required = contract.evidence_receipt_required
     evidence_receipt_exists = _exists(project_root, contract.receipt_path) if receipt_required else False
+    skill_use_attestation = build_skill_use_attestation(
+        project_root,
+        contract,
+        skill_receipt_path=skill_receipt_path,
+    )
     issues = list(open_issues or [])
     failures: list[str] = []
 
@@ -215,6 +221,7 @@ def write_completion_receipt(
         failures.append("human decision needed")
     if issues:
         failures.append("open issues remain")
+    failures.extend(str(item) for item in (skill_use_attestation.get("failures") or []))
 
     verdict = "fail" if failures else "pass"
     if substantive_outputs:
@@ -230,7 +237,7 @@ def write_completion_receipt(
     authority_status = "human_decision_required" if human_decision_needed else "no_new_authority"
     progress_domain = progress_domain_for(contract.work_lane, authority_status=authority_status)
     payload = {
-        "version": 5,
+        "version": 6,
         "task_id": contract.task_id,
         "generated_at": _now(),
         "completion_mode": mode,
@@ -249,6 +256,7 @@ def write_completion_receipt(
         "gate_status": contract.gate_status,
         "run_report_path": report_rel,
         "skill_invocation_receipt_path": _rel(project_root, skill_receipt_path),
+        "skill_use_attestation": skill_use_attestation,
         "allowed_outputs_expected": expected,
         "allowed_outputs_found": found,
         "allowed_outputs_missing": missing_outputs,
@@ -340,6 +348,17 @@ def validate_completion_receipts(project_root: Path, contracts: dict[str, tuple[
                 failures.append(f"{task_id}: completion receipt staging_artifact_paths is missing or invalid")
             if not isinstance(payload.get("substantive_evidence_paths"), list):
                 failures.append(f"{task_id}: completion receipt substantive_evidence_paths is missing or invalid")
+        if int(payload.get("version") or 1) >= 6:
+            attestation = payload.get("skill_use_attestation")
+            if not isinstance(attestation, dict):
+                failures.append(f"{task_id}: completion receipt missing skill_use_attestation")
+            else:
+                if attestation.get("use_or_waive_required") and attestation.get("verdict") != "pass":
+                    failures.append(f"{task_id}: skill use-or-waive attestation is not pass")
+                if attestation.get("missing_skill_decision"):
+                    failures.append(f"{task_id}: skill use-or-waive attestation reports a missing decision")
+                for failure in attestation.get("failures") or []:
+                    failures.append(f"{task_id}: skill attestation failure: {failure}")
         if payload.get("work_lane") != contract.work_lane:
             failures.append(f"{task_id}: completion receipt work_lane does not match contract")
         if not _same_check_set(list(payload.get("checks_required") or []), list(contract.checks)):

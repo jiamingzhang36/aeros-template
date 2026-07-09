@@ -79,6 +79,8 @@ def main() -> int:
             "protected_path_hook",
             "evidence_sufficiency_audit",
             "submission_research_driver",
+            "skill_use_attestation",
+            "current_work_context",
         }
         if not expected_missing <= missing:
             failures.append("fixture: expected missing capabilities were not reported")

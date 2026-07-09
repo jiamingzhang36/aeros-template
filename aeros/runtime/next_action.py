@@ -16,6 +16,7 @@ import yaml
 from .contract import Contract
 from .controller import build_iterate_plan
 from .action_spec import declared_action_spec
+from .current_work import preferred_lane as current_work_preferred_lane
 from .kernel import discover_contracts
 from .stale_triage import triage_item_for_task
 from .research_risk import compile_research_risk
@@ -738,6 +739,13 @@ def compute_next_action(root: Path, *, lane: str = "") -> NextAction:
     risk_action = _research_risk_next(root, lane=lane)
     if risk_action:
         return risk_action
+
+    if not lane:
+        context_lane = current_work_preferred_lane(root, fallback="")
+        if context_lane:
+            action = _lane_specific_next(root, context_lane)
+            if action:
+                return action
 
     if lane:
         action = _lane_specific_next(root, lane)
