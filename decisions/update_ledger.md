@@ -2210,7 +2210,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-09 — Repair sentence citation grounding route admissions
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `8ef3704`
 - **Change type**: framework / citation grounding / rollout bug fix
 - **North star:** Reduce false citation debt while preserving sentence-level anti-hallucination boundaries.
 - **Alignment:** Keeps manuscript citation truth as a P0 submission risk, but distinguishes true unsupported claims from bounded method/theory/data references and source-snapshot-backed facts already admitted by a final citation packet.
