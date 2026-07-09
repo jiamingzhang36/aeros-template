@@ -2177,3 +2177,12 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: the ranked risk is scientifically optimal; citation-function inference is perfect; full project rollout improves usefulness; claim support; paper readiness; gate approval.
 - **Next check**: Run inside CMPD/MAHA/SNAP and verify the top recommendation matches the real PI/editor risk rather than a mechanical stale task.
 
+## 2026-07-09 — Fix research-driver rollout semantics
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / research-driver rollout repair / citation grounding
+- **Action**: Fixed the rollout issues surfaced by real MAHA and cultured-meat tests: read-only research-risk `ActionSpec` records no longer declare expected outputs; `aeros drive --execute` can report `blocked_found` when a truth check successfully surfaces a blocker; email addresses such as `name@msu.edu` are no longer parsed as manuscript citation keys; citation grounding now respects registry citation functions/source types so method/background/official-source routes are not over-promoted into core claim blockers; downstream `check_next_action.py` keeps expensive controller-loop fixtures scoped to the template.
+- **Why**: The rollout test showed the new driver was conceptually right but had operational friction: useful blocker discovery looked like command failure, read-only specs violated their own invariant, email addresses caused false citation debt, and downstream smoke profiles paid template-level controller-test costs.
+- **Validation**: `python3 checks/check_next_action.py` and `python3 checks/check_drive.py` in template; `python3 checks/check_manuscript_citation_faithfulness.py`, `python3 checks/check_manuscript_citation_interpretation.py`, `python3 -m aeros.cli drive --goal citation-risk --execute --json`, `python3 -m aeros.cli next --json`, and targeted `check_next_action.py`/`check_drive.py` in cultured meat; `python3 -m aeros.cli next --json` and `python3 checks/check_manuscript_citation_faithfulness.py` in MAHA.
+- **Does not prove**: citation-function inference is perfect; weak/background citations are substantively correct; paper readiness; claim support; gate approval; real-project usefulness beyond the tested projects.
+- **Next check**: After sync into active projects, monitor whether `aeros drive` reports `blocked_found` only for genuine action-worthy blockers and whether downstream smoke latency remains acceptable without hiding template-level controller invariants.

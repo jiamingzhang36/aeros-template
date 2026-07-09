@@ -265,6 +265,19 @@ def _is_safe_to_execute(command: str) -> bool:
     return False
 
 
+def _surfaces_blocker(command: str) -> bool:
+    try:
+        args = shlex.split(command)
+    except ValueError:
+        return False
+    joined = " ".join(args)
+    return any(marker in joined for marker in (
+        "check_manuscript_citation_faithfulness.py",
+        "check_manuscript_citation_interpretation.py",
+        "check_literature_wrapper_sync.py",
+    ))
+
+
 def _run_safe_command(root: Path, command: str) -> dict[str, Any]:
     if not _is_safe_to_execute(command):
         return {
@@ -275,9 +288,13 @@ def _run_safe_command(root: Path, command: str) -> dict[str, Any]:
         }
     args = shlex.split(command)
     proc = subprocess.run(args, cwd=root, text=True, capture_output=True, timeout=60)
+    status = "pass" if proc.returncode == 0 else "fail"
+    if proc.returncode != 0 and _surfaces_blocker(command):
+        status = "blocked_found"
     return {
         "attempted": True,
-        "status": "pass" if proc.returncode == 0 else "fail",
+        "status": status,
+        "blocked_found": proc.returncode != 0 and _surfaces_blocker(command),
         "exit_code": proc.returncode,
         "command": command,
         "stdout_tail": proc.stdout[-4000:],

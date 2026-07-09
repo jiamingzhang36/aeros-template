@@ -73,11 +73,13 @@ def _blocked_fulltext_ids(root: Path) -> list[str]:
 
 
 def _is_template_project(root: Path) -> bool:
+    if root.name == "aeros-template":
+        return True
     manifest = root / "project_manifest.yml"
     if not manifest.exists():
         return False
     text = manifest.read_text(encoding="utf-8", errors="ignore")
-    return "project_mode: template" in text or "name: AEROS project" in text
+    return "project_mode: template" in text
 
 
 def main() -> int:
@@ -148,34 +150,35 @@ def main() -> int:
             if next_json_spec.get("lane") != next_json_data.get("lane"):
                 failures.append("aeros next --json ActionSpec lane differs from rendered lane")
 
-    rc, records = run_until(root, ControllerLoopArgs(until="no-progress", dry_run=True, max_steps=2))
-    if rc != 0 or not records:
-        failures.append("controller run-until dry-run did not produce a safe record")
-    elif not records[0].get("action_spec"):
-        failures.append("controller run-until dry-run did not include an ActionSpec record")
-    else:
-        if (records[0].get("action_spec") or {}).get("producer_mode") != "declared":
-            failures.append("controller run-until dry-run ActionSpec producer_mode is not declared")
-        for key in ("primary_stop_reason", "semantic_progress", "frontier_hash", "action_signature"):
-            if key not in records[0]:
-                failures.append(f"controller run-until dry-run missing {key}")
-    rc, max_records = run_until(root, ControllerLoopArgs(until="max-steps", dry_run=True, max_steps=2))
-    if rc != 0 or not max_records:
-        failures.append("controller run-until max-steps dry-run did not produce a safe record")
-    elif not max_records[0].get("action_spec"):
-        failures.append("controller run-until max-steps dry-run did not include an ActionSpec record")
-    else:
-        if (max_records[0].get("action_spec") or {}).get("producer_mode") != "declared":
-            failures.append("controller run-until max-steps ActionSpec producer_mode is not declared")
-        for key in ("primary_stop_reason", "semantic_progress", "frontier_hash", "action_signature"):
-            if key not in max_records[0]:
-                failures.append(f"controller run-until max-steps dry-run missing {key}")
-    unsafe_args, unsafe_reason = _command_args(
-        type("Action", (), {"command": "python3 -m aeros.cli iterate --stage discovery", "status_label": "ROUTE_READY"})(),
-        ControllerLoopArgs(until="human-gate"),
-    )
-    if unsafe_args or "allow-task-runs" not in unsafe_reason:
-        failures.append("controller must reject real iterate commands without --allow-task-runs")
+    if _is_template_project(root):
+        rc, records = run_until(root, ControllerLoopArgs(until="no-progress", dry_run=True, max_steps=2))
+        if rc != 0 or not records:
+            failures.append("controller run-until dry-run did not produce a safe record")
+        elif not records[0].get("action_spec"):
+            failures.append("controller run-until dry-run did not include an ActionSpec record")
+        else:
+            if (records[0].get("action_spec") or {}).get("producer_mode") != "declared":
+                failures.append("controller run-until dry-run ActionSpec producer_mode is not declared")
+            for key in ("primary_stop_reason", "semantic_progress", "frontier_hash", "action_signature"):
+                if key not in records[0]:
+                    failures.append(f"controller run-until dry-run missing {key}")
+        rc, max_records = run_until(root, ControllerLoopArgs(until="max-steps", dry_run=True, max_steps=2))
+        if rc != 0 or not max_records:
+            failures.append("controller run-until max-steps dry-run did not produce a safe record")
+        elif not max_records[0].get("action_spec"):
+            failures.append("controller run-until max-steps dry-run did not include an ActionSpec record")
+        else:
+            if (max_records[0].get("action_spec") or {}).get("producer_mode") != "declared":
+                failures.append("controller run-until max-steps ActionSpec producer_mode is not declared")
+            for key in ("primary_stop_reason", "semantic_progress", "frontier_hash", "action_signature"):
+                if key not in max_records[0]:
+                    failures.append(f"controller run-until max-steps dry-run missing {key}")
+        unsafe_args, unsafe_reason = _command_args(
+            type("Action", (), {"command": "python3 -m aeros.cli iterate --stage discovery", "status_label": "ROUTE_READY"})(),
+            ControllerLoopArgs(until="human-gate"),
+        )
+        if unsafe_args or "allow-task-runs" not in unsafe_reason:
+            failures.append("controller must reject real iterate commands without --allow-task-runs")
 
     lane_matrix = ["data", "literature", "method", "analysis", "claim", "writing", "compliance"] if _is_template_project(root) else []
     for lane in lane_matrix:

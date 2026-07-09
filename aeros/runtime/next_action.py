@@ -567,7 +567,6 @@ def _research_risk_next(root: Path, *, lane: str = "") -> NextAction | None:
         spec_effect_class="read_only",
         source=str(risk.get("source") or "aeros.runtime.research_risk"),
         blocked=False,
-        expected_outputs=tuple(str(item) for item in (risk.get("expected_artifacts") or ())),
     )
 
 

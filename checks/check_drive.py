@@ -62,8 +62,8 @@ def main() -> int:
         execution = payload.get("execution") or {}
         if execution.get("attempted") is not True:
             failures.append("drive citation-risk --execute should run the read-only citation check")
-        if execution.get("status") != "pass":
-            failures.append("drive citation-risk execution should pass in template mode")
+        if execution.get("status") not in {"pass", "blocked_found"}:
+            failures.append("drive citation-risk execution should pass or surface a blocker")
 
     fixture_code = r"""
 from pathlib import Path

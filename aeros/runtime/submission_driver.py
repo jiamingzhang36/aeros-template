@@ -204,8 +204,10 @@ def _citation_keys(sentence: str) -> list[str]:
             key = raw.strip()
             if key:
                 keys.append(key)
-    # Pandoc markdown citations: [@key; @key2] and bare @key.
-    for match in re.finditer(r"@([A-Za-z0-9_:\-\.]+)", sentence):
+    # Pandoc markdown citations: [@key; @key2] and bare @key. The negative
+    # lookbehind avoids treating email addresses such as name@msu.edu as
+    # citations.
+    for match in re.finditer(r"(?<![A-Za-z0-9._%+\-])@([A-Za-z0-9_:\-\.]+)", sentence):
         key = match.group(1).strip().rstrip(".,;:)]}")
         if key and key not in keys:
             keys.append(key)
@@ -302,11 +304,24 @@ def _scope_failures(scope_match: Any) -> tuple[list[str], list[str]]:
     return hard, weak
 
 
-def _citation_grounding_tier(sentence: str, record_data: dict[str, Any] | None = None) -> str:
+def _citation_grounding_tier(
+    sentence: str,
+    record_data: dict[str, Any] | None = None,
+    registry_row: dict[str, str] | None = None,
+) -> str:
     if isinstance(record_data, dict):
         explicit = str(record_data.get("citation_grounding_tier") or "").strip().lower()
         if explicit in VALID_CITATION_GROUNDING_TIERS:
             return explicit
+    registry_row = registry_row or {}
+    citation_function = str(registry_row.get("citation_function") or registry_row.get("primary_function") or "").strip().lower()
+    source_type = str(registry_row.get("source_type") or "").strip().lower()
+    if (
+        "method" in citation_function
+        or citation_function in {"related_literature", "background", "background-institutional"}
+        or source_type in {"official_source"}
+    ):
+        return "tier_1_interpretive"
     lowered = f" {_normalise_sentence(sentence).lower()} "
     if any(marker in lowered for marker in CLAIM_BEARING_MARKERS):
         return "tier_2_claim_bearing"
@@ -469,8 +484,9 @@ def build_citation_faithfulness_rows(root: Path | str = Path.cwd()) -> list[Cita
                 sid = _stable_sentence_id(rel, sentence, key)
                 record_entry = records.get((sid, key))
                 record_data = record_entry[1] if record_entry else None
-                tier = _citation_grounding_tier(sentence, record_data)
                 paper_id = bib_map.get(key, "")
+                registry_row = registry.get(paper_id, {}) if paper_id else {}
+                tier = _citation_grounding_tier(sentence, record_data, registry_row=registry_row)
                 card_status = "missing"
                 card_path = ""
                 card_notes = ""

@@ -177,7 +177,7 @@ def _citation_keys(sentence: str) -> list[str]:
             key = raw.strip()
             if key and key not in keys:
                 keys.append(key)
-    for match in re.finditer(r"@([A-Za-z0-9_:\-.]+)", sentence):
+    for match in re.finditer(r"(?<![A-Za-z0-9._%+\-])@([A-Za-z0-9_:\-.]+)", sentence):
         key = match.group(1).strip().rstrip(".,;:)]}")
         if key and key not in keys:
             keys.append(key)
