@@ -2224,7 +2224,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-09 — Compile current-work priority into the drive objective
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `986cf2f`
 - **Change type**: framework / research driver / current-work routing repair
 - **North star:** Reduce manual pushes by turning an operator-declared active priority into the next concrete, bounded recommendation.
 - **Alignment:** Keeps hard process failures and nonzero research risks ahead of current-work hints, but prevents a generic lane fallback from replacing the first active project priority when no higher risk exists.
