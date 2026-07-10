@@ -83,6 +83,99 @@ tools:
       - overwrite paper registry identity without receipt
       - certify final bibliography entries
       - approve gates
+  aea_data_editor:
+    lane: compliance
+    role: external_standard
+    maturity: external_policy
+    url: "https://aeadataeditor.github.io/"
+    use_for:
+      - replication package alignment
+      - data availability and reproducibility checklist design
+      - pre-submission package audit
+    evidence_output:
+      - replication/aea_data_package_manifest.yml
+      - audits/aea_replication_alignment.md
+    must_not_do:
+      - certify AEA acceptance
+      - replace human policy review
+      - waive data license or confidentiality constraints
+  opensourceeconomics:
+    lane: analysis
+    role: reference_index
+    maturity: reference
+    url: "https://github.com/OpenSourceEconomics"
+    use_for:
+      - reproducible economics project structure ideas
+      - environment and package organization references
+    evidence_output:
+      - external_tool_notes
+    must_not_do:
+      - replace AEROS task contracts
+      - approve replication package completeness
+      - certify claims
+  econstellar:
+    lane: analysis
+    role: reference_pattern
+    maturity: emerging_reference
+    url: "https://arxiv.org/abs/2606.05705"
+    use_for:
+      - endpoint-reproducible result pattern
+      - result registry reproducibility metadata design
+    evidence_output:
+      - evidence/result_registry.csv
+      - evidence/result_index.csv
+    must_not_do:
+      - require every result to have a public endpoint
+      - certify endpoint stability forever
+      - certify claims
+      - approve gates
+  econometrics_agent:
+    lane: analysis
+    role: advisory_reviewer
+    maturity: emerging_tool
+    url: "https://github.com/FromCSUZhou/Econometrics-Agent"
+    use_for:
+      - econometric workflow suggestions
+      - specification-risk brainstorming
+      - optional reviewer notes
+    evidence_output:
+      - audits/advisory/econometrics_agent_notes.md
+    must_not_do:
+      - approve gates
+      - certify identification
+      - certify claims
+      - replace reproducible code or result registry
+  causal_copilot:
+    lane: claim
+    role: advisory_reviewer
+    maturity: emerging_tool
+    url: "https://arxiv.org/abs/2504.13263"
+    use_for:
+      - causal identification risk brainstorming
+      - alternative explanation checklist generation
+      - advisory claim-ceiling notes
+    evidence_output:
+      - audits/advisory/causal_copilot_notes.md
+    must_not_do:
+      - approve gates
+      - certify identification
+      - upgrade claim status
+      - replace human G3/G7/G12 decisions
+  causalagent:
+    lane: claim
+    role: advisory_reviewer
+    maturity: emerging_tool
+    url: "https://arxiv.org/abs/2602.11527"
+    use_for:
+      - causal graph or identification-assumption brainstorming
+      - robustness-risk suggestions
+    evidence_output:
+      - audits/advisory/causalagent_notes.md
+    must_not_do:
+      - approve gates
+      - certify identification
+      - upgrade claim status
+      - replace human G3/G7/G12 decisions
 aut_sci_download:
   lane: literature
   role: adapter_candidate

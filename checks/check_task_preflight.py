@@ -3,8 +3,10 @@
 
 from __future__ import annotations
 
+import csv
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,6 +14,42 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from aeros.runtime.task_preflight import build_task_preflight
+
+
+def _campaign_breaker_blocks_preflight() -> list[str]:
+    """A tripped campaign circuit breaker must force preflight to BLOCKED, and no
+    active campaign must leave preflight unaffected (backward compatible)."""
+    failures: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="aeros_preflight_campaign_") as name:
+        tmp = Path(name)
+        (tmp / "discovery/literature").mkdir(parents=True)
+        # no active campaign -> preflight must not be campaign-blocked
+        base = build_task_preflight(tmp, lane="data", intent="collect more source leads")
+        if base.get("campaign_status") != "NO_ACTIVE_CAMPAIGN" or base.get("campaign_breakers"):
+            failures.append("no active campaign should yield zero breakers")
+        # active campaign whose last window all yield below expected -> BLOCKED
+        (tmp / "campaigns").mkdir()
+        (tmp / "campaigns/active_campaign.yml").write_text(
+            "version: 1\ncampaign_id: t\nobjective_metric: n\ncurrent_value: 5\n"
+            "stop_condition: x\nstop_condition_met: false\ntask_budget: 8\n"
+            "expected_yield_per_task: 3\nmarginal_yield_window: 3\n"
+            "binding_constraint: numerator\nfallback_if_stalled: escalate\n",
+            encoding="utf-8",
+        )
+        with (tmp / "campaigns/campaign_progress.csv").open("w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["task_id", "task_type", "metric_before", "metric_after",
+                        "marginal_yield", "target_constraint", "used_batch_source", "decision_metric_rerun"])
+            for i in range(3):
+                w.writerow([f"T{i}", "collect", i, i + 1, 1, "numerator", "false", "false"])
+        tripped = build_task_preflight(tmp, lane="data", intent="collect more source leads")
+        if tripped.get("status") != "BLOCKED":
+            failures.append(f"tripped campaign breaker must BLOCK preflight, got {tripped.get('status')}")
+        if "low_marginal_yield" not in [b.get("breaker_id") for b in (tripped.get("campaign_breakers") or [])]:
+            failures.append("preflight did not surface the low_marginal_yield breaker")
+        if not tripped.get("needs_human_decision"):
+            failures.append("tripped breaker must set needs_human_decision")
+    return failures
 
 
 def main() -> int:
@@ -47,6 +85,7 @@ def main() -> int:
     promote = build_task_preflight(ROOT, lane="data", intent="promote source candidate to canonical processed data")
     if promote.get("task_mode") == "broad_capture":
         failures.append("promotion/canonical work must not remain in broad_capture mode")
+    failures.extend(_campaign_breaker_blocks_preflight())
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))
     elif failures:

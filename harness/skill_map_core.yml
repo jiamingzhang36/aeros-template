@@ -129,6 +129,306 @@ skills:
     human_gate_required: false
     tier: core
     default_use: true
+  bib_manager:
+    name: bib-manager
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: literature_discovery
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - references.bib
+    - discovery/literature/citation_audit.md
+    aeros_constraints:
+    - May draft or validate bibliography entries; may not certify citation truth or approve gates.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  zotero_reference:
+    name: zotero:Zotero
+    source: mcp_tools
+    invocation: mcp_skill
+    aeros_stage: literature_discovery
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - discovery/literature/paper_registry.csv
+    aeros_constraints:
+    - Reference/library retrieval only; full-text obtained becomes evidence only via extraction cards.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  results_narrator:
+    name: results-narrator
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: writing_results
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/results_narration_notes.md
+    aeros_constraints:
+    - Drafts results prose from existing result registry only; may not upgrade claims or invent numbers.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  econ_write:
+    name: econ-write
+    source: econ_writing_skill
+    invocation: external_repo
+    aeros_stage: writing
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/econ_write_notes.md
+    aeros_constraints:
+    - Writing/rewriting/review assistance only; may not certify claims or approve gates.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  econ_principles_check:
+    name: econ-principles-check
+    source: econ_writing_skill
+    invocation: external_repo
+    aeros_stage: claim_review
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/econ_principles_notes.md
+    aeros_constraints:
+    - Advisory economic-reasoning review only; may not certify identification or upgrade claim status.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  code_review_econ:
+    name: code-review-econ
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: analysis_review
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/code_review_econ_notes.md
+    aeros_constraints:
+    - Advisory code review only; may not approve replication completeness or certify results.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  replication_check:
+    name: replication-check
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: compliance
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/replication_check_notes.md
+    aeros_constraints:
+    - Advisory replication-package review only; may not certify AEA acceptance or approve gates.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  pre_submission_audit:
+    name: pre-submission-audit
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: compliance
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/pre_submission_audit_notes.md
+    aeros_constraints:
+    - Advisory pre-submission checklist only; may not certify submission readiness or approve gates.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  causal_id_review:
+    name: causal-id-review
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: claim_review
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/causal_id_review_notes.md
+    aeros_constraints:
+    - Advisory causal-id-review assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  data_codebook:
+    name: data-codebook
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: data_documentation
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/data_codebook_notes.md
+    aeros_constraints:
+    - Advisory data-codebook assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  data_inventory:
+    name: data-inventory
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: data_scouting
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/data_inventory_notes.md
+    aeros_constraints:
+    - Advisory data-inventory assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  data_merge_audit:
+    name: data-merge-audit
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: data_assembly
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/data_merge_audit_notes.md
+    aeros_constraints:
+    - Advisory data-merge-audit assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  data_quality_checker:
+    name: data-quality-checker
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: data_quality
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/data_quality_checker_notes.md
+    aeros_constraints:
+    - Advisory data-quality-checker assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  describe_data:
+    name: describe-data
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: data_exploration
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/describe_data_notes.md
+    aeros_constraints:
+    - Advisory describe-data assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  did_checklist:
+    name: did-checklist
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: analysis_design
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/did_checklist_notes.md
+    aeros_constraints:
+    - Advisory did-checklist assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  feature_engineering:
+    name: feature-engineering
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: data_construction
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/feature_engineering_notes.md
+    aeros_constraints:
+    - Advisory feature-engineering assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  paper_draft:
+    name: paper-draft
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: writing
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/paper_draft_notes.md
+    aeros_constraints:
+    - Advisory paper-draft assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  placebo_test:
+    name: placebo-test
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: analysis_robustness
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/placebo_test_notes.md
+    aeros_constraints:
+    - Advisory placebo-test assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  policy_timeline:
+    name: policy-timeline
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: background_institutional
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/policy_timeline_notes.md
+    aeros_constraints:
+    - Advisory policy-timeline assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  quick_stats:
+    name: quick-stats
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: analysis_exploration
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/quick_stats_notes.md
+    aeros_constraints:
+    - Advisory quick-stats assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  regression_table:
+    name: regression-table
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: writing_results
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/regression_table_notes.md
+    aeros_constraints:
+    - Advisory regression-table assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  robustness_suite:
+    name: robustness-suite
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: analysis_robustness
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/robustness_suite_notes.md
+    aeros_constraints:
+    - Advisory robustness-suite assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  summary_stats_table:
+    name: summary-stats-table
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: writing_results
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/summary_stats_table_notes.md
+    aeros_constraints:
+    - Advisory summary-stats-table assistance only; may not certify claims/identification, approve gates, or write canonical evidence.
+    human_gate_required: false
+    tier: optional
+    default_use: false
 sci_download:
   name: sci-download
   source: local_codex_skills

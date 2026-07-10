@@ -14,6 +14,7 @@ try:
 except Exception:  # pragma: no cover
     yaml = None
 
+from .campaign import assess_campaign
 from .contract import Contract
 from .output_intent import contract_output_intents
 from .owner_decisions import evaluate_owner_decision_rules
@@ -159,6 +160,14 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
         task_id=task_id,
     )
     owner_blocks = list(owner_decisions.get("blocks") or [])
+    # Marginal-yield / budget / collecting-without-testing circuit breaker.
+    # Backward-compatible: with no active campaign contract assess_campaign
+    # returns zero breakers, so preflight behaviour is unchanged. When a
+    # campaign IS active and a breaker trips, the execution gate blocks — this
+    # is the wire from "campaign assess can detect stop" to "preflight enforces
+    # stop", so the agent cannot proceed to the next local task on autopilot.
+    campaign = assess_campaign(root)
+    campaign_breakers = list(campaign.get("breakers") or [])
     stop_reasons = [
         "route is pending and task is route-sensitive",
         "skill obligations cannot be used or waived",
@@ -167,8 +176,11 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
     ]
     if owner_blocks:
         stop_reasons.insert(0, "owner decision do_not rule matched this task intent")
+    if campaign_breakers:
+        ids = ", ".join(str(b.get("breaker_id") or "breaker") for b in campaign_breakers)
+        stop_reasons.insert(0, f"campaign circuit breaker tripped ({ids}); request a human continue/stop decision")
     return {
-        "status": "BLOCKED" if owner_blocks else "ADVISORY",
+        "status": "BLOCKED" if (owner_blocks or campaign_breakers) else "ADVISORY",
         "task_id": task_id,
         "lane": lane or (contract.work_lane if contract else ""),
         "intent": intent,
@@ -189,6 +201,10 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
         "owner_decision_blocks": owner_blocks,
         "owner_decision_constraints": owner_decisions.get("constraints") or [],
         "active_owner_decision_count": owner_decisions.get("active_rule_count", 0),
+        "campaign_status": campaign.get("status"),
+        "campaign_breakers": campaign_breakers,
+        "campaign_recommended_action": campaign.get("recommended_action", ""),
+        "needs_human_decision": bool(owner_blocks or campaign_breakers),
         "allowed_to_touch": allowed,
         "must_not_touch": must_not_touch,
         "stop_before_work_if": stop_reasons,
