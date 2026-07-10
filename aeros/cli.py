@@ -453,6 +453,7 @@ def _cmd_campaign(args: argparse.Namespace) -> int:
         root,
         contract_path=getattr(args, "contract", "") or None,
         progress_path=getattr(args, "progress", "") or None,
+        campaign_id=getattr(args, "campaign_id", "") or "",
     )
     if getattr(args, "json", False):
         print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
@@ -1502,6 +1503,7 @@ def _cmd_task_preflight(args: argparse.Namespace) -> int:
         task_id=getattr(args, "task_id", "") or "",
         lane=getattr(args, "lane", "") or "",
         intent=getattr(args, "intent", "") or "",
+        campaign_id=getattr(args, "campaign_id", "") or "",
     )
     if getattr(args, "json", False):
         print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
@@ -1658,6 +1660,7 @@ def main(argv: list[str] | None = None) -> int:
     campaign_assess = campaign_sub.add_parser("assess", help="assess active campaign contract without executing work")
     campaign_assess.add_argument("--contract", default="", help="campaign contract path, default campaigns/active_campaign.yml")
     campaign_assess.add_argument("--progress", default="", help="campaign progress CSV path, default campaigns/campaign_progress.csv")
+    campaign_assess.add_argument("--campaign-id", default="", help="only assess when this identity matches the active campaign")
     campaign_assess.add_argument("--write", action="store_true", help="write outputs/campaign/campaign_assessment.md and .json")
     campaign_assess.add_argument("--json", action="store_true", help="emit machine-readable campaign assessment")
     campaign_assess.set_defaults(func=_cmd_campaign)
@@ -1709,6 +1712,7 @@ def main(argv: list[str] | None = None) -> int:
     task_preflight.add_argument("--task-id", default="", help="task id to inspect")
     task_preflight.add_argument("--lane", default="", choices=["", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"], help="task lane")
     task_preflight.add_argument("--intent", default="", help="short description of intended work")
+    task_preflight.add_argument("--campaign-id", default="", help="campaign identity for an ActionSpec/preflight without a task contract")
     task_preflight.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     task_preflight.set_defaults(func=_cmd_task_preflight)
 

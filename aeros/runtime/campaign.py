@@ -7,6 +7,8 @@ execute tasks, mutate runtime state, approve gates, or decide scientific truth.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from hashlib import sha256
 from pathlib import Path
 import csv
 import json
@@ -17,6 +19,22 @@ import yaml
 
 DEFAULT_CONTRACT = Path("campaigns/active_campaign.yml")
 DEFAULT_PROGRESS = Path("campaigns/campaign_progress.csv")
+PROGRESS_FIELDS = (
+    "campaign_id",
+    "task_id",
+    "task_type",
+    "metric_before",
+    "metric_after",
+    "marginal_yield",
+    "target_constraint",
+    "used_batch_source",
+    "decision_metric_rerun",
+    "metric_evidence_path",
+    "metric_evidence_sha256",
+    "completion_mode",
+    "completion_receipt_path",
+    "recorded_at",
+)
 
 DOES_NOT_PROVE = [
     "that the campaign objective is scientifically optimal",
@@ -29,6 +47,7 @@ DOES_NOT_PROVE = [
 
 @dataclass(frozen=True)
 class CampaignTaskProgress:
+    campaign_id: str
     task_id: str
     task_type: str
     metric_before: float | None
@@ -40,6 +59,7 @@ class CampaignTaskProgress:
 
     def to_dict(self) -> dict[str, Any]:
         return {
+            "campaign_id": self.campaign_id,
             "task_id": self.task_id,
             "task_type": self.task_type,
             "metric_before": self.metric_before,
@@ -127,6 +147,7 @@ def load_campaign_progress(root: Path, progress_path: str | Path | None = None) 
                 marginal = (after - before) if before is not None and after is not None else 0.0
             rows.append(
                 CampaignTaskProgress(
+                    campaign_id=str(row.get("campaign_id") or "").strip(),
                     task_id=str(row.get("task_id") or row.get("id") or "").strip(),
                     task_type=str(row.get("task_type") or row.get("action_type") or "").strip(),
                     metric_before=before,
@@ -140,6 +161,135 @@ def load_campaign_progress(root: Path, progress_path: str | Path | None = None) 
     return rows
 
 
+def _sha256_file(path: Path) -> str:
+    digest = sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _allowed_metric_evidence(path: str, allowed_outputs: list[str]) -> bool:
+    value = str(path or "").strip().strip("/")
+    for allowed in allowed_outputs:
+        prefix = str(allowed or "").strip().strip("/")
+        if prefix and (value == prefix or value.startswith(prefix + "/")):
+            return True
+    return False
+
+
+def record_campaign_progress(
+    root: Path,
+    contract: Any,
+    *,
+    completion_mode: str,
+    completion_receipt_path: str,
+    append: bool = True,
+) -> dict[str, Any]:
+    """Validate and idempotently record one passed task's campaign progress.
+
+    Metrics are declared by the task but must be anchored to an existing allowed
+    output. AEROS computes marginal yield itself and never appends a row for a
+    task outside the active campaign. Revalidation of an identical task is a
+    no-op; conflicting values fail closed instead of rewriting history.
+    """
+    campaign_id = str(getattr(contract, "campaign_id", "") or "").strip()
+    if not campaign_id:
+        return {"status": "not_campaign_task", "campaign_id": "", "row": {}, "failures": []}
+
+    active = load_campaign_contract(root)
+    if active is None:
+        return {
+            "status": "missing_active_campaign",
+            "campaign_id": campaign_id,
+            "row": {},
+            "failures": [f"campaign task {contract.task_id} declares {campaign_id} but no active campaign contract exists"],
+        }
+    active_id = str(active.get("campaign_id") or active.get("id") or "").strip()
+    if active_id != campaign_id:
+        return {
+            "status": "campaign_mismatch",
+            "campaign_id": campaign_id,
+            "active_campaign_id": active_id,
+            "row": {},
+            "failures": [f"task campaign_id {campaign_id} does not match active campaign {active_id or '<missing>'}"],
+        }
+
+    declared = dict(getattr(contract, "campaign_progress", {}) or {})
+    before = _as_float(declared.get("metric_before"))
+    after = _as_float(declared.get("metric_after"))
+    target = str(declared.get("target_constraint") or "").strip()
+    evidence_rel = str(declared.get("metric_evidence_path") or "").strip()
+    failures: list[str] = []
+    if before is None or after is None:
+        failures.append("campaign_progress requires numeric metric_before and metric_after")
+    if not target:
+        failures.append("campaign_progress requires target_constraint")
+    if not evidence_rel:
+        failures.append("campaign_progress requires metric_evidence_path")
+    elif not _allowed_metric_evidence(evidence_rel, list(getattr(contract, "allowed_outputs", []) or [])):
+        failures.append("campaign metric_evidence_path must be inside the task's allowed_outputs")
+    evidence_path = root / evidence_rel if evidence_rel else root / "__missing_campaign_evidence__"
+    if evidence_rel and not evidence_path.is_file():
+        failures.append(f"campaign metric evidence file is missing: {evidence_rel}")
+    if failures:
+        return {
+            "status": "invalid_progress_declaration",
+            "campaign_id": campaign_id,
+            "row": {},
+            "failures": failures,
+        }
+
+    assert before is not None and after is not None
+    row = {
+        "campaign_id": campaign_id,
+        "task_id": str(contract.task_id),
+        "task_type": str(declared.get("task_type") or getattr(contract, "work_lane", "") or "task").strip(),
+        "metric_before": f"{before:g}",
+        "metric_after": f"{after:g}",
+        "marginal_yield": f"{after - before:g}",
+        "target_constraint": target,
+        "used_batch_source": "true" if _as_bool(declared.get("used_batch_source")) else "false",
+        "decision_metric_rerun": "true" if _as_bool(declared.get("decision_metric_rerun")) else "false",
+        "metric_evidence_path": evidence_rel,
+        "metric_evidence_sha256": _sha256_file(evidence_path),
+        "completion_mode": str(completion_mode or ""),
+        "completion_receipt_path": str(completion_receipt_path or ""),
+        "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
+    if not append:
+        return {"status": "validated_not_recorded", "campaign_id": campaign_id, "row": row, "failures": []}
+
+    path = root / DEFAULT_PROGRESS
+    existing_rows: list[dict[str, str]] = []
+    if path.exists():
+        with path.open("r", encoding="utf-8", newline="") as handle:
+            existing_rows = [{str(k): str(v or "") for k, v in item.items()} for item in csv.DictReader(handle)]
+    matches = [item for item in existing_rows if item.get("campaign_id", "") == campaign_id and item.get("task_id", "") == str(contract.task_id)]
+    compare_fields = [field for field in PROGRESS_FIELDS if field not in {"recorded_at", "completion_mode", "completion_receipt_path"}]
+    if matches:
+        previous = matches[-1]
+        if all(str(previous.get(field, "")) == str(row.get(field, "")) for field in compare_fields):
+            return {"status": "unchanged", "campaign_id": campaign_id, "row": previous, "failures": []}
+        return {
+            "status": "conflicting_existing_progress",
+            "campaign_id": campaign_id,
+            "row": row,
+            "failures": [f"campaign progress already exists with different values for {campaign_id}/{contract.task_id}"],
+        }
+
+    existing_rows.append(row)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp = path.with_suffix(path.suffix + ".tmp")
+    with temp.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(PROGRESS_FIELDS), extrasaction="ignore")
+        writer.writeheader()
+        for item in existing_rows:
+            writer.writerow({field: item.get(field, "") for field in PROGRESS_FIELDS})
+    temp.replace(path)
+    return {"status": "appended", "campaign_id": campaign_id, "row": row, "failures": []}
+
+
 def _is_single_item_task(row: CampaignTaskProgress) -> bool:
     text = row.task_type.lower().replace("-", "_").replace(" ", "_")
     return any(marker in text for marker in ["single", "manual_lookup", "one_by_one", "portal_lookup", "item_lookup"])
@@ -150,6 +300,7 @@ def assess_campaign(
     *,
     contract_path: str | Path | None = None,
     progress_path: str | Path | None = None,
+    campaign_id: str = "",
 ) -> dict[str, Any]:
     contract = load_campaign_contract(root, contract_path)
     if contract is None:
@@ -162,7 +313,23 @@ def assess_campaign(
             "does_not_prove": DOES_NOT_PROVE,
         }
 
-    rows = load_campaign_progress(root, progress_path)
+    active_id = str(contract.get("campaign_id") or contract.get("id") or "").strip()
+    declared_id = str(campaign_id or "").strip()
+    if declared_id and declared_id != active_id:
+        return {
+            "model": "AEROS-CAMPAIGN-001",
+            "status": "CAMPAIGN_MISMATCH",
+            "campaign_id": declared_id,
+            "active_campaign_id": active_id,
+            "breakers": [],
+            "recommended_action": "do not apply the active campaign breaker to this task",
+            "does_not_prove": DOES_NOT_PROVE,
+        }
+
+    rows = [
+        row for row in load_campaign_progress(root, progress_path)
+        if not row.campaign_id or row.campaign_id == active_id
+    ]
     expected = _expected_yield(contract)
     window = int(contract.get("marginal_yield_window") or 3)
     task_budget = int(contract.get("task_budget") or 0)
@@ -224,7 +391,7 @@ def assess_campaign(
     return {
         "model": "AEROS-CAMPAIGN-001",
         "status": status,
-        "campaign_id": contract.get("campaign_id") or contract.get("id") or "active_campaign",
+        "campaign_id": active_id or "active_campaign",
         "objective_metric": contract.get("objective_metric") or "",
         "binding_constraint": binding,
         "stop_condition": contract.get("stop_condition") or "",

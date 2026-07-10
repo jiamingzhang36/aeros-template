@@ -27,6 +27,7 @@ from .contract import Contract, load_contract
 from .execution_envelope import ExecutionEnvelope, execute_in_isolated_worktree
 from .report import AttemptRecord, RunRecord, write_run_report
 from .skill_receipt import write_skill_invocation_receipt
+from .task_preflight import build_task_preflight
 from .work_lane import lane_matches, normalize_lane
 
 print = partial(print, flush=True)
@@ -807,6 +808,21 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
     contract = load_contract(contract_path)
     project_root = find_project_root(Path(contract_path).resolve())
     state = state_mod.load_state(project_root)
+    preflight = build_task_preflight(
+        project_root,
+        task_id=contract.task_id,
+        lane=contract.work_lane,
+        intent=contract.goal,
+        campaign_id=contract.campaign_id,
+    )
+    if preflight.get("status") == "BLOCKED":
+        reasons = [str(item) for item in (preflight.get("stop_before_work_if") or [])]
+        feedback = "Task preflight blocked execution:\n- " + "\n- ".join(reasons)
+        path = _escalate(project_root, contract, feedback)
+        state_mod.set_status(state, contract.task_id, "escalated")
+        state_mod.save_state(project_root, state)
+        print(f"[kernel] task {contract.task_id} BLOCKED by preflight -> {path}")
+        return 2
     state_mod.set_status(state, contract.task_id, "running")
 
     # Deterministic probe tasks (max_agent_calls=0) skip the agent loop entirely.

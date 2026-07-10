@@ -20,6 +20,8 @@ class Contract:
     evidence_receipt_required: bool
     receipt_path: str
     gate_status: str
+    campaign_id: str
+    campaign_progress: dict[str, Any]
     work_lane: str
     goal: str
     inputs: list[str]
@@ -70,6 +72,8 @@ def load_contract(path: str | Path) -> Contract:
         evidence_receipt_required=bool(data.get("evidence_receipt_required", False)),
         receipt_path=str(data.get("receipt_path", "") or ""),
         gate_status=str(data.get("gate_status", "pending") or "pending"),
+        campaign_id=str(data.get("campaign_id", "") or "").strip(),
+        campaign_progress=dict(data.get("campaign_progress", {}) or {}),
         work_lane=str(data.get("work_lane", "") or ""),
         goal=str(data.get("goal", "")).strip(),
         inputs=list(data.get("inputs", []) or []),

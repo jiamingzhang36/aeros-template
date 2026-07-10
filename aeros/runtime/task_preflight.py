@@ -14,7 +14,7 @@ try:
 except Exception:  # pragma: no cover
     yaml = None
 
-from .campaign import assess_campaign
+from .campaign import assess_campaign, load_campaign_contract
 from .contract import Contract
 from .output_intent import contract_output_intents
 from .owner_decisions import evaluate_owner_decision_rules
@@ -132,7 +132,14 @@ def _contract_allowed_to_touch(contract: Contract | None) -> list[str]:
     return sorted(dict.fromkeys(contract.allowed_outputs))
 
 
-def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", intent: str = "") -> dict[str, Any]:
+def build_task_preflight(
+    root: Path,
+    *,
+    task_id: str = "",
+    lane: str = "",
+    intent: str = "",
+    campaign_id: str = "",
+) -> dict[str, Any]:
     contract = load_contract_by_id(root, task_id)
     mode = infer_task_mode(root, task_id=task_id, lane=lane, intent=intent)
     workflow = str(mode.get("workflow_preset", "") or "")
@@ -166,7 +173,18 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
     # campaign IS active and a breaker trips, the execution gate blocks — this
     # is the wire from "campaign assess can detect stop" to "preflight enforces
     # stop", so the agent cannot proceed to the next local task on autopilot.
-    campaign = assess_campaign(root)
+    declared_campaign_id = str(campaign_id or (contract.campaign_id if contract else "") or "").strip()
+    if declared_campaign_id:
+        campaign = assess_campaign(root, campaign_id=declared_campaign_id)
+    else:
+        active_campaign = load_campaign_contract(root)
+        campaign = {
+            "status": "TASK_NOT_IN_CAMPAIGN" if active_campaign else "NO_ACTIVE_CAMPAIGN",
+            "campaign_id": "",
+            "active_campaign_id": str((active_campaign or {}).get("campaign_id") or ""),
+            "breakers": [],
+            "recommended_action": "continue outside the active campaign scope",
+        }
     campaign_breakers = list(campaign.get("breakers") or [])
     stop_reasons = [
         "route is pending and task is route-sensitive",
@@ -202,6 +220,8 @@ def build_task_preflight(root: Path, *, task_id: str = "", lane: str = "", inten
         "owner_decision_constraints": owner_decisions.get("constraints") or [],
         "active_owner_decision_count": owner_decisions.get("active_rule_count", 0),
         "campaign_status": campaign.get("status"),
+        "campaign_id": declared_campaign_id,
+        "active_campaign_id": campaign.get("active_campaign_id") or campaign.get("campaign_id") or "",
         "campaign_breakers": campaign_breakers,
         "campaign_recommended_action": campaign.get("recommended_action", ""),
         "needs_human_decision": bool(owner_blocks or campaign_breakers),
@@ -226,6 +246,8 @@ def format_task_preflight(report: dict[str, Any]) -> str:
         f"workflow_preset: {report.get('workflow_preset')}",
         f"execution_mode: {report.get('execution_mode')}",
         f"source_capture_permission: {(report.get('source_capture_permission') or {}).get('approval_required')}",
+        f"campaign_id: {report.get('campaign_id')}",
+        f"campaign_status: {report.get('campaign_status')}",
         f"owner_decision_status: {report.get('owner_decision_status')}",
         "",
         "owner_decision_blocks:",

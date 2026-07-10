@@ -5,6 +5,7 @@
 id: AS-example
 kind: adopt_idea
 lane: discovery
+campaign_id: ""
 effect_class: local_write_preview
 capabilities:
   - read_project_state

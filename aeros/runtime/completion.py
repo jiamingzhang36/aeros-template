@@ -10,6 +10,7 @@ from typing import Any
 import yaml
 
 from .contract import Contract
+from .campaign import record_campaign_progress
 from .skill_receipt import build_skill_use_attestation
 
 RECEIPT_DIR = Path("agent_runs/completion_receipts")
@@ -223,6 +224,15 @@ def write_completion_receipt(
         failures.append("open issues remain")
     failures.extend(str(item) for item in (skill_use_attestation.get("failures") or []))
 
+    receipt_path = _receipt_path(project_root, contract.task_id)
+    campaign_progress = record_campaign_progress(
+        project_root,
+        contract,
+        completion_mode=mode,
+        completion_receipt_path=_rel(project_root, receipt_path),
+        append=not failures,
+    )
+    failures.extend(str(item) for item in (campaign_progress.get("failures") or []))
     verdict = "fail" if failures else "pass"
     if substantive_outputs:
         progress_class = "substantive"
@@ -237,7 +247,7 @@ def write_completion_receipt(
     authority_status = "human_decision_required" if human_decision_needed else "no_new_authority"
     progress_domain = progress_domain_for(contract.work_lane, authority_status=authority_status)
     payload = {
-        "version": 6,
+        "version": 7,
         "task_id": contract.task_id,
         "generated_at": _now(),
         "completion_mode": mode,
@@ -254,6 +264,8 @@ def write_completion_receipt(
         "contract_path": _rel(project_root, contract.path) if contract.path else "",
         "automation_class": contract.automation_class,
         "gate_status": contract.gate_status,
+        "campaign_id": contract.campaign_id,
+        "campaign_progress": campaign_progress,
         "run_report_path": report_rel,
         "skill_invocation_receipt_path": _rel(project_root, skill_receipt_path),
         "skill_use_attestation": skill_use_attestation,
@@ -289,7 +301,7 @@ def write_completion_receipt(
         "completion_verdict": verdict,
         "failures": failures,
     }
-    path = _receipt_path(project_root, contract.task_id)
+    path = receipt_path
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(payload, sort_keys=False, allow_unicode=True), encoding="utf-8")
     return CompletionReceipt(path=path, passed=verdict == "pass", failures=failures, payload=payload)
@@ -359,6 +371,14 @@ def validate_completion_receipts(project_root: Path, contracts: dict[str, tuple[
                     failures.append(f"{task_id}: skill use-or-waive attestation reports a missing decision")
                 for failure in attestation.get("failures") or []:
                     failures.append(f"{task_id}: skill attestation failure: {failure}")
+        if int(payload.get("version") or 1) >= 7:
+            if str(payload.get("campaign_id") or "") != contract.campaign_id:
+                failures.append(f"{task_id}: completion receipt campaign_id does not match contract")
+            campaign_progress = payload.get("campaign_progress")
+            if not isinstance(campaign_progress, dict):
+                failures.append(f"{task_id}: completion receipt campaign_progress is missing or invalid")
+            elif contract.campaign_id and campaign_progress.get("status") not in {"appended", "unchanged"}:
+                failures.append(f"{task_id}: campaign task completion did not record idempotent campaign progress")
         if payload.get("work_lane") != contract.work_lane:
             failures.append(f"{task_id}: completion receipt work_lane does not match contract")
         if not _same_check_set(list(payload.get("checks_required") or []), list(contract.checks)):

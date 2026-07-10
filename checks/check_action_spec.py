@@ -88,11 +88,14 @@ def main() -> int:
         kind="literature_status",
         effect_class="read_only",
         lane="literature",
+        campaign_id="literature_fulltext_recovery",
         command="python3 -m aeros.cli literature status",
         stop_condition="stop after status",
     )
     if declared.producer_mode != "declared":
         failures.append("declared ActionSpec producer_mode is not declared")
+    if declared.campaign_id != "literature_fulltext_recovery":
+        failures.append("declared ActionSpec did not preserve campaign_id")
     if not declared.authority_boundary:
         failures.append("declared ActionSpec missing authority_boundary")
     if declared.post_run_hooks:

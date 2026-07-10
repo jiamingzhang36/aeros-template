@@ -3,6 +3,7 @@
 # It asks whether continuing the campaign is still worth it; it does not approve gates or claims.
 version: 1
 campaign_id: example_campaign
+work_lane: data
 objective_metric: clean_restriction_events
 current_value: 0
 stop_condition: "define the decision-relevant win condition"

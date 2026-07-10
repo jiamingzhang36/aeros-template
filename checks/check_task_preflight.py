@@ -14,6 +14,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from aeros.runtime.task_preflight import build_task_preflight
+from aeros.runtime.kernel import run_task
 
 
 def _campaign_breaker_blocks_preflight() -> list[str]:
@@ -27,7 +28,8 @@ def _campaign_breaker_blocks_preflight() -> list[str]:
         base = build_task_preflight(tmp, lane="data", intent="collect more source leads")
         if base.get("campaign_status") != "NO_ACTIVE_CAMPAIGN" or base.get("campaign_breakers"):
             failures.append("no active campaign should yield zero breakers")
-        # active campaign whose last window all yield below expected -> BLOCKED
+        # Active campaign whose last window all yield below expected. It must
+        # block only matching tasks; unrelated and mismatched tasks stay free.
         (tmp / "campaigns").mkdir()
         (tmp / "campaigns/active_campaign.yml").write_text(
             "version: 1\ncampaign_id: t\nobjective_metric: n\ncurrent_value: 5\n"
@@ -42,13 +44,34 @@ def _campaign_breaker_blocks_preflight() -> list[str]:
                         "marginal_yield", "target_constraint", "used_batch_source", "decision_metric_rerun"])
             for i in range(3):
                 w.writerow([f"T{i}", "collect", i, i + 1, 1, "numerator", "false", "false"])
-        tripped = build_task_preflight(tmp, lane="data", intent="collect more source leads")
+        unrelated = build_task_preflight(tmp, lane="writing", intent="edit an unrelated appendix")
+        if unrelated.get("status") == "BLOCKED" or unrelated.get("campaign_status") != "TASK_NOT_IN_CAMPAIGN":
+            failures.append("active campaign must not block a task with no campaign_id")
+        mismatch = build_task_preflight(tmp, lane="data", intent="another campaign", campaign_id="other")
+        if mismatch.get("status") == "BLOCKED" or mismatch.get("campaign_status") != "CAMPAIGN_MISMATCH":
+            failures.append("active campaign must not block a different campaign_id")
+        tripped = build_task_preflight(tmp, lane="data", intent="collect more source leads", campaign_id="t")
         if tripped.get("status") != "BLOCKED":
             failures.append(f"tripped campaign breaker must BLOCK preflight, got {tripped.get('status')}")
         if "low_marginal_yield" not in [b.get("breaker_id") for b in (tripped.get("campaign_breakers") or [])]:
             failures.append("preflight did not surface the low_marginal_yield breaker")
         if not tripped.get("needs_human_decision"):
             failures.append("tripped breaker must set needs_human_decision")
+        # The real run entrypoint must enforce the same block, not merely render
+        # a preflight packet that callers can bypass.
+        (tmp / "project_manifest.yml").write_text("project:\n  name: fixture\n", encoding="utf-8")
+        (tmp / "tasks").mkdir()
+        task_path = tmp / "tasks/T_MATCH.yml"
+        task_path.write_text(
+            "task_id: T_MATCH\nstage: execution\nwork_lane: data\ncampaign_id: t\n"
+            "goal: collect more source leads\nchecks: []\nallowed_outputs:\n  - outputs/should_not_exist.txt\n"
+            "budget:\n  max_agent_calls: 0\n  max_dollars: 0\n",
+            encoding="utf-8",
+        )
+        if run_task(task_path) != 2:
+            failures.append("aeros run did not enforce matching campaign preflight block")
+        if (tmp / "outputs/should_not_exist.txt").exists():
+            failures.append("blocked task unexpectedly executed its output path")
     return failures
 
 

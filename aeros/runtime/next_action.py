@@ -63,6 +63,7 @@ class NextAction:
     status_label: str
     command: str
     stop_condition: str
+    campaign_id: str = ""
     source: str = "deterministic"
     blocked: bool = False
     action_spec: dict[str, Any] | None = None
@@ -91,11 +92,13 @@ def _next_action(
     requires_decision: bool | None = None,
     expected_outputs: tuple[str, ...] | None = None,
     acceptance_checks: tuple[str, ...] | None = None,
+    campaign_id: str = "",
 ) -> NextAction:
     spec = declared_action_spec(
         kind=spec_kind,
         effect_class=spec_effect_class,
         lane=lane,
+        campaign_id=campaign_id,
         command=command,
         stop_condition=stop_condition,
         source=source,
@@ -111,6 +114,7 @@ def _next_action(
         status_label=status_label,
         command=command,
         stop_condition=stop_condition,
+        campaign_id=campaign_id,
         source=source,
         blocked=blocked,
         action_spec=spec.to_dict(),
@@ -268,6 +272,7 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                 stop_condition="Stop after the human decision packet or queue item states what approval, credential, source snapshot, or boundary is needed.",
                 spec_kind="human_decision",
                 spec_effect_class="blocked",
+                campaign_id=contract.campaign_id if contract else "",
                 blocked=True,
             )
         if step.action == "rerun":
@@ -288,6 +293,7 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                     stop_condition="Stop after recover --check passes or reports the first failing check; do not call a provider/API for this stale item first.",
                     spec_kind="stale_revalidate_free",
                     spec_effect_class="local_write_preview",
+                    campaign_id=contract.campaign_id if contract else "",
                     source="deterministic_stale_triage",
                     blocked=False,
                 )
@@ -311,6 +317,7 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
                     stop_condition="Stop after the dry-run plan shows the exact task/check path; require explicit human choice before a provider/API rerun.",
                     spec_kind="stale_rerun_preview",
                     spec_effect_class="local_write_preview",
+                    campaign_id=contract.campaign_id if contract else "",
                     source="deterministic_stale_triage",
                     blocked=False,
                 )
@@ -334,6 +341,7 @@ def _from_plan(root: Path, *, stage: str, lane: str) -> NextAction | None:
             ),
             spec_kind="iterate_preview",
             spec_effect_class="local_write_preview",
+            campaign_id=contract.campaign_id if contract else "",
         )
     return None
 
@@ -810,6 +818,7 @@ def format_next_action(action: NextAction) -> str:
             lines.append(f"action_spec_id: {value.get('id')}")
             lines.append(f"action_spec_kind: {value.get('kind')}")
             lines.append(f"action_spec_effect_class: {value.get('effect_class')}")
+            lines.append(f"action_spec_campaign_id: {value.get('campaign_id')}")
             lines.append(f"action_spec_requires_decision: {value.get('requires_decision')}")
             lines.append(f"action_spec_producer_mode: {value.get('producer_mode')}")
             continue

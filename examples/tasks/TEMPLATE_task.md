@@ -1,6 +1,16 @@
 ---
 task_class: standard
 work_lane: data   # data | literature | analysis | claim | writing | compliance | harness
+campaign_id: ""   # required only for a task in an active repeated-work campaign
+campaign_progress: {}
+# For a campaign task, replace {} with:
+#   task_type: source_verification
+#   metric_before: 0
+#   metric_after: 0
+#   target_constraint: decision_relevant_constraint
+#   used_batch_source: false
+#   decision_metric_rerun: false
+#   metric_evidence_path: outputs/path/to/checked_metric_artifact.json
 allowed_skills:
   - data-inventory
   - data-quality-checker

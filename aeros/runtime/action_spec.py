@@ -28,6 +28,7 @@ class ActionSpec:
     kind: str
     lane: str
     effect_class: str
+    campaign_id: str = ""
     capabilities: tuple[str, ...] = ()
     requires_decision: bool = False
     expected_outputs: tuple[str, ...] = ()
@@ -70,8 +71,11 @@ class ActionSpec:
         return data
 
 
-def _stable_id(kind: str, lane: str, command: str, source: str) -> str:
-    digest = sha256(f"{kind}\0{lane}\0{command}\0{source}".encode("utf-8")).hexdigest()[:12]
+def _stable_id(kind: str, lane: str, command: str, source: str, campaign_id: str = "") -> str:
+    identity = f"{kind}\0{lane}\0{command}\0{source}"
+    if campaign_id:
+        identity += f"\0campaign:{campaign_id}"
+    digest = sha256(identity.encode("utf-8")).hexdigest()[:12]
     return f"AS-{digest}"
 
 
@@ -230,6 +234,7 @@ def action_spec_from_next(action: Any) -> ActionSpec:
     effect_class = _infer_effect_class(command, blocked=blocked, kind=kind)
     requires_decision = blocked or effect_class in {"task_run", "human_decision", "blocked"} or "<" in command or _contains_gate_command(command)
     source = str(getattr(action, "source", "") or "deterministic")
+    campaign_id = str(getattr(action, "campaign_id", "") or "").strip()
     risk = "requires human authority or missing input" if requires_decision else "bounded deterministic controller action"
     if effect_class == "task_run":
         risk = "real task execution; requires explicit --allow-task-runs"
@@ -237,10 +242,11 @@ def action_spec_from_next(action: Any) -> ActionSpec:
     if effect_class == "task_run":
         budget = {"requires_explicit_allow_task_runs": "true"}
     return ActionSpec(
-        id=_stable_id(kind, lane, command, source),
+        id=_stable_id(kind, lane, command, source, campaign_id),
         kind=kind,
         lane=lane,
         effect_class=effect_class,
+        campaign_id=campaign_id,
         capabilities=_capabilities_for(kind, effect_class),
         requires_decision=requires_decision,
         expected_outputs=_expected_outputs_for(kind),
@@ -249,7 +255,7 @@ def action_spec_from_next(action: Any) -> ActionSpec:
         stop_condition=str(getattr(action, "stop_condition", "") or ""),
         source=source,
         risk=risk,
-        idempotency_key=_stable_id(kind, lane, command, source),
+        idempotency_key=_stable_id(kind, lane, command, source, campaign_id),
         producer_mode="inferred_compat",
         runtime_profile="",
         resource_budget=budget,
@@ -267,6 +273,7 @@ def declared_action_spec(
     kind: str,
     effect_class: str,
     lane: str,
+    campaign_id: str = "",
     command: str,
     stop_condition: str,
     source: str = "deterministic",
@@ -302,10 +309,11 @@ def declared_action_spec(
         budget = {"requires_explicit_allow_task_runs": "true"}
     merged_capabilities = tuple(dict.fromkeys((capabilities or ()) + _capabilities_for(kind, effect_class)))
     return ActionSpec(
-        id=_stable_id(kind, lane, command, source),
+        id=_stable_id(kind, lane, command, source, campaign_id),
         kind=kind,
         lane=lane,
         effect_class=effect_class,
+        campaign_id=str(campaign_id or "").strip(),
         capabilities=merged_capabilities,
         requires_decision=bool(requires_decision),
         expected_outputs=expected_outputs if expected_outputs is not None else _expected_outputs_for(kind),
@@ -314,7 +322,7 @@ def declared_action_spec(
         stop_condition=stop_condition,
         source=source,
         risk=risk or ("requires human authority or missing input" if requires_decision else "bounded deterministic controller action"),
-        idempotency_key=_stable_id(kind, lane, command, source),
+        idempotency_key=_stable_id(kind, lane, command, source, campaign_id),
         producer_mode="declared",
         runtime_profile=runtime_profile,
         resource_budget=budget,
@@ -338,6 +346,8 @@ def validate_action_spec(spec: ActionSpec | dict[str, Any]) -> list[str]:
         failures.append(f"ActionSpec has invalid effect_class {data.get('effect_class')!r}")
     if data.get("producer_mode") not in {"declared", "inferred_compat"}:
         failures.append(f"ActionSpec has invalid producer_mode {data.get('producer_mode')!r}")
+    if not isinstance(data.get("campaign_id", ""), str):
+        failures.append("ActionSpec campaign_id must be a string")
     if not isinstance(data.get("capabilities"), list) or not data.get("capabilities"):
         failures.append("ActionSpec capabilities must be a non-empty list")
     if data.get("effect_class") in {"task_run", "human_decision", "blocked"} and not data.get("requires_decision"):
