@@ -12,6 +12,11 @@ profiles:
       - check_next_action.py
       - check_drive.py
       - check_campaign_contract.py
+      # registry/skill drift guards: keep in smoke so the autonomous loop (which
+      # runs smoke, not full) cannot silently accumulate map/registry drift.
+      - check_external_tool_registry.py
+      - check_skill_invocations.py
+      - check_skill_layer.py
       - check_architecture_freeze.py
       - check_action_spec.py
       - check_execution_envelope.py

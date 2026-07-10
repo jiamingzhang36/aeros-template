@@ -43,6 +43,9 @@ CAPABILITIES: dict[str, list[str]] = {
 }
 
 CAPABILITY_EXEMPT_CHECKS: dict[str, str] = {
+    "check_external_tool_registry.py": "framework-owned external tool registry invariant; synced via harness/external_tool_registry.yml",
+    "check_skill_invocations.py": "framework-owned skill routing invariant; synced via harness/skill_map_core.yml",
+    "check_skill_layer.py": "framework-owned skill layer scaffold invariant; synced via harness/skill_map_core.yml",
     "check_action_spec.py": "contract-internal invariant; synced through aeros/runtime/action_spec.py in broader framework sync",
     "check_agent_envelope.py": "runtime sandbox/audit invariant; not a downstream sync capability selector",
     "check_architecture_freeze.py": "template design/freeze invariant",
