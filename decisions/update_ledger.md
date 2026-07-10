@@ -2269,7 +2269,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-10 — Cache immutable skill policy inputs during validation
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `c02fe65`
 - **Change type**: framework / validation performance / no semantic change
 - **North star:** Keep strict skill obligations usable on mature projects without paying repeated YAML parsing cost per task.
 - **Action**: Added process-local bounded caches to `load_core_skill_map` and the skill-obligation policy loader. Every AEROS command still starts a fresh process and observes files anew; within one validation run, hundreds of contracts now share the same immutable parsed registry and policy.
