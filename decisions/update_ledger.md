@@ -2246,7 +2246,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Consider enforcing `full` harness (or a drift check) at the loop's commit gate so registry drift cannot re-accumulate silently. Backfill this pending entry with the commit hash.
 ## 2026-07-10 — Add registry/skill drift guards to smoke profile
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `f1f1d14`
 - **Change type**: framework / harness profile / drift prevention
 - **Action**: Added `check_external_tool_registry.py`, `check_skill_invocations.py`, and `check_skill_layer.py` to the `smoke` profile, and exempted them in `sync_doctor` CAPABILITY_EXEMPT_CHECKS (framework-owned registry invariants synced via `harness/`).
 - **Why**: The external-tool and skill-map registries had silently drifted red for several commits because the autonomous loop commits on the `smoke` profile and never runs `full`. Putting the drift guards in `smoke` makes the loop catch registry/skill-map drift at its own commit gate instead of letting it accumulate — the framework-health analogue of wiring the campaign breaker into task preflight.
