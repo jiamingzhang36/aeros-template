@@ -2266,3 +2266,16 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: declared metric values are substantively correct merely because their evidence file exists and hashes cleanly; campaign thresholds are optimal; a stopped campaign should never resume; unrelated work is scientifically worthwhile; claim support; paper readiness; gate approval.
 - **Drift risk**: Legacy progress rows without `campaign_id` are temporarily treated as belonging to the active campaign for backward compatibility. Vendored projects should sync before starting a second campaign, and future migration should retire blank campaign identities after active projects have upgraded.
 - **Next check**: Sync into land-grid, create a real `clean-official-numerator` campaign, and prove a low-yield matching task is blocked while a non-campaign task remains runnable.
+
+## 2026-07-10 — Cache immutable skill policy inputs during validation
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / validation performance / no semantic change
+- **North star:** Keep strict skill obligations usable on mature projects without paying repeated YAML parsing cost per task.
+- **Action**: Added process-local bounded caches to `load_core_skill_map` and the skill-obligation policy loader. Every AEROS command still starts a fresh process and observes files anew; within one validation run, hundreds of contracts now share the same immutable parsed registry and policy.
+- **Why**: Land-grid's 149 active contracts exposed a scaling defect: `check_skill_invocations.py` repeatedly parsed the 953-line skill map and terminated before producing a verdict. The same check completes in under four seconds after caching.
+- **Validation**: `python3 checks/check_skill_invocations.py`; `python3 checks/check_skill_coverage.py`; land-grid smoke profile.
+- **Non-goal**: Do not weaken skill obligations, skip receipts, waive legacy tasks, infer scientific quality, or persist cache state across commands.
+- **Does not prove**: skill advice is correct; agents followed skills correctly; old project research is valid; claim support; gate approval.
+- **Drift risk**: A single long-lived Python process that edits the policy after first access would need to clear the cache; normal AEROS CLI/check execution is one fresh process per command.
+- **Next check**: Keep the skill checks in smoke and monitor runtime on another project with more than 100 task contracts.

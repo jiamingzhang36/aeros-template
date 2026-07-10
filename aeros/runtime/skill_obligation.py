@@ -8,6 +8,7 @@ an explicit waiver/blocker.
 
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -64,6 +65,7 @@ def _norm_list(value: Any) -> list[str]:
     return out
 
 
+@lru_cache(maxsize=16)
 def _load_policy(root: Path) -> dict[str, Any]:
     path = root / POLICY_PATH
     if not path.exists() or yaml is None:

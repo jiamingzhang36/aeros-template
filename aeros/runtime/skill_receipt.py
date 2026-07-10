@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +28,15 @@ def _rel(root: Path, path: Path | str | None) -> str:
         return str(path)
 
 
+@lru_cache(maxsize=16)
 def load_core_skill_map(project_root: Path) -> dict[str, dict[str, Any]]:
+    """Load the immutable per-process skill registry once per project root.
+
+    Validation may inspect hundreds of task contracts. Re-parsing the same
+    registry for every contract adds cost without adding evidence; each AEROS
+    command is a fresh process, so process-local caching cannot hide changes
+    between runs.
+    """
     path = project_root / SKILL_MAP
     if not path.exists():
         return {}
