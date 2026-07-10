@@ -2256,7 +2256,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-10 — Scope campaign breakers to declared task identity and auto-record progress
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `6337c3c`
 - **Change type**: framework / campaign runtime enforcement / completion evidence
 - **North star:** Stop autonomous local hill-climbing without letting one campaign's breaker block unrelated research work.
 - **Alignment:** Makes campaign identity explicit in TaskContract and ActionSpec, evaluates only the matching active campaign at preflight, enforces the decision in the real runner, and records passed-task progress from the completion path rather than relying on a manually edited ledger.
