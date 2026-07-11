@@ -137,12 +137,18 @@ def match_campaign_scope(
     *,
     lane: str,
     objective_text: str,
+    task_type: str = "",
+    output_targets: Any = (),
 ) -> dict[str, Any]:
     """Deterministically test whether undeclared work resembles an active campaign.
 
-    Markers are owner-authored phrases in the campaign contract. A missing
-    marker list is not treated as proof of unrelated work: same-lane work must
-    fail closed once the campaign breaker has tripped. This guard does not add
+    Scope is matched on three phrasing-independent dimensions so that merely
+    rewording the intent cannot dodge a tripped campaign breaker:
+      * objective markers (owner-authored phrases in the intent/goal),
+      * output targets (the task writes into an output class the campaign owns),
+      * task type (the task's inferred mode matches a campaign task type).
+    A missing marker list is not treated as proof of unrelated work: same-lane
+    work must fail closed once the breaker has tripped. This guard does not add
     a task to the campaign; it only requires an explicit declaration or human
     confirmation before more potentially same-campaign work proceeds.
     """
@@ -151,20 +157,48 @@ def match_campaign_scope(
         text = str(value or "").lower().replace("_", " ").replace("-", " ")
         return " ".join(re.sub(r"[^a-z0-9]+", " ", text).split())
 
+    def as_list(value: Any) -> list[str]:
+        return [str(item).strip() for item in value if str(item).strip()] if isinstance(value, (list, tuple)) else []
+
     active_lane = str(contract.get("work_lane") or "").strip()
     task_lane = str(lane or "").strip()
+    lane_match = bool(active_lane and task_lane and active_lane == task_lane)
+
     raw_markers = contract.get("objective_markers") or []
-    markers = [str(item).strip() for item in raw_markers if str(item).strip()] if isinstance(raw_markers, list) else []
+    markers = as_list(raw_markers)
     normalized_text = normalize(objective_text)
     matched = [marker for marker in markers if normalize(marker) and normalize(marker) in normalized_text]
-    lane_match = bool(active_lane and task_lane and active_lane == task_lane)
+
+    # output-path dimension: same-lane work writing into an output class the
+    # campaign owns is in scope regardless of wording.
+    output_prefixes = as_list(contract.get("objective_outputs"))
+    targets = as_list(output_targets)
+    matched_outputs = sorted({
+        tgt for tgt in targets
+        for pre in output_prefixes
+        if pre and (tgt == pre or tgt.startswith(pre.rstrip("/") + "/") or tgt.startswith(pre))
+    })
+
+    # task-type dimension: the task's inferred mode matches a campaign task type.
+    task_types = {normalize(t) for t in as_list(contract.get("objective_task_types"))}
+    task_type_match = bool(task_type and normalize(task_type) in task_types)
+
+    objective_match = bool(matched)
+    output_match = bool(matched_outputs)
+    scope_match_any = objective_match or output_match or task_type_match
     return {
         "active_lane": active_lane,
         "task_lane": task_lane,
         "lane_match": lane_match,
         "objective_markers": markers,
         "matched_markers": matched,
-        "objective_match": bool(matched),
+        "objective_match": objective_match,
+        "objective_outputs": output_prefixes,
+        "matched_outputs": matched_outputs,
+        "output_match": output_match,
+        "task_type": task_type,
+        "task_type_match": task_type_match,
+        "scope_match_any": scope_match_any,
         "marker_status": "declared" if markers else "missing_fail_closed",
     }
 

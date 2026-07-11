@@ -200,9 +200,12 @@ def build_task_preflight(
             if active_campaign:
                 active_id = str(active_campaign.get("campaign_id") or active_campaign.get("id") or "").strip()
                 active_assessment = assess_campaign(root, campaign_id=active_id)
-                scope = match_campaign_scope(active_campaign, lane=effective_lane, objective_text=objective_text)
+                scope = match_campaign_scope(
+                    active_campaign, lane=effective_lane, objective_text=objective_text,
+                    task_type=str(mode.get("task_mode", "")), output_targets=allowed,
+                )
                 active_breakers = list(active_assessment.get("breakers") or [])
-                if active_breakers and scope.get("lane_match") and scope.get("objective_match"):
+                if active_breakers and scope.get("lane_match") and scope.get("scope_match_any"):
                     collision_breaker = {
                         "breaker_id": "campaign_scope_collision",
                         "severity": "block_same_campaign_loop",
@@ -228,20 +231,29 @@ def build_task_preflight(
                 active_campaign,
                 lane=effective_lane,
                 objective_text=objective_text,
+                task_type=str(mode.get("task_mode", "")),
+                output_targets=allowed,
             )
             active_breakers = list(active_assessment.get("breakers") or [])
             suspected_escape = bool(
                 active_breakers
                 and scope.get("lane_match")
-                and (scope.get("objective_match") or scope.get("marker_status") == "missing_fail_closed")
+                and (scope.get("scope_match_any") or scope.get("marker_status") == "missing_fail_closed")
             )
             if suspected_escape:
                 escape_breaker = {
                     "breaker_id": "undeclared_campaign_scope",
                     "severity": "block_same_campaign_loop",
                     "reason": (
-                        "task omits campaign_id but matches the active campaign lane/objective markers"
-                        if scope.get("objective_match")
+                        "task omits campaign_id but matches the active campaign on "
+                        + ", ".join(
+                            dim for dim, on in (
+                                ("objective markers", scope.get("objective_match")),
+                                ("output targets", scope.get("output_match")),
+                                ("task type", scope.get("task_type_match")),
+                            ) if on
+                        )
+                        if scope.get("scope_match_any")
                         else "task omits campaign_id in the active campaign lane and objective markers are missing"
                     ),
                     "recommended_action": "declare the active campaign_id or obtain a human decision that this task is unrelated",

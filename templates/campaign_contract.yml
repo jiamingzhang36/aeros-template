@@ -8,6 +8,16 @@ objective_metric: clean_restriction_events
 objective_markers:
   - clean restriction events
   - source verification
+# Phrasing-independent scope guards: once the breaker trips, same-lane work is
+# caught even if the intent is reworded to dodge the markers above.
+#   objective_outputs: output path prefixes this campaign writes into.
+#   objective_task_types: task modes/types that belong to this campaign.
+objective_outputs:
+  - data/backfill/
+  - data/leads/
+objective_task_types:
+  - broad_capture
+  - source_capture
 current_value: 0
 stop_condition: "define the decision-relevant win condition"
 stop_condition_met: false

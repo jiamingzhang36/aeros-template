@@ -2305,3 +2305,12 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: objective markers are complete; differently worded same-objective work can never evade phrase matching; campaign thresholds are optimal; research validity; claim support; gate approval.
 - **Drift risk**: Marker lists can be underspecified. Missing markers deliberately fail closed only for the active campaign lane after a breaker trips; owners should add concise stable phrases rather than broad words such as `data` or `source`.
 - **Next check**: Sync into the next project with an active stopped campaign and verify one undeclared same-scope task blocks while one genuinely unrelated same-lane task remains advisory.
+## 2026-07-10 — Add output-target and task-type dimensions to campaign scope guard
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / execution-gate enforcement / anti-evasion
+- **Action**: Extended `match_campaign_scope` beyond objective-marker keyword matching to two phrasing-independent dimensions: `objective_outputs` (output path prefixes the campaign owns) and `objective_task_types` (task modes belonging to the campaign). `task_preflight` now passes the task's allowed output targets and inferred task mode, and the `UNDECLARED_CAMPAIGN_SCOPE` / `CAMPAIGN_SCOPE_COLLISION` guards fire on `scope_match_any` (markers OR outputs OR task type). Added a `check_task_preflight.py` fixture locking in that a reworded intent writing to the campaign output class is blocked while genuinely-unrelated output stays free, and documented the new fields in the campaign contract template.
+- **Why**: The prior guard matched scope only on intent keywords, so an autonomous loop could keep running the same stalled campaign by rewording the task intent to avoid every marker. Adding output-path and task-type matching makes same-lane work that writes into the campaign's owned output class in-scope regardless of wording — closing the rephrasing escape while still not over-blocking genuinely unrelated work.
+- **Validation**: `python3 checks/check_task_preflight.py`; `python3 checks/check_campaign_contract.py`; `python3 checks/run_harness_checks.py --profile full --timeout 90` (all pass).
+- **Does not prove**: that all same-campaign work is caught (semantic paraphrase writing to a novel output class can still evade; markers/outputs/task-types are owner-declared); scientific validity; claim or gate approval.
+- **Next check**: Backfill this pending entry with the commit hash.

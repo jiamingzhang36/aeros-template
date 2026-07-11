@@ -110,6 +110,44 @@ def _campaign_breaker_blocks_preflight() -> list[str]:
         legacy_same_lane = build_task_preflight(tmp, lane="data", intent="continue another collection task")
         if legacy_same_lane.get("status") != "BLOCKED" or legacy_same_lane.get("campaign_status") != "UNDECLARED_CAMPAIGN_SCOPE":
             failures.append("legacy active campaign without objective_markers must fail closed for undeclared same-lane work")
+        # Output-target dimension: rewording the intent to dodge every objective
+        # marker must NOT escape when the task still writes into the campaign's
+        # owned output class; genuinely unrelated output must stay free.
+        (tmp / "campaigns/active_campaign.yml").write_text(
+            "version: 1\ncampaign_id: t2\nwork_lane: data\nobjective_metric: n\n"
+            "objective_markers:\n  - source leads\n"
+            "objective_outputs:\n  - data/backfill/\ncurrent_value: 5\n"
+            "stop_condition: x\nstop_condition_met: false\ntask_budget: 8\n"
+            "expected_yield_per_task: 3\nmarginal_yield_window: 3\n"
+            "binding_constraint: numerator\nfallback_if_stalled: escalate\n",
+            encoding="utf-8",
+        )
+        reworded = tmp / "tasks/T_REWORDED.yml"
+        reworded.write_text(
+            "task_id: T_REWORDED\nstage: execution\nwork_lane: data\n"
+            "goal: grab more data points for the sample\nchecks: []\n"
+            "allowed_outputs:\n  - data/backfill/reworded.csv\n"
+            "budget:\n  max_agent_calls: 0\n  max_dollars: 0\n",
+            encoding="utf-8",
+        )
+        rw = build_task_preflight(tmp, task_id="T_REWORDED", lane="data",
+                                  intent="grab more data points for the sample")
+        if rw.get("status") != "BLOCKED" or rw.get("campaign_status") != "UNDECLARED_CAMPAIGN_SCOPE":
+            failures.append("reworded intent writing to the campaign output class must not escape the breaker")
+        if not rw.get("campaign_scope_match") or not rw["campaign_scope_match"].get("output_match"):
+            failures.append("output-target scope match did not fire for campaign-owned output class")
+        unrelated_out = tmp / "tasks/T_UNRELATED_OUT.yml"
+        unrelated_out.write_text(
+            "task_id: T_UNRELATED_OUT\nstage: execution\nwork_lane: data\n"
+            "goal: draft a separate data codebook\nchecks: []\n"
+            "allowed_outputs:\n  - docs/codebook.md\n"
+            "budget:\n  max_agent_calls: 0\n  max_dollars: 0\n",
+            encoding="utf-8",
+        )
+        uo = build_task_preflight(tmp, task_id="T_UNRELATED_OUT", lane="data",
+                                  intent="draft a separate data codebook")
+        if uo.get("status") == "BLOCKED" or uo.get("campaign_status") != "TASK_NOT_IN_CAMPAIGN":
+            failures.append("work writing only to an unrelated output class must stay outside the campaign")
     return failures
 
 
