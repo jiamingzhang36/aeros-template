@@ -40,6 +40,10 @@ CAPABILITIES: dict[str, list[str]] = {
     "drive": ["aeros/runtime/drive.py", "aeros/runtime/research_risk.py", "checks/check_drive.py", "aeros/cli.py"],
     "campaign_contract": ["aeros/runtime/campaign.py", "checks/check_campaign_contract.py", "templates/campaign_contract.yml", "templates/campaign_progress.csv", "aeros/cli.py"],
     "owner_decision_rules": ["aeros/runtime/owner_decisions.py", "checks/check_owner_decisions.py", "aeros/runtime/task_preflight.py"],
+    "authority_evidence": ["aeros/runtime/authority.py", "harness/authority_evidence_policy.yml", "checks/check_authority_evidence.py"],
+    "artifact_semantics": ["aeros/runtime/artifact_semantics.py", "harness/artifact_semantics_policy.yml", "checks/check_artifact_semantics.py"],
+    "research_job_compiler": ["aeros/runtime/research_job.py", "templates/research_job_data_probe.yml", "checks/check_research_job_compiler.py"],
+    "adaptive_checks": ["aeros/runtime/adaptive_checks.py", "harness/adaptive_checks.yml", "checks/check_adaptive_checks.py"],
 }
 
 CAPABILITY_EXEMPT_CHECKS: dict[str, str] = {

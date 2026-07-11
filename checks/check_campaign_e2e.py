@@ -21,6 +21,7 @@ from __future__ import annotations
 import tempfile
 from pathlib import Path
 import sys
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -49,13 +50,14 @@ def _breakers(root: Path) -> list[str]:
 
 def _collect(root: Path, tid: str, before: int, gain: int) -> bool:
     ev = f"data/backfill/{tid}.csv"
-    (root / ev).write_text("id\n" + "\n".join(f"lead_{i}" for i in range(gain)) + ("\n" if gain else ""), encoding="utf-8")
+    (root / ev).write_text("id\n" + "\n".join(f"{tid}_lead_{i}" for i in range(gain)) + ("\n" if gain else ""), encoding="utf-8")
     tp = root / f"tasks/{tid}.yml"
     tp.write_text(
         f"task_id: {tid}\nstage: execution\nwork_lane: data\ncampaign_id: leads\n"
         f"campaign_progress:\n  task_type: source_capture\n  metric_before: {before}\n"
         f"  metric_after: {before + gain}\n  target_constraint: numerator\n"
         f"  used_batch_source: false\n  decision_metric_rerun: false\n  metric_evidence_path: {ev}\n"
+        f"  metric_unique_key_columns:\n    - id\n"
         f"skill_waivers:\n  - skill_class: data_source\n    reason: e2e fixture local evidence\n"
         f"    scope: e2e\n    progress_label: CHECK_PASS\n"
         f"goal: collect source leads batch\nchecks: []\nallowed_outputs:\n  - {ev}\n",
@@ -72,6 +74,36 @@ def _run_lifecycle() -> list[str]:
             (root / d).mkdir(parents=True, exist_ok=True)
         (root / "project_manifest.yml").write_text("project:\n  name: campaign_e2e\n", encoding="utf-8")
         (root / "campaigns/active_campaign.yml").write_text(CAMPAIGN, encoding="utf-8")
+
+        # No caller-controlled reviewer string may release authority.
+        try:
+            record_campaign_decision(root, decision="continue", reason="agent self-release")
+            failures.append("phase0: campaign decision succeeded without a human approval artifact")
+        except PermissionError:
+            pass
+
+        subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "fixture-human"], cwd=root, check=True)
+        subprocess.run(["git", "config", "user.email", "fixture@example.invalid"], cwd=root, check=True)
+        (root / "harness").mkdir(exist_ok=True)
+        (root / "decisions/approvals").mkdir(parents=True, exist_ok=True)
+        (root / "harness/permissions.yml").write_text(
+            "human_approval:\n  enforcement: git_committer\n  approver_identity:\n    - fixture-human\n"
+            "  agent_identity:\n    - fixture-agent\n  approval_artifact_dir: decisions/approvals\n",
+            encoding="utf-8",
+        )
+
+        def approval(decision: str, *, breaker: str = "all", horizon: int = 1) -> str:
+            rel = f"decisions/approvals/campaign_leads_{decision}.yml"
+            (root / rel).write_text(
+                f"version: 1\ncampaign_id: leads\ndecision: {decision}\nreason: fixture human decision\n"
+                f"breaker_id: {breaker}\nexpires_after_tasks: {horizon}\n"
+                "approved_at: 2026-07-11T00:00:00Z\ndecision_ref: fixture-review\n",
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "add", "harness/permissions.yml", rel], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-m", f"human {decision} approval"], cwd=root, check=True, capture_output=True)
+            return rel
 
         # Phase 1: breaker emerges from real accumulated diminishing-returns progress.
         metric = 0
@@ -96,8 +128,8 @@ def _run_lifecycle() -> list[str]:
             failures.append("phase2: blocked task unexpectedly produced output")
 
         # Phase 3: a human continue decision releases the breaker.
-        record_campaign_decision(root, decision="continue", breaker_id="low_marginal_yield",
-                                 reason="one more targeted batch", expires_after_tasks=1)
+        record_campaign_decision(root, decision="continue", approval_artifact=approval(
+            "continue", breaker="low_marginal_yield", horizon=1))
         if "low_marginal_yield" in _breakers(root):
             failures.append("phase3: continue decision did not release the breaker")
 
@@ -116,7 +148,7 @@ def _run_lifecycle() -> list[str]:
             failures.append("phase5: convergence_freeze did not fire on a plateaued metric")
 
         # Phase 6: a human stop decision halts the campaign.
-        record_campaign_decision(root, decision="stop", reason="pool is decision-sufficient")
+        record_campaign_decision(root, decision="stop", approval_artifact=approval("stop"))
         rep = assess_campaign(root)
         if not rep.get("campaign_halted") or [b["breaker_id"] for b in rep["breakers"]] != ["human_stop"]:
             failures.append("phase6: stop decision did not halt the campaign")

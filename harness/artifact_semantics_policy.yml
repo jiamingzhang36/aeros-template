@@ -1,0 +1,12 @@
+version: 1
+dimensions:
+  selection_status: [lead, candidate, accepted, rejected]
+  processing_stage: [raw, staging, intermediate, processed]
+  admission_status: [nonproduction, canonical_candidate, canonical, result_eligible, claim_review_eligible]
+compatibility:
+  output_intent_is_projection_only: true
+  legacy_projects_must_not_be_forced_to_migrate: true
+invariants:
+  - rejected artifacts remain nonproduction
+  - canonical/result/claim-review admission requires processed artifacts
+

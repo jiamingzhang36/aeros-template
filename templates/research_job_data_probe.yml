@@ -1,0 +1,6 @@
+job_id: PROBE-C1-ACS
+job_type: data_probe
+target: C1
+source_candidate: census_acs_2024
+objective: verify coverage, required fields, join keys, and missingness on a bounded sample
+

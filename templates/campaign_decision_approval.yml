@@ -1,0 +1,15 @@
+# Copy to decisions/approvals/campaign_<id>_<decision>.yml, review it, then
+# commit it under an approver_identity before running aeros campaign continue/stop.
+version: 1
+campaign_id: example_campaign
+decision: continue
+reason: "Human-reviewed reason for bounded continuation"
+breaker_id: all
+expires_after_tasks: 1
+approved_at: "YYYY-MM-DDTHH:MM:SSZ"
+decision_ref: "human decision or meeting reference"
+authority_evidence: local_authorship
+does_not_prove:
+  - scientific validity
+  - claim support
+  - gate approval

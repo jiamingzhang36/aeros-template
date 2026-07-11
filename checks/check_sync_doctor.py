@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from aeros.runtime.sync_doctor import CAPABILITIES, CAPABILITY_EXEMPT_CHECKS, diagnose_project, sync_doctor
+from checks.run_harness_checks import CHECKS
 
 
 def _profile_checks() -> set[str]:
@@ -49,7 +50,10 @@ def main() -> int:
             "profile check(s) missing from sync doctor CAPABILITIES or explicit exemption list: "
             + ", ".join(missing_meta)
         )
-    stale_exemptions = sorted(set(CAPABILITY_EXEMPT_CHECKS) - profile_checks)
+    # Full is represented by the sentinel ``all``. Exemptions remain live when
+    # a check is still in the canonical full registry, even after it leaves
+    # smoke/lane profiles during product-tax reduction.
+    stale_exemptions = sorted(set(CAPABILITY_EXEMPT_CHECKS) - set(CHECKS))
     if stale_exemptions:
         failures.append(
             "sync doctor exemption(s) no longer appear in check_profiles.yml: "

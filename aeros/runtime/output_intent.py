@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .contract import Contract
+from .artifact_semantics import compile_legacy_output_intent
 
 
 VALID_OUTPUT_INTENTS = {
@@ -31,6 +32,13 @@ def contract_output_intents(contract: Contract) -> dict[str, str]:
     if not isinstance(raw, dict):
         return {}
     return {str(path).strip(): str(intent).strip() for path, intent in raw.items() if str(path).strip()}
+
+
+def compiled_artifact_semantics(contract: Contract) -> dict[str, dict[str, str]]:
+    return {
+        path: compile_legacy_output_intent(intent).to_dict()
+        for path, intent in contract_output_intents(contract).items()
+    }
 
 
 def validate_output_intents(contract: Contract) -> list[str]:

@@ -33,6 +33,9 @@ PROGRESS_FIELDS = (
     "decision_metric_rerun",
     "metric_evidence_path",
     "metric_evidence_sha256",
+    "metric_unique_key_columns",
+    "metric_verified_novel_units",
+    "research_value_events",
     "completion_mode",
     "completion_receipt_path",
     "recorded_at",
@@ -58,6 +61,11 @@ class CampaignTaskProgress:
     target_constraint: str
     used_batch_source: bool
     decision_metric_rerun: bool
+    metric_evidence_path: str = ""
+    metric_evidence_sha256: str = ""
+    metric_unique_key_columns: str = ""
+    metric_verified_novel_units: int = 0
+    research_value_events: tuple[dict[str, Any], ...] = ()
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -70,6 +78,11 @@ class CampaignTaskProgress:
             "target_constraint": self.target_constraint,
             "used_batch_source": self.used_batch_source,
             "decision_metric_rerun": self.decision_metric_rerun,
+            "metric_evidence_path": self.metric_evidence_path,
+            "metric_evidence_sha256": self.metric_evidence_sha256,
+            "metric_unique_key_columns": self.metric_unique_key_columns,
+            "metric_verified_novel_units": self.metric_verified_novel_units,
+            "research_value_events": list(self.research_value_events),
         }
 
 
@@ -235,6 +248,11 @@ def load_campaign_progress(root: Path, progress_path: str | Path | None = None) 
                     target_constraint=str(row.get("target_constraint") or row.get("binding_constraint") or "").strip(),
                     used_batch_source=_as_bool(row.get("used_batch_source")),
                     decision_metric_rerun=_as_bool(row.get("decision_metric_rerun") or row.get("decision_metric_updated")),
+                    metric_evidence_path=str(row.get("metric_evidence_path") or "").strip(),
+                    metric_evidence_sha256=str(row.get("metric_evidence_sha256") or "").strip(),
+                    metric_unique_key_columns=str(row.get("metric_unique_key_columns") or "").strip(),
+                    metric_verified_novel_units=int(_as_float(row.get("metric_verified_novel_units")) or 0),
+                    research_value_events=__import__("aeros.runtime.research_value", fromlist=["decode_events"]).decode_events(str(row.get("research_value_events") or "[]")),
                 )
             )
     return rows
@@ -305,19 +323,59 @@ def record_campaign_decision(
     root: Path,
     *,
     decision: str,
-    reason: str,
+    approval_artifact: str | Path | None = None,
+    reason: str = "",
     breaker_id: str = "all",
     reviewer: str = "",
     expires_after_tasks: int = 1,
     decisions_path: str | Path | None = None,
 ) -> dict[str, Any]:
-    """Append a human continue/stop decision, anchored to the current progress
-    count so a `continue` release is bounded and re-review is forced later."""
+    """Consume a committed human approval and append its campaign decision.
+
+    ``reason``, ``reviewer``, ``breaker_id`` and ``expires_after_tasks`` remain
+    accepted only for API compatibility. Authority and decision parameters come
+    from the approval artifact; caller-supplied identity text grants nothing.
+    """
     kind = str(decision or "").strip().lower()
     if kind not in {"continue", "stop"}:
         raise ValueError("decision must be 'continue' or 'stop'")
     active = load_campaign_contract(root)
     active_id = str((active or {}).get("campaign_id") or (active or {}).get("id") or "").strip()
+    if not active_id:
+        raise ValueError("no active campaign exists")
+    if not approval_artifact:
+        raise PermissionError("campaign decisions require --approval pointing to a committed human approval artifact")
+    approval_path = Path(approval_artifact)
+    if not approval_path.is_absolute():
+        approval_path = root / approval_path
+    try:
+        approval_path.resolve().relative_to(root.resolve())
+    except ValueError as exc:
+        raise PermissionError("campaign approval artifact must be inside the project") from exc
+    from .authority import evaluate_authority, load_requested_level
+    authority = evaluate_authority(root, approval_path, load_requested_level(approval_path))
+    if not authority.granted:
+        raise PermissionError(f"campaign decision approval rejected: {authority.reason}")
+    try:
+        approval = yaml.safe_load(approval_path.read_text(encoding="utf-8")) or {}
+    except Exception as exc:
+        raise ValueError(f"cannot parse campaign approval artifact: {exc}") from exc
+    if not isinstance(approval, dict):
+        raise ValueError("campaign approval artifact must be a YAML mapping")
+    required = ["campaign_id", "decision", "reason", "approved_at", "decision_ref"]
+    missing = [field for field in required if not str(approval.get(field) or "").strip()]
+    if missing:
+        raise ValueError(f"campaign approval artifact missing required fields: {', '.join(missing)}")
+    if str(approval.get("campaign_id") or "").strip() != active_id:
+        raise ValueError("campaign approval artifact campaign_id does not match the active campaign")
+    if str(approval.get("decision") or "").strip().lower() != kind:
+        raise ValueError("campaign approval artifact decision does not match the requested command")
+    approved_reason = str(approval.get("reason") or "").strip()
+    approved_breaker = str(approval.get("breaker_id") or "all").strip() or "all"
+    approved_horizon = max(1, int(approval.get("expires_after_tasks") or 1))
+    author = authority.actor
+    if not author:
+        raise PermissionError("campaign approval artifact has no verifiable approving commit author")
     tasks_observed = len([
         row for row in load_campaign_progress(root)
         if not row.campaign_id or row.campaign_id == active_id
@@ -325,14 +383,18 @@ def record_campaign_decision(
     record: dict[str, Any] = {
         "campaign_id": active_id or "active_campaign",
         "decision": kind,
-        "reason": str(reason or "").strip(),
-        "reviewer": str(reviewer or "").strip() or "human",
+        "reason": approved_reason,
+        "reviewer": author,
+        "approval_artifact": str(approval_path.resolve().relative_to(root.resolve())),
+        "decision_ref": str(approval.get("decision_ref") or "").strip(),
+        "approved_at": str(approval.get("approved_at") or "").strip(),
+        "authority_evidence": authority.to_dict(),
         "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "recorded_at_progress": tasks_observed,
     }
     if kind == "continue":
-        record["breaker_id"] = str(breaker_id or "all").strip() or "all"
-        record["expires_after_tasks"] = max(1, int(expires_after_tasks or 1))
+        record["breaker_id"] = approved_breaker
+        record["expires_after_tasks"] = approved_horizon
     path = _contract_path(root, decisions_path or DEFAULT_DECISIONS)
     path.parent.mkdir(parents=True, exist_ok=True)
     data = {}
@@ -360,6 +422,91 @@ def _evidence_rowcount(path: Path) -> int | None:
     if path.suffix.lower() in {".csv", ".tsv"}:
         return max(0, len(lines) - 1)  # drop header
     return len(lines)
+
+
+# High-confidence, framework-standard artifacts whose *presence* is itself a
+# decision-relevant research value event. Kept deliberately strict: only things
+# that cannot be produced by mere collection volume (a registered result, a
+# grounded claim-bearing citation, a closed data gap), so inference recognises
+# real value without letting raw counts masquerade as value.
+_VALUE_ARTIFACT_SOURCES: tuple[tuple[str, str], ...] = (
+    ("probe_passed", "evidence/result_registry.csv"),
+    ("paper_exhibit_reproduced", "evidence/result_index.csv"),
+    ("claim_bearing_citation_grounded", "discovery/literature/interpretation_records"),
+    ("resolved_data_gap", "data/backfill/resolved"),
+    ("replication_blocker_resolved", "evidence/negative_result_ledger.md"),
+)
+
+
+def infer_research_value_events(root: Path, *, since_mtime: float | None = None) -> list[dict[str, Any]]:
+    """Recognise decision-relevant value the project already recorded elsewhere,
+    so `low_decision_value` reflects real value (declared ∪ inferred), not just
+    annotation diligence. Strict by design: only high-confidence artifacts count,
+    and only those produced since the campaign started (anchored to the campaign
+    contract's mtime) so pre-campaign results cannot permanently suppress the
+    breaker. Fail-safe: unreadable mtimes yield no inference → the breaker fires
+    (conservative)."""
+    anchor = since_mtime
+    if anchor is None:
+        contract_file = root / DEFAULT_CONTRACT
+        try:
+            anchor = contract_file.stat().st_mtime if contract_file.exists() else None
+        except OSError:
+            anchor = None
+    inferred: list[dict[str, Any]] = []
+    for event_type, rel in _VALUE_ARTIFACT_SOURCES:
+        base = root / rel
+        if not base.exists():
+            continue
+        candidates = [base] if base.is_file() else [p for p in base.rglob("*") if p.is_file()]
+        for f in candidates:
+            try:
+                if anchor is not None and f.stat().st_mtime < anchor:
+                    continue
+            except OSError:
+                continue
+            if f.suffix.lower() in {".csv", ".tsv"} and (_evidence_rowcount(f) or 0) < 1:
+                continue  # header-only registries carry no value yet
+            inferred.append({"event_type": event_type, "source": str(f.relative_to(root))})
+            break  # one confirmation per source is enough
+    return inferred
+
+
+def _metric_key_columns(value: Any) -> list[str]:
+    if isinstance(value, str):
+        value = [part.strip() for part in value.split(",")]
+    if not isinstance(value, list):
+        return []
+    return [str(part).strip() for part in value if str(part).strip()]
+
+
+def _evidence_unique_units(path: Path, key_columns: list[str] | None = None) -> tuple[set[tuple[str, ...]], str]:
+    """Return independently observed unique evidence units.
+
+    CSV/TSV evidence defaults to its first column when no key is declared.
+    Text evidence uses unique non-empty lines. This is deliberately mechanical:
+    it verifies novelty, not scientific relevance or source quality.
+    """
+    columns = list(key_columns or [])
+    if path.suffix.lower() in {".csv", ".tsv"}:
+        delimiter = "\t" if path.suffix.lower() == ".tsv" else ","
+        with path.open("r", encoding="utf-8", errors="ignore", newline="") as handle:
+            reader = csv.DictReader(handle, delimiter=delimiter)
+            fields = list(reader.fieldnames or [])
+            if not fields:
+                return set(), ""
+            use = columns or [fields[0]]
+            missing = [name for name in use if name not in fields]
+            if missing:
+                raise ValueError(f"metric unique-key column(s) missing from evidence: {', '.join(missing)}")
+            units = {
+                tuple(str(row.get(name) or "").strip() for name in use)
+                for row in reader
+            }
+            units.discard(tuple("" for _ in use))
+            return units, ",".join(use)
+    text = path.read_text(encoding="utf-8", errors="ignore")
+    return {(line.strip(),) for line in text.splitlines() if line.strip()}, "__line__"
 
 
 def load_campaign_decisions(root: Path, campaign_id: str = "", decisions_path: str | Path | None = None) -> list[dict[str, Any]]:
@@ -445,7 +592,15 @@ def record_campaign_progress(
     after = _as_float(declared.get("metric_after"))
     target = str(declared.get("target_constraint") or "").strip()
     evidence_rel = str(declared.get("metric_evidence_path") or "").strip()
+    unique_key_columns = _metric_key_columns(declared.get("metric_unique_key_columns"))
     failures: list[str] = []
+    from .research_value import encode_events, validate_events
+    value_events, value_failures = validate_events(
+        root,
+        declared.get("research_value_events") or [],
+        list(getattr(contract, "allowed_outputs", []) or []),
+    )
+    failures.extend(value_failures)
     if before is None or after is None:
         failures.append("campaign_progress requires numeric metric_before and metric_after")
     if not target:
@@ -474,6 +629,37 @@ def record_campaign_progress(
                 f"declared metric gain {gain:g} exceeds evidence rows {rowcount} in {evidence_rel}; "
                 "metric_after is not backed by enough evidence"
             )
+        try:
+            current_units, observed_key = _evidence_unique_units(evidence_path, unique_key_columns)
+        except (OSError, ValueError) as exc:
+            failures.append(str(exc))
+            current_units, observed_key = set(), ""
+        prior_rows = [
+            row for row in load_campaign_progress(root)
+            if row.campaign_id == campaign_id and row.task_id != str(contract.task_id)
+        ]
+        if prior_rows and before is not None:
+            expected_before = prior_rows[-1].metric_after
+            if before != expected_before:
+                failures.append(
+                    f"metric_before {before:g} does not continue the recorded campaign value {expected_before:g}"
+                )
+        historical_units: set[tuple[str, ...]] = set()
+        for previous in prior_rows:
+            previous_path = root / previous.metric_evidence_path
+            if not previous.metric_evidence_path or not previous_path.is_file():
+                continue
+            try:
+                units, _ = _evidence_unique_units(previous_path, unique_key_columns)
+                historical_units.update(units)
+            except (OSError, ValueError):
+                continue
+        novel_units = current_units - historical_units
+        if gain >= 1 and len(novel_units) < int(gain):
+            failures.append(
+                f"declared metric gain {gain:g} exceeds independently observed novel units {len(novel_units)} "
+                f"using key {observed_key or '<unavailable>'}; duplicate or previously counted evidence cannot inflate progress"
+            )
     if failures:
         return {
             "status": "invalid_progress_declaration",
@@ -495,6 +681,9 @@ def record_campaign_progress(
         "decision_metric_rerun": "true" if _as_bool(declared.get("decision_metric_rerun")) else "false",
         "metric_evidence_path": evidence_rel,
         "metric_evidence_sha256": _sha256_file(evidence_path),
+        "metric_unique_key_columns": observed_key,
+        "metric_verified_novel_units": str(len(novel_units)),
+        "research_value_events": encode_events(value_events),
         "completion_mode": str(completion_mode or ""),
         "completion_receipt_path": str(completion_receipt_path or ""),
         "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
@@ -580,6 +769,23 @@ def assess_campaign(
     fallback = str(contract.get("fallback_if_stalled") or "escalate to human decision packet").strip()
 
     breakers: list[CampaignBreaker] = []
+    value_window = max(1, int(contract.get("research_value_window") or contract.get("marginal_yield_window") or 3))
+    declared_value = any(row.research_value_events for row in rows[-value_window:])
+    inferred_value: list[dict[str, Any]] = []
+    if len(rows) >= value_window and not declared_value:
+        inferred_value = infer_research_value_events(root)
+        if not inferred_value:
+            # Fire, but present BOTH interpretations honestly: genuinely no
+            # decision value, OR value produced but not recorded.
+            breakers.append(CampaignBreaker(
+                "low_decision_value",
+                "BLOCK",
+                f"the last {value_window} campaign task(s) recorded no research_value_event, "
+                "and none was inferred from project value artifacts",
+                "either the recent work produced no decision-relevant value (stop and reconsider "
+                "route/metric/objective), or value was produced but not recorded — record it as a "
+                "campaign research_value_event to clear this",
+            ))
     recent = rows[-window:] if window > 0 else rows
     if expected > 0 and len(recent) >= window and all(row.marginal_yield < expected for row in recent):
         breakers.append(CampaignBreaker(
@@ -713,6 +919,11 @@ def assess_campaign(
         "breakers": [breaker.to_dict() for breaker in breakers],
         "released_breakers": released,
         "human_decisions_applied": applied_decisions,
+        "inferred_research_value": inferred_value,
+        "unrecorded_value_hint": (
+            "decision value was inferred from project artifacts but not recorded as campaign "
+            "research_value_events; record it for a durable trail" if inferred_value else ""
+        ),
         "campaign_halted": halt_decision is not None,
         "recommended_action": (
             "the campaign is stopped by a human stop decision" if halt_decision is not None

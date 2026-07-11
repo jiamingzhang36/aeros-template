@@ -26,6 +26,7 @@ PROTECTED_EXACT = {
 PROTECTED_PREFIXES = (
     "data/raw/",
     "decisions/approvals/",
+    "campaigns/campaign_decisions.yml",
 )
 
 
@@ -70,4 +71,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -87,6 +87,28 @@ def _freeze_and_decision_valve() -> list[str]:
             "binding_constraint: numerator\nfallback_if_stalled: escalate\n")
     failures: list[str] = []
 
+    def approve(tmp: Path, decision: str, *, breaker: str = "all", horizon: int = 1) -> str:
+        subprocess.run(["git", "init"], cwd=tmp, check=True, capture_output=True)
+        subprocess.run(["git", "config", "user.name", "fixture-human"], cwd=tmp, check=True)
+        subprocess.run(["git", "config", "user.email", "fixture@example.invalid"], cwd=tmp, check=True)
+        (tmp / "harness").mkdir(exist_ok=True)
+        (tmp / "decisions/approvals").mkdir(parents=True, exist_ok=True)
+        (tmp / "harness/permissions.yml").write_text(
+            "human_approval:\n  enforcement: git_committer\n  approver_identity:\n    - fixture-human\n"
+            "  agent_identity:\n    - fixture-agent\n  approval_artifact_dir: decisions/approvals\n",
+            encoding="utf-8",
+        )
+        rel = f"decisions/approvals/campaign_t_{decision}.yml"
+        (tmp / rel).write_text(
+            f"version: 1\ncampaign_id: t\ndecision: {decision}\nreason: fixture human decision\n"
+            f"breaker_id: {breaker}\nexpires_after_tasks: {horizon}\n"
+            "approved_at: 2026-07-11T00:00:00Z\ndecision_ref: fixture-review\n",
+            encoding="utf-8",
+        )
+        subprocess.run(["git", "add", "harness/permissions.yml", rel], cwd=tmp, check=True)
+        subprocess.run(["git", "commit", "-m", "human campaign approval"], cwd=tmp, check=True, capture_output=True)
+        return rel
+
     # FREEZE: a plateaued objective metric must raise convergence_freeze.
     with _tempfile.TemporaryDirectory() as d:
         tmp = Path(d); (tmp / "campaigns").mkdir()
@@ -101,8 +123,8 @@ def _freeze_and_decision_valve() -> list[str]:
         tmp = Path(d); (tmp / "campaigns").mkdir()
         (tmp / "campaigns/active_campaign.yml").write_text(base, encoding="utf-8")
         _campaign_progress(tmp, [(10, 11), (11, 12), (12, 13)])
-        record_campaign_decision(tmp, decision="continue", breaker_id="low_marginal_yield",
-                                 reason="one more batch", expires_after_tasks=2)
+        approval = approve(tmp, "continue", breaker="low_marginal_yield", horizon=2)
+        record_campaign_decision(tmp, decision="continue", approval_artifact=approval)
         rep = assess_campaign(tmp)
         if any(b["breaker_id"] == "low_marginal_yield" for b in rep["breakers"]):
             failures.append("continue decision did not release the low_marginal_yield breaker")
@@ -117,7 +139,8 @@ def _freeze_and_decision_valve() -> list[str]:
         tmp = Path(d); (tmp / "campaigns").mkdir()
         (tmp / "campaigns/active_campaign.yml").write_text(base, encoding="utf-8")
         _campaign_progress(tmp, [(10, 11), (11, 12), (12, 13)])
-        record_campaign_decision(tmp, decision="stop", reason="done enough")
+        approval = approve(tmp, "stop")
+        record_campaign_decision(tmp, decision="stop", approval_artifact=approval)
         rep = assess_campaign(tmp)
         if not rep.get("campaign_halted") or [b["breaker_id"] for b in rep["breakers"]] != ["human_stop"]:
             failures.append("stop decision must halt the campaign with a human_stop breaker")
@@ -140,6 +163,18 @@ def _freeze_and_decision_valve() -> list[str]:
         if res["status"] != "invalid_progress_declaration" or not any("exceeds evidence rows" in f for f in res["failures"]):
             failures.append("inflated metric_after (unbacked by evidence rows) must be rejected")
 
+        # Duplicate IDs are one unique unit, not three rows of progress.
+        (tmp / "data/backfill/dupes.csv").write_text("id\nr1\nr1\nr1\n", encoding="utf-8")
+        class _D:
+            task_id = "TD"; work_lane = "data"; allowed_outputs = ["data/backfill/dupes.csv"]
+            campaign_id = "t"
+            campaign_progress = {"metric_before": 0, "metric_after": 3, "target_constraint": "numerator",
+                                 "metric_evidence_path": "data/backfill/dupes.csv", "task_type": "collect",
+                                 "metric_unique_key_columns": ["id"]}
+        dres = record_campaign_progress(tmp, _D(), completion_mode="auto", completion_receipt_path="rd.yml")
+        if not any("novel units 1" in f for f in dres.get("failures", [])):
+            failures.append("duplicate evidence keys inflated campaign metric progress")
+
         # A legitimate zero-gain task ("found nothing new") must still record: it
         # is the diminishing-returns/plateau signal the breakers depend on.
         (tmp / "data/backfill/none.csv").write_text("id\n", encoding="utf-8")  # header only
@@ -153,6 +188,27 @@ def _freeze_and_decision_valve() -> list[str]:
         zres = record_campaign_progress(tmp, _Z(), completion_mode="auto", completion_receipt_path="rz.yml")
         if zres["status"] == "invalid_progress_declaration":
             failures.append(f"zero-gain task must record, not be rejected as empty: {zres['failures']}")
+
+    # Research-value inference: a real value artifact produced since the campaign
+    # started must suppress low_decision_value (declared ∪ inferred); an empty
+    # project must still fire it with a dual interpretation; and a pre-campaign
+    # result must not grant permanent immunity.
+    import time as _time
+    with _tempfile.TemporaryDirectory() as d:
+        tmp = Path(d); (tmp / "campaigns").mkdir()
+        (tmp / "campaigns/active_campaign.yml").write_text(base, encoding="utf-8")
+        _campaign_progress(tmp, [(0, 5), (5, 10), (10, 15)])  # decent yield, no value events
+        fired = [b["breaker_id"] for b in assess_campaign(tmp)["breakers"]]
+        if "low_decision_value" not in fired:
+            failures.append("no recorded/inferred value must fire low_decision_value")
+        (tmp / "evidence").mkdir()
+        _time.sleep(0.02)
+        (tmp / "evidence/result_registry.csv").write_text("result_id,estimate\nR1,0.4\n", encoding="utf-8")
+        rep = assess_campaign(tmp)
+        if any(b["breaker_id"] == "low_decision_value" for b in rep["breakers"]):
+            failures.append("a real result produced since the campaign must suppress low_decision_value")
+        if not rep.get("inferred_research_value"):
+            failures.append("inferred research value was not reported")
     return failures
 
 
@@ -175,6 +231,8 @@ def main() -> int:
         ])
         report = assess_campaign(tmp, contract_path=contract, progress_path=progress)
         ids = {breaker.get("breaker_id") for breaker in report.get("breakers") or []}
+        if "low_decision_value" not in ids:
+            failures.append("campaign without research_value_events did not raise low_decision_value")
         for expected in ["task_budget_exhausted", "binding_constraint_drift", "batch_source_unused", "collecting_without_testing"]:
             if expected not in ids:
                 failures.append(f"campaign breaker did not fire {expected}")

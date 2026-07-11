@@ -445,6 +445,61 @@ def _cmd_next(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_approve(args: argparse.Namespace) -> int:
+    root = _project_root()
+    decision = str(args.decision).strip(); campaign_id = str(args.campaign_id).strip()
+    authority = str(args.authority_evidence).strip()
+    if authority == "external_human_approval":
+        print("approval rejected: external_human_approval has no configured independent verifier")
+        return 2
+    path = root / "decisions/approvals" / f"campaign_{campaign_id}_{decision}.yml"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "version": 1, "campaign_id": campaign_id, "decision": decision,
+        "reason": args.reason, "breaker_id": args.breaker,
+        "expires_after_tasks": int(args.for_tasks),
+        "approved_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "decision_ref": args.decision_ref, "authority_evidence": authority,
+        "authority_scope": {"campaign_continuation_only": decision == "continue", "campaign_stop_only": decision == "stop"},
+        "does_not_authorize": ["canonical promotion", "claim upgrade", "release"],
+    }
+    path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    print(f"wrote scoped approval artifact: {_display_rel(path, root)}")
+    if not args.commit:
+        print("authority not granted: artifact is uncommitted; review it and rerun with --commit")
+        return 0
+    staged = subprocess.run(["git", "-C", str(root), "diff", "--cached", "--name-only"], text=True, capture_output=True)
+    if staged.stdout.strip():
+        print("approval commit refused: unrelated staged files exist")
+        return 2
+    env = dict(os.environ); env["AEROS_ALLOW_PROTECTED_COMMIT"] = "1"
+    if subprocess.run(["git", "-C", str(root), "add", str(path.relative_to(root))], env=env).returncode != 0:
+        return 2
+    commit_args = ["git", "-C", str(root), "commit"]
+    if authority == "signed_commit": commit_args.append("-S")
+    commit_args.extend(["-m", f"approve campaign {campaign_id} {decision}", "--", str(path.relative_to(root))])
+    result = subprocess.run(commit_args, env=env)
+    if result.returncode != 0: return result.returncode
+    print(f"authority granted at level={authority}; run: aeros campaign {decision} --approval {path.relative_to(root)}")
+    return 0
+
+
+def _cmd_job(args: argparse.Namespace) -> int:
+    from .runtime.research_job import load_research_job, compile_research_job, validate_compilation, write_compiled_job
+    root = _project_root(); compiled = compile_research_job(load_research_job(Path(args.file)))
+    failures = validate_compilation(compiled)
+    if failures: print(json.dumps({"status":"invalid","failures":failures}, indent=2)); return 2
+    if args.write:
+        for path in write_compiled_job(root, compiled): print(f"wrote {_display_rel(path, root)}")
+    else: print(json.dumps(compiled.to_dict(), indent=2))
+    return 0
+
+
+def _cmd_adaptive_checks(args: argparse.Namespace) -> int:
+    from .runtime.adaptive_checks import changed_paths, select_checks
+    root = _project_root(); print(json.dumps(select_checks(root, list(args.changed or []) or changed_paths(root)), indent=2)); return 0
+
+
 def _cmd_campaign(args: argparse.Namespace) -> int:
     from .runtime.campaign import assess_campaign, format_campaign_assessment, write_campaign_assessment
 
@@ -468,14 +523,15 @@ def _cmd_campaign(args: argparse.Namespace) -> int:
 
     if command in {"continue", "stop"}:
         from .runtime.campaign import record_campaign_decision
-        rec = record_campaign_decision(
-            root,
-            decision=command,
-            reason=getattr(args, "reason", "") or "",
-            breaker_id=getattr(args, "breaker", "all") or "all",
-            reviewer=getattr(args, "reviewer", "") or "",
-            expires_after_tasks=int(getattr(args, "for_tasks", 1) or 1),
-        )
+        try:
+            rec = record_campaign_decision(
+                root,
+                decision=command,
+                approval_artifact=getattr(args, "approval", "") or "",
+            )
+        except (PermissionError, ValueError) as exc:
+            print(f"campaign {command} rejected: {exc}")
+            return 2
         print(f"recorded {command} decision for campaign '{rec['campaign_id']}' at progress {rec['recorded_at_progress']}")
         if command == "continue":
             print(f"  releases breaker '{rec['breaker_id']}' for the next {rec['expires_after_tasks']} task(s), then re-review")
@@ -1688,6 +1744,22 @@ def main(argv: list[str] | None = None) -> int:
     next_p.add_argument("--json", action="store_true", help="emit machine-readable next action with full ActionSpec")
     next_p.set_defaults(func=_cmd_next)
 
+    approve = sub.add_parser("approve", help="create scoped authority evidence; plain confirmation is not human proof")
+    approve.add_argument("--campaign-id", required=True); approve.add_argument("--decision", required=True, choices=["continue", "stop"])
+    approve.add_argument("--reason", required=True); approve.add_argument("--breaker", default="all"); approve.add_argument("--for-tasks", type=int, default=1)
+    approve.add_argument("--decision-ref", required=True)
+    approve.add_argument("--authority-evidence", choices=["local_authorship", "signed_commit", "external_human_approval"], default="local_authorship")
+    approve.add_argument("--commit", action="store_true", help="commit only this approval; signed_commit uses git commit -S")
+    approve.set_defaults(func=_cmd_approve)
+
+    job = sub.add_parser("job", help="compile ResearchJob into TaskContract, ActionSpec, and ExecutionEnvelope")
+    job_sub = job.add_subparsers(dest="job_command", required=True); job_compile = job_sub.add_parser("compile")
+    job_compile.add_argument("--file", required=True); job_compile.add_argument("--write", action="store_true"); job_compile.set_defaults(func=_cmd_job)
+
+    adaptive = sub.add_parser("checks", help="select change-aware checks from observed writes")
+    adaptive_sub = adaptive.add_subparsers(dest="adaptive_command", required=True); adaptive_select = adaptive_sub.add_parser("select")
+    adaptive_select.add_argument("--changed", action="append", default=[]); adaptive_select.set_defaults(func=_cmd_adaptive_checks)
+
     campaign = sub.add_parser("campaign", help="assess repeated-loop campaign contracts and marginal-yield breakers")
     campaign_sub = campaign.add_subparsers(dest="campaign_command", required=True)
     campaign_assess = campaign_sub.add_parser("assess", help="assess active campaign contract without executing work")
@@ -1702,14 +1774,10 @@ def main(argv: list[str] | None = None) -> int:
     campaign_new.add_argument("--force", action="store_true", help="overwrite an existing campaign contract")
     campaign_new.set_defaults(func=_cmd_campaign)
     campaign_continue = campaign_sub.add_parser("continue", help="record a human decision to continue past a tripped breaker for a bounded number of tasks")
-    campaign_continue.add_argument("--reason", required=True, help="why continuing is justified")
-    campaign_continue.add_argument("--breaker", default="all", help="breaker_id to release, or 'all' (default)")
-    campaign_continue.add_argument("--for-tasks", type=int, default=1, help="how many further tasks this release covers before re-review")
-    campaign_continue.add_argument("--reviewer", default="", help="who made the decision")
+    campaign_continue.add_argument("--approval", required=True, help="committed human approval YAML; decision parameters are read from this artifact")
     campaign_continue.set_defaults(func=_cmd_campaign)
     campaign_stop = campaign_sub.add_parser("stop", help="record a human decision to halt the campaign")
-    campaign_stop.add_argument("--reason", required=True, help="why the campaign is being stopped")
-    campaign_stop.add_argument("--reviewer", default="", help="who made the decision")
+    campaign_stop.add_argument("--approval", required=True, help="committed human approval YAML; decision parameters are read from this artifact")
     campaign_stop.set_defaults(func=_cmd_campaign)
 
     drive_p = sub.add_parser("drive", help="choose and optionally execute one useful safe next objective")

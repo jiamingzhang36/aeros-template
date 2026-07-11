@@ -14,6 +14,7 @@ protected_paths:
   prefixes:
     - data/raw/
     - decisions/approvals/
+    - campaigns/campaign_decisions.yml
 override:
   env_var: AEROS_ALLOW_PROTECTED_COMMIT
   allowed_value: "1"
@@ -31,4 +32,3 @@ does_not_prove:
   - human approval
   - release readiness
   - absence of off-repo side effects
-

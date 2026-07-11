@@ -44,6 +44,36 @@ metric held within `convergence_epsilon` across the last `convergence_window`
 tasks (with enough tasks run). The positive counterpart: stop *expanding* and
 request a human finalize decision, rather than grinding.
 
+Decision-value signal (block): **`low_decision_value`** — the last
+`research_value_window` tasks recorded no `research_value_event` (a status
+transition from a controlled vocabulary: `resolved_data_gap`, `probe_passed`,
+`claim_bearing_citation_grounded`, …). Volume ≠ value: collecting rows is not
+progress unless it advances a decision. To avoid punishing projects that *did*
+produce value but didn't annotate it, `infer_research_value_events` recognises
+value from high-confidence framework artifacts (a registered result, a grounded
+claim, a closed data gap) produced *since the campaign started* (anchored to the
+contract mtime, so pre-campaign results grant no permanent immunity). The breaker
+fires only on `declared ∪ inferred == ∅`, and then states **both** readings:
+genuinely no value (stop/reconsider) *or* value produced but unrecorded (record
+it). When value is inferred but not declared, `inferred_research_value` +
+`unrecorded_value_hint` nudge the project to formalise it.
+
+## Which breaker fires on which trajectory (calibration)
+
+The count-based breakers (`low_marginal_yield`, `convergence_freeze`) assume a
+**granular, sustained** task stream and *under-fire on front-loaded trajectories*:
+one big first batch keeps the yield window "healthy", and `convergence_freeze`
+needs `2 × convergence_window` tasks. Real research collection is often
+front-loaded (one materialisation + a few follow-ups), so on real data the
+**value-based `low_decision_value` is the robust primary signal** and the
+count-based ones are secondary confirmation for genuine grinding loops. This was
+confirmed by a read-only assess over a real project's collection history: the
+count breakers stayed silent while `low_decision_value` fired correctly.
+Calibration guidance: treat `research_value_window` as the primary knob;
+`marginal_yield_window`/`convergence_window` tune the grinding-loop case. Do **not**
+add a fragile "sudden-drop" heuristic to force the count breakers to fire on
+sparse data — it misfires on naturally lumpy campaigns; rely on the value signal.
+
 ## Scope matching — why rewording cannot dodge a stopped campaign
 
 `match_campaign_scope` decides whether an *undeclared* task is really the same

@@ -119,6 +119,12 @@ def main() -> int:
         if proc.returncode == 0:
             failures.append("protected data/raw edit was not blocked")
 
+        repo = make_repo()
+        stage(repo, "campaigns/campaign_decisions.yml", "decisions: []\n")
+        proc = hook(repo)
+        if proc.returncode == 0:
+            failures.append("campaign authority decision log was not protected")
+
     if failures:
         print("FAIL: protected-path hook check failed")
         for failure in failures:

@@ -1,0 +1,16 @@
+version: 1
+request_id: REQUEST-ID
+authority_scope:
+  action: campaign_continue
+  target: CAMPAIGN-ID
+  breaker: BREAKER-ID
+  expires_after_tasks: 1
+does_not_authorize:
+  - canonical promotion
+  - claim upgrade
+  - release
+authority_evidence: local_authorship
+reason: ""
+approved_at: ""
+decision_ref: ""
+

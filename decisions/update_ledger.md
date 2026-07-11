@@ -2350,3 +2350,34 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: `python3 checks/check_campaign_e2e.py`; `python3 checks/run_harness_checks.py --profile full --timeout 120` (all pass).
 - **Does not prove**: that real-project campaigns behave identically; that the throwaway fixture covers every metric shape; scientific validity; gate approval.
 - **Next check**: Backfill this pending entry with the commit hash.
+## 2026-07-11 — Bind campaign decisions to human approval and verify unique metric gain
+
+- **Commit(s)**: pending
+- **Change type**: framework / authority enforcement / campaign metric integrity
+- **North star:** A stopped autonomous campaign cannot release itself, and duplicate evidence cannot manufacture progress.
+- **Action**: Required `aeros campaign continue|stop` to consume a project-local approval artifact whose clean git author is an configured approver identity; removed caller-supplied reviewer authority and recorded the verified author, approval path, date, and decision reference. Protected the campaign decision log with the existing pre-commit guard. Reversed the E2E fixture so an approval-free self-release fails and a committed human fixture alone releases the breaker. Campaign progress now checks metric continuity and computes novel evidence units using declared CSV/TSV unique keys (or the first column by default), excluding duplicates and units already counted by prior campaign tasks.
+- **Validation**: targeted campaign, E2E, protected-path, task-preflight, ledger, smoke, and full harness checks.
+- **Non-goal**: Do not judge whether a continuation is scientifically wise, whether an evidence unit is relevant, or whether a metric definition is optimal.
+- **Does not prove**: scientific validity; source quality; claim support; gate approval; resistance to a human who intentionally shares the approver identity with an autonomous agent.
+- **Drift risk**: Legacy campaign decisions without approval metadata are readable for history but no new decision can be created without a committed approval. Non-tabular evidence uses unique non-empty lines and remains a mechanical verifier only.
+- **Next check**: Roll out to the next active campaign and confirm an agent-authored approval is rejected while a human-committed bounded continuation succeeds.
+## 2026-07-11 — Converge authority, research value, artifact state, job compilation, and adaptive checks
+
+- **Commit(s)**: pending
+- **Change type**: framework / runtime convergence / control-tax reduction
+- **North star:** Reduce the cost of truthful research progress by strengthening real authority boundaries while removing duplicated declarations and daily checks.
+- **Action**: Reclassified Git approver evidence as `local_authorship`, added fail-closed signed/external authority levels and a scoped `aeros approve`; added seven evidence-bound research-value events and `low_decision_value`; split artifact state into selection/processing/admission with legacy output-intent projection; compiled one `data_probe` ResearchJob into TaskContract, ActionSpec, and ExecutionEnvelope with monotonic authority; mapped observed writes to six risk domains; reduced smoke from 54 to 15 core checks and pre-drive to three checks; retained the complete full harness. De-vendor remains gated on real-project rollout.
+- **Validation**: authority, campaign, artifact semantics, ResearchJob, adaptive selection, sync doctor, pre-drive, smoke, and full harness.
+- **Non-goal**: Do not claim Git authorship proves a real person; do not treat novel units as research value; do not force legacy artifact migration; do not de-vendor before real-project evidence.
+- **Does not prove**: scientific validity; research-value event importance; signed approval wisdom; external identity; optimal check selection; safe package migration.
+- **Drift risk**: Legacy output intents remain projections; local authorship is forgeable under a hostile local agent; adaptive path rules are deterministic and may conservatively select extra checks.
+- **Next check**: Roll the first four batches into one clean active project, measure pre-drive/post-action latency and substantive issue detection, then decide whether De-vendor admission is earned.
+## 2026-07-11 — Infer research value so low_decision_value reflects real value, not annotation
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / campaign breaker / false-positive reduction
+- **Action**: Added `infer_research_value_events(root)` and wired it into the `low_decision_value` breaker so it fires on `declared ∪ inferred == ∅`. Inference recognises decision-relevant value from high-confidence framework artifacts (a registered result, a grounded claim, a closed data gap, a resolved replication blocker) produced *since the campaign started* (anchored to the contract mtime, so pre-campaign results grant no permanent immunity; unreadable mtimes fail safe → the breaker still fires). When it does fire, the recommended action states both readings (genuinely no value → stop/reconsider, or value produced but unrecorded → record it); when value is inferred but not declared, `inferred_research_value` + `unrecorded_value_hint` nudge formal recording. Documented the fix and a calibration note (count-based breakers under-fire on front-loaded trajectories; value-based is the robust primary signal) in docs/design/campaign_circuit_breaker.md. This was motivated by a read-only assess over MAHA's real literature-collection history.
+- **Why**: `low_decision_value` previously fired purely on absence of annotation, conflating "no decision value" with "value produced but not recorded" — a false-positive risk on real projects. Inference from unforgeable artifacts keeps the "prove value, not volume" pressure while cutting false alarms.
+- **Validation**: `python3 checks/check_campaign_contract.py`; `python3 checks/check_campaign_e2e.py`; `python3 checks/run_harness_checks.py --profile full` (all pass on the combined batch).
+- **Does not prove**: that inferred artifacts truly advanced a decision; that mtime anchoring is tamper-proof; scientific validity; gate approval.
+- **Next check**: Backfill this pending entry with the commit hash.

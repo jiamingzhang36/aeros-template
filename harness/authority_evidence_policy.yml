@@ -1,0 +1,13 @@
+version: 1
+levels:
+  local_authorship:
+    verification: configured clean Git authorship
+    proves: local procedural provenance only
+  signed_commit:
+    verification: git verify-commit over the approval artifact's last commit
+    use_for: [claim_upgrade, canonical_promotion, expensive_data_access, release]
+  external_human_approval:
+    verification: independent verifier required
+    status: reserved_fail_closed
+plain_interactive_confirmation_grants_authority: false
+

@@ -24,6 +24,7 @@ stop_condition_met: false
 task_budget: 8
 expected_yield_per_task: 3
 marginal_yield_window: 3
+research_value_window: 3
 binding_constraint: numerator_size
 fallback_if_stalled: "batch-ingest structured sources or escalate to human"
 # Convergence / FREEZE: when the objective metric holds within
@@ -37,6 +38,14 @@ convergence_epsilon: 0
 # of tasks, then it re-applies; a `stop` decision halts the campaign.
 batch_source_available: false
 rerun_decision_metric_after_gain: 10
+# Campaign tasks should declare campaign_progress.metric_unique_key_columns.
+# CSV/TSV evidence otherwise defaults conservatively to its first column.
+# Progress is computed from novel unique units across prior campaign evidence;
+# duplicate or previously counted records cannot inflate marginal yield.
+# Optional per-task campaign_progress.research_value_events are restricted to:
+# resolved_data_gap, probe_passed, route_decision_changed,
+# claim_bearing_citation_grounded, diagnostic_obligation_closed,
+# paper_exhibit_reproduced, replication_blocker_resolved.
 does_not_prove:
   - scientific validity
   - claim support

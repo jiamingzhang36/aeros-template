@@ -1,0 +1,29 @@
+version: 1
+target_pre_drive_seconds: [2, 5]
+default_checks: [check_action_spec.py, check_task_preflight.py]
+domains:
+  execution_integrity:
+    path_prefixes: [aeros/, code/, tasks/, contracts/]
+    checks: [check_action_spec.py, check_execution_envelope.py, check_task_preflight.py]
+  data_sample_integrity:
+    path_prefixes: [data/, discovery/data_inventory.csv, docs/data_contract.yml]
+    checks: [check_data_inventory.py, check_data_contract.py, check_provenance.py]
+  specification_integrity:
+    path_prefixes: [code/, docs/method_card.md, evidence/spec_run_index.csv]
+    checks: [check_analysis_ledger.py, check_claim_method_consistency.py]
+  evidence_claim_integrity:
+    path_prefixes: [evidence/, discovery/literature/]
+    checks: [check_claim_registry.py, check_claim_ceiling.py, check_research_graph.py]
+  paper_binding_integrity:
+    path_prefixes: [paper/, tex/, references.bib]
+    checks: [check_number_registry.py, check_manuscript_citation_faithfulness.py, check_claim_numbers_bound.py]
+  release_reproduction_integrity:
+    path_prefixes: [replication/, compliance/, decisions/approvals/, campaigns/campaign_decisions.yml]
+    checks: [check_protected_path_hook.py, check_approval_freshness.py, check_replication_package.py]
+check_metadata:
+  check_action_spec.py: {cost: low, authority_criticality: high}
+  check_task_preflight.py: {cost: low, authority_criticality: high}
+  check_provenance.py: {cost: medium, authority_criticality: high}
+  check_manuscript_citation_faithfulness.py: {cost: medium, authority_criticality: high}
+telemetry_fields: [duration_ms, trigger_count, real_issue_count, false_positive_count, overlap_group, last_real_issue_at]
+
