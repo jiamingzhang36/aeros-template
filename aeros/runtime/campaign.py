@@ -464,9 +464,12 @@ def record_campaign_progress(
         # metrics (gain < 1) only require the evidence to be non-empty.
         gain = (after - before) if (before is not None and after is not None) else 0.0
         rowcount = _evidence_rowcount(evidence_path)
-        if rowcount is not None and rowcount == 0:
-            failures.append(f"campaign metric evidence file is empty: {evidence_rel}")
-        elif rowcount is not None and gain >= 1 and rowcount < int(gain):
+        # Only a *claimed positive gain* must be backed by that many evidence rows.
+        # A zero-gain task ("found nothing new") is a legitimate diminishing-returns
+        # signal and may point at empty/header-only evidence — rejecting it would
+        # suppress the very plateau that low_marginal_yield and convergence_freeze
+        # need to see.
+        if rowcount is not None and gain >= 1 and rowcount < int(gain):
             failures.append(
                 f"declared metric gain {gain:g} exceeds evidence rows {rowcount} in {evidence_rel}; "
                 "metric_after is not backed by enough evidence"

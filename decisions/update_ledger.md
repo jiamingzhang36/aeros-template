@@ -2332,3 +2332,12 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: `python3 checks/check_campaign_contract.py`; `python3 checks/check_task_preflight.py`; `python3 -m aeros.cli campaign new|continue|stop|assess`; `python3 checks/run_harness_checks.py --profile full --timeout 90` (all pass).
 - **Does not prove**: that convergence thresholds are scientifically right; that a fractional/rate metric is verified beyond non-emptiness; that a human continue decision is wise; that inference is complete when task contracts are archived; scientific validity; claim or gate approval.
 - **Next check**: Backfill this pending entry with the commit hash.
+## 2026-07-10 — Fix: zero-gain campaign tasks must record (found by end-to-end dogfood)
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / bugfix / campaign metric verification
+- **Action**: An end-to-end campaign lifecycle dogfood (fresh init project, real completion path, real `aeros run`, real CLI decisions) exercised all six phases. Phases 1-4 and 6 passed (breaker emerged from real accumulated progress, `aeros run` blocked at the entrypoint, `campaign continue` released it, the release expired and re-armed, `campaign stop` halted). Phase 5 (convergence FREEZE) failed to fire because the metric anti-inflation check rejected legitimate zero-gain tasks as "empty evidence", so the plateau they represent was never recorded. Removed the standalone empty-evidence rejection; only a claimed positive integer gain must be backed by that many evidence rows. Added a regression fixture that a zero-gain task records while an inflated gain is still rejected.
+- **Why**: A task that finds nothing new is the diminishing-returns/plateau signal that `low_marginal_yield` and `convergence_freeze` need to see; rejecting it suppressed convergence detection. The fixtures had tested inflation but never the legitimate zero-gain case — the dogfood caught it.
+- **Validation**: `python3 checks/check_campaign_contract.py`; end-to-end dogfood now passes all six phases incl. `convergence_freeze`; `python3 checks/run_harness_checks.py --profile full --timeout 90` (all pass).
+- **Does not prove**: that all metric semantics are captured; that a zero-gain task did real work; scientific validity; gate approval.
+- **Next check**: Backfill this pending entry with the commit hash.

@@ -139,6 +139,20 @@ def _freeze_and_decision_valve() -> list[str]:
         res = record_campaign_progress(tmp, _C(), completion_mode="auto", completion_receipt_path="r.yml")
         if res["status"] != "invalid_progress_declaration" or not any("exceeds evidence rows" in f for f in res["failures"]):
             failures.append("inflated metric_after (unbacked by evidence rows) must be rejected")
+
+        # A legitimate zero-gain task ("found nothing new") must still record: it
+        # is the diminishing-returns/plateau signal the breakers depend on.
+        (tmp / "data/backfill/none.csv").write_text("id\n", encoding="utf-8")  # header only
+
+        class _Z:
+            task_id = "TZ"; work_lane = "data"; allowed_outputs = ["data/backfill/none.csv"]
+            campaign_id = "t"
+            campaign_progress = {"metric_before": 13, "metric_after": 13, "target_constraint": "numerator",
+                                 "metric_evidence_path": "data/backfill/none.csv", "task_type": "collect"}
+
+        zres = record_campaign_progress(tmp, _Z(), completion_mode="auto", completion_receipt_path="rz.yml")
+        if zres["status"] == "invalid_progress_declaration":
+            failures.append(f"zero-gain task must record, not be rejected as empty: {zres['failures']}")
     return failures
 
 
