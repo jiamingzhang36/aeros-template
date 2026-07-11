@@ -2316,7 +2316,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Backfill this pending entry with the commit hash.
 ## 2026-07-10 — Infer campaign output classes from progress history
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `d833d88`
 - **Change type**: framework / execution-gate enforcement / anti-evasion
 - **Action**: Added `infer_campaign_output_classes(root)` which learns a campaign's output footprint from the `allowed_outputs` of the task contracts that already recorded campaign progress, excluding generic scaffolding dirs (`agent_runs/`, `audits/`, `outputs/`, `work/`, `discovery/`, `tasks/`, `decisions/`, `docs/`) so only campaign-specific classes (e.g. `data/backfill/`) are learned. `match_campaign_scope` now unions these inferred classes with the owner-declared `objective_outputs`, and `task_preflight` passes them in. A `check_task_preflight.py` fixture locks in that a campaign declaring NO `objective_outputs` still blocks reworded same-output work via the inferred class, while unrelated output and generic dirs stay free.
 - **Why**: Closes the last easy evasion of the campaign breaker: previously an owner had to declare `objective_outputs` for the output dimension to catch reworded work. Now the guard learns the real output class from the campaign's own progress even when nothing was declared, so rewording the intent AND omitting the declaration no longer escapes a stopped campaign.
