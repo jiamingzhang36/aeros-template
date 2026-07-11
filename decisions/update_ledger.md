@@ -2394,7 +2394,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Commit the template, then run the same bounded data-probe and adaptive post-check path in one clean real project before admitting De-vendor.
 ## 2026-07-11 — Admit additive De-vendor package mode after real-project rollout
 
-- **Commit(s)**: pending
+- **Commit(s)**: `69935a3`
 - **Change type**: framework / packaging / incremental migration
 - **North star:** Remove runtime-copy tax without sacrificing local reproducibility or deleting project state.
 - **Action**: Cultured-meat commits `563b64d5` and `bdda9324` proved the first four convergence batches on a real bounded data probe. Switched setuptools to discover every `aeros*` namespace, added `.aeros/project.yml` plus `aeros.lock`, additive `aeros migrate inspect|prepare`, and `aeros doctor`. Added a full-only E2E that builds a fresh venv, installs AEROS locally, creates a project with no vendored runtime/check/policy directories, prepares package mode, and requires doctor PASS. Migration never deletes vendored files automatically.
