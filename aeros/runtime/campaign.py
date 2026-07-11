@@ -13,12 +13,14 @@ from pathlib import Path
 import csv
 import json
 import re
+from functools import lru_cache
 from typing import Any
 
 import yaml
 
 DEFAULT_CONTRACT = Path("campaigns/active_campaign.yml")
 DEFAULT_PROGRESS = Path("campaigns/campaign_progress.csv")
+DEFAULT_DECISIONS = Path("campaigns/campaign_decisions.yml")
 PROGRESS_FIELDS = (
     "campaign_id",
     "task_id",
@@ -262,9 +264,24 @@ def infer_campaign_output_classes(root: Path, *, progress_path: str | Path | Non
     tasks that already recorded progress. Generic scaffolding dirs are excluded so
     only campaign-specific output classes (e.g. data/backfill/) are learned. This
     supplements owner-declared objective_outputs so a stopped campaign cannot be
-    dodged by rewording the intent AND omitting the declaration."""
+    dodged by rewording the intent AND omitting the declaration. Cached per
+    process on the progress file's identity so repeated preflights in one run do
+    not re-glob tasks/**."""
+    progress_file = _contract_path(root, progress_path or DEFAULT_PROGRESS)
+    try:
+        stat = progress_file.stat()
+        key = (stat.st_mtime_ns, stat.st_size)
+    except OSError:
+        key = (0, 0)
+    return list(_infer_output_classes_cached(str(root), progress_file if key != (0, 0) else None, key))
+
+
+@lru_cache(maxsize=64)
+def _infer_output_classes_cached(root_str: str, progress_file: Path | None, _key: tuple[int, int]) -> tuple[str, ...]:
+    root = Path(root_str)
     classes: set[str] = set()
-    for row in load_campaign_progress(root, progress_path):
+    rows = load_campaign_progress(root, progress_file) if progress_file else []
+    for row in rows:
         tid = row.task_id
         if not tid:
             continue
@@ -281,7 +298,92 @@ def infer_campaign_output_classes(root: Path, *, progress_path: str | Path | Non
                 if pre and not any(pre.startswith(g) for g in _GENERIC_OUTPUT_PREFIXES):
                     classes.add(pre)
             break
-    return sorted(classes)
+    return tuple(sorted(classes))
+
+
+def record_campaign_decision(
+    root: Path,
+    *,
+    decision: str,
+    reason: str,
+    breaker_id: str = "all",
+    reviewer: str = "",
+    expires_after_tasks: int = 1,
+    decisions_path: str | Path | None = None,
+) -> dict[str, Any]:
+    """Append a human continue/stop decision, anchored to the current progress
+    count so a `continue` release is bounded and re-review is forced later."""
+    kind = str(decision or "").strip().lower()
+    if kind not in {"continue", "stop"}:
+        raise ValueError("decision must be 'continue' or 'stop'")
+    active = load_campaign_contract(root)
+    active_id = str((active or {}).get("campaign_id") or (active or {}).get("id") or "").strip()
+    tasks_observed = len([
+        row for row in load_campaign_progress(root)
+        if not row.campaign_id or row.campaign_id == active_id
+    ])
+    record: dict[str, Any] = {
+        "campaign_id": active_id or "active_campaign",
+        "decision": kind,
+        "reason": str(reason or "").strip(),
+        "reviewer": str(reviewer or "").strip() or "human",
+        "recorded_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "recorded_at_progress": tasks_observed,
+    }
+    if kind == "continue":
+        record["breaker_id"] = str(breaker_id or "all").strip() or "all"
+        record["expires_after_tasks"] = max(1, int(expires_after_tasks or 1))
+    path = _contract_path(root, decisions_path or DEFAULT_DECISIONS)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = {}
+    if path.exists():
+        try:
+            data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        except Exception:
+            data = {}
+    decisions = list(data.get("decisions") or []) if isinstance(data, dict) else []
+    decisions.append(record)
+    path.write_text(yaml.safe_dump({"decisions": decisions}, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    return record
+
+
+def _evidence_rowcount(path: Path) -> int | None:
+    """Independent data-row count of an evidence file: CSV data rows (minus
+    header) or non-empty lines. Returns None if unreadable."""
+    try:
+        text = path.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return None
+    lines = [ln for ln in text.splitlines() if ln.strip()]
+    if not lines:
+        return 0
+    if path.suffix.lower() in {".csv", ".tsv"}:
+        return max(0, len(lines) - 1)  # drop header
+    return len(lines)
+
+
+def load_campaign_decisions(root: Path, campaign_id: str = "", decisions_path: str | Path | None = None) -> list[dict[str, Any]]:
+    """Human continue/stop decisions recorded against a campaign. This is the
+    consumption side of the breaker's escalation: a recorded decision lets the
+    human release a tripped breaker for a bounded number of tasks (continue) or
+    halt the campaign (stop), instead of hand-editing the contract."""
+    path = _contract_path(root, decisions_path or DEFAULT_DECISIONS)
+    if not path.exists():
+        return []
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    except Exception:
+        return []
+    raw = data.get("decisions") if isinstance(data, dict) else data
+    out: list[dict[str, Any]] = []
+    for item in raw or []:
+        if not isinstance(item, dict):
+            continue
+        cid = str(item.get("campaign_id") or "").strip()
+        if cid and campaign_id and cid not in {campaign_id, "*"}:
+            continue
+        out.append(item)
+    return out
 
 
 def _sha256_file(path: Path) -> str:
@@ -355,6 +457,20 @@ def record_campaign_progress(
     evidence_path = root / evidence_rel if evidence_rel else root / "__missing_campaign_evidence__"
     if evidence_rel and not evidence_path.is_file():
         failures.append(f"campaign metric evidence file is missing: {evidence_rel}")
+    elif evidence_rel:
+        # Anti-inflation: a claimed integer gain must be backed by at least that
+        # many data rows/lines in the evidence file, so a task cannot report a
+        # large metric_after while pointing at a tiny real file. Fractional/rate
+        # metrics (gain < 1) only require the evidence to be non-empty.
+        gain = (after - before) if (before is not None and after is not None) else 0.0
+        rowcount = _evidence_rowcount(evidence_path)
+        if rowcount is not None and rowcount == 0:
+            failures.append(f"campaign metric evidence file is empty: {evidence_rel}")
+        elif rowcount is not None and gain >= 1 and rowcount < int(gain):
+            failures.append(
+                f"declared metric gain {gain:g} exceeds evidence rows {rowcount} in {evidence_rel}; "
+                "metric_after is not backed by enough evidence"
+            )
     if failures:
         return {
             "status": "invalid_progress_declaration",
@@ -510,6 +626,69 @@ def assess_campaign(
                     "rerun the binding decision metric before more collection",
                 ))
 
+    # Convergence / FREEZE: the positive counterpart of the stall breakers. When
+    # the objective metric has plateaued across the recent window, stop expanding
+    # side-branches and ask the human to finalize (freeze), rather than grinding.
+    conv_window = int(contract.get("convergence_window") or window)
+    conv_eps = _as_float(contract.get("convergence_epsilon"))
+    conv_eps = conv_eps if conv_eps is not None else 0.0
+    conv_recent = rows[-conv_window:] if conv_window > 0 else rows
+    conv_levels = [row.metric_after for row in conv_recent if row.metric_after is not None]
+    if (not stop_met and conv_window > 0 and len(conv_levels) >= conv_window
+            and len(rows) >= 2 * conv_window
+            and max(conv_levels) - min(conv_levels) <= conv_eps):
+        breakers.append(CampaignBreaker(
+            "convergence_freeze",
+            "recommend_finalize",
+            f"objective metric stable within {conv_eps:g} across last {conv_window} task(s) "
+            f"(levels {min(conv_levels):g}..{max(conv_levels):g}); results appear converged",
+            "stop expanding this campaign and request a human finalize/freeze decision",
+        ))
+
+    # Human release valve: consume recorded continue/stop decisions. A `stop`
+    # decision halts the campaign; a `continue` decision releases the named
+    # breaker (or all) for a bounded number of tasks, then it re-applies so the
+    # human must re-review. This makes the human's answer a first-class record
+    # instead of forcing a hand-edit of the contract with mismatched semantics.
+    decisions = load_campaign_decisions(root, active_id)
+    released: list[dict[str, Any]] = []
+    applied_decisions: list[dict[str, Any]] = []
+    halt_decision: dict[str, Any] | None = None
+    continue_decisions: list[dict[str, Any]] = []
+    for dec in decisions:
+        kind = str(dec.get("decision") or "").strip().lower()
+        if kind == "stop":
+            halt_decision = dec
+            applied_decisions.append(dec)
+        elif kind == "continue":
+            at = int(_as_float(dec.get("recorded_at_progress")) or 0)
+            horizon = int(_as_float(dec.get("expires_after_tasks")) or 0)
+            active_window = horizon <= 0 or len(rows) < at + horizon
+            if active_window:
+                continue_decisions.append(dec)
+                applied_decisions.append(dec)
+
+    if halt_decision is not None:
+        breakers = [CampaignBreaker(
+            "human_stop",
+            "block_same_campaign_loop",
+            f"human recorded a stop decision for this campaign: {str(halt_decision.get('reason') or '').strip()}",
+            "the campaign is stopped by human decision; start a new campaign or remove the stop decision to resume",
+        )]
+    elif continue_decisions:
+        kept: list[CampaignBreaker] = []
+        for breaker in breakers:
+            match = next(
+                (dec for dec in continue_decisions
+                 if str(dec.get("breaker_id") or "all").strip().lower() in {"all", breaker.breaker_id}),
+                None,
+            )
+            if match is not None:
+                released.append({"breaker_id": breaker.breaker_id, "released_by": match})
+            else:
+                kept.append(breaker)
+        breakers = kept
+
     status = "ESCALATE" if breakers else "CONTINUE"
     return {
         "model": "AEROS-CAMPAIGN-001",
@@ -529,7 +708,14 @@ def assess_campaign(
         "expected_yield_per_task": expected,
         "recent_marginal_yields": [row.marginal_yield for row in recent],
         "breakers": [breaker.to_dict() for breaker in breakers],
-        "recommended_action": fallback if breakers else "continue only if the next task still targets the binding constraint and expected marginal yield",
+        "released_breakers": released,
+        "human_decisions_applied": applied_decisions,
+        "campaign_halted": halt_decision is not None,
+        "recommended_action": (
+            "the campaign is stopped by a human stop decision" if halt_decision is not None
+            else fallback if breakers
+            else "continue only if the next task still targets the binding constraint and expected marginal yield"
+        ),
         "progress_rows": [row.to_dict() for row in rows],
         "does_not_prove": DOES_NOT_PROVE,
     }

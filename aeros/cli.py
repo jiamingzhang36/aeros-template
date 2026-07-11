@@ -449,6 +449,39 @@ def _cmd_campaign(args: argparse.Namespace) -> int:
     from .runtime.campaign import assess_campaign, format_campaign_assessment, write_campaign_assessment
 
     root = _project_root()
+    command = getattr(args, "campaign_command", "assess")
+
+    if command == "new":
+        from pathlib import Path as _Path
+        target = root / (getattr(args, "path", "") or "campaigns/active_campaign.yml")
+        if target.exists() and not getattr(args, "force", False):
+            print(f"campaign contract already exists: {target.relative_to(root)} (use --force to overwrite)")
+            return 1
+        template = _Path(__file__).resolve().parents[1] / "templates" / "campaign_contract.yml"
+        if not template.is_file():
+            print("templates/campaign_contract.yml not found")
+            return 1
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(template.read_text(encoding="utf-8"), encoding="utf-8")
+        print(f"wrote {target.relative_to(root)} — edit campaign_id, work_lane, objective_*, task_budget before use")
+        return 0
+
+    if command in {"continue", "stop"}:
+        from .runtime.campaign import record_campaign_decision
+        rec = record_campaign_decision(
+            root,
+            decision=command,
+            reason=getattr(args, "reason", "") or "",
+            breaker_id=getattr(args, "breaker", "all") or "all",
+            reviewer=getattr(args, "reviewer", "") or "",
+            expires_after_tasks=int(getattr(args, "for_tasks", 1) or 1),
+        )
+        print(f"recorded {command} decision for campaign '{rec['campaign_id']}' at progress {rec['recorded_at_progress']}")
+        if command == "continue":
+            print(f"  releases breaker '{rec['breaker_id']}' for the next {rec['expires_after_tasks']} task(s), then re-review")
+        print("  this is a human decision record; it does not certify scientific validity or approve gates")
+        return 0
+
     report = assess_campaign(
         root,
         contract_path=getattr(args, "contract", "") or None,
@@ -1664,6 +1697,20 @@ def main(argv: list[str] | None = None) -> int:
     campaign_assess.add_argument("--write", action="store_true", help="write outputs/campaign/campaign_assessment.md and .json")
     campaign_assess.add_argument("--json", action="store_true", help="emit machine-readable campaign assessment")
     campaign_assess.set_defaults(func=_cmd_campaign)
+    campaign_new = campaign_sub.add_parser("new", help="scaffold a campaign contract from the template")
+    campaign_new.add_argument("--path", default="", help="target path, default campaigns/active_campaign.yml")
+    campaign_new.add_argument("--force", action="store_true", help="overwrite an existing campaign contract")
+    campaign_new.set_defaults(func=_cmd_campaign)
+    campaign_continue = campaign_sub.add_parser("continue", help="record a human decision to continue past a tripped breaker for a bounded number of tasks")
+    campaign_continue.add_argument("--reason", required=True, help="why continuing is justified")
+    campaign_continue.add_argument("--breaker", default="all", help="breaker_id to release, or 'all' (default)")
+    campaign_continue.add_argument("--for-tasks", type=int, default=1, help="how many further tasks this release covers before re-review")
+    campaign_continue.add_argument("--reviewer", default="", help="who made the decision")
+    campaign_continue.set_defaults(func=_cmd_campaign)
+    campaign_stop = campaign_sub.add_parser("stop", help="record a human decision to halt the campaign")
+    campaign_stop.add_argument("--reason", required=True, help="why the campaign is being stopped")
+    campaign_stop.add_argument("--reviewer", default="", help="who made the decision")
+    campaign_stop.set_defaults(func=_cmd_campaign)
 
     drive_p = sub.add_parser("drive", help="choose and optionally execute one useful safe next objective")
     drive_p.add_argument("--goal", default="auto", choices=["auto", "capture", "broad-capture", "promote", "source-promotion", "literature", "fulltext", "citation-risk", "submission", "data-probe", "probe"], help="optional objective override")

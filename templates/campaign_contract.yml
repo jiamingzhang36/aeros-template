@@ -26,6 +26,15 @@ expected_yield_per_task: 3
 marginal_yield_window: 3
 binding_constraint: numerator_size
 fallback_if_stalled: "batch-ingest structured sources or escalate to human"
+# Convergence / FREEZE: when the objective metric holds within
+# convergence_epsilon across the last convergence_window tasks (and enough tasks
+# have run), the breaker recommends stopping expansion and asking the human to
+# finalize. Leave defaults (window = marginal_yield_window, epsilon = 0) or tune.
+convergence_window: 3
+convergence_epsilon: 0
+# Human release valve (recorded via `aeros campaign continue|stop`, consumed by
+# assess): a `continue` decision releases a named breaker for a bounded number
+# of tasks, then it re-applies; a `stop` decision halts the campaign.
 batch_source_available: false
 rerun_decision_metric_after_gain: 10
 does_not_prove:

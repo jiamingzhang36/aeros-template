@@ -63,6 +63,85 @@ def _write_progress(path: Path, rows: list[dict[str, object]]) -> None:
             writer.writerow(row)
 
 
+def _campaign_progress(tmp: Path, levels: list[tuple[float, float]]) -> None:
+    (tmp / "campaigns").mkdir(parents=True, exist_ok=True)
+    with (tmp / "campaigns/campaign_progress.csv").open("w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["campaign_id", "task_id", "task_type", "metric_before", "metric_after",
+                    "marginal_yield", "target_constraint", "used_batch_source", "decision_metric_rerun"])
+        for i, (b, a) in enumerate(levels):
+            w.writerow(["t", f"T{i}", "collect", b, a, a - b, "numerator", "false", "false"])
+
+
+def _freeze_and_decision_valve() -> list[str]:
+    """FREEZE breaker, human continue/stop release valve (with expiry), and the
+    metric anti-inflation check must all hold."""
+    from aeros.runtime.campaign import (
+        assess_campaign, record_campaign_decision, record_campaign_progress,
+    )
+    import tempfile as _tempfile
+
+    base = ("version: 1\ncampaign_id: t\nwork_lane: data\nobjective_metric: n\ncurrent_value: 5\n"
+            "stop_condition: x\nstop_condition_met: false\ntask_budget: 100\nexpected_yield_per_task: 3\n"
+            "marginal_yield_window: 3\nconvergence_window: 3\nconvergence_epsilon: 0\n"
+            "binding_constraint: numerator\nfallback_if_stalled: escalate\n")
+    failures: list[str] = []
+
+    # FREEZE: a plateaued objective metric must raise convergence_freeze.
+    with _tempfile.TemporaryDirectory() as d:
+        tmp = Path(d); (tmp / "campaigns").mkdir()
+        (tmp / "campaigns/active_campaign.yml").write_text(base, encoding="utf-8")
+        _campaign_progress(tmp, [(40, 50), (50, 50), (50, 50), (50, 50), (50, 50), (50, 50)])
+        ids = [b["breaker_id"] for b in assess_campaign(tmp)["breakers"]]
+        if "convergence_freeze" not in ids:
+            failures.append("plateaued objective metric did not raise the convergence_freeze breaker")
+
+    # CONTINUE decision releases the named breaker, then expires and re-applies.
+    with _tempfile.TemporaryDirectory() as d:
+        tmp = Path(d); (tmp / "campaigns").mkdir()
+        (tmp / "campaigns/active_campaign.yml").write_text(base, encoding="utf-8")
+        _campaign_progress(tmp, [(10, 11), (11, 12), (12, 13)])
+        record_campaign_decision(tmp, decision="continue", breaker_id="low_marginal_yield",
+                                 reason="one more batch", expires_after_tasks=2)
+        rep = assess_campaign(tmp)
+        if any(b["breaker_id"] == "low_marginal_yield" for b in rep["breakers"]):
+            failures.append("continue decision did not release the low_marginal_yield breaker")
+        if not any(x["breaker_id"] == "low_marginal_yield" for x in rep.get("released_breakers", [])):
+            failures.append("released breaker was not reported")
+        _campaign_progress(tmp, [(i, i + 1) for i in range(6)])  # past the 2-task horizon
+        if not any(b["breaker_id"] == "low_marginal_yield" for b in assess_campaign(tmp)["breakers"]):
+            failures.append("continue decision must expire and let the breaker re-apply")
+
+    # STOP decision halts the campaign.
+    with _tempfile.TemporaryDirectory() as d:
+        tmp = Path(d); (tmp / "campaigns").mkdir()
+        (tmp / "campaigns/active_campaign.yml").write_text(base, encoding="utf-8")
+        _campaign_progress(tmp, [(10, 11), (11, 12), (12, 13)])
+        record_campaign_decision(tmp, decision="stop", reason="done enough")
+        rep = assess_campaign(tmp)
+        if not rep.get("campaign_halted") or [b["breaker_id"] for b in rep["breakers"]] != ["human_stop"]:
+            failures.append("stop decision must halt the campaign with a human_stop breaker")
+
+    # METRIC anti-inflation: a claimed integer gain must be backed by evidence rows.
+    with _tempfile.TemporaryDirectory() as d:
+        tmp = Path(d)
+        for sub in ("campaigns", "data/backfill"):
+            (tmp / sub).mkdir(parents=True)
+        (tmp / "campaigns/active_campaign.yml").write_text(base, encoding="utf-8")
+        (tmp / "data/backfill/leads.csv").write_text("h\nr1\nr2\n", encoding="utf-8")  # 2 data rows
+
+        class _C:
+            task_id = "TX"; work_lane = "data"; allowed_outputs = ["data/backfill/leads.csv"]
+            campaign_id = "t"
+            campaign_progress = {"metric_before": 0, "metric_after": 100, "target_constraint": "numerator",
+                                 "metric_evidence_path": "data/backfill/leads.csv", "task_type": "collect"}
+
+        res = record_campaign_progress(tmp, _C(), completion_mode="auto", completion_receipt_path="r.yml")
+        if res["status"] != "invalid_progress_declaration" or not any("exceeds evidence rows" in f for f in res["failures"]):
+            failures.append("inflated metric_after (unbacked by evidence rows) must be rejected")
+    return failures
+
+
 def main() -> int:
     failures: list[str] = []
     with tempfile.TemporaryDirectory() as tmp_raw:
@@ -158,6 +237,8 @@ def main() -> int:
                 failures.append("campaign CLI did not emit AEROS-CAMPAIGN-001 model")
             if payload.get("status") != "ESCALATE":
                 failures.append("campaign CLI did not surface ESCALATE")
+
+    failures.extend(_freeze_and_decision_valve())
 
     if failures:
         print("FAIL: campaign contract problems detected")
