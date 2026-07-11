@@ -139,6 +139,7 @@ def match_campaign_scope(
     objective_text: str,
     task_type: str = "",
     output_targets: Any = (),
+    inferred_outputs: Any = (),
 ) -> dict[str, Any]:
     """Deterministically test whether undeclared work resembles an active campaign.
 
@@ -170,8 +171,11 @@ def match_campaign_scope(
     matched = [marker for marker in markers if normalize(marker) and normalize(marker) in normalized_text]
 
     # output-path dimension: same-lane work writing into an output class the
-    # campaign owns is in scope regardless of wording.
-    output_prefixes = as_list(contract.get("objective_outputs"))
+    # campaign owns is in scope regardless of wording. Owner-declared prefixes
+    # are supplemented by classes inferred from the campaign's progress history.
+    declared_outputs = as_list(contract.get("objective_outputs"))
+    learned_outputs = [o for o in as_list(inferred_outputs) if o not in declared_outputs]
+    output_prefixes = declared_outputs + learned_outputs
     targets = as_list(output_targets)
     matched_outputs = sorted({
         tgt for tgt in targets
@@ -194,6 +198,8 @@ def match_campaign_scope(
         "matched_markers": matched,
         "objective_match": objective_match,
         "objective_outputs": output_prefixes,
+        "declared_outputs": declared_outputs,
+        "inferred_outputs": learned_outputs,
         "matched_outputs": matched_outputs,
         "output_match": output_match,
         "task_type": task_type,
@@ -230,6 +236,52 @@ def load_campaign_progress(root: Path, progress_path: str | Path | None = None) 
                 )
             )
     return rows
+
+
+# Generic scaffolding directories are not campaign-specific output classes;
+# inferring them would over-block unrelated same-lane work.
+_GENERIC_OUTPUT_PREFIXES = (
+    "agent_runs/", "audits/", "outputs/", "work/", "discovery/",
+    "tasks/", "decisions/", "docs/",
+)
+
+
+def _output_class_prefix(path: str) -> str:
+    """Directory-class of an output path, or '' for a bare filename/root."""
+    p = str(path or "").strip()
+    if not p:
+        return ""
+    if p.endswith("/"):
+        return p
+    parts = p.rstrip("/").split("/")
+    return "/".join(parts[:-1]) + "/" if len(parts) > 1 else ""
+
+
+def infer_campaign_output_classes(root: Path, *, progress_path: str | Path | None = None) -> list[str]:
+    """Best-effort output footprint of a campaign, inferred from the contracts of
+    tasks that already recorded progress. Generic scaffolding dirs are excluded so
+    only campaign-specific output classes (e.g. data/backfill/) are learned. This
+    supplements owner-declared objective_outputs so a stopped campaign cannot be
+    dodged by rewording the intent AND omitting the declaration."""
+    classes: set[str] = set()
+    for row in load_campaign_progress(root, progress_path):
+        tid = row.task_id
+        if not tid:
+            continue
+        candidates = [root / "tasks" / f"{tid}.yml", *sorted(root.glob(f"tasks/**/{tid}.yml"))]
+        for cand in candidates:
+            if not cand.is_file():
+                continue
+            try:
+                data = yaml.safe_load(cand.read_text(encoding="utf-8")) or {}
+            except Exception:
+                break
+            for out in (data.get("allowed_outputs") or []):
+                pre = _output_class_prefix(str(out))
+                if pre and not any(pre.startswith(g) for g in _GENERIC_OUTPUT_PREFIXES):
+                    classes.add(pre)
+            break
+    return sorted(classes)
 
 
 def _sha256_file(path: Path) -> str:

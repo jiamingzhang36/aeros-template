@@ -148,6 +148,47 @@ def _campaign_breaker_blocks_preflight() -> list[str]:
                                   intent="draft a separate data codebook")
         if uo.get("status") == "BLOCKED" or uo.get("campaign_status") != "TASK_NOT_IN_CAMPAIGN":
             failures.append("work writing only to an unrelated output class must stay outside the campaign")
+        # Inferred output class: a campaign that declares NO objective_outputs
+        # must still learn its output footprint from the contracts of tasks that
+        # recorded progress, so reworded same-output work cannot escape; generic
+        # scaffolding dirs must not be learned (no over-block).
+        (tmp / "campaigns/active_campaign.yml").write_text(
+            "version: 1\ncampaign_id: t3\nwork_lane: data\nobjective_metric: n\n"
+            "objective_markers:\n  - source leads\ncurrent_value: 5\n"
+            "stop_condition: x\nstop_condition_met: false\ntask_budget: 8\n"
+            "expected_yield_per_task: 3\nmarginal_yield_window: 3\n"
+            "binding_constraint: numerator\nfallback_if_stalled: escalate\n",
+            encoding="utf-8",
+        )
+        for i in range(3):
+            (tmp / f"tasks/P{i}.yml").write_text(
+                f"task_id: P{i}\nstage: execution\nwork_lane: data\ngoal: collect source leads\n"
+                f"checks: []\nallowed_outputs:\n  - data/backfill/leads_{i}.csv\n  - audits/note.md\n"
+                "budget:\n  max_agent_calls: 0\n  max_dollars: 0\n",
+                encoding="utf-8",
+            )
+        with (tmp / "campaigns/campaign_progress.csv").open("w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["task_id", "task_type", "metric_before", "metric_after",
+                        "marginal_yield", "target_constraint", "used_batch_source", "decision_metric_rerun"])
+            for i in range(3):
+                w.writerow([f"P{i}", "collect", i, i + 1, 1, "numerator", "false", "false"])
+        (tmp / "tasks/T_INFERRED.yml").write_text(
+            "task_id: T_INFERRED\nstage: execution\nwork_lane: data\n"
+            "goal: grab more data points\nchecks: []\n"
+            "allowed_outputs:\n  - data/backfill/more.csv\n"
+            "budget:\n  max_agent_calls: 0\n  max_dollars: 0\n",
+            encoding="utf-8",
+        )
+        inferred = build_task_preflight(tmp, task_id="T_INFERRED", lane="data",
+                                        intent="grab more data points")
+        if inferred.get("status") != "BLOCKED" or inferred.get("campaign_status") != "UNDECLARED_CAMPAIGN_SCOPE":
+            failures.append("reworded work writing to a progress-inferred output class must be blocked")
+        learned = (inferred.get("campaign_scope_match") or {}).get("inferred_outputs") or []
+        if "data/backfill/" not in learned:
+            failures.append("campaign output class was not inferred from progress task contracts")
+        if any(p.startswith(("audits/", "agent_runs/")) for p in learned):
+            failures.append("generic scaffolding dir was wrongly inferred as a campaign output class")
     return failures
 
 

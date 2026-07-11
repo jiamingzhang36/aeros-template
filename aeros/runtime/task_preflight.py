@@ -15,7 +15,12 @@ try:
 except Exception:  # pragma: no cover
     yaml = None
 
-from .campaign import assess_campaign, load_campaign_contract, match_campaign_scope
+from .campaign import (
+    assess_campaign,
+    infer_campaign_output_classes,
+    load_campaign_contract,
+    match_campaign_scope,
+)
 from .contract import Contract
 from .output_intent import contract_output_intents
 from .owner_decisions import evaluate_owner_decision_rules
@@ -203,6 +208,7 @@ def build_task_preflight(
                 scope = match_campaign_scope(
                     active_campaign, lane=effective_lane, objective_text=objective_text,
                     task_type=str(mode.get("task_mode", "")), output_targets=allowed,
+                    inferred_outputs=infer_campaign_output_classes(root),
                 )
                 active_breakers = list(active_assessment.get("breakers") or [])
                 if active_breakers and scope.get("lane_match") and scope.get("scope_match_any"):
@@ -233,6 +239,7 @@ def build_task_preflight(
                 objective_text=objective_text,
                 task_type=str(mode.get("task_mode", "")),
                 output_targets=allowed,
+                inferred_outputs=infer_campaign_output_classes(root),
             )
             active_breakers = list(active_assessment.get("breakers") or [])
             suspected_escape = bool(
