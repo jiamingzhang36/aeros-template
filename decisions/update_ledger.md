@@ -2295,7 +2295,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-10 — Block undeclared same-campaign work after circuit-breaker escalation
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `f6f669f`
 - **Change type**: framework / campaign enforcement / anti-bypass guard
 - **North star:** Make autonomous stopping rules enforceable without turning one campaign into a global lane lock.
 - **Action**: Added owner-declared `objective_markers` to campaign contracts and a deterministic lane/marker scope matcher. When an active campaign has tripped breakers, an undeclared task that matches its lane and objective markers is now `BLOCKED` as `UNDECLARED_CAMPAIGN_SCOPE`; a task using a different campaign ID but the same stopped scope is `BLOCKED` as `CAMPAIGN_SCOPE_COLLISION`. Legacy active campaigns without markers fail closed for undeclared same-lane work. Different lanes and same-lane tasks with declared nonmatching objectives remain outside the campaign. The real runner enforces the same result before task execution.
