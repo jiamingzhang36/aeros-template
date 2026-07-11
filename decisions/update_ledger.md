@@ -2383,7 +2383,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Backfill this pending entry with the commit hash.
 ## 2026-07-11 — Prove signed authority, research value, and ResearchJob post-checks end to end
 
-- **Commit(s)**: pending
+- **Commit(s)**: `5915b06`
 - **Change type**: framework / vertical validation / no new control surface
 - **North star:** Replace template-green claims with executable system-level evidence.
 - **Action**: Extended existing full-only lifecycle checks rather than adding daily checks. A temporary SSH key now signs an approval produced by `aeros approve`; `git verify-commit` validates it before campaign consumption. Parallel campaign fixtures prove that quantity-only work trips `low_decision_value` while an evidence-bound `resolved_data_gap` prevents it. The `data_probe` ResearchJob now compiles to a real deterministic action that reads CSV, records source SHA-256/rows/columns, executes in an isolated worktree, copies back only the declared report, maps the observed write to `data_sample_integrity`, and runs the selected probe post-check.
