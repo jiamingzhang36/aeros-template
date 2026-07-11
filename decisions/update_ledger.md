@@ -2282,7 +2282,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-10 — Stabilize fast smoke and add real-project runtime canaries
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `f4d8ac8`
 - **Change type**: framework / performance / profile consolidation / rollout evidence
 - **North star:** Reduce the cost of truthful research progress without weakening the full internal harness.
 - **Action**: Added mtime/size-keyed process-local caches for task-preflight, task-mode, and source-capture policy YAML; reused the already loaded task contract within one preflight; moved isolated-worktree and agent-envelope executable fixtures out of smoke while retaining them in full; made the profile validator reject future leakage of heavy fixtures into smoke; removed obsolete sync-doctor exemptions; and recorded current-template read-only canaries on land-grid, cultured meat, and MAHA in `audits/runtime_rollout_validation_20260710.md`.
