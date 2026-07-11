@@ -42,7 +42,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "owner_decision_rules": ["aeros/runtime/owner_decisions.py", "checks/check_owner_decisions.py", "aeros/runtime/task_preflight.py"],
     "authority_evidence": ["aeros/runtime/authority.py", "harness/authority_evidence_policy.yml", "checks/check_authority_evidence.py"],
     "artifact_semantics": ["aeros/runtime/artifact_semantics.py", "harness/artifact_semantics_policy.yml", "checks/check_artifact_semantics.py"],
-    "research_job_compiler": ["aeros/runtime/research_job.py", "templates/research_job_data_probe.yml", "checks/check_research_job_compiler.py"],
+    "research_job_compiler": ["aeros/runtime/research_job.py", "aeros/runtime/job_actions.py", "templates/research_job_data_probe.yml", "checks/check_research_job_compiler.py"],
     "adaptive_checks": ["aeros/runtime/adaptive_checks.py", "harness/adaptive_checks.yml", "checks/check_adaptive_checks.py"],
 }
 

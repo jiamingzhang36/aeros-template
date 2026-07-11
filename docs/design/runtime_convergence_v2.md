@@ -50,3 +50,13 @@ selection have passed at least one clean real-project rollout. The future
 project-local contract is `.aeros/project.yml` plus `aeros.lock`; this document
 does not authorize migration yet.
 
+## Vertical proof status
+
+- Signed authority: a temporary SSH signing key produces a signed approval via
+  `aeros approve`; Git verifies it and campaign consumption retains the signed
+  authority evidence.
+- Research value: equal-size campaign windows are tested with and without a
+  verified obligation-closing event; quantity-only work trips the breaker.
+- ResearchJob: a compiled data probe runs in a detached worktree, reads a real
+  CSV, emits a hashed probe report, accepts only the declared output, selects
+  the data/sample risk domain, and passes its post-check.

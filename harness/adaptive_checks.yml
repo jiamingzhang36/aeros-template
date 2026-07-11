@@ -6,8 +6,8 @@ domains:
     path_prefixes: [aeros/, code/, tasks/, contracts/]
     checks: [check_action_spec.py, check_execution_envelope.py, check_task_preflight.py]
   data_sample_integrity:
-    path_prefixes: [data/, discovery/data_inventory.csv, docs/data_contract.yml]
-    checks: [check_data_inventory.py, check_data_contract.py, check_provenance.py]
+    path_prefixes: [data/, audits/data_probe/, discovery/data_inventory.csv, docs/data_contract.yml]
+    checks: [check_data_probe.py, check_data_inventory.py, check_data_contract.py, check_provenance.py]
   specification_integrity:
     path_prefixes: [code/, docs/method_card.md, evidence/spec_run_index.csv]
     checks: [check_analysis_ledger.py, check_claim_method_consistency.py]
@@ -26,4 +26,3 @@ check_metadata:
   check_provenance.py: {cost: medium, authority_criticality: high}
   check_manuscript_citation_faithfulness.py: {cost: medium, authority_criticality: high}
 telemetry_fields: [duration_ms, trigger_count, real_issue_count, false_positive_count, overlap_group, last_real_issue_at]
-

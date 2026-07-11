@@ -5,6 +5,7 @@ from hashlib import sha256
 from pathlib import Path
 from typing import Any
 import json
+import shlex
 import yaml
 
 from .action_spec import ActionSpec
@@ -62,7 +63,11 @@ def compile_research_job(job: ResearchJob) -> CompiledResearchJob:
         "required_skill_classes": ["data_source"],
         "budget": {"max_agent_calls": 0, "max_dollars": 0},
     }
-    command = f"python3 -m aeros.cli data probe plan"
+    command = (
+        "python3 -m aeros.runtime.job_actions data-probe "
+        f"--source {shlex.quote(job.source_candidate)} --output {shlex.quote(output)} "
+        f"--target {shlex.quote(job.target)}"
+    )
     digest = sha256(json.dumps(task, sort_keys=True).encode()).hexdigest()[:12]
     envelope = ExecutionEnvelope(
         read_roots=(".",), write_roots=("audits/data_probe/",),
@@ -101,4 +106,3 @@ def write_compiled_job(root: Path, compiled: CompiledResearchJob) -> list[Path]:
     paths[1].write_text(json.dumps(compiled.action_spec.to_dict(), indent=2) + "\n", encoding="utf-8")
     paths[2].write_text(json.dumps(compiled.execution_envelope.to_dict(), indent=2) + "\n", encoding="utf-8")
     return paths
-

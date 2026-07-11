@@ -2381,3 +2381,14 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: `python3 checks/check_campaign_contract.py`; `python3 checks/check_campaign_e2e.py`; `python3 checks/run_harness_checks.py --profile full` (all pass on the combined batch).
 - **Does not prove**: that inferred artifacts truly advanced a decision; that mtime anchoring is tamper-proof; scientific validity; gate approval.
 - **Next check**: Backfill this pending entry with the commit hash.
+## 2026-07-11 — Prove signed authority, research value, and ResearchJob post-checks end to end
+
+- **Commit(s)**: pending
+- **Change type**: framework / vertical validation / no new control surface
+- **North star:** Replace template-green claims with executable system-level evidence.
+- **Action**: Extended existing full-only lifecycle checks rather than adding daily checks. A temporary SSH key now signs an approval produced by `aeros approve`; `git verify-commit` validates it before campaign consumption. Parallel campaign fixtures prove that quantity-only work trips `low_decision_value` while an evidence-bound `resolved_data_gap` prevents it. The `data_probe` ResearchJob now compiles to a real deterministic action that reads CSV, records source SHA-256/rows/columns, executes in an isolated worktree, copies back only the declared report, maps the observed write to `data_sample_integrity`, and runs the selected probe post-check.
+- **Validation**: `check_campaign_e2e.py`; `check_research_job_compiler.py`; `check_adaptive_checks.py`; sync doctor; smoke; full harness.
+- **Non-goal**: Do not claim SSH key possession proves a real-world person; do not score scientific importance; do not de-vendor based on template fixtures alone.
+- **Does not prove**: production key custody; external approval; data fitness; optimal check selection; safe package migration.
+- **Drift risk**: Signed approval security depends on keeping the signing key outside agent authority. The fixture intentionally verifies mechanics, not production custody.
+- **Next check**: Commit the template, then run the same bounded data-probe and adaptive post-check path in one clean real project before admitting De-vendor.
