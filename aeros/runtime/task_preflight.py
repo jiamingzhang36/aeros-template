@@ -6,6 +6,7 @@ deterministic and advisory: it selects guardrails, not scientific conclusions.
 
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -41,11 +42,19 @@ DOES_NOT_PROVE = [
 ]
 
 
+@lru_cache(maxsize=64)
+def _load_yaml_cached(path_text: str, mtime_ns: int, size: int) -> dict[str, Any]:
+    del mtime_ns, size  # cache-key inputs; file identity remains path_text
+    path = Path(path_text)
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return data if isinstance(data, dict) else {}
+
+
 def _load_yaml(path: Path) -> dict[str, Any]:
     if not path.exists() or yaml is None:
         return {}
-    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    return data if isinstance(data, dict) else {}
+    stat = path.stat()
+    return _load_yaml_cached(str(path.resolve()), stat.st_mtime_ns, stat.st_size)
 
 
 def _suggested_route(intent: str) -> str:
@@ -141,7 +150,7 @@ def build_task_preflight(
     campaign_id: str = "",
 ) -> dict[str, Any]:
     contract = load_contract_by_id(root, task_id)
-    mode = infer_task_mode(root, task_id=task_id, lane=lane, intent=intent)
+    mode = infer_task_mode(root, task_id=task_id, lane=lane, intent=intent, contract=contract)
     workflow = str(mode.get("workflow_preset", "") or "")
     contract_intents = contract_output_intents(contract) if contract else {}
     output_intents: Any = contract_intents or list(mode.get("allowed_output_intents") or [])

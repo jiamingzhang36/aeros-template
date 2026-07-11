@@ -7,7 +7,7 @@ principle: >
 default_profile: full
 profiles:
   smoke:
-    description: "Fast cockpit/context/next/lane/schema checks for every small step."
+    description: "Fast deterministic cockpit/context/next/lane/schema checks for every small step; isolated-worktree and agent adversarial fixtures remain full-only."
     checks:
       - check_next_action.py
       - check_drive.py
@@ -19,8 +19,6 @@ profiles:
       - check_skill_layer.py
       - check_architecture_freeze.py
       - check_action_spec.py
-      - check_execution_envelope.py
-      - check_agent_envelope.py
       - check_progress_semantics.py
       - check_claim_vector.py
       - check_claim_upgrade.py

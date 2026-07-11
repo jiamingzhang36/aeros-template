@@ -6,6 +6,7 @@ guardrail selectors, not execution authority and not evidence admission.
 
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -63,12 +64,20 @@ DEFAULT_MODES: dict[str, dict[str, Any]] = {
 }
 
 
-def _load_policy(root: Path) -> dict[str, Any]:
-    path = root / POLICY_PATH
-    if not path.exists() or yaml is None:
-        return {"modes": DEFAULT_MODES}
+@lru_cache(maxsize=32)
+def _load_policy_cached(path_text: str, mtime_ns: int, size: int) -> dict[str, Any]:
+    del mtime_ns, size
+    path = Path(path_text)
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     return data if isinstance(data, dict) else {"modes": DEFAULT_MODES}
+
+
+def _load_policy(root: Path) -> dict[str, Any]:
+    path = (root / POLICY_PATH).resolve()
+    if not path.exists() or yaml is None:
+        return {"modes": DEFAULT_MODES}
+    stat = path.stat()
+    return _load_policy_cached(str(path), stat.st_mtime_ns, stat.st_size)
 
 
 def _contract_blob(contract: Contract | None) -> str:
@@ -101,8 +110,15 @@ def load_contract_by_id(root: Path, task_id: str) -> Contract | None:
     return None
 
 
-def infer_task_mode(root: Path, *, task_id: str = "", lane: str = "", intent: str = "") -> dict[str, Any]:
-    contract = load_contract_by_id(root, task_id)
+def infer_task_mode(
+    root: Path,
+    *,
+    task_id: str = "",
+    lane: str = "",
+    intent: str = "",
+    contract: Contract | None = None,
+) -> dict[str, Any]:
+    contract = contract if contract is not None else load_contract_by_id(root, task_id)
     blob = f"{lane} {intent} {_contract_blob(contract)}".lower()
     claim_boundary_only = any(
         marker in blob

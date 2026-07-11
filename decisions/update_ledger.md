@@ -2279,3 +2279,16 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: skill advice is correct; agents followed skills correctly; old project research is valid; claim support; gate approval.
 - **Drift risk**: A single long-lived Python process that edits the policy after first access would need to clear the cache; normal AEROS CLI/check execution is one fresh process per command.
 - **Next check**: Keep the skill checks in smoke and monitor runtime on another project with more than 100 task contracts.
+
+## 2026-07-10 — Stabilize fast smoke and add real-project runtime canaries
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / performance / profile consolidation / rollout evidence
+- **North star:** Reduce the cost of truthful research progress without weakening the full internal harness.
+- **Action**: Added mtime/size-keyed process-local caches for task-preflight, task-mode, and source-capture policy YAML; reused the already loaded task contract within one preflight; moved isolated-worktree and agent-envelope executable fixtures out of smoke while retaining them in full; made the profile validator reject future leakage of heavy fixtures into smoke; removed obsolete sync-doctor exemptions; and recorded current-template read-only canaries on land-grid, cultured meat, and MAHA in `audits/runtime_rollout_validation_20260710.md`.
+- **Why**: Smoke had become unstable at the documented 20–30 second per-check budget, and an empty template pass did not establish usefulness on real research state. Profiling showed repeated YAML parsing in preflight; live canaries also showed two bounded/aligned recommendations and one visible land-grid context gap.
+- **Validation**: `check_task_preflight.py`, `check_next_action.py`, `check_drive.py`, `check_harness_profiles.py`, `check_sync_doctor.py`, smoke with `--timeout 20`, full harness, and current-template `drive --json` plus broad-capture preflight against three real projects.
+- **Non-goal**: Do not remove envelope/adversarial checks from full, auto-sync downstream projects, execute canary recommendations, hide the land-grid context gap, approve gates, or upgrade claims.
+- **Does not prove**: recommendation optimality; downstream version parity; research validity; claim support; paper readiness; gate approval.
+- **Drift risk**: Long-lived processes that rewrite a policy file without changing mtime/size could theoretically retain a stale parse; normal CLI/check execution is process-bounded. Smoke remains a fast commit gate, not a release substitute for full.
+- **Next check**: After downstream projects deliberately sync, repeat the canary using their vendored runtime and confirm land-grid has an explicit current-work priority before treating its driver recommendation as aligned.

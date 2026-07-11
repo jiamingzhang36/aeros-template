@@ -7,6 +7,7 @@ not evidence admission.
 
 from __future__ import annotations
 
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -113,12 +114,20 @@ DOES_NOT_PROVE = [
 ]
 
 
-def _load_policy(root: Path) -> dict[str, Any]:
-    path = root / POLICY_PATH
-    if not path.exists() or yaml is None:
-        return {}
+@lru_cache(maxsize=32)
+def _load_policy_cached(path_text: str, mtime_ns: int, size: int) -> dict[str, Any]:
+    del mtime_ns, size
+    path = Path(path_text)
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     return data if isinstance(data, dict) else {}
+
+
+def _load_policy(root: Path) -> dict[str, Any]:
+    path = (root / POLICY_PATH).resolve()
+    if not path.exists() or yaml is None:
+        return {}
+    stat = path.stat()
+    return _load_policy_cached(str(path), stat.st_mtime_ns, stat.st_size)
 
 
 def _flatten_output_intents(output_intents: Any) -> list[str]:
