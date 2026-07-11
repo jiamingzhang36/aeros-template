@@ -39,6 +39,7 @@ CHECKS = [
     "check_artifact_semantics.py",
     "check_research_job_compiler.py",
     "check_adaptive_checks.py",
+    "check_devendor_package.py",
     "check_action_spec.py",
     "check_execution_envelope.py",
     "check_agent_envelope.py",

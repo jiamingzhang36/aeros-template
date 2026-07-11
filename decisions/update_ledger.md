@@ -2392,3 +2392,14 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: production key custody; external approval; data fitness; optimal check selection; safe package migration.
 - **Drift risk**: Signed approval security depends on keeping the signing key outside agent authority. The fixture intentionally verifies mechanics, not production custody.
 - **Next check**: Commit the template, then run the same bounded data-probe and adaptive post-check path in one clean real project before admitting De-vendor.
+## 2026-07-11 — Admit additive De-vendor package mode after real-project rollout
+
+- **Commit(s)**: pending
+- **Change type**: framework / packaging / incremental migration
+- **North star:** Remove runtime-copy tax without sacrificing local reproducibility or deleting project state.
+- **Action**: Cultured-meat commits `563b64d5` and `bdda9324` proved the first four convergence batches on a real bounded data probe. Switched setuptools to discover every `aeros*` namespace, added `.aeros/project.yml` plus `aeros.lock`, additive `aeros migrate inspect|prepare`, and `aeros doctor`. Added a full-only E2E that builds a fresh venv, installs AEROS locally, creates a project with no vendored runtime/check/policy directories, prepares package mode, and requires doctor PASS. Migration never deletes vendored files automatically.
+- **Validation**: cultured-meat sync doctor, isolated probe, adaptive post-checks, smoke; `check_devendor_package.py`; template smoke/full.
+- **Non-goal**: Do not remove vendored runtime from existing projects, auto-migrate policy customizations, or claim package mode preserves every downstream override.
+- **Does not prove**: safe migration of every legacy project; scientific validity; release readiness; external package-index availability.
+- **Drift risk**: Projects must pin `aeros_version`, runtime identity, policy bundle, and schema in `aeros.lock`; custom vendored policy changes need explicit migration review.
+- **Next check**: Keep cultured meat vendored until package mode runs alongside it for one additional project action, then use an explicit removal plan rather than automatic deletion.

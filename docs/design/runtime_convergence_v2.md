@@ -50,6 +50,11 @@ selection have passed at least one clean real-project rollout. The future
 project-local contract is `.aeros/project.yml` plus `aeros.lock`; this document
 does not authorize migration yet.
 
+Cultured-meat rollout commit `bdda9324` satisfied this admission condition for
+the bounded data-probe path. Package mode is now available through `aeros
+migrate prepare` and `aeros doctor`; migration remains additive and never
+deletes vendored files automatically.
+
 ## Vertical proof status
 
 - Signed authority: a temporary SSH signing key produces a signed approval via

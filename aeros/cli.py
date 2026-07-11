@@ -500,6 +500,23 @@ def _cmd_adaptive_checks(args: argparse.Namespace) -> int:
     root = _project_root(); print(json.dumps(select_checks(root, list(args.changed or []) or changed_paths(root)), indent=2)); return 0
 
 
+def _cmd_migrate(args: argparse.Namespace) -> int:
+    from .runtime.devendor import inspect_migration, prepare_package_mode
+    root = _project_root()
+    if args.migrate_command == "inspect": print(json.dumps(inspect_migration(root), indent=2)); return 0
+    config, lock = prepare_package_mode(root, policy_bundle_version=args.policy_bundle_version)
+    print(f"wrote {_display_rel(config, root)}\nwrote {_display_rel(lock, root)}")
+    print("no vendored runtime files were deleted; run `aeros doctor` from the installed package before removal")
+    return 0
+
+
+def _cmd_doctor(args: argparse.Namespace) -> int:
+    from .runtime.devendor import doctor_package_mode
+    report = doctor_package_mode(_project_root())
+    print(json.dumps(report, indent=2) if args.json else f"status: {report['status']}\n" + "\n".join(report.get("failures") or ["package lock matches installed runtime"]))
+    return 0 if report["status"] == "PASS" else 1
+
+
 def _cmd_campaign(args: argparse.Namespace) -> int:
     from .runtime.campaign import assess_campaign, format_campaign_assessment, write_campaign_assessment
 
@@ -1759,6 +1776,13 @@ def main(argv: list[str] | None = None) -> int:
     adaptive = sub.add_parser("checks", help="select change-aware checks from observed writes")
     adaptive_sub = adaptive.add_subparsers(dest="adaptive_command", required=True); adaptive_select = adaptive_sub.add_parser("select")
     adaptive_select.add_argument("--changed", action="append", default=[]); adaptive_select.set_defaults(func=_cmd_adaptive_checks)
+
+    migrate = sub.add_parser("migrate", help="prepare or inspect package-mode migration without deleting vendored files")
+    migrate_sub = migrate.add_subparsers(dest="migrate_command", required=True)
+    migrate_inspect = migrate_sub.add_parser("inspect"); migrate_inspect.set_defaults(func=_cmd_migrate)
+    migrate_prepare = migrate_sub.add_parser("prepare"); migrate_prepare.add_argument("--policy-bundle-version", default="aeros-policy-v1"); migrate_prepare.set_defaults(func=_cmd_migrate)
+    doctor = sub.add_parser("doctor", help="validate installed package against .aeros/project.yml and aeros.lock")
+    doctor.add_argument("--json", action="store_true"); doctor.set_defaults(func=_cmd_doctor)
 
     campaign = sub.add_parser("campaign", help="assess repeated-loop campaign contracts and marginal-yield breakers")
     campaign_sub = campaign.add_subparsers(dest="campaign_command", required=True)

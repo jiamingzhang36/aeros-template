@@ -16,7 +16,7 @@ dependencies = [
 [project.scripts]
 aeros = "aeros.cli:main"
 
-[tool.setuptools]
-# The runtime package; the surrounding directories are the project scaffold,
-# not part of the installable distribution.
-packages = ["aeros", "aeros.runtime", "aeros.hooks"]
+[tool.setuptools.packages.find]
+# Package every runtime namespace used by the CLI (including kernel and
+# paper_ci). The surrounding project scaffold remains outside the wheel.
+include = ["aeros*"]
