@@ -5,6 +5,9 @@ version: 1
 campaign_id: example_campaign
 work_lane: data
 objective_metric: clean_restriction_events
+objective_markers:
+  - clean restriction events
+  - source verification
 current_value: 0
 stop_condition: "define the decision-relevant win condition"
 stop_condition_met: false

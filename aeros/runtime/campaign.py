@@ -132,6 +132,43 @@ def load_campaign_contract(root: Path, contract_path: str | Path | None = None) 
     return data
 
 
+def match_campaign_scope(
+    contract: dict[str, Any],
+    *,
+    lane: str,
+    objective_text: str,
+) -> dict[str, Any]:
+    """Deterministically test whether undeclared work resembles an active campaign.
+
+    Markers are owner-authored phrases in the campaign contract. A missing
+    marker list is not treated as proof of unrelated work: same-lane work must
+    fail closed once the campaign breaker has tripped. This guard does not add
+    a task to the campaign; it only requires an explicit declaration or human
+    confirmation before more potentially same-campaign work proceeds.
+    """
+
+    def normalize(value: Any) -> str:
+        text = str(value or "").lower().replace("_", " ").replace("-", " ")
+        return " ".join(re.sub(r"[^a-z0-9]+", " ", text).split())
+
+    active_lane = str(contract.get("work_lane") or "").strip()
+    task_lane = str(lane or "").strip()
+    raw_markers = contract.get("objective_markers") or []
+    markers = [str(item).strip() for item in raw_markers if str(item).strip()] if isinstance(raw_markers, list) else []
+    normalized_text = normalize(objective_text)
+    matched = [marker for marker in markers if normalize(marker) and normalize(marker) in normalized_text]
+    lane_match = bool(active_lane and task_lane and active_lane == task_lane)
+    return {
+        "active_lane": active_lane,
+        "task_lane": task_lane,
+        "lane_match": lane_match,
+        "objective_markers": markers,
+        "matched_markers": matched,
+        "objective_match": bool(matched),
+        "marker_status": "declared" if markers else "missing_fail_closed",
+    }
+
+
 def load_campaign_progress(root: Path, progress_path: str | Path | None = None) -> list[CampaignTaskProgress]:
     path = _contract_path(root, progress_path or DEFAULT_PROGRESS)
     if not path.exists():
@@ -392,6 +429,12 @@ def assess_campaign(
         "model": "AEROS-CAMPAIGN-001",
         "status": status,
         "campaign_id": active_id or "active_campaign",
+        "work_lane": str(contract.get("work_lane") or "").strip(),
+        "objective_markers": [
+            str(item).strip()
+            for item in (contract.get("objective_markers") or [])
+            if str(item).strip()
+        ] if isinstance(contract.get("objective_markers") or [], list) else [],
         "objective_metric": contract.get("objective_metric") or "",
         "binding_constraint": binding,
         "stop_condition": contract.get("stop_condition") or "",

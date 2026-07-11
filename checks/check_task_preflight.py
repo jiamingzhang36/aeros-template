@@ -32,7 +32,8 @@ def _campaign_breaker_blocks_preflight() -> list[str]:
         # block only matching tasks; unrelated and mismatched tasks stay free.
         (tmp / "campaigns").mkdir()
         (tmp / "campaigns/active_campaign.yml").write_text(
-            "version: 1\ncampaign_id: t\nobjective_metric: n\ncurrent_value: 5\n"
+            "version: 1\ncampaign_id: t\nwork_lane: data\nobjective_metric: n\n"
+            "objective_markers:\n  - source leads\n  - numerator\ncurrent_value: 5\n"
             "stop_condition: x\nstop_condition_met: false\ntask_budget: 8\n"
             "expected_yield_per_task: 3\nmarginal_yield_window: 3\n"
             "binding_constraint: numerator\nfallback_if_stalled: escalate\n",
@@ -47,9 +48,24 @@ def _campaign_breaker_blocks_preflight() -> list[str]:
         unrelated = build_task_preflight(tmp, lane="writing", intent="edit an unrelated appendix")
         if unrelated.get("status") == "BLOCKED" or unrelated.get("campaign_status") != "TASK_NOT_IN_CAMPAIGN":
             failures.append("active campaign must not block a task with no campaign_id")
+        undeclared_same = build_task_preflight(tmp, lane="data", intent="collect more source leads")
+        if undeclared_same.get("status") != "BLOCKED" or undeclared_same.get("campaign_status") != "UNDECLARED_CAMPAIGN_SCOPE":
+            failures.append("undeclared same-lane/same-objective work must be blocked after a campaign breaker trips")
+        if "undeclared_campaign_scope" not in [b.get("breaker_id") for b in (undeclared_same.get("campaign_breakers") or [])]:
+            failures.append("undeclared campaign escape guard did not surface its breaker")
+        if not undeclared_same.get("needs_human_decision"):
+            failures.append("undeclared campaign scope must require a human decision")
+        unrelated_data = build_task_preflight(tmp, lane="data", intent="validate a separate outcome data dictionary")
+        if unrelated_data.get("status") == "BLOCKED" or unrelated_data.get("campaign_status") != "TASK_NOT_IN_CAMPAIGN":
+            failures.append("same-lane work with no objective-marker match must remain outside the active campaign")
         mismatch = build_task_preflight(tmp, lane="data", intent="another campaign", campaign_id="other")
         if mismatch.get("status") == "BLOCKED" or mismatch.get("campaign_status") != "CAMPAIGN_MISMATCH":
             failures.append("active campaign must not block a different campaign_id")
+        mismatch_same = build_task_preflight(tmp, lane="data", intent="collect more source leads", campaign_id="other")
+        if mismatch_same.get("status") != "BLOCKED" or mismatch_same.get("campaign_status") != "CAMPAIGN_SCOPE_COLLISION":
+            failures.append("different campaign_id must not bypass a stopped campaign with the same lane/objective markers")
+        if "campaign_scope_collision" not in [b.get("breaker_id") for b in (mismatch_same.get("campaign_breakers") or [])]:
+            failures.append("campaign scope collision did not surface its breaker")
         tripped = build_task_preflight(tmp, lane="data", intent="collect more source leads", campaign_id="t")
         if tripped.get("status") != "BLOCKED":
             failures.append(f"tripped campaign breaker must BLOCK preflight, got {tripped.get('status')}")
@@ -72,6 +88,28 @@ def _campaign_breaker_blocks_preflight() -> list[str]:
             failures.append("aeros run did not enforce matching campaign preflight block")
         if (tmp / "outputs/should_not_exist.txt").exists():
             failures.append("blocked task unexpectedly executed its output path")
+        undeclared_path = tmp / "tasks/T_UNDECLARED.yml"
+        undeclared_path.write_text(
+            "task_id: T_UNDECLARED\nstage: execution\nwork_lane: data\n"
+            "goal: collect more source leads\nchecks: []\nallowed_outputs:\n"
+            "  - outputs/undeclared_should_not_exist.txt\nbudget:\n"
+            "  max_agent_calls: 0\n  max_dollars: 0\n",
+            encoding="utf-8",
+        )
+        if run_task(undeclared_path) != 2:
+            failures.append("aeros run did not block undeclared same-campaign work")
+        if (tmp / "outputs/undeclared_should_not_exist.txt").exists():
+            failures.append("undeclared campaign escape unexpectedly produced output")
+        (tmp / "campaigns/active_campaign.yml").write_text(
+            "version: 1\ncampaign_id: legacy\nwork_lane: data\nobjective_metric: n\ncurrent_value: 5\n"
+            "stop_condition: x\nstop_condition_met: false\ntask_budget: 8\n"
+            "expected_yield_per_task: 3\nmarginal_yield_window: 3\n"
+            "binding_constraint: numerator\nfallback_if_stalled: escalate\n",
+            encoding="utf-8",
+        )
+        legacy_same_lane = build_task_preflight(tmp, lane="data", intent="continue another collection task")
+        if legacy_same_lane.get("status") != "BLOCKED" or legacy_same_lane.get("campaign_status") != "UNDECLARED_CAMPAIGN_SCOPE":
+            failures.append("legacy active campaign without objective_markers must fail closed for undeclared same-lane work")
     return failures
 
 

@@ -2292,3 +2292,16 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: recommendation optimality; downstream version parity; research validity; claim support; paper readiness; gate approval.
 - **Drift risk**: Long-lived processes that rewrite a policy file without changing mtime/size could theoretically retain a stale parse; normal CLI/check execution is process-bounded. Smoke remains a fast commit gate, not a release substitute for full.
 - **Next check**: After downstream projects deliberately sync, repeat the canary using their vendored runtime and confirm land-grid has an explicit current-work priority before treating its driver recommendation as aligned.
+
+## 2026-07-10 — Block undeclared same-campaign work after circuit-breaker escalation
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / campaign enforcement / anti-bypass guard
+- **North star:** Make autonomous stopping rules enforceable without turning one campaign into a global lane lock.
+- **Action**: Added owner-declared `objective_markers` to campaign contracts and a deterministic lane/marker scope matcher. When an active campaign has tripped breakers, an undeclared task that matches its lane and objective markers is now `BLOCKED` as `UNDECLARED_CAMPAIGN_SCOPE`; a task using a different campaign ID but the same stopped scope is `BLOCKED` as `CAMPAIGN_SCOPE_COLLISION`. Legacy active campaigns without markers fail closed for undeclared same-lane work. Different lanes and same-lane tasks with declared nonmatching objectives remain outside the campaign. The real runner enforces the same result before task execution.
+- **Why**: Campaign scoping previously depended entirely on honest task metadata. An autonomous loop could omit `campaign_id` and continue the exact low-yield route that the breaker was designed to stop.
+- **Validation**: Fixtures cover no active campaign, unrelated lane, same lane/different objective, undeclared same scope, mismatched ID/different objective, mismatched ID/same scope, declared matching scope, legacy missing markers, and real-runner non-bypass with absent output.
+- **Non-goal**: Do not infer scientific equivalence with an LLM, auto-enroll tasks into campaigns, block unrelated work, choose campaign thresholds, approve continuation, or change claims/gates.
+- **Does not prove**: objective markers are complete; differently worded same-objective work can never evade phrase matching; campaign thresholds are optimal; research validity; claim support; gate approval.
+- **Drift risk**: Marker lists can be underspecified. Missing markers deliberately fail closed only for the active campaign lane after a breaker trips; owners should add concise stable phrases rather than broad words such as `data` or `source`.
+- **Next check**: Sync into the next project with an active stopped campaign and verify one undeclared same-scope task blocks while one genuinely unrelated same-lane task remains advisory.

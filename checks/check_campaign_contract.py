@@ -23,7 +23,11 @@ def _write_contract(path: Path, extra: str = "") -> None:
         "\n".join([
             "version: 1",
             "campaign_id: restriction_backfill_test",
+            "work_lane: data",
             "objective_metric: clean_restriction_events",
+            "objective_markers:",
+            "  - clean restriction events",
+            "  - source verification",
             "current_value: 46",
             "stop_condition: own_ctrl_RF_p < 0.05 robust",
             "stop_condition_met: false",
@@ -83,6 +87,8 @@ def main() -> int:
                 failures.append(f"campaign breaker did not fire {expected}")
         if report.get("status") != "ESCALATE":
             failures.append("campaign with fired breakers should report ESCALATE")
+        if report.get("work_lane") != "data" or "source verification" not in (report.get("objective_markers") or []):
+            failures.append("campaign assessment did not retain scope lane/objective markers")
         if not report.get("does_not_prove"):
             failures.append("campaign report must carry does_not_prove boundaries")
 

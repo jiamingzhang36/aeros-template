@@ -15,7 +15,7 @@ try:
 except Exception:  # pragma: no cover
     yaml = None
 
-from .campaign import assess_campaign, load_campaign_contract
+from .campaign import assess_campaign, load_campaign_contract, match_campaign_scope
 from .contract import Contract
 from .output_intent import contract_output_intents
 from .owner_decisions import evaluate_owner_decision_rules
@@ -183,17 +183,99 @@ def build_task_preflight(
     # is the wire from "campaign assess can detect stop" to "preflight enforces
     # stop", so the agent cannot proceed to the next local task on autopilot.
     declared_campaign_id = str(campaign_id or (contract.campaign_id if contract else "") or "").strip()
+    effective_lane = lane or (contract.work_lane if contract else "")
+    objective_parts = [task_id, intent]
+    if contract:
+        objective_parts.extend([
+            contract.goal,
+            " ".join(contract.inputs),
+            " ".join(contract.allowed_outputs),
+            " ".join(contract.checks),
+        ])
+    objective_text = " ".join(objective_parts)
     if declared_campaign_id:
         campaign = assess_campaign(root, campaign_id=declared_campaign_id)
+        if campaign.get("status") == "CAMPAIGN_MISMATCH":
+            active_campaign = load_campaign_contract(root)
+            if active_campaign:
+                active_id = str(active_campaign.get("campaign_id") or active_campaign.get("id") or "").strip()
+                active_assessment = assess_campaign(root, campaign_id=active_id)
+                scope = match_campaign_scope(active_campaign, lane=effective_lane, objective_text=objective_text)
+                active_breakers = list(active_assessment.get("breakers") or [])
+                if active_breakers and scope.get("lane_match") and scope.get("objective_match"):
+                    collision_breaker = {
+                        "breaker_id": "campaign_scope_collision",
+                        "severity": "block_same_campaign_loop",
+                        "reason": "task declares a different campaign_id but matches the stopped active campaign lane/objective markers",
+                        "recommended_action": "use the active campaign_id or obtain a human decision that this is a genuinely separate campaign",
+                    }
+                    campaign = dict(active_assessment)
+                    campaign.update({
+                        "status": "CAMPAIGN_SCOPE_COLLISION",
+                        "campaign_id": declared_campaign_id,
+                        "active_campaign_id": active_id,
+                        "breakers": [collision_breaker] + active_breakers,
+                        "recommended_action": collision_breaker["recommended_action"],
+                        "scope_match": scope,
+                        "active_campaign_breakers": active_breakers,
+                    })
     else:
         active_campaign = load_campaign_contract(root)
-        campaign = {
-            "status": "TASK_NOT_IN_CAMPAIGN" if active_campaign else "NO_ACTIVE_CAMPAIGN",
-            "campaign_id": "",
-            "active_campaign_id": str((active_campaign or {}).get("campaign_id") or ""),
-            "breakers": [],
-            "recommended_action": "continue outside the active campaign scope",
-        }
+        if active_campaign:
+            active_id = str(active_campaign.get("campaign_id") or active_campaign.get("id") or "").strip()
+            active_assessment = assess_campaign(root, campaign_id=active_id)
+            scope = match_campaign_scope(
+                active_campaign,
+                lane=effective_lane,
+                objective_text=objective_text,
+            )
+            active_breakers = list(active_assessment.get("breakers") or [])
+            suspected_escape = bool(
+                active_breakers
+                and scope.get("lane_match")
+                and (scope.get("objective_match") or scope.get("marker_status") == "missing_fail_closed")
+            )
+            if suspected_escape:
+                escape_breaker = {
+                    "breaker_id": "undeclared_campaign_scope",
+                    "severity": "block_same_campaign_loop",
+                    "reason": (
+                        "task omits campaign_id but matches the active campaign lane/objective markers"
+                        if scope.get("objective_match")
+                        else "task omits campaign_id in the active campaign lane and objective markers are missing"
+                    ),
+                    "recommended_action": "declare the active campaign_id or obtain a human decision that this task is unrelated",
+                }
+                campaign = dict(active_assessment)
+                campaign.update({
+                    "status": "UNDECLARED_CAMPAIGN_SCOPE",
+                    "campaign_id": "",
+                    "active_campaign_id": active_id,
+                    "breakers": [escape_breaker] + active_breakers,
+                    "recommended_action": escape_breaker["recommended_action"],
+                    "scope_match": scope,
+                    "active_campaign_breakers": active_breakers,
+                })
+            else:
+                campaign = {
+                    "status": "TASK_NOT_IN_CAMPAIGN",
+                    "campaign_id": "",
+                    "active_campaign_id": active_id,
+                    "breakers": [],
+                    "active_campaign_breakers": active_breakers,
+                    "scope_match": scope,
+                    "recommended_action": "continue only if this task is demonstrably unrelated; otherwise declare the active campaign_id",
+                }
+        else:
+            campaign = {
+                "status": "NO_ACTIVE_CAMPAIGN",
+                "campaign_id": "",
+                "active_campaign_id": "",
+                "breakers": [],
+                "active_campaign_breakers": [],
+                "scope_match": {},
+                "recommended_action": "continue outside campaign control",
+            }
     campaign_breakers = list(campaign.get("breakers") or [])
     stop_reasons = [
         "route is pending and task is route-sensitive",
@@ -232,6 +314,8 @@ def build_task_preflight(
         "campaign_id": declared_campaign_id,
         "active_campaign_id": campaign.get("active_campaign_id") or campaign.get("campaign_id") or "",
         "campaign_breakers": campaign_breakers,
+        "active_campaign_breakers": campaign.get("active_campaign_breakers") or [],
+        "campaign_scope_match": campaign.get("scope_match") or {},
         "campaign_recommended_action": campaign.get("recommended_action", ""),
         "needs_human_decision": bool(owner_blocks or campaign_breakers),
         "allowed_to_touch": allowed,
