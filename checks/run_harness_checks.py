@@ -34,6 +34,7 @@ CHECKS = [
     "check_next_action.py",
     "check_drive.py",
     "check_campaign_contract.py",
+    "check_campaign_e2e.py",
     "check_action_spec.py",
     "check_execution_envelope.py",
     "check_agent_envelope.py",

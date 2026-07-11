@@ -2341,3 +2341,12 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: `python3 checks/check_campaign_contract.py`; end-to-end dogfood now passes all six phases incl. `convergence_freeze`; `python3 checks/run_harness_checks.py --profile full --timeout 90` (all pass).
 - **Does not prove**: that all metric semantics are captured; that a zero-gain task did real work; scientific validity; gate approval.
 - **Next check**: Backfill this pending entry with the commit hash.
+## 2026-07-10 — Add repeatable campaign end-to-end lifecycle check
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / test coverage / regression guard
+- **Action**: Added `checks/check_campaign_e2e.py`, a repeatable end-to-end lifecycle check that drives the whole campaign loop through the real code paths in a throwaway project and asserts system-level behaviour: (1) a breaker emerges from real accumulated diminishing-returns progress, (2) `run_task` blocks the next same-campaign task at the real entrypoint, (3) a recorded human `continue` decision releases the breaker, (4) the release expires and the breaker re-arms, (5) a plateaued objective metric raises `convergence_freeze`, (6) a recorded human `stop` decision halts the campaign. Registered in the CHECKS list so it runs in the full profile.
+- **Why**: The zero-gain bug just fixed passed every unit fixture but broke the system-level behaviour (convergence detection). A lifecycle test that runs the full loop would have caught it; this locks that coverage in so future campaign changes are validated as a system, not only as isolated units.
+- **Validation**: `python3 checks/check_campaign_e2e.py`; `python3 checks/run_harness_checks.py --profile full --timeout 120` (all pass).
+- **Does not prove**: that real-project campaigns behave identically; that the throwaway fixture covers every metric shape; scientific validity; gate approval.
+- **Next check**: Backfill this pending entry with the commit hash.
