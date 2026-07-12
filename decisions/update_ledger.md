@@ -2415,3 +2415,12 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: first-bootstrap real-world human presence; safe signing-key custody; Census positive network execution; FRED vintage history; provider-verified FRED units without its metadata API; computational lineage from specification to result; scientific validity; claim support; gate approval; paper readiness.
 - **Drift risk**: The first signer bootstrap remains local TOFU; FRED current-release CSV is not an ALFRED vintage; Census live access remains credential-blocked; Econ object registries currently prove referential consistency rather than executor-produced lineage; legacy skill receipts will yield sparse scorecards rather than fabricated zeros.
 - **Next check**: After this batch is committed and hash-backed, choose one narrow follow-up only: either add authenticated FRED metadata verification or provide a Census key for a positive official-network E2E. Do not do both or add a new horizontal module in the same batch.
+## 2026-07-11 — Make de-vendor package check portable across host Pythons
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / test robustness / bugfix
+- **Action**: Fixed `check_devendor_package.py` so the package-mode E2E passes under any host Python, not only one that happens to be a 3.10+ interpreter carrying PyYAML. Three fixes: (1) build the install venv with a `>=3.10` interpreter (was `sys.executable`, which broke when the harness ran under Python 3.9 — the wheel requires `>=3.10`); (2) add real `python3.10/3.11/3.12/3.13` via `shutil.which` to the build-Python candidate list instead of only machine-specific hardcoded paths; (3) require `yaml` in the candidate probe — the check installs `--no-deps` and relies on `--system-site-packages` for PyYAML, so it must select a Python that actually has PyYAML (a homebrew 3.11 without it made `migrate prepare` die on `import yaml`, surfacing as "lock files missing").
+- **Why**: Full harness went red purely on the host Python: `python3` = 3.9.13 → wheel install refused; auto-selected homebrew 3.11 → missing PyYAML. The de-vendor logic itself was fine; the check's environment assumptions were not.
+- **Validation**: `checks/check_devendor_package.py` passes under Python 3.9, 3.10, and 3.14 ambients; `python3.10 checks/run_harness_checks.py --profile full` (all pass).
+- **Does not prove**: that every exotic host Python is supported; that de-vendor removal is safe; scientific validity.
+- **Next check**: Backfill this pending entry with the commit hash.

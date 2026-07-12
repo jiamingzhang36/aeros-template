@@ -12,14 +12,16 @@ def main() -> int:
         wheels=base/"wheels"; wheels.mkdir()
         candidates=[
             os.environ.get("AEROS_BUILD_PYTHON", ""),
+            sys.executable,
+            shutil.which("python3.13") or "", shutil.which("python3.12") or "",
+            shutil.which("python3.11") or "", shutil.which("python3.10") or "",
             "/Users/jiamingzhang/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3",
             "/Users/jiamingzhang/opt/anaconda3/bin/python",
-            sys.executable,
         ]
         build_python=""
         for candidate in candidates:
             probe = subprocess.run(
-                [candidate, "-c", "import sys,setuptools.build_meta; raise SystemExit(0 if sys.version_info >= (3,10) else 1)"],
+                [candidate, "-c", "import sys,setuptools.build_meta,yaml; raise SystemExit(0 if sys.version_info >= (3,10) else 1)"],
                 capture_output=True,
             ) if candidate and Path(candidate).is_file() else None
             if probe is not None and probe.returncode == 0:
@@ -29,7 +31,8 @@ def main() -> int:
         if build.returncode!=0: print("FAIL: local wheel build",build.stderr); return 1
         wheel_files=list(wheels.glob("aeros_runtime-*.whl"))
         if len(wheel_files)!=1: print("FAIL: expected exactly one AEROS wheel"); return 1
-        create=subprocess.run([sys.executable,"-m","venv","--system-site-packages",str(venv)],capture_output=True,text=True)
+        venv_python = sys.executable if sys.version_info >= (3, 10) else build_python
+        create=subprocess.run([venv_python,"-m","venv","--system-site-packages",str(venv)],capture_output=True,text=True)
         if create.returncode!=0: print("FAIL: venv creation",create.stderr); return 1
         py=venv/"bin/python"; pip=venv/"bin/pip"
         install=subprocess.run([str(pip),"install","--no-deps",str(wheel_files[0])],capture_output=True,text=True,timeout=120)
