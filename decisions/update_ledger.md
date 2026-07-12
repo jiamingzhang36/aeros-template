@@ -2352,7 +2352,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Backfill this pending entry with the commit hash.
 ## 2026-07-11 — Bind campaign decisions to human approval and verify unique metric gain
 
-- **Commit(s)**: pending
+- **Commit(s)**: `dc41c54`
 - **Change type**: framework / authority enforcement / campaign metric integrity
 - **North star:** A stopped autonomous campaign cannot release itself, and duplicate evidence cannot manufacture progress.
 - **Action**: Required `aeros campaign continue|stop` to consume a project-local approval artifact whose clean git author is an configured approver identity; removed caller-supplied reviewer authority and recorded the verified author, approval path, date, and decision reference. Protected the campaign decision log with the existing pre-commit guard. Reversed the E2E fixture so an approval-free self-release fails and a committed human fixture alone releases the breaker. Campaign progress now checks metric continuity and computes novel evidence units using declared CSV/TSV unique keys (or the first column by default), excluding duplicates and units already counted by prior campaign tasks.
@@ -2363,7 +2363,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Roll out to the next active campaign and confirm an agent-authored approval is rejected while a human-committed bounded continuation succeeds.
 ## 2026-07-11 — Converge authority, research value, artifact state, job compilation, and adaptive checks
 
-- **Commit(s)**: pending
+- **Commit(s)**: `dc41c54`
 - **Change type**: framework / runtime convergence / control-tax reduction
 - **North star:** Reduce the cost of truthful research progress by strengthening real authority boundaries while removing duplicated declarations and daily checks.
 - **Action**: Reclassified Git approver evidence as `local_authorship`, added fail-closed signed/external authority levels and a scoped `aeros approve`; added seven evidence-bound research-value events and `low_decision_value`; split artifact state into selection/processing/admission with legacy output-intent projection; compiled one `data_probe` ResearchJob into TaskContract, ActionSpec, and ExecutionEnvelope with monotonic authority; mapped observed writes to six risk domains; reduced smoke from 54 to 15 core checks and pre-drive to three checks; retained the complete full harness. De-vendor remains gated on real-project rollout.
@@ -2406,7 +2406,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-11 — Add authority lifecycle hardening and an isolated official economic-data probe
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `dc41c54`
 - **Change type**: framework / authority lifecycle / Econ Pack / bounded official-data execution
 - **North star:** Move AEROS from arranging economics work toward completing one truthful, permission-bounded economics action without weakening human authority.
 - **Alignment**: Ordered authority evidence now has non-weakenable action floors, signer-to-approver binding, committed-policy verification, signed policy rotation, and an explicit TOFU bootstrap boundary. Econ Pack adds referential Sample → Specification → Result → Exhibit → Sentence → Claim registries, advisory method protocols, literature radar, and evidence-aware skill scorecards. `aeros drive --job probe_data --execute` compiles an official Census/FRED probe into a declared ActionSpec and isolated-worktree ExecutionEnvelope, accepts only exact nonproduction probe/provenance outputs, and runs deterministic coverage, missingness, join-key, source-ID, and hash checks.
