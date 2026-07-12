@@ -1,0 +1,13 @@
+series_id: gdp_current_release_probe
+provider: fred
+provider_native_id: GDP
+release: current_release
+frequency: quarterly
+units: Billions of Dollars, Seasonally Adjusted Annual Rate
+observation_start: "2020-01-01"
+observation_end: "2024-01-01"
+join_keys: [observation_date]
+minimum_coverage: 12
+maximum_missingness: 0.0
+admission_status: nonproduction
+source_terms: https://fred.stlouisfed.org/legal/

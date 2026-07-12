@@ -8,7 +8,7 @@ breaker_id: all
 expires_after_tasks: 1
 approved_at: "YYYY-MM-DDTHH:MM:SSZ"
 decision_ref: "human decision or meeting reference"
-authority_evidence: local_authorship
+authority_evidence: signed_commit
 does_not_prove:
   - scientific validity
   - claim support

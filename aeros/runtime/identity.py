@@ -78,6 +78,11 @@ def write_approval_request(project_root: Path, *, gate: str, stage: str,
     artifact.parent.mkdir(parents=True, exist_ok=True)
     rel = artifact.relative_to(project_root)
     body = (
+        "---\n"
+        "authority_evidence: signed_commit\n"
+        f"gate: {gate}\n"
+        f"stage: {stage}\n"
+        "---\n\n"
         f"# Gate approval request: {gate}\n\n"
         f"- requested_at: {datetime.now(timezone.utc).isoformat(timespec='seconds')}\n"
         f"- stage: {stage}\n"
@@ -85,10 +90,9 @@ def write_approval_request(project_root: Path, *, gate: str, stage: str,
         f"- requested_by: {requested_by}\n\n"
         f"## Why this gate is ready\n\n{note or '(fill in the evidence summary)'}\n\n"
         "## Human grant\n\n"
-        "This request becomes a GRANT only when an approver commits this file under\n"
-        "an approved git identity (harness/permissions.yml human_approval). The agent\n"
-        "cannot grant its own gate. Review, then:\n\n"
-        f"    git add {rel} && git commit -m \"approve {gate_slug(gate)}\"\n"
+        "This request becomes a GRANT only when a trusted approver signs its commit.\n"
+        "A git author name alone is not authority. Review, then:\n\n"
+        f"    git add {rel} && git commit -S -m \"approve {gate_slug(gate)}\"\n"
         f"    aeros gate approve \"{gate}\" --stage \"{stage}\"\n"
     )
     artifact.write_text(body, encoding="utf-8")

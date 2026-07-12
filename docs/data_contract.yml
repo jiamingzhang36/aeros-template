@@ -31,6 +31,10 @@ provenance:
   code_to_data_lineage_required: true
   manual_edits_allowed: false
 
+# Provider-native economic series used by bounded probes. Keep empty in the
+# reusable template; adopted projects add explicit provider/release semantics.
+economic_data_series: []
+
 privacy:
   contains_personal_data: "unknown"
   contains_confidential_data: "unknown"

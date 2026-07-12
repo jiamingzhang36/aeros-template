@@ -42,6 +42,7 @@ class Deck:
     gate: str
     stage: str
     cards: list[Card] = field(default_factory=list)
+    authority_evidence: str = "signed_commit"
 
 
 def deck_path(project_root: Path, gate: str) -> Path:
@@ -54,6 +55,7 @@ def write_deck(project_root: Path, deck: Deck) -> Path:
     path = deck_path(project_root, deck.gate)
     path.parent.mkdir(parents=True, exist_ok=True)
     front = {"gate": deck.gate, "stage": deck.stage,
+             "authority_evidence": deck.authority_evidence,
              "cards": [c.to_dict() for c in deck.cards]}
     lines = ["---", yaml.safe_dump(front, sort_keys=False).strip(), "---", ""]
     lines += [f"# Plan deck: {deck.gate}", "",
@@ -93,7 +95,12 @@ def parse_deck(path: Path) -> Deck:
             source=str(raw.get("source", "agent")).strip().lower(),
             locked=bool(raw.get("locked", False)),
         ))
-    return Deck(gate=str(data.get("gate", "")), stage=str(data.get("stage", "")), cards=cards)
+    return Deck(
+        gate=str(data.get("gate", "")),
+        stage=str(data.get("stage", "")),
+        cards=cards,
+        authority_evidence=str(data.get("authority_evidence") or "local_authorship").strip(),
+    )
 
 
 def validate_applied(deck: Deck) -> list[str]:

@@ -352,8 +352,8 @@ def record_campaign_decision(
         approval_path.resolve().relative_to(root.resolve())
     except ValueError as exc:
         raise PermissionError("campaign approval artifact must be inside the project") from exc
-    from .authority import evaluate_authority, load_requested_level
-    authority = evaluate_authority(root, approval_path, load_requested_level(approval_path))
+    from .authority import evaluate_for_action
+    authority = evaluate_for_action(root, approval_path, "campaign_release")
     if not authority.granted:
         raise PermissionError(f"campaign decision approval rejected: {authority.reason}")
     try:

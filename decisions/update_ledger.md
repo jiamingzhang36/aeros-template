@@ -2403,3 +2403,15 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: safe migration of every legacy project; scientific validity; release readiness; external package-index availability.
 - **Drift risk**: Projects must pin `aeros_version`, runtime identity, policy bundle, and schema in `aeros.lock`; custom vendored policy changes need explicit migration review.
 - **Next check**: Keep cultured meat vendored until package mode runs alongside it for one additional project action, then use an explicit removal plan rather than automatic deletion.
+
+## 2026-07-11 — Add authority lifecycle hardening and an isolated official economic-data probe
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / authority lifecycle / Econ Pack / bounded official-data execution
+- **North star:** Move AEROS from arranging economics work toward completing one truthful, permission-bounded economics action without weakening human authority.
+- **Alignment**: Ordered authority evidence now has non-weakenable action floors, signer-to-approver binding, committed-policy verification, signed policy rotation, and an explicit TOFU bootstrap boundary. Econ Pack adds referential Sample → Specification → Result → Exhibit → Sentence → Claim registries, advisory method protocols, literature radar, and evidence-aware skill scorecards. `aeros drive --job probe_data --execute` compiles an official Census/FRED probe into a declared ActionSpec and isolated-worktree ExecutionEnvelope, accepts only exact nonproduction probe/provenance outputs, and runs deterministic coverage, missingness, join-key, source-ID, and hash checks.
+- **Validation**: Authority lifecycle E2E; campaign authority checks; Econ Pack checks; Census missing-key and fixture checks; real no-key FRED GDP probe through `drive` and isolated-worktree acceptance; execution-envelope, drive, sync-doctor, smoke, and full harness checks.
+- **Non-goal**: Do not add FRED metadata-key integration, provision a Census API key, promote probe data to canonical, execute estimator protocol packs, certify a scientific claim, or expand the feature surface beyond this vertical slice.
+- **Does not prove**: first-bootstrap real-world human presence; safe signing-key custody; Census positive network execution; FRED vintage history; provider-verified FRED units without its metadata API; computational lineage from specification to result; scientific validity; claim support; gate approval; paper readiness.
+- **Drift risk**: The first signer bootstrap remains local TOFU; FRED current-release CSV is not an ALFRED vintage; Census live access remains credential-blocked; Econ object registries currently prove referential consistency rather than executor-produced lineage; legacy skill receipts will yield sparse scorecards rather than fabricated zeros.
+- **Next check**: After this batch is committed and hash-backed, choose one narrow follow-up only: either add authenticated FRED metadata verification or provide a Census key for a positive official-network E2E. Do not do both or add a new horizontal module in the same batch.

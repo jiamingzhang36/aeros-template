@@ -43,6 +43,8 @@ STAGING_PATH_MARKERS = (
     "audits/",
     "quality_reports/",
     "outputs/context/",
+    "data/probes/",
+    "outputs/.provenance/",
     "evidence/delta_log.jsonl",
 )
 
@@ -199,10 +201,11 @@ def classify_source_capture_permission(
         approval_required = "route_level"
         reasons.append("batch/browser/portal/canonical-candidate capture needs bounded route approval")
     elif (
-        task_mode == "source_capture"
+        task_mode in {"source_capture", "data_repair"}
         and outputs
         and set(outputs).issubset(GREEN_INTENTS)
         and not _has_any(text, RED_PATH_MARKERS)
+        and (task_mode == "source_capture" or "nonproduction probe" in text)
         and (any(marker in text for marker in STAGING_PATH_MARKERS) or _has_any(text, GREEN_TEXT_MARKERS))
     ):
         tier = "green_public_staging"

@@ -4,10 +4,27 @@ levels:
     verification: configured clean Git authorship
     proves: local procedural provenance only
   signed_commit:
-    verification: git verify-commit over the approval artifact's last commit
+    verification: signature bound to the actor by committed permissions policy; repository allowed-signers config is ignored
     use_for: [claim_upgrade, canonical_promotion, expensive_data_access, release]
   external_human_approval:
     verification: independent verifier required
     status: reserved_fail_closed
 plain_interactive_confirmation_grants_authority: false
-
+hard_floors:
+  campaign_release: signed_commit
+  gate_approval: signed_commit
+  gate_apply: signed_commit
+trust_lifecycle:
+  bootstrap:
+    command: aeros authority bootstrap
+    semantics: interactive fingerprint-confirmed TOFU; does not independently prove real-world identity
+    activation: bootstrap permissions commit must be signed by the enrolled key
+  rotation:
+    rule: every later permissions policy change must be signed by a signer trusted in the preceding policy
+  revocation:
+    rule: approval signatures are evaluated against the current committed signer set; revoked keys cannot authorize new consumption
+security_boundary:
+  - project-local minimum settings may strengthen but cannot weaken built-in signed floors
+  - uncommitted permissions changes fail closed
+  - force may override scientific criteria but never authority
+  - rewriting Git history or compromising the human private key remains outside the local-runtime guarantee

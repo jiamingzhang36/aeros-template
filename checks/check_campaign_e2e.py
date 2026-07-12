@@ -110,11 +110,6 @@ def _signed_approval_e2e() -> list[str]:
             (root / d).mkdir(parents=True, exist_ok=True)
         (root / "project_manifest.yml").write_text("project:\n  name: signed_approval_e2e\n", encoding="utf-8")
         (root / "campaigns/active_campaign.yml").write_text(CAMPAIGN, encoding="utf-8")
-        (root / "harness/permissions.yml").write_text(
-            "human_approval:\n  enforcement: git_committer\n  approver_identity: [fixture-human]\n"
-            "  agent_identity: [fixture-agent]\n  approval_artifact_dir: decisions/approvals\n",
-            encoding="utf-8",
-        )
         subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True)
         subprocess.run(["git", "config", "user.name", "fixture-human"], cwd=root, check=True)
         subprocess.run(["git", "config", "user.email", "fixture@example.invalid"], cwd=root, check=True)
@@ -122,8 +117,19 @@ def _signed_approval_e2e() -> list[str]:
         generated = subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", str(key)], cwd=root, capture_output=True)
         if generated.returncode != 0:
             return ["ssh-keygen unavailable; signed approval positive E2E cannot run"]
+        public_key = key.with_suffix(".pub").read_text(encoding="utf-8").strip()
+        (root / "harness/permissions.yml").write_text(
+            "human_approval:\n  enforcement: git_committer\n  approver_identity: [fixture-human]\n"
+            "  agent_identity: [fixture-agent]\n  approval_artifact_dir: decisions/approvals\n"
+            "  minimum_authority:\n    campaign_release: signed_commit\n"
+            "  trusted_signers:\n    - identity: fixture-human\n      principal: fixture@example.invalid\n"
+            f"      ssh_public_key: {public_key}\n",
+            encoding="utf-8",
+        )
         allowed = root / "allowed_signers"
         allowed.write_text("fixture@example.invalid " + key.with_suffix(".pub").read_text(encoding="utf-8"), encoding="utf-8")
+        subprocess.run(["git", "add", "project_manifest.yml", "campaigns/active_campaign.yml", "harness/permissions.yml"], cwd=root, check=True)
+        subprocess.run(["git", "commit", "-m", "fixture trust baseline"], cwd=root, check=True, capture_output=True)
         subprocess.run(["git", "config", "gpg.format", "ssh"], cwd=root, check=True)
         subprocess.run(["git", "config", "user.signingkey", str(key)], cwd=root, check=True)
         subprocess.run(["git", "config", "gpg.ssh.allowedSignersFile", str(allowed)], cwd=root, check=True)
@@ -170,11 +176,22 @@ def _run_lifecycle() -> list[str]:
         subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True)
         subprocess.run(["git", "config", "user.name", "fixture-human"], cwd=root, check=True)
         subprocess.run(["git", "config", "user.email", "fixture@example.invalid"], cwd=root, check=True)
+        key = root / "lifecycle_signing_key"
+        subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", str(key)], cwd=root, check=True, capture_output=True)
+        public_key = key.with_suffix(".pub").read_text(encoding="utf-8").strip()
+        allowed = root / "lifecycle_allowed_signers"
+        allowed.write_text(f"fixture@example.invalid {public_key}\n", encoding="utf-8")
+        subprocess.run(["git", "config", "gpg.format", "ssh"], cwd=root, check=True)
+        subprocess.run(["git", "config", "user.signingkey", str(key)], cwd=root, check=True)
+        subprocess.run(["git", "config", "gpg.ssh.allowedSignersFile", str(allowed)], cwd=root, check=True)
         (root / "harness").mkdir(exist_ok=True)
         (root / "decisions/approvals").mkdir(parents=True, exist_ok=True)
         (root / "harness/permissions.yml").write_text(
             "human_approval:\n  enforcement: git_committer\n  approver_identity:\n    - fixture-human\n"
-            "  agent_identity:\n    - fixture-agent\n  approval_artifact_dir: decisions/approvals\n",
+            "  agent_identity:\n    - fixture-agent\n  approval_artifact_dir: decisions/approvals\n"
+            "  minimum_authority:\n    campaign_release: signed_commit\n"
+            "  trusted_signers:\n    - identity: fixture-human\n      principal: fixture@example.invalid\n"
+            f"      ssh_public_key: {public_key}\n",
             encoding="utf-8",
         )
 
@@ -183,11 +200,12 @@ def _run_lifecycle() -> list[str]:
             (root / rel).write_text(
                 f"version: 1\ncampaign_id: leads\ndecision: {decision}\nreason: fixture human decision\n"
                 f"breaker_id: {breaker}\nexpires_after_tasks: {horizon}\n"
-                "approved_at: 2026-07-11T00:00:00Z\ndecision_ref: fixture-review\n",
+                "approved_at: 2026-07-11T00:00:00Z\ndecision_ref: fixture-review\n"
+                "authority_evidence: signed_commit\n",
                 encoding="utf-8",
             )
             subprocess.run(["git", "add", "harness/permissions.yml", rel], cwd=root, check=True)
-            subprocess.run(["git", "commit", "-m", f"human {decision} approval"], cwd=root, check=True, capture_output=True)
+            subprocess.run(["git", "commit", "-S", "-m", f"human {decision} approval"], cwd=root, check=True, capture_output=True)
             return rel
 
         # Phase 1: breaker emerges from real accumulated diminishing-returns progress.

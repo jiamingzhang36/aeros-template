@@ -164,6 +164,14 @@ def build_task_preflight(
     allowed = _contract_allowed_to_touch(contract) or _workflow_allowed_prefixes(root, workflow)
     if not allowed:
         allowed = ["agent_runs/", "audits/", "outputs/context/", "work/"]
+    bounded_official_probe = (
+        (lane or (contract.work_lane if contract else "")) == "data"
+        and "bounded official public" in intent.lower()
+        and "nonproduction probe" in intent.lower()
+    )
+    if bounded_official_probe and not contract:
+        output_intents = ["probe_only", "audit_note"]
+        allowed = ["data/probes/", "outputs/.provenance/", "audits/"]
     must_not_touch = list(DEFAULT_MUST_NOT_TOUCH)
     route = _route_status(root, intent)
     permission = classify_source_capture_permission(

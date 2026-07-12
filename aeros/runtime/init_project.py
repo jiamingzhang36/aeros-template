@@ -435,15 +435,18 @@ version: "0.1"
 defaults:
   push_to_remote: "human_only"   # never auto-push without explicit human approval
   raw_data_write: "deny"
-# Human-gate trust anchor. Off by default so a new project runs immediately.
-# To require a committed human grant at gates: set enforcement to git_committer
-# and put your git author name in approver_identity. The autonomous loop commits
-# under agent_identity and can never grant its own gate.
+# Human-gate trust anchor. Sensitive decisions fail closed until the first
+# signer is bootstrapped; git author names alone are provenance, not identity.
 human_approval:
-  enforcement: "off"             # -> "git_committer" to enable
+  enforcement: "git_committer"
   approver_identity: []          # e.g. ["your-git-author-name"]
   agent_identity: ["aeros-agent"]
   approval_artifact_dir: "decisions/approvals"
+  minimum_authority:
+    campaign_release: "signed_commit"
+    gate_approval: "signed_commit"
+    gate_apply: "signed_commit"
+  trusted_signers: []
 """,
     "aeros_state.yml": """current_stage: discovery
 current_gate: G0

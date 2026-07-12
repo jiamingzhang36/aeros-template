@@ -1,0 +1,17 @@
+series_id: population_denominator_acs5_2024
+provider: census
+provider_native_id: acs/acs5
+release: "2024"
+variables:
+  - id: B01003_001E
+    role: outcome
+    label: total population estimate
+units: persons
+geography:
+  for: "state:*"
+  in: ""
+join_keys: [state]
+minimum_coverage: 3
+maximum_missingness: 0.0
+admission_status: nonproduction
+source_terms: https://www.census.gov/data/developers/about/terms-of-service.html

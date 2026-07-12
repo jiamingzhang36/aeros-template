@@ -9,8 +9,7 @@ does_not_authorize:
   - canonical promotion
   - claim upgrade
   - release
-authority_evidence: local_authorship
+authority_evidence: signed_commit
 reason: ""
 approved_at: ""
 decision_ref: ""
-

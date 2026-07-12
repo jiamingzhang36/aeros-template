@@ -46,6 +46,11 @@ SAFE_AEROS_COMMAND_MARKERS = (
     " mode recommend",
     " inspect modes",
     " next",
+    " data plan",
+    " data probe plan",
+    " data probe census",
+    " data probe official",
+    " econ ",
 )
 
 
@@ -289,6 +294,7 @@ def _preflight_intent(objective: DriveObjective) -> str:
         "source_promotion": "promote reviewed source candidates",
         "citation_risk": "citation risk audit",
         "data_probe": "data probe plan",
+        "econ_job:probe_data": "bounded official public economic-data nonproduction probe into data/probes and provenance",
     }
     return mapping.get(objective.objective_id, objective.objective)
 
@@ -347,25 +353,59 @@ def _run_safe_command(root: Path, command: str) -> dict[str, Any]:
     }
 
 
-def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lane: str = "", execute: bool = False) -> dict[str, Any]:
+def _run_official_probe_envelope(root: Path) -> dict[str, Any]:
+    from .economic_probe import compile_official_probe_action
+    from .execution_envelope import execute_action_spec_in_isolated_worktree
+    try:
+        spec = compile_official_probe_action(root)
+        result = execute_action_spec_in_isolated_worktree(root, spec, timeout_seconds=60)
+    except Exception as exc:
+        return {"attempted": False, "status": "fail", "reason": str(exc), "command": "compiled official probe"}
+    return {
+        "attempted": True,
+        "status": "pass" if result.ok else "fail",
+        "exit_code": result.return_code,
+        "command": spec.command,
+        "action_spec": spec.to_dict(),
+        "observed_writes": list(result.observed_writes),
+        "accepted_outputs": list(result.accepted_outputs),
+        "denied_writes": list(result.denied_writes),
+        "undeclared_writes": list(result.undeclared_writes),
+        "missing_expected_outputs": list(result.missing_expected_outputs),
+        "worktree_removed": result.worktree_removed,
+        "reason": result.message,
+    }
+
+
+def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lane: str = "", execute: bool = False, job: str = "") -> dict[str, Any]:
     root = Path(root)
     goal = (goal or "auto").strip().lower()
     lane = (lane or "").strip()
-    objective = _auto_objective(root, lane) if goal == "auto" else _goal_objective(root, goal, lane)
+    if job:
+        from .econ_pack import compile_drive_job
+        objective = DriveObjective(**compile_drive_job(job))
+    else:
+        objective = _auto_objective(root, lane) if goal == "auto" else _goal_objective(root, goal, lane)
     preflight = build_task_preflight(root, lane=objective.lane if objective.lane in {"data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"} else lane, intent=_preflight_intent(objective))
     broad_summary = summarize_broad_capture(root)
-    execution = _run_safe_command(root, objective.command) if execute and objective.can_run_without_human and not objective.needs_human else {
+    source_permission = preflight.get("source_capture_permission") or {}
+    probe_permission_ok = objective.objective_id != "econ_job:probe_data" or bool(source_permission.get("allowed_without_human_approval"))
+    may_execute = execute and objective.can_run_without_human and not objective.needs_human and not preflight.get("needs_human_decision") and probe_permission_ok
+    execution = (_run_official_probe_envelope(root) if objective.objective_id == "econ_job:probe_data" else _run_safe_command(root, objective.command)) if may_execute else {
         "attempted": False,
         "status": "not_requested" if not execute else "needs_human_or_not_safe",
         "command": objective.command,
     }
-    status = "NEEDS_HUMAN" if objective.needs_human else ("EXECUTED" if execution.get("attempted") else "READY")
+    if execution.get("status") == "fail": status = "FAILED"
+    elif objective.needs_human or (execute and not probe_permission_ok): status = "NEEDS_HUMAN"
+    else: status = "EXECUTED" if execution.get("attempted") else "READY"
     risk_report = compile_research_risk(root, lane=lane)
     current_work = load_current_work_context(root)
     return {
         "status": status,
         "model": "AEROS-USEFUL-001-drive-mvp",
         "goal": goal,
+        "job": job or "auto",
         "chosen_objective": objective.to_dict(),
         "research_risk": risk_report,
         "execution": execution,
@@ -378,7 +418,7 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
         "what_this_does": [
             "selects one useful next objective from existing deterministic AEROS signals",
             "turns scattered next/preflight/mode/submission/broad-capture signals into one packet",
-            "executes only allowlisted read-only or dry-run commands when --execute is requested",
+            "executes only allowlisted read-only/dry-run commands or bounded nonproduction probes when --execute is requested",
         ],
         "what_this_does_not_touch": [
             "data/raw/",
@@ -388,7 +428,10 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
             "evidence/claim_registry.md",
             "decisions/approvals/",
         ],
-        "does_not_prove": DOES_NOT_PROVE,
+        "does_not_prove": [
+            item for item in DOES_NOT_PROVE
+            if not (job == "probe_data" and execution.get("status") == "pass" and item == "that external provider/API work was performed")
+        ],
     }
 
 

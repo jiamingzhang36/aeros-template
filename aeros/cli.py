@@ -484,6 +484,61 @@ def _cmd_approve(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_authority_bootstrap(args: argparse.Namespace) -> int:
+    """Interactive TOFU ceremony for the first project signer."""
+    root = _project_root()
+    public_path = Path(args.ssh_public_key).expanduser()
+    if not public_path.exists():
+        print(f"REFUSED: SSH public key does not exist: {public_path}")
+        return 2
+    if not sys.stdin.isatty():
+        print("REFUSED: authority bootstrap requires an interactive terminal fingerprint comparison.")
+        print("This is a TOFU ceremony, not an agent-automatable approval step.")
+        return 3
+    fingerprint_result = subprocess.run(
+        ["ssh-keygen", "-lf", str(public_path), "-E", "sha256"],
+        text=True, capture_output=True, timeout=20,
+    )
+    if fingerprint_result.returncode != 0:
+        print("REFUSED: unable to fingerprint SSH public key")
+        return 2
+    parts = fingerprint_result.stdout.split()
+    fingerprint = parts[1] if len(parts) > 1 else ""
+    print("AEROS first-signer trust bootstrap (TOFU)")
+    print(f"identity:    {args.identity}")
+    print(f"principal:   {args.principal}")
+    print(f"fingerprint: {fingerprint}")
+    print("This records a locally confirmed key; it does not independently prove real-world identity.")
+    typed = input("Type the complete fingerprint to trust this key: ").strip()
+    from .runtime.authority import bootstrap_ssh_signer
+    try:
+        policy, confirmed = bootstrap_ssh_signer(
+            root, identity=args.identity, principal=args.principal,
+            public_key=public_path.read_text(encoding="utf-8"), confirmed_fingerprint=typed,
+        )
+    except (PermissionError, ValueError) as exc:
+        print(f"REFUSED: {exc}")
+        return 3
+    print(f"wrote bootstrap record: {policy.relative_to(root)} ({confirmed})")
+    if not args.commit:
+        print("NOT ACTIVE: sign and commit harness/permissions.yml before authority can be consumed.")
+        return 0
+    committed = subprocess.run(
+        ["git", "-C", str(root), "add", "harness/permissions.yml"],
+        text=True, capture_output=True,
+    )
+    if committed.returncode == 0:
+        committed = subprocess.run(
+            ["git", "-C", str(root), "commit", "-S", "-m", "bootstrap AEROS authority signer"],
+            text=True, capture_output=True,
+        )
+    if committed.returncode != 0:
+        print(f"REFUSED: signed bootstrap commit failed: {(committed.stderr or committed.stdout).strip()}")
+        return 4
+    print("ACTIVE: first signer policy was committed with a signature; later changes require the prior signer.")
+    return 0
+
+
 def _cmd_job(args: argparse.Namespace) -> int:
     from .runtime.research_job import load_research_job, compile_research_job, validate_compilation, write_compiled_job
     root = _project_root(); compiled = compile_research_job(load_research_job(Path(args.file)))
@@ -581,6 +636,7 @@ def _cmd_drive(args: argparse.Namespace) -> int:
         goal=getattr(args, "goal", "auto") or "auto",
         lane=getattr(args, "lane", "") or "",
         execute=bool(getattr(args, "execute", False)),
+        job=getattr(args, "job", "") or "",
     )
     if getattr(args, "json", False):
         print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
@@ -593,6 +649,63 @@ def _cmd_drive(args: argparse.Namespace) -> int:
     execution = report.get("execution") or {}
     if execution.get("attempted") and execution.get("status") == "fail":
         return 1
+    return 0
+
+
+def _cmd_econ(args: argparse.Namespace) -> int:
+    from .runtime.econ_pack import (
+        build_literature_radar, build_skill_scorecard, compile_protocol,
+        initialize_registries, validate_object_chain, write_literature_radar,
+    )
+    root = _project_root()
+    if args.econ_command == "init":
+        payload = {"created_or_present": [str(p.relative_to(root)) for p in initialize_registries(root)]}
+    elif args.econ_command == "chain":
+        payload = validate_object_chain(root)
+    elif args.econ_command == "protocol":
+        payload = compile_protocol(args.name, spec_id=args.spec_id)
+    elif args.econ_command == "literature-radar":
+        payload = build_literature_radar(root)
+        if args.write: payload["written_to"] = str(write_literature_radar(root, payload).relative_to(root))
+    elif args.econ_command == "skill-scorecard":
+        payload = build_skill_scorecard(root)
+    else:
+        raise SystemExit(f"unknown econ command: {args.econ_command}")
+    print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(payload, sort_keys=False, allow_unicode=True))
+    return 0 if payload.get("status") != "FAIL" else 1
+
+
+def _cmd_submit(args: argparse.Namespace) -> int:
+    from .runtime.econ_pack import submission_review_ready
+    from .runtime.paper_readiness import assess_paper_readiness
+    from .runtime.submission_driver import build_submission_driver
+    root = _project_root()
+    driver = build_submission_driver(root)
+    readiness = assess_paper_readiness(root).to_dict()
+    payload = {
+        "model": "AEROS-SUBMIT-001", "submission_driver": driver,
+        "paper_readiness": readiness,
+        "ready_for_human_review": submission_review_ready(driver, readiness),
+        "authority": "advisory; mechanical readiness may enter human review but does not approve paper readiness or release",
+    }
+    print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(payload, sort_keys=False, allow_unicode=True))
+    return 0 if payload["ready_for_human_review"] else 2
+
+
+def _cmd_home(args: argparse.Namespace) -> int:
+    from .runtime.drive import build_drive_report
+    report = build_drive_report(_project_root())
+    objective = report.get("chosen_objective") or {}
+    print("AEROS\n")
+    print("RUN NOW")
+    print(f"  {objective.get('objective', 'Inspect project state')}")
+    print(f"  command: {objective.get('command', 'aeros drive')}")
+    print("\nNEED YOU")
+    print("  " + ("Human decision required for the selected action." if objective.get("needs_human") else "No immediate human decision."))
+    print("\nPRIMARY COMMANDS")
+    print("  aeros drive [--job JOB]   choose/run bounded research work")
+    print("  aeros submit              submission/readiness projection")
+    print("  aeros --help              advanced/debug commands")
     return 0
 
 
@@ -945,13 +1058,13 @@ def _cmd_gate_apply(args: argparse.Namespace) -> int:
         print(f"REFUSED: no plan deck at {path.relative_to(root)}. Run `aeros gate plan` first.")
         return 2
 
-    # 1. Deck must be committed by an approver (same trust anchor as approve).
-    if identity.enforcement_enabled(root):
-        granted, reason = identity.approved_by_human(path, root)
-        if not granted and not args.force:
-            print(f"REFUSED: plan deck is not human-granted ({reason}).")
-            print(f"  An approver must commit {path.relative_to(root)} under an approved git identity.")
-            return 3
+    # 1. Deck must carry authority meeting the gate-apply floor. --force may
+    # override scientific criteria, never the authority boundary.
+    from .runtime.authority import evaluate_for_action
+    authority = evaluate_for_action(root, path, "gate_apply")
+    if not authority.granted:
+        print(f"REFUSED: plan deck lacks required authority ({authority.reason}).")
+        return 3
 
     # 2. Deck semantics: no dropped locked card, at least one kept card.
     deck = parse_deck(path)
@@ -1026,28 +1139,18 @@ def _cmd_gate_approve(args: argparse.Namespace) -> int:
         for f in failures:
             print(f"  - {f}")
 
-    # Trust anchor: the agent can REQUEST approval but cannot GRANT it. A grant
-    # only counts when the approval artifact is committed by an approver_identity
-    # (see harness/permissions.yml). The agent, committing under agent_identity,
-    # physically cannot produce a passing artifact.
+    # Trust anchor: --force may override unmet criteria but never authority.
     approver_committer = ""
-    if identity.enforcement_enabled(root):
-        artifact = identity.approval_artifact_path(root, args.gate)
-        granted, reason = identity.approved_by_human(artifact, root)
-        if not granted:
-            if not args.force:
-                print(f"REFUSED: {args.gate} is not human-granted ({reason}).")
-                print(f"  An approver must review and commit {artifact.relative_to(root)} "
-                      f"under an approved git identity.")
-                print(f"  Create the request with:  aeros gate request \"{args.gate}\"")
-                print("  Then (as the human):       git add <artifact> && git commit")
-                print("  Override with --force (logged) only if you accept the audit trail gap.")
-                return 3
-            note = f"[FORCED past human-grant anchor: {reason}] " + note
-            print(f"WARNING: forcing approval without a committed human grant: {reason}")
-        else:
-            approver_committer = reason.replace("approved by ", "")
-            print(f"human grant verified: {reason}")
+    artifact = identity.approval_artifact_path(root, args.gate)
+    from .runtime.authority import evaluate_for_action
+    authority = evaluate_for_action(root, artifact, "gate_approval")
+    if not authority.granted:
+        print(f"REFUSED: {args.gate} lacks required human authority ({authority.reason}).")
+        print(f"  Create the request with: aeros gate request \"{args.gate}\"")
+        print("  Then have a trusted signer sign and commit the approval artifact.")
+        return 3
+    approver_committer = authority.actor
+    print(f"human authority verified: {authority.verification_method} ({authority.actor})")
 
     state = load_state(root)
     decision = approve_gate(
@@ -1256,6 +1359,22 @@ def _cmd_data(args: argparse.Namespace) -> int:
         print(format_data_first_plan(root))
         return 0
     if args.data_command == "probe":
+        if args.data_probe_command == "official":
+            from .runtime.economic_probe import run_official_probe
+            try:
+                payload = run_official_probe(root, series_id=args.series_id, contract_path=args.contract, api_key_env=args.api_key_env)
+            except Exception as exc:
+                payload = {"model": "AEROS-OFFICIAL-PROBE-001", "status": "FAIL", "error": str(exc), "next_action": "fix EconomicDataSeries contract, credentials, or official-source access and rerun"}
+            print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(payload, sort_keys=False, allow_unicode=True))
+            return 0 if payload.get("status") == "PASS" else 2
+        if args.data_probe_command == "census":
+            from .runtime.census_probe import run_census_probe
+            try:
+                payload = run_census_probe(root, series_id=args.series_id, contract_path=args.contract, api_key_env=args.api_key_env)
+            except Exception as exc:
+                payload = {"model": "AEROS-CENSUS-PROBE-001", "status": "FAIL", "error": str(exc), "next_action": "fix Census EconomicDataSeries contract, credentials, or API access and rerun"}
+            print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(payload, sort_keys=False, allow_unicode=True))
+            return 0 if payload.get("status") == "PASS" else 2
         if args.data_probe_command == "plan":
             return write_probe_plan(root, dry_run=args.dry_run)
         if args.data_probe_command == "run":
@@ -1620,7 +1739,7 @@ def _cmd_task_preflight(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="aeros", description="AEROS runtime")
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command", required=False)
 
 
     event = sub.add_parser("event", help="append/replay kernel event log")
@@ -1769,6 +1888,15 @@ def main(argv: list[str] | None = None) -> int:
     approve.add_argument("--commit", action="store_true", help="commit only this approval; signed_commit uses git commit -S")
     approve.set_defaults(func=_cmd_approve)
 
+    authority = sub.add_parser("authority", help="manage cryptographic human-authority trust anchors")
+    authority_sub = authority.add_subparsers(dest="authority_command", required=True)
+    authority_bootstrap = authority_sub.add_parser("bootstrap", help="interactively bind the first trusted SSH signer (TOFU)")
+    authority_bootstrap.add_argument("--identity", required=True, help="existing approver_identity to bind")
+    authority_bootstrap.add_argument("--principal", required=True, help="SSH signing principal, usually an email")
+    authority_bootstrap.add_argument("--ssh-public-key", required=True, help="path to the public key")
+    authority_bootstrap.add_argument("--commit", action="store_true", help="create the required signed policy commit")
+    authority_bootstrap.set_defaults(func=_cmd_authority_bootstrap)
+
     job = sub.add_parser("job", help="compile ResearchJob into TaskContract, ActionSpec, and ExecutionEnvelope")
     job_sub = job.add_subparsers(dest="job_command", required=True); job_compile = job_sub.add_parser("compile")
     job_compile.add_argument("--file", required=True); job_compile.add_argument("--write", action="store_true"); job_compile.set_defaults(func=_cmd_job)
@@ -1810,7 +1938,20 @@ def main(argv: list[str] | None = None) -> int:
     drive_p.add_argument("--execute", action="store_true", help="execute only allowlisted read-only/dry-run commands")
     drive_p.add_argument("--write", action="store_true", help="write outputs/context/drive_packet.md and .json")
     drive_p.add_argument("--json", action="store_true", help="emit machine-readable drive packet")
+    drive_p.add_argument("--job", default="", choices=["", "find_data", "probe_data", "run_specification", "diagnose_design", "read_literature", "bind_or_reproduce_paper"], help="run one economics-native drive job")
     drive_p.set_defaults(func=_cmd_drive)
+
+    submit_p = sub.add_parser("submit", help="aggregate paper, evidence, and reproduction readiness without granting release")
+    submit_p.add_argument("--json", action="store_true")
+    submit_p.set_defaults(func=_cmd_submit)
+
+    econ = sub.add_parser("econ", help="advanced economics object-chain, protocol, radar, and skill projections")
+    econ_sub = econ.add_subparsers(dest="econ_command", required=True)
+    econ_init = econ_sub.add_parser("init"); econ_init.add_argument("--json", action="store_true"); econ_init.set_defaults(func=_cmd_econ)
+    econ_chain = econ_sub.add_parser("chain"); econ_chain.add_argument("--json", action="store_true"); econ_chain.set_defaults(func=_cmd_econ)
+    econ_protocol = econ_sub.add_parser("protocol"); econ_protocol.add_argument("--name", required=True, choices=["iv", "did", "rd", "panel", "synthetic_control", "econ:iv", "econ:did", "econ:rd", "econ:panel", "econ:synthetic_control"]); econ_protocol.add_argument("--spec-id", default=""); econ_protocol.add_argument("--json", action="store_true"); econ_protocol.set_defaults(func=_cmd_econ)
+    econ_radar = econ_sub.add_parser("literature-radar"); econ_radar.add_argument("--write", action="store_true"); econ_radar.add_argument("--json", action="store_true"); econ_radar.set_defaults(func=_cmd_econ)
+    econ_skills = econ_sub.add_parser("skill-scorecard"); econ_skills.add_argument("--json", action="store_true"); econ_skills.set_defaults(func=_cmd_econ)
 
     session = sub.add_parser("session", help="start/status/audit a lane-scoped chat session")
     session_sub = session.add_subparsers(dest="session_command", required=True)
@@ -2241,6 +2382,18 @@ def main(argv: list[str] | None = None) -> int:
     data_probe_report = data_probe_sub.add_parser("report", help="summarize completed probe metadata")
     data_probe_report.add_argument("--dry-run", action="store_true", help="show report summary without writing")
     data_probe_report.set_defaults(func=_cmd_data)
+    data_probe_census = data_probe_sub.add_parser("census", help="run bounded Census API probe from EconomicDataSeries in DataContract")
+    data_probe_census.add_argument("--series-id", default="auto")
+    data_probe_census.add_argument("--contract", default="docs/data_contract.yml")
+    data_probe_census.add_argument("--api-key-env", default="CENSUS_API_KEY")
+    data_probe_census.add_argument("--json", action="store_true")
+    data_probe_census.set_defaults(func=_cmd_data)
+    data_probe_official = data_probe_sub.add_parser("official", help="run bounded Census or FRED probe from EconomicDataSeries")
+    data_probe_official.add_argument("--series-id", default="auto")
+    data_probe_official.add_argument("--contract", default="docs/data_contract.yml")
+    data_probe_official.add_argument("--api-key-env", default="CENSUS_API_KEY")
+    data_probe_official.add_argument("--json", action="store_true")
+    data_probe_official.set_defaults(func=_cmd_data)
 
     data_backfill = data_sub.add_parser("backfill", help="build and optionally run a data backfill queue")
     data_backfill.add_argument("--dry-run", action="store_true",
@@ -2332,6 +2485,8 @@ def main(argv: list[str] | None = None) -> int:
     improve_harvest_p.set_defaults(func=_cmd_improve_harvest)
 
     args = parser.parse_args(argv)
+    if not getattr(args, "command", None):
+        return _cmd_home(args)
     return args.func(args)
 
 

@@ -8,18 +8,28 @@ version: "0.1"
 
 # Human adjudication trust anchor.
 #
-# Gates and evidence receipts only "count" when the artifact's last git commit
-# author is an approver_identity. The autonomous loop must commit under an
-# agent_identity and must NOT change git config (user.name / user.email).
-# This is tamper-evident for single-user setups (a human and the agent may
-# share a machine); escalate to GPG-signed commits for tamper resistance.
+# local_authorship is provenance, not proof of a human. Security-sensitive
+# decisions require a signature bound here to an approver. Runtime verification
+# reads this policy from committed HEAD and ignores repository allowed-signers
+# configuration, so an agent cannot enroll its own key by editing git config.
 human_approval:
-  enforcement: "git_committer"   # set to "off" to fall back to legacy field-presence only
+  enforcement: "git_committer"   # compatibility field; campaign/gate hard floors cannot be disabled here
   approver_identity:
     - "gagaggg36"                # human-held git author(s) allowed to grant approvals
   agent_identity:
     - "aeros-agent"              # the autonomous loop commits under this; never counts as approval
   approval_artifact_dir: "decisions/approvals"
+  minimum_authority:
+    campaign_release: "signed_commit"
+    gate_approval: "signed_commit"
+    gate_apply: "signed_commit"
+    claim_upgrade: "signed_commit"
+    release: "signed_commit"
+  # Bootstrap the first signer interactively with `aeros authority bootstrap`.
+  # Later changes to this policy must be signed by a signer in the preceding policy.
+  # SSH row: {identity: "name above", principal: "email", ssh_public_key: "ssh-ed25519 AAAA..."}
+  # GPG row: {identity: "name above", gpg_fingerprint: "FULL40CHARFINGERPRINT"}
+  trusted_signers: []
 
 defaults:
   work_mode: "branch_or_isolated_worktree"

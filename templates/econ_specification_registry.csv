@@ -1,0 +1,1 @@
+spec_id,estimand_id,sample_id,outcome,treatment,controls,fixed_effects,cluster,weights,window,estimator,software,package_versions,protocol,status

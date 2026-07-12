@@ -11,10 +11,13 @@ profiles:
     checks:
       - check_campaign_contract.py
       - check_authority_evidence.py
+      - check_authority_lifecycle_e2e.py
       - check_action_spec.py
       - check_progress_semantics.py
       - check_artifact_semantics.py
       - check_research_job_compiler.py
+      - check_econ_pack.py
+      - check_census_probe.py
       - check_adaptive_checks.py
       - check_task_preflight.py
       - check_owner_decisions.py
@@ -30,6 +33,7 @@ profiles:
       - check_next_action.py
       - check_action_spec.py
       - check_authority_evidence.py
+      - check_authority_lifecycle_e2e.py
   lane:data:
     description: "Data-first readiness and no-empty-run checks."
     checks:

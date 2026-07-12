@@ -91,22 +91,34 @@ def _freeze_and_decision_valve() -> list[str]:
         subprocess.run(["git", "init"], cwd=tmp, check=True, capture_output=True)
         subprocess.run(["git", "config", "user.name", "fixture-human"], cwd=tmp, check=True)
         subprocess.run(["git", "config", "user.email", "fixture@example.invalid"], cwd=tmp, check=True)
+        key = tmp / "fixture_signing_key"
+        subprocess.run(["ssh-keygen", "-q", "-t", "ed25519", "-N", "", "-f", str(key)], cwd=tmp, check=True, capture_output=True)
+        public_key = key.with_suffix(".pub").read_text(encoding="utf-8").strip()
+        allowed = tmp / "allowed_signers"
+        allowed.write_text(f"fixture@example.invalid {public_key}\n", encoding="utf-8")
+        subprocess.run(["git", "config", "gpg.format", "ssh"], cwd=tmp, check=True)
+        subprocess.run(["git", "config", "user.signingkey", str(key)], cwd=tmp, check=True)
+        subprocess.run(["git", "config", "gpg.ssh.allowedSignersFile", str(allowed)], cwd=tmp, check=True)
         (tmp / "harness").mkdir(exist_ok=True)
         (tmp / "decisions/approvals").mkdir(parents=True, exist_ok=True)
         (tmp / "harness/permissions.yml").write_text(
             "human_approval:\n  enforcement: git_committer\n  approver_identity:\n    - fixture-human\n"
-            "  agent_identity:\n    - fixture-agent\n  approval_artifact_dir: decisions/approvals\n",
+            "  agent_identity:\n    - fixture-agent\n  approval_artifact_dir: decisions/approvals\n"
+            "  minimum_authority: {campaign_release: signed_commit}\n  trusted_signers:\n"
+            "    - identity: fixture-human\n      principal: fixture@example.invalid\n"
+            f"      ssh_public_key: {public_key}\n",
             encoding="utf-8",
         )
         rel = f"decisions/approvals/campaign_t_{decision}.yml"
         (tmp / rel).write_text(
             f"version: 1\ncampaign_id: t\ndecision: {decision}\nreason: fixture human decision\n"
             f"breaker_id: {breaker}\nexpires_after_tasks: {horizon}\n"
-            "approved_at: 2026-07-11T00:00:00Z\ndecision_ref: fixture-review\n",
+            "approved_at: 2026-07-11T00:00:00Z\ndecision_ref: fixture-review\n"
+            "authority_evidence: signed_commit\n",
             encoding="utf-8",
         )
         subprocess.run(["git", "add", "harness/permissions.yml", rel], cwd=tmp, check=True)
-        subprocess.run(["git", "commit", "-m", "human campaign approval"], cwd=tmp, check=True, capture_output=True)
+        subprocess.run(["git", "commit", "-S", "-m", "human campaign approval"], cwd=tmp, check=True, capture_output=True)
         return rel
 
     # FREEZE: a plateaued objective metric must raise convergence_freeze.
