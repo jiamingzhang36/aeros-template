@@ -173,7 +173,9 @@ does_not_prove: [scientific validity, claim support, gate approval, release read
 """,
     "harness/skill_obligation_policy.yml": """version: "0.1"
 policy: AEROS-SKILL-OBLIGATION-001
-principle: Skill-eligible tasks must consider relevant skills and either declare usable skills, mark the class required, or record an explicit waiver.
+principle: Ordinary tasks may dynamically use zero or more skills without a waiver; use-or-waive applies only to explicit required_skill_classes.
+default_requirement: optional_record_if_used
+use_or_waive_trigger: explicit_required_skill_classes
 classes:
   data_source: {skills: [data-inventory, data-quality-checker, data-merge-audit], triggers: [data, source, probe, capture, inventory, denominator, gdp, schema]}
   literature: {skills: [academic-research-suite, lit-review-assistant], triggers: [literature, citation, paper_registry, full-text, fulltext, synthesis]}
@@ -183,6 +185,26 @@ classes:
 allowed_waiver_classes: [ledger_hash_only, typo_only, mechanical_revalidation, single_line_parser_patch]
 required_waiver_fields: [skill_class, reason, scope, progress_label]
 does_not_prove: [skill invocation, skill output correctness, scientific validity, claim support, human gate approval]
+""",
+    "harness/research_profiles.yml": """version: "0.1"
+policy: AEROS-RESEARCH-PROFILES-001
+default_profile: research
+status: mapping_only
+immutable_invariants:
+  - {id: no_forged_human_decision, rule: Agent cannot generate or apply a human decision.}
+  - {id: external_authority_required, rule: Credentials paid access external writes and release require human authority.}
+  - {id: observed_artifact_required, rule: Completion requires an observed expected artifact.}
+  - {id: result_lineage_required, rule: Admitted results trace to data code environment and run.}
+  - {id: claim_self_upgrade_forbidden, rule: Claim producers cannot upgrade claim admission.}
+  - {id: paper_number_binding_required, rule: Paper numbers bind to Result Specification and Exhibit.}
+  - {id: claim_citation_locator_required, rule: Claim-bearing citations require locator-backed evidence.}
+  - {id: bounded_loop_required, rule: Autonomous loops enforce time cost resource and repetition limits.}
+profiles:
+  explore: {workspace: isolated_candidate_worktree, check_strategy: minimal_pre_drive_plus_artifact_selected_post_action, skill_policy: dynamic_optional, promotion_authority: unchanged}
+  research: {workspace: isolated_candidate_worktree, check_strategy: adaptive_post_action, skill_policy: dynamic_optional, promotion_authority: unchanged}
+  submit: {workspace: isolated_candidate_worktree, check_strategy: submit_plus_full_release_candidate, skill_policy: contract_required_or_dynamic_optional, promotion_authority: unchanged}
+  regulated: {workspace: isolated_candidate_worktree, check_strategy: full, skill_policy: contract_required_use_or_waive, promotion_authority: unchanged}
+does_not_prove: [scientific validity, provider sandboxing, promotion approval]
 """,
     "harness/protected_path_commit_policy.yml": """version: "0.1"
 policy: AEROS-PROTECTED-PATH-COMMIT-001

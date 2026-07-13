@@ -1,0 +1,76 @@
+version: "0.1"
+policy: AEROS-RESEARCH-PROFILES-001
+default_profile: research
+status: mapping_only
+principle: >
+  Profiles may reduce ceremony around reversible candidate work, but they may
+  not weaken immutable authority, evidence, provenance, or resource bounds.
+
+immutable_invariants:
+  - id: no_forged_human_decision
+    rule: "An agent must not generate, impersonate, or apply a human decision."
+  - id: external_authority_required
+    rule: "Credentials, paid access, external writes, and public release require human authority."
+  - id: observed_artifact_required
+    rule: "Completion requires an observed non-empty expected artifact, not an agent assertion."
+  - id: result_lineage_required
+    rule: "An admitted Result must trace to data snapshot, code, environment, and executor run."
+  - id: claim_self_upgrade_forbidden
+    rule: "The producer of a claim must not upgrade its admission status."
+  - id: paper_number_binding_required
+    rule: "Paper-facing numbers must bind to Result, Specification, and Exhibit evidence."
+  - id: claim_citation_locator_required
+    rule: "Claim-bearing citations require source evidence with a resolvable locator."
+  - id: bounded_loop_required
+    rule: "Every autonomous loop must enforce time, cost, resource, and repeated-state limits."
+
+profiles:
+  explore:
+    workspace: isolated_candidate_worktree
+    check_strategy: minimal_pre_drive_plus_artifact_selected_post_action
+    skill_policy: dynamic_optional
+    promotion_authority: unchanged
+    intended_use: "public-source exploration and reversible candidate artifacts"
+  research:
+    workspace: isolated_candidate_worktree
+    check_strategy: adaptive_post_action
+    skill_policy: dynamic_optional
+    promotion_authority: unchanged
+    intended_use: "normal data, analysis, literature, and paper-candidate work"
+  submit:
+    workspace: isolated_candidate_worktree
+    check_strategy: submit_plus_full_release_candidate
+    skill_policy: contract_required_or_dynamic_optional
+    promotion_authority: unchanged
+    intended_use: "citation, claim, number, replication, and package review"
+  regulated:
+    workspace: isolated_candidate_worktree
+    check_strategy: full
+    skill_policy: contract_required_use_or_waive
+    promotion_authority: unchanged
+    intended_use: "sensitive, team, signed-authority, or externally governed work"
+
+candidate_boundary:
+  candidate_may_change:
+    - paper_candidate
+    - claim_candidate
+    - specification_candidate
+    - local_code
+    - public_source_leads
+    - nonproduction_probe
+  always_requires_promotion:
+    - canonical_data
+    - admitted_result
+    - accepted_claim_status
+    - human_decision_record
+    - submission_or_release
+  implementation_boundary: >
+    This file maps desired behavior only. Deterministic local actions already
+    use isolated worktrees; provider/LLM actions remain AgentEnvelope-audited
+    until they have real isolated execution.
+
+does_not_prove:
+  - "that a candidate artifact is scientifically valid"
+  - "that provider/LLM execution is fully sandboxed"
+  - "that a lower-ceremony profile improves productivity"
+  - "that promotion or release is approved"

@@ -58,6 +58,7 @@ for T in "${TARGETS[@]}"; do
   fi
   [ -f "$SRC/docs/architecture_v0_5.md" ] && rsync -a "$SRC/docs/architecture_v0_5.md" "$T/docs/architecture_v0_5.md"
   [ -f "$SRC/docs/design/architecture_freeze_v1.md" ] && rsync -a "$SRC/docs/design/architecture_freeze_v1.md" "$T/docs/design/architecture_freeze_v1.md"
+  [ -f "$SRC/docs/design/profile_ab_protocol.md" ] && rsync -a "$SRC/docs/design/profile_ab_protocol.md" "$T/docs/design/profile_ab_protocol.md"
   if [ ! -f "$T/decisions/update_ledger.md" ]; then
     [ -f "$SRC/decisions/update_ledger.md" ] && rsync -a "$SRC/decisions/update_ledger.md" "$T/decisions/update_ledger.md"
   fi
@@ -214,6 +215,7 @@ REQUIRED_FILES = [
     "harness/completion_attestation_policy.yml",
     "harness/protected_path_commit_policy.yml",
     "harness/skill_obligation_policy.yml",
+    "harness/research_profiles.yml",
     "harness/evidence_unit_policy.yml",
     "harness/claim_vector_policy.yml",
     "harness/claim_upgrade_policy.yml",

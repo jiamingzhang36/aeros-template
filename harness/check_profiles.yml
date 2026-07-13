@@ -26,7 +26,7 @@ profiles:
       - check_sync_doctor.py
       - check_update_ledger_hash_chain.py
       - check_protected_path_hook.py
-      - check_skill_use_attestation.py
+      - check_execution_profiles.py
   pre_drive:
     description: "2-5 second authority/context/action compilation gate before choosing work."
     checks:

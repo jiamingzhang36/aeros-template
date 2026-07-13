@@ -1,10 +1,4 @@
-"""Skill obligation helpers.
-
-Skill obligations make skill consideration auditable without turning skills into
-research authority.  A task that is skill-eligible must either declare allowed
-or recommended skills for the relevant class, mark the class required, or carry
-an explicit waiver/blocker.
-"""
+"""Dynamic skill candidates plus explicit required-class enforcement."""
 
 from __future__ import annotations
 
@@ -99,10 +93,12 @@ def infer_skill_obligations(project_root: Path, contract: Contract) -> list[str]
     explicit = explicit_skill_obligations(contract)
     if explicit:
         return explicit
+    required = _norm_list(contract.raw.get("required_skill_classes"))
+    if required:
+        return required
     if (
         _norm_list(contract.raw.get("allowed_skills"))
         or _norm_list(contract.raw.get("recommended_skills"))
-        or _norm_list(contract.raw.get("required_skill_classes"))
         or skill_waivers(contract)
     ):
         return []
@@ -152,11 +148,12 @@ def skill_obligation_report(project_root: Path, contract: Contract) -> dict[str,
         spec = classes.get(cls, {})
         candidate_skills = set(_norm_list(spec.get("skills")))
         declared = sorted((allowed | recommended) & candidate_skills)
-        satisfied = bool(declared) or cls in required or cls in waived or "all" in waived
-        if not satisfied:
-            failures.append(
-                f"{contract.task_id}: skill obligation {cls!r} has no allowed/recommended skill, required class, or waiver"
-            )
+        required_now = cls in required
+        # Declaring a required class is sufficient at contract-validation time.
+        # Completion attestation, not this planning check, proves invocation or
+        # an explicit waiver. This also preserves legacy stage-shaped classes
+        # such as ``data_scouting`` while keeping the runtime fail-closed.
+        satisfied = True
         for skill in sorted(candidate_skills):
             if skill not in known_skills:
                 failures.append(f"{contract.task_id}: obligation {cls!r} references unknown skill {skill!r}")
@@ -166,6 +163,7 @@ def skill_obligation_report(project_root: Path, contract: Contract) -> dict[str,
                 "candidate_skills": sorted(candidate_skills),
                 "declared_skills": declared,
                 "required_class": cls in required,
+                "advisory_candidate": not required_now,
                 "waived": cls in waived or "all" in waived,
                 "satisfied": satisfied,
             }

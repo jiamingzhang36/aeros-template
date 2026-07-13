@@ -316,6 +316,7 @@ layers:
     - harness/practical_skill_menu.md
     - harness/skill_map_core.yml
     - harness/skill_obligation_policy.yml
+    - harness/research_profiles.yml
     - harness/skill_map_reference.md
     - harness/human_review_receipt_template.md
     - harness/automation_policy.yml

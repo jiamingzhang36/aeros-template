@@ -149,7 +149,8 @@ def validate_skill_contracts(project_root: Path, contracts: dict[str, tuple[Cont
                 failures.append(f"{task_id}: skill {name!r} is not in harness/skill_map_core.yml")
         for name in sorted(rec - allowed):
             failures.append(f"{task_id}: recommended skill {name!r} is not allowed by task contract")
-        if infer_skill_stage(contract) == "data_scouting":
+        required_classes = set(_norm_list(contract.raw.get("required_skill_classes")))
+        if infer_skill_stage(contract) == "data_scouting" and "data_source" in required_classes:
             if not (allowed & DATA_SKILL_NAMES):
                 failures.append(f"{task_id}: data-lane task has no allowed data skill")
             if not (rec & DATA_SKILL_NAMES):

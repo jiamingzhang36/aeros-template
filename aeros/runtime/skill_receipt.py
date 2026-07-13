@@ -94,7 +94,7 @@ def write_skill_invocation_receipt(
             "human_gate_required": bool(meta.get("human_gate_required", False)),
             "aeros_constraints": meta.get("aeros_constraints", []),
         })
-    missing_skill_decision = bool((recommended or obligations or required_classes) and not records and not waivers)
+    missing_skill_decision = bool(required_classes and not records and not waivers)
     payload = {
         "version": 1,
         "task_id": contract.task_id,
@@ -123,14 +123,7 @@ def build_skill_use_attestation(
     *,
     skill_receipt_path: Path | str | None = None,
 ) -> dict[str, Any]:
-    """Return the completion-level use-or-waive skill attestation.
-
-    This is deliberately stricter than mere recommendation coverage.  A passed
-    task that is skill-eligible must either point to a passing skill invocation
-    receipt or carry explicit waivers in the task contract.  The attestation is
-    still not a claim of skill quality; it only proves that the use/waive
-    decision is visible and machine-checkable.
-    """
+    """Enforce use-or-waive only for explicitly required skill classes."""
     skill_map = load_core_skill_map(project_root)
     try:
         from .skill_obligation import infer_skill_obligations
@@ -138,13 +131,7 @@ def build_skill_use_attestation(
         obligations = sorted(set(infer_skill_obligations(project_root, contract)))
     except Exception:
         obligations = sorted(str(s).strip() for s in (contract.raw.get("skill_obligations") or []) if str(s).strip())
-    required_classes = sorted(
-        {
-            str(s).strip()
-            for s in list(contract.raw.get("required_skill_classes") or []) + obligations
-            if str(s).strip()
-        }
-    )
+    required_classes = sorted({str(s).strip() for s in (contract.raw.get("required_skill_classes") or []) if str(s).strip()})
     recommended = sorted(str(s).strip() for s in (contract.raw.get("recommended_skills") or []) if str(s).strip())
     allowed = sorted(str(s).strip() for s in (contract.raw.get("allowed_skills") or []) if str(s).strip())
     contract_waivers = [w for w in (contract.raw.get("skill_waivers") or []) if isinstance(w, dict)]
@@ -177,7 +164,7 @@ def build_skill_use_attestation(
         if str(skill_map.get(name, {}).get("aeros_stage", "")).strip()
     }
     failures: list[str] = []
-    use_or_waive_required = bool(required_classes or recommended)
+    use_or_waive_required = bool(required_classes)
     missing_classes = sorted(
         cls for cls in required_classes
         if cls not in waiver_classes and "all" not in waiver_classes and cls not in skills_used and cls not in used_stages
@@ -192,14 +179,12 @@ def build_skill_use_attestation(
         failures.append("skill invocation receipt reports a missing skill decision")
     for cls in missing_classes:
         failures.append(f"required skill class {cls!r} has neither invocation nor waiver")
-    if recommended and not skills_used and not waivers:
-        failures.append("recommended skills declared but no invocation or waiver is recorded")
     verdict = "not_required"
     if use_or_waive_required:
         verdict = "fail" if failures else "pass"
     return {
         "version": 1,
-        "requirement": "use_or_waive",
+        "requirement": "required_class_use_or_waive_else_optional",
         "use_or_waive_required": use_or_waive_required,
         "receipt_path": receipt_rel,
         "receipt_present": receipt_present,

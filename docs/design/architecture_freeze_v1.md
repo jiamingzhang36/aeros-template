@@ -141,3 +141,32 @@ control plane.
 This freeze does not certify scientific truth, approve any gate, upgrade any
 claim, release any project, or prove that AEROS has low control tax. It defines
 the baseline from which those questions can be measured.
+
+## vNext reduction baseline
+
+The user-facing default is `research`, with `explore`, `submit`, and
+`regulated` as mappings over one immutable kernel. Profiles may reduce process
+ceremony but may not weaken these eight invariants:
+
+1. Agents cannot forge or apply human decisions.
+2. Credentials, paid access, external writes, and release require authority.
+3. Completion requires an observed expected artifact.
+4. Admitted Results require data/code/environment/run lineage.
+5. Claim producers cannot upgrade their own claim status.
+6. Paper numbers bind to Result, Specification, and Exhibit evidence.
+7. Claim-bearing citations require locator-backed source evidence.
+8. Autonomous loops require time, cost, resource, and repetition limits.
+
+Reversible model work should converge on an isolated candidate-worktree
+default. Candidate paper, claim, specification, code, public-source lead, and
+nonproduction-probe edits may be broad inside that workspace. Canonical data,
+admitted Results, accepted claims, human decisions, submission, and release
+remain promotion boundaries. Current deterministic local actions already use
+isolated worktrees; provider/LLM tasks remain audit-mode only and must not be
+described as fully sandboxed.
+
+Skills are dynamic optional capabilities by default. Only an explicit
+`required_skill_classes` contract creates a use-or-waive completion obligation.
+Profile simplification is accepted or rejected through paired real-project A/B
+evidence under `docs/design/profile_ab_protocol.md`; no rule is retired merely
+because the template remains green.

@@ -1,10 +1,12 @@
 version: "0.1"
 policy: AEROS-SKILL-OBLIGATION-001
 principle: >
-  Skill-eligible tasks must consider relevant professional skills and either
-  declare usable skills, mark the class required, or record an explicit waiver.
-  Skill obligations do not invoke skills, approve gates, certify claims, or
-  weaken AEROS checks.
+  Relevant skills are dynamically recommended, not a default completion
+  ceremony. Ordinary tasks may use zero skills without a waiver. Use-or-waive
+  is enforced only for classes explicitly listed in required_skill_classes.
+  Skill use does not approve gates, certify claims, or weaken AEROS checks.
+default_requirement: optional_record_if_used
+use_or_waive_trigger: explicit_required_skill_classes
 classes:
   data_source:
     skills: [data-inventory, data-quality-checker, data-merge-audit]
@@ -30,7 +32,7 @@ required_waiver_fields: [skill_class, reason, scope, progress_label]
 tiers:
   core:
     default_use: true
-    meaning: "default first-pass skills for normal AEROS work"
+    meaning: "high-priority dynamic candidate; not a completion obligation unless explicitly required"
   optional:
     default_use: false
     meaning: "task-specific skills used when clearly relevant"

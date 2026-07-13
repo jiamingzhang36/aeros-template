@@ -2415,6 +2415,18 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: first-bootstrap real-world human presence; safe signing-key custody; Census positive network execution; FRED vintage history; provider-verified FRED units without its metadata API; computational lineage from specification to result; scientific validity; claim support; gate approval; paper readiness.
 - **Drift risk**: The first signer bootstrap remains local TOFU; FRED current-release CSV is not an ALFRED vintage; Census live access remains credential-blocked; Econ object registries currently prove referential consistency rather than executor-produced lineage; legacy skill receipts will yield sparse scorecards rather than fabricated zeros.
 - **Next check**: After this batch is committed and hash-backed, choose one narrow follow-up only: either add authenticated FRED metadata verification or provide a Census key for a positive official-network E2E. Do not do both or add a new horizontal module in the same batch.
+
+## 2026-07-12 — Reduce process ceremony behind immutable research boundaries
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / profile mapping / control-tax reduction / measurement protocol
+- **North star:** Maximize model capability inside reversible candidate work while enforcing only boundaries that cannot safely be delegated.
+- **Alignment**: Added a mapping-only `explore/research/submit/regulated` profile policy with `research` as the user-facing default and exactly eight profile-invariant authority/evidence/resource rules. Ordinary tasks may now use zero skills without a waiver; only explicit `required_skill_classes` create completion-level use-or-waive enforcement. Recorded the candidate-worktree default design without claiming provider/LLM sandboxing, and added a paired real-project A/B protocol that measures accepted artifacts, control tax, human interruptions, and safety escapes before any old rule can be retired. Smoke remains 18 checks by replacing skill ceremony with profile/invariant validation rather than adding another daily check.
+- **Validation**: `check_execution_profiles.py`; `check_skill_coverage.py`; `check_skill_use_attestation.py`; `check_sync_doctor.py`; `check_architecture_freeze.py`; smoke 18/18; full 139/139.
+- **Non-goal**: Do not enable model-led planning, add a hypothesis/memory registry, delete Campaign, weaken signed authority, auto-retire checks, claim provider/LLM sandboxing, or start the real-project A/B before this baseline is committed.
+- **Does not prove**: lower control tax; better model decisions; higher artifact acceptance; safe provider/LLM isolation; scientific validity; claim support; promotion, submission, or release approval.
+- **Drift risk**: Downstream projects retain their old skill ceremony until explicitly synced. `research_profiles.yml` is mapping-only, so callers must not represent it as a runtime sandbox switch. Required skill classes remain fail-closed at completion even though ordinary recommendations no longer require waivers.
+- **Next check**: Sync one clean project per A/B arm, pair comparable bounded episodes using `docs/design/profile_ab_protocol.md`, and inspect every safety escape before considering any rule retirement.
 ## 2026-07-11 — Make de-vendor package check portable across host Pythons
 
 - **Commit(s)**: `1e7c298`
