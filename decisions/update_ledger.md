@@ -2462,7 +2462,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-13 — Route mature candidate pools without broad-capture ceremony
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `97e57d1`
 - **Change type**: framework / real-project rollout bugfix / control-tax reduction
 - **North star:** Let AEROS respond to actual project state: stop broad capture when a usable candidate pool already exists, avoid irrelevant skill ceremony, and diagnose runtime mode without migration false positives.
 - **Action**: Made broad-capture metrics denominator-honest (`lead_to_candidate_rate` is unavailable when no leads exist), added a deterministic 20-candidate triage threshold, and moved saturated candidate pools to candidate triage/promotion rather than another capture pass. Updated the research driver so this state surfaces as capture-efficiency risk with a concrete triage preflight. Broad-capture tasks no longer infer required skill classes unless a contract explicitly requires them; dynamic skill use remains available. Sync doctor now distinguishes vendored, package, and unknown runtime modes and marks de-vendor capability as not applicable for vendored projects. Reduced `check_econ_pack.py` startup cost by retaining all six pure job-compilation assertions while exercising one representative CLI dispatch instead of spawning six redundant processes.
