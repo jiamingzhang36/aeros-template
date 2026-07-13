@@ -2436,3 +2436,14 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: `checks/check_devendor_package.py` passes under Python 3.9, 3.10, and 3.14 ambients; `python3.10 checks/run_harness_checks.py --profile full` (all pass).
 - **Does not prove**: that every exotic host Python is supported; that de-vendor removal is safe; scientific validity.
 - **Next check**: Backfill this pending entry with the commit hash.
+## 2026-07-13 — Fail-close candidate profiles from real-project paired A/B
+
+- **Commit(s)**: pending
+- **Change type**: framework / adaptive profile enforcement / rollout evidence
+- **North star:** Reduce control tax only where real-project evidence shows that truthful progress remains observable.
+- **Action**: Converted the existing adaptive selector into a fail-closed post-action assessment when callers provide an observed action exit and expected outputs. Nonzero or missing exits and missing, empty, or out-of-worktree expected outputs now fail. Added analysis/figure and manuscript path mappings to result-registry, reproducibility, and provenance checks. Recorded the CMPD/MAHA/VLM paired decision: no rule is retired; candidate profiles remain reversible preflight only.
+- **Validation**: python3 checks/check_adaptive_checks.py; python3 checks/check_execution_profiles.py; smoke/full harness; paired MAHA and VLM reruns after downstream sync.
+- **Non-goal**: Do not add a new runtime module, infer omitted dependencies, certify output freshness, retire full checks, approve claims/gates, or authorize promotion/release.
+- **Does not prove**: scientific validity; complete path coverage; freshness of a pre-existing non-empty artifact; that lower control time generalizes beyond the paired tasks.
+- **Drift risk**: Callers must declare material dependency paths in addition to observed writes. An omitted dependency can still suppress a relevant check, so promotion/release remains on strict/full.
+- **Next check**: Sync MAHA and VLM, rerun the original paired episodes, and require candidate failure or visibility for the provenance/action-exit issues previously missed.

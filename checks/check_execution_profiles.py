@@ -45,6 +45,24 @@ def main() -> int:
         for name, mapping in research_profiles.items():
             if not isinstance(mapping, dict) or mapping.get("promotion_authority") != "unchanged":
                 failures.append(f"{name}: profile must not weaken promotion authority")
+        post_action = policy.get("candidate_post_action_contract") or {}
+        required_inputs = set(post_action.get("required_inputs") or [])
+        required_failures = set(post_action.get("fail_closed_on") or [])
+        if required_inputs != {
+            "observed_write_or_dependency_paths",
+            "observed_action_exit_code",
+            "expected_output_paths",
+        }:
+            failures.append("candidate post-action contract must require paths, action exit, and expected outputs")
+        if not {
+            "action_exit_not_observed",
+            "action_exit_nonzero",
+            "expected_outputs_not_declared",
+            "expected_output_missing",
+            "expected_output_empty",
+            "expected_output_outside_project",
+        }.issubset(required_failures):
+            failures.append("candidate post-action contract is not fail-closed")
     if failures:
         print("FAIL: execution profile problems detected")
         for failure in failures:

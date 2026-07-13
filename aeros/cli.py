@@ -551,8 +551,21 @@ def _cmd_job(args: argparse.Namespace) -> int:
 
 
 def _cmd_adaptive_checks(args: argparse.Namespace) -> int:
-    from .runtime.adaptive_checks import changed_paths, select_checks
-    root = _project_root(); print(json.dumps(select_checks(root, list(args.changed or []) or changed_paths(root)), indent=2)); return 0
+    from .runtime.adaptive_checks import assess_post_action, changed_paths, select_checks
+    root = _project_root()
+    paths = list(args.changed or []) or changed_paths(root)
+    if args.action_exit is None and not args.expected_output:
+        report = select_checks(root, paths)
+        print(json.dumps(report, indent=2))
+        return 0
+    report = assess_post_action(
+        root,
+        paths,
+        action_exit_code=args.action_exit,
+        expected_outputs=list(args.expected_output or []),
+    )
+    print(json.dumps(report, indent=2))
+    return 0 if report["status"] == "PASS" else 1
 
 
 def _cmd_migrate(args: argparse.Namespace) -> int:
@@ -1903,7 +1916,10 @@ def main(argv: list[str] | None = None) -> int:
 
     adaptive = sub.add_parser("checks", help="select change-aware checks from observed writes")
     adaptive_sub = adaptive.add_subparsers(dest="adaptive_command", required=True); adaptive_select = adaptive_sub.add_parser("select")
-    adaptive_select.add_argument("--changed", action="append", default=[]); adaptive_select.set_defaults(func=_cmd_adaptive_checks)
+    adaptive_select.add_argument("--changed", action="append", default=[])
+    adaptive_select.add_argument("--action-exit", type=int, default=None, help="observed action exit code for fail-closed post-action assessment")
+    adaptive_select.add_argument("--expected-output", action="append", default=[], help="project-relative expected artifact; repeat for multiple outputs")
+    adaptive_select.set_defaults(func=_cmd_adaptive_checks)
 
     migrate = sub.add_parser("migrate", help="prepare or inspect package-mode migration without deleting vendored files")
     migrate_sub = migrate.add_subparsers(dest="migrate_command", required=True)

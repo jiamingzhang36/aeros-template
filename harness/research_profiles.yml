@@ -69,6 +69,25 @@ candidate_boundary:
     use isolated worktrees; provider/LLM actions remain AgentEnvelope-audited
     until they have real isolated execution.
 
+candidate_post_action_contract:
+  command: "aeros checks select --changed PATH --action-exit N --expected-output PATH"
+  required_inputs:
+    - observed_write_or_dependency_paths
+    - observed_action_exit_code
+    - expected_output_paths
+  fail_closed_on:
+    - action_exit_not_observed
+    - action_exit_nonzero
+    - expected_outputs_not_declared
+    - expected_output_missing
+    - expected_output_empty
+    - expected_output_outside_project
+  dependency_rule: >
+    Callers must include material dependency paths as well as observed writes.
+    Manuscript work backed by registered results must therefore select
+    provenance/result checks even when the manuscript validator itself is
+    read-only.
+
 does_not_prove:
   - "that a candidate artifact is scientifically valid"
   - "that provider/LLM execution is fully sandboxed"

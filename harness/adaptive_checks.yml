@@ -9,14 +9,14 @@ domains:
     path_prefixes: [data/, audits/data_probe/, discovery/data_inventory.csv, docs/data_contract.yml]
     checks: [check_data_probe.py, check_data_inventory.py, check_data_contract.py, check_provenance.py]
   specification_integrity:
-    path_prefixes: [code/, docs/method_card.md, evidence/spec_run_index.csv]
-    checks: [check_analysis_ledger.py, check_claim_method_consistency.py]
+    path_prefixes: [code/, docs/method_card.md, evidence/spec_run_index.csv, outputs/analysis/, outputs/figures/]
+    checks: [check_analysis_ledger.py, check_claim_method_consistency.py, check_result_registry.py, check_output_reproducibility.py, check_provenance.py]
   evidence_claim_integrity:
     path_prefixes: [evidence/, discovery/literature/]
     checks: [check_claim_registry.py, check_claim_ceiling.py, check_research_graph.py]
   paper_binding_integrity:
-    path_prefixes: [paper/, tex/, references.bib]
-    checks: [check_number_registry.py, check_manuscript_citation_faithfulness.py, check_claim_numbers_bound.py]
+    path_prefixes: [paper/, tex/, docs/manuscript/, references.bib]
+    checks: [check_number_registry.py, check_manuscript_citation_faithfulness.py, check_claim_numbers_bound.py, check_result_registry.py, check_output_reproducibility.py, check_provenance.py]
   release_reproduction_integrity:
     path_prefixes: [replication/, compliance/, decisions/approvals/, campaigns/campaign_decisions.yml]
     checks: [check_protected_path_hook.py, check_approval_freshness.py, check_replication_package.py]

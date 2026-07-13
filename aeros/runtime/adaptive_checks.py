@@ -33,3 +33,55 @@ def select_checks(root: Path, paths: list[str]) -> dict[str, Any]:
         selected_checks = list(policy.get("default_checks") or [])
     return {"changed_paths": paths, "risk_domains": selected_domains, "checks": list(dict.fromkeys(selected_checks))}
 
+
+def assess_post_action(
+    root: Path,
+    paths: list[str],
+    *,
+    action_exit_code: int | None,
+    expected_outputs: list[str],
+) -> dict[str, Any]:
+    """Fail closed around an adaptive post-action check selection.
+
+    Selection alone is not completion evidence. A candidate-profile action must
+    expose its observed exit code and at least one non-empty expected artifact
+    inside the candidate worktree before selected checks can be treated as a
+    passing post-action gate.
+    """
+    report = select_checks(root, paths)
+    blockers: list[str] = []
+    if action_exit_code is None:
+        blockers.append("action_exit_not_observed")
+    elif action_exit_code != 0:
+        blockers.append(f"action_exit_nonzero:{action_exit_code}")
+
+    if not expected_outputs:
+        blockers.append("expected_outputs_not_declared")
+    else:
+        resolved_root = root.resolve()
+        for raw in expected_outputs:
+            candidate = (root / raw).resolve()
+            try:
+                candidate.relative_to(resolved_root)
+            except ValueError:
+                blockers.append(f"expected_output_outside_project:{raw}")
+                continue
+            if not candidate.is_file():
+                blockers.append(f"expected_output_missing:{raw}")
+            elif candidate.stat().st_size <= 0:
+                blockers.append(f"expected_output_empty:{raw}")
+
+    report.update({
+        "post_action_evaluated": True,
+        "action_exit_code": action_exit_code,
+        "expected_outputs": list(expected_outputs),
+        "blockers": blockers,
+        "status": "FAIL" if blockers else "PASS",
+        "does_not_prove": [
+            "that a non-empty artifact is scientifically valid",
+            "that a pre-existing artifact was freshly regenerated",
+            "that selected checks cover omitted dependency paths",
+            "that promotion, claim, gate, or release authority is granted",
+        ],
+    })
+    return report

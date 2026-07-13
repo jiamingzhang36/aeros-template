@@ -69,6 +69,24 @@ retirement candidate only when paired real-project evidence shows lower control
 tax or fewer human interruptions without a higher safety-escape count. Human
 review decides retirement; this protocol never deletes checks automatically.
 
+## Candidate post-action contract
+
+The candidate arm is not allowed to report PASS from selected checks alone.
+It must provide the observed action exit code, observed write paths plus
+material dependency paths, and at least one non-empty expected output inside
+the candidate worktree:
+
+    aeros checks select \
+      --changed PATH \
+      --action-exit N \
+      --expected-output PATH
+
+A missing/nonzero action exit or missing/empty/out-of-worktree expected output
+fails before scientific checks are interpreted. Analysis/figure outputs select
+result and provenance checks. Manuscript work that depends on registered
+results must declare that dependency so those checks also run. This contract
+does not prove that an output is fresh or scientifically valid.
+
 ## Boundaries
 
 This protocol does not prove scientific quality, model superiority, profile
