@@ -2450,7 +2450,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-13 — Enforce candidate execution, profile-selected checks, dynamic skills, and tiered citation verification
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `c2cb768`
 - **Change type**: framework / runtime enforcement / control-tax reduction / manuscript evidence integrity
 - **North star:** Give capable agents broad freedom inside reversible candidate work while keeping promotion, authority, evidence, and submission boundaries mechanically strict.
 - **Action**: Made isolated candidate worktrees the default for write-producing agent and provider collection actions; only declared, nonempty, conflict-free outputs are accepted back into the canonical workspace, while denied or undeclared writes fail closed. Activated immutable `explore/research/submit/regulated` runtime profiles: explore/research select post-action checks from observed artifacts, submit adds the paper/citation/result/provenance floor and automatically requires the submission review skill class, and regulated preserves full contract checks. Ordinary dynamic skills remain optional and capped at three, but actual use must record findings and artifact impact. Added explicit citation Tier 0/1/2 semantics: Tier 0 requires bibliographic mapping, Tier 1 requires passage/locator/interpretation plus medium-or-high automated verification, and Tier 2 requires full text, approved interpretation, and an independent verifier with source fingerprint. Added a fail-safe contract-check fallback for minimal or older projects lacking the adaptive-check catalog.
