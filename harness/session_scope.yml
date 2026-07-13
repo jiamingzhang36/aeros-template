@@ -16,6 +16,7 @@ common_allowed_prefixes:
   - aeros/state/global_state.yml
   - decisions/revision_log.md
   - decisions/update_ledger.md
+  - decisions/update_ledger_chain.jsonl
   - harness/improvement_backlog.yml
 lanes:
   data:

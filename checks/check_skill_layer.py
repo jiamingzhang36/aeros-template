@@ -61,6 +61,11 @@ ALLOWED_TIERS = {"core", "optional", "reference"}
 LEGACY_TIER_ALIASES = {"advisory": "optional"}
 MAX_CORE_SKILLS = 24
 MAX_TOTAL_SKILLS = 32
+REQUIRED_MAPPED_SKILL_NAMES = {
+    "sci-download",
+    "latex-compile-qa",
+    "project-rigor-check",
+}
 
 
 def main() -> int:
@@ -80,6 +85,16 @@ def main() -> int:
     elif SKILL_MAP.exists():
         data = yaml.safe_load(SKILL_MAP.read_text(encoding="utf-8"))
         skills = data.get("skills", {})
+        mapped_names = {
+            str(skill.get("name", "")).strip()
+            for skill in skills.values()
+            if isinstance(skill, dict) and str(skill.get("name", "")).strip()
+        }
+        missing_names = sorted(REQUIRED_MAPPED_SKILL_NAMES - mapped_names)
+        if missing_names:
+            failures.append(
+                "skill map is missing required registered names: " + ", ".join(missing_names)
+            )
         core_count = 0
         total_count = 0
         for key, skill in skills.items():

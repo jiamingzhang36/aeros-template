@@ -2483,3 +2483,15 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: correct skill use; scientific validity; citation truth; reproducibility; claim support; gate or release approval.
 - **Drift risk**: Projects remain on their vendored map until synced; project-owned backlog entries must be preserved during the framework rollout.
 - **Next check**: Commit the template, sync the clean CMPD project with `tools/sync_aeros_latest.zsh`, and require `check_skill_invocations.py` plus `check_approval_integrity.py` to pass there.
+
+## 2026-07-13 — Repair full-text skill registration and bibliography lane routing
+
+- **Commit(s)**: pending
+- **Change type**: framework / skill registry / exact work-lane routing
+- **North star:** Keep source verification auditable without forcing a source-identity repair to masquerade as manuscript writing.
+- **Action**: Registered `sci-download` inside the machine-readable `skills:` map and removed the unreachable duplicated subtree created by the prior root-level insertion. Added one exact literature-lane exception for `tex/references.bib`; all other `tex/` paths, including `tex/paper.tex`, remain forbidden. Corrected session semantics so the append-only update-ledger hash chain is bookkeeping, while real `decisions/` and claim authority remain protected. Added parsed-name, allow/deny, and semantic-classification regression assertions.
+- **Validation**: `check_skill_layer.py`, `check_skill_invocations.py`, `check_work_lanes.py`, `check_session_scope.py`, improvement-backlog validation, update-ledger validation, hash-chain validation, and downstream CMPD sync/checks.
+- **Non-goal**: Do not broaden literature tasks into manuscript editing, certify downloaded PDFs, rewrite task receipts, or weaken gate/claim authority.
+- **Does not prove**: source truth; full-text interpretation quality; citation support; scientific validity; claim, gate, submission, or release approval.
+- **Drift risk**: Downstream vendored projects retain the malformed map and coarse lane rule until an official sync; the exact exception must not become a prefix exception.
+- **Next check**: Commit the template, sync clean CMPD, and require T026 skill, lane, bibliography, and session checks to pass before completing the task.

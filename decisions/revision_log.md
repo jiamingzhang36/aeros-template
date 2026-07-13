@@ -615,3 +615,36 @@ Use this file to track template or project-level changes that alter workflow, ev
 - notes: This registers skill names and bounded output authority only. It does
   not prove that a skill was used correctly, validate prior scientific work,
   approve a gate, or alter downstream projects until the official sync runs.
+
+## REV042 - 2026-07-13 15:55 -0400
+
+- commit: pending
+- change_type: skill registry repair / exact work-lane exception
+- summary: Moved `sci-download` into the parsed `skills:` registry, removed the
+  unreachable duplicated legacy subtree, allowed literature tasks to edit only
+  `tex/references.bib`, and corrected the session classifier so the append-only
+  update-ledger hash chain is bookkeeping rather than gate authority.
+- files:
+  - harness/skill_map_core.yml
+  - aeros/runtime/work_lane.py
+  - checks/check_skill_layer.py
+  - checks/check_work_lanes.py
+  - aeros/runtime/session_guard.py
+  - checks/check_session_scope.py
+  - harness/session_scope.yml
+  - harness/work_lane_policy.yml
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/update_ledger_chain.jsonl
+  - decisions/revision_log.md
+- checks:
+  - `python3 checks/check_skill_layer.py`
+  - `python3 checks/check_skill_invocations.py`
+  - `python3 checks/check_work_lanes.py`
+  - `python3 checks/check_session_scope.py`
+  - `python3 checks/check_improvement_backlog.py`
+  - `python3 checks/check_update_ledger.py`
+  - `python3 checks/check_update_ledger_hash_chain.py`
+- notes: This is routing, registry, and bookkeeping-classification repair. It does not admit literature
+  evidence, verify bibliography content, allow manuscript prose edits, approve
+  a gate, or strengthen a claim.

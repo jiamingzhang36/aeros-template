@@ -27,6 +27,13 @@ COMMON_OUTPUT_PATHS = {
     "agent_runs",
 }
 
+# Narrow cross-surface exceptions must name exact files. Literature work may
+# repair source-verified bibliography metadata, but it may not edit manuscript
+# prose or any other TeX artifact.
+LANE_EXACT_OUTPUTS = {
+    "literature": {"tex/references.bib"},
+}
+
 LANE_OUTPUT_PREFIXES = {
     "data": (
         "data/",
@@ -163,12 +170,15 @@ def output_lane_problems(lane: str, outputs: Iterable[str]) -> list[str]:
         return [f"invalid work_lane {lane!r}"]
     failures: list[str] = []
     allowed = LANE_OUTPUT_PREFIXES[normalized]
+    exact_allowed = LANE_EXACT_OUTPUTS.get(normalized, set())
     forbidden = LANE_FORBIDDEN_PREFIXES.get(normalized, ())
     for raw in outputs:
         rel = _norm_path(str(raw))
         if not rel:
             continue
         if rel in COMMON_OUTPUT_PATHS or rel.startswith(COMMON_OUTPUT_PREFIXES):
+            continue
+        if rel in exact_allowed:
             continue
         if any(rel.startswith(prefix.rstrip("/")) for prefix in forbidden):
             failures.append(f"{rel}: forbidden output for {normalized} lane")

@@ -74,6 +74,7 @@ def default_policy() -> dict[str, Any]:
         "aeros/state/global_state.yml",
         "decisions/revision_log.md",
         "decisions/update_ledger.md",
+        "decisions/update_ledger_chain.jsonl",
         "harness/improvement_backlog.yml",
     ]
     return {
@@ -358,7 +359,7 @@ def _classify_artifact(rel: str, active_lane: str, allowed: bool, forbidden: boo
     elif rel.startswith("evidence/") or rel.startswith("outputs/.provenance/"):
         owner_lane = "claim"
         artifact_type = "evidence_or_result_artifact"
-    elif rel.startswith(("agent_runs/", "outputs/logs/", "outputs/context/", "decisions/revision_log.md", "decisions/update_ledger.md")) or rel in {"SESSION_CONTRACT.yml", "CURRENT_STATE.md", "NEXT_ACTION.md", "CONTEXT_BUNDLE.md"}:
+    elif rel.startswith(("agent_runs/", "outputs/logs/", "outputs/context/", "decisions/revision_log.md", "decisions/update_ledger.md", "decisions/update_ledger_chain.jsonl")) or rel in {"SESSION_CONTRACT.yml", "CURRENT_STATE.md", "NEXT_ACTION.md", "CONTEXT_BUNDLE.md"}:
         owner_lane = "bookkeeping"
         artifact_type = "bookkeeping"
     elif rel.startswith("decisions/"):

@@ -95,6 +95,31 @@ def _workflow_scope_fixture() -> list[str]:
     return failures
 
 
+def _ledger_chain_bookkeeping_fixture() -> list[str]:
+    failures: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="aeros_session_ledger_chain_") as tmp_name:
+        tmp = Path(tmp_name)
+        failures.extend(_init_git_fixture(tmp))
+        if failures:
+            return failures
+        start_session(tmp, lane="harness", objective="append update ledger chain", dry_run=False)
+        rel = "decisions/update_ledger_chain.jsonl"
+        _write_text(tmp / rel, '{"fixture":"append-only bookkeeping"}\n')
+        audit = audit_session(tmp)
+        if audit.verdict not in {"bookkeeping_only", "expected_lane_change"}:
+            failures.append(f"{rel}: expected bookkeeping verdict, got {audit.verdict}")
+        matching = [item for item in audit.changed_artifacts if item.get("path") == rel]
+        if not matching:
+            failures.append(f"{rel}: audit missing changed_artifacts entry")
+        elif matching[0].get("semantic_class") != "bookkeeping_only":
+            failures.append(
+                f"{rel}: expected bookkeeping_only, got {matching[0].get('semantic_class')}"
+            )
+        if not audit.ok:
+            failures.append(f"{rel}: append-only bookkeeping fixture should pass")
+    return failures
+
+
 def main() -> int:
     root = Path.cwd()
     policy = load_policy(root)
@@ -123,7 +148,7 @@ def main() -> int:
         if not preset.get("allowed_actions"):
             failures.append(f"workflow preset {required} has no allowed_actions")
     common = policy.get("common_allowed_prefixes") or []
-    for required in ["SESSION_CONTRACT.yml", "agent_runs/", "outputs/logs/", "decisions/revision_log.md"]:
+    for required in ["SESSION_CONTRACT.yml", "agent_runs/", "outputs/logs/", "decisions/revision_log.md", "decisions/update_ledger_chain.jsonl"]:
         if required not in common:
             failures.append(f"common_allowed_prefixes missing {required}")
     try:
@@ -152,6 +177,7 @@ def main() -> int:
     failures.extend(_semantic_scope_fixture("paper/draft.md", "CLAIM_SCOPE_DRIFT", "claim_scope_drift"))
     failures.extend(_semantic_scope_fixture("evidence/claim_registry.md", "AUTHORITY_DRIFT", "authority_drift"))
     failures.extend(_workflow_scope_fixture())
+    failures.extend(_ledger_chain_bookkeeping_fixture())
     if failures:
         print("FAIL: session scope guard problems detected")
         for failure in failures:

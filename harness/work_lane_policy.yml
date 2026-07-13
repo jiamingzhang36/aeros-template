@@ -86,6 +86,15 @@ forbidden_cross_lane_substitutions:
   - claim lane blocked -> writing stronger prose
   - harness lane cleanup -> substantive research progress
 
+exact_output_exceptions:
+  literature:
+    - tex/references.bib
+
+exact_output_exception_boundary: >
+  The literature exception is limited to source-verified bibliography metadata.
+  It does not allow tex/paper.tex, generated TeX, figures, tables, or manuscript
+  prose; all other tex/ paths remain writing-lane outputs.
+
 enforced_by:
   - checks/check_work_lanes.py
   - checks/check_goal_mode_data_progress.py

@@ -1,0 +1,29 @@
+version: 1
+policy: AEROS-ACTION-RECEIPT-001
+action_id: aeros_skill_lane_registry_repair_2026_07_13
+generated_at: '2026-07-13T19:53:08+00:00'
+action_mode: harness_triage
+honest_progress_label: mechanical_hygiene
+why_this_now: CMPD T026 exposed a hidden full-text skill, an over-broad bibliography
+  lane prohibition, and a false authority classification for required ledger-chain
+  maintenance.
+summary: Registered sci-download, added an exact tex/references.bib literature exception,
+  and classified only the update-ledger hash chain as bookkeeping while retaining
+  real decision authority.
+data_impact:
+  inventory_changed: false
+  source_verified: false
+  data_rows_changed: false
+  coverage_changed: false
+  backfill_queue_changed: false
+  probe_completed: false
+research_impact:
+  claim_ceiling_changed: false
+  gate_candidate_changed: false
+  evidence_graph_changed: false
+  result_registered: false
+evidence_paths:
+- agent_runs/AEROS_skill_lane_registry_repair_2026-07-13.md
+causal_attribution:
+  would_progress_without_this_action: false
+  dependency_type: blocking_resolution

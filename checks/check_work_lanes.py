@@ -11,6 +11,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from aeros.runtime.contract import load_contract  # noqa: E402
 from aeros.runtime.work_lane import (  # noqa: E402
+    LANE_EXACT_OUTPUTS,
     LANES,
     infer_work_lane,
     lane_policy_path,
@@ -43,9 +44,23 @@ def main() -> int:
             "harness/work_lane_policy.yml lanes do not match runtime lanes: "
             f"policy={sorted(declared)} runtime={sorted(LANES)}"
         )
-    for key in ["principle", "switch_gate", "completion_definitions", "forbidden_cross_lane_substitutions"]:
+    for key in ["principle", "switch_gate", "completion_definitions", "forbidden_cross_lane_substitutions", "exact_output_exceptions"]:
         if key not in policy:
             failures.append(f"harness/work_lane_policy.yml missing {key}")
+
+    declared_exceptions = {
+        str(lane): set(str(path) for path in (paths or []))
+        for lane, paths in (policy.get("exact_output_exceptions") or {}).items()
+    }
+    if declared_exceptions != LANE_EXACT_OUTPUTS:
+        failures.append(
+            "harness/work_lane_policy.yml exact_output_exceptions do not match runtime: "
+            f"policy={declared_exceptions} runtime={LANE_EXACT_OUTPUTS}"
+        )
+    if output_lane_problems("literature", ["tex/references.bib"]):
+        failures.append("literature lane must allow exact bibliography metadata path tex/references.bib")
+    if not output_lane_problems("literature", ["tex/paper.tex"]):
+        failures.append("literature lane must continue to forbid manuscript TeX edits")
 
     counts: Counter[str] = Counter()
     for path in sorted((root / "tasks").rglob("*.yml")):
