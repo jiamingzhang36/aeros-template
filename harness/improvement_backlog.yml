@@ -597,5 +597,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-07-13"
-    resolution_commit: "pending"
+    resolution_commit: "9aa5f43"
     notes: "This aligns parser and tier semantics. It does not verify a real source passage, create project interpretation records, or weaken Tier-2 human/independent review in the submission scanner."

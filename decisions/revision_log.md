@@ -744,7 +744,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV047 - 2026-07-13 - Canonical Tier-1 citation-record compatibility
 
-- commit: pending
+- commit: 9aa5f43
 - change_type: citation-grounding parser and tier-semantics alignment
 - summary: Let legacy sentence grounding resolve canonical interpretation
   records by manuscript path, normalized sentence, and citation key; accept
