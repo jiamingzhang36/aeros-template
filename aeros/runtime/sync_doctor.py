@@ -151,13 +151,37 @@ def default_project_roots(root: Path) -> list[Path]:
     return [path for path in sorted(validation.iterdir()) if (path / "project_manifest.yml").exists()]
 
 
+def _project_runtime_mode(project_root: Path) -> str:
+    config = project_root / ".aeros" / "project.yml"
+    if config.exists():
+        for raw in config.read_text(encoding="utf-8", errors="ignore").splitlines():
+            key, separator, value = raw.partition(":")
+            if separator and key.strip() == "runtime_mode":
+                mode = value.strip().strip("\"'").lower()
+                if mode in {"package", "vendored"}:
+                    return mode
+    if (project_root / "aeros").is_dir():
+        return "vendored"
+    if (project_root / "aeros.lock").exists():
+        return "package"
+    return "unknown"
+
+
 def diagnose_project(template_root: Path, project_root: Path) -> dict[str, Any]:
     template_root = Path(template_root).resolve()
     project_root = Path(project_root).resolve()
     capabilities: dict[str, dict[str, Any]] = {}
     missing_capabilities: list[str] = []
     outdated_capabilities: list[str] = []
+    runtime_mode = _project_runtime_mode(project_root)
     for capability, rels in CAPABILITIES.items():
+        if capability == "devendor_package" and runtime_mode == "vendored":
+            capabilities[capability] = {
+                "status": "not_applicable",
+                "reason": "vendored runtime does not require a project-local package build surface",
+                "files": [{"path": rel, "status": "not_applicable"} for rel in rels],
+            }
+            continue
         file_rows: list[dict[str, str]] = []
         cap_missing = False
         cap_outdated = False
@@ -184,6 +208,7 @@ def diagnose_project(template_root: Path, project_root: Path) -> dict[str, Any]:
         }
     return {
         "project": project_root.as_posix(),
+        "runtime_mode": runtime_mode,
         "status": "PASS" if not missing_capabilities and not outdated_capabilities else "ATTENTION",
         "missing_capabilities": missing_capabilities,
         "outdated_capabilities": outdated_capabilities,

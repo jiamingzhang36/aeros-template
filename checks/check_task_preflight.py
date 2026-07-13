@@ -222,6 +222,9 @@ def main() -> int:
         failures.append("broad source search should default to broad_capture mode")
     if "lead_queue" not in (broad.get("output_intents") or []):
         failures.append("broad_capture preflight should include lead_queue output intent")
+    broad_skill = broad.get("skill_use_contract") or {}
+    if broad_skill.get("use_or_waive_required") or broad_skill.get("required_skill_classes"):
+        failures.append("broad_capture preflight must not create a skill use-or-waive obligation")
     promote = build_task_preflight(ROOT, lane="data", intent="promote source candidate to canonical processed data")
     if promote.get("task_mode") == "broad_capture":
         failures.append("promotion/canonical work must not remain in broad_capture mode")

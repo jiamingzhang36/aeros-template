@@ -46,9 +46,12 @@ def main()->int:
         if any(not compile_drive_job(j).get('command') for j in jobs): failures.append('one or more drive jobs did not compile')
         if not submission_review_ready({'status':'ready'},{'recommendation':'ready_for_human_paper_readiness_review','blockers':['release_gate_not_human_approved']}): failures.append('release approval incorrectly blocks entry into human paper review')
         if submission_review_ready({'status':'blocked'},{'recommendation':'ready_for_human_paper_readiness_review'}): failures.append('blocked submission driver incorrectly entered human review')
-    for job in jobs:
-        proc=subprocess.run([sys.executable,'-m','aeros.cli','drive','--job',job,'--json'],cwd=ROOT,text=True,capture_output=True,timeout=30)
-        if proc.returncode or json.loads(proc.stdout).get('job')!=job: failures.append(f'drive --job {job} failed')
+    # Pure compilation above covers all six jobs. One representative CLI call
+    # proves parser/dispatch wiring without paying six process startups in the
+    # daily smoke profile.
+    cli_job='probe_data'
+    proc=subprocess.run([sys.executable,'-m','aeros.cli','drive','--job',cli_job,'--json'],cwd=ROOT,text=True,capture_output=True,timeout=30)
+    if proc.returncode or json.loads(proc.stdout).get('job')!=cli_job: failures.append(f'drive --job {cli_job} failed')
     home=subprocess.run([sys.executable,'-m','aeros.cli'],cwd=ROOT,text=True,capture_output=True,timeout=30)
     if home.returncode or 'RUN NOW' not in home.stdout or 'aeros submit' not in home.stdout: failures.append('three-entry home did not render')
     if failures:

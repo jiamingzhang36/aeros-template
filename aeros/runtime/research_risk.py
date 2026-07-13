@@ -122,6 +122,7 @@ def _wrapper_sync_item(root: Path) -> ResearchRiskItem | None:
 def _capture_efficiency_item(root: Path) -> ResearchRiskItem | None:
     summary = summarize_broad_capture(root)
     total_leads = int(summary.get("total_leads") or 0)
+    total_candidates = int(summary.get("total_candidates") or 0)
     saturation = bool(summary.get("capture_saturation_stop"))
     stale = int(summary.get("stale_lead_count") or 0)
     duplicates = int(summary.get("duplicate_lead_count") or 0)
@@ -135,12 +136,12 @@ def _capture_efficiency_item(root: Path) -> ResearchRiskItem | None:
         score=score,
         severity=_severity(score),
         status_label="CAPTURE_LOGGED",
-        recommended_action="Triage, dedupe, or promote existing broad-capture leads before collecting more.",
+        recommended_action="Triage existing leads or review/promote the candidate pool before collecting more.",
         why=(
-            f"Broad capture appears saturated: leads={total_leads}, stale={stale}, duplicates={duplicates}, "
+            f"Broad capture appears saturated: leads={total_leads}, candidates={total_candidates}, stale={stale}, duplicates={duplicates}, "
             f"lead_to_candidate_rate={summary.get('lead_to_candidate_rate')}. More capture may be lower value than triage."
         ),
-        command='python3 -m aeros.cli task preflight --lane data --intent "triage broad-capture lead queue" --json',
+        command='python3 -m aeros.cli task preflight --lane data --intent "triage existing broad-capture candidates for promotion readiness" --json',
         stop_condition="Stop after lead triage/promotion blockers are visible; do not promote to processed/canonical/claim without promotion checks.",
         expected_artifacts=("data/backfill/*_lead_queue.csv", "data/backfill/*_candidate_queue.csv", "audits/broad_capture/"),
         outranks=("more_broad_capture", "routine_data_scan"),

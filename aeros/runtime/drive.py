@@ -279,10 +279,10 @@ def _auto_objective(root: Path, lane: str) -> DriveObjective:
 
     broad = summarize_broad_capture(root)
     total_leads = int(broad.get("total_leads") or 0)
-    if lane in {"", "data"} and total_leads == 0:
-        return _goal_objective(root, "capture", lane)
     if lane in {"", "data"} and broad.get("capture_saturation_stop"):
         return _goal_objective(root, "promote", lane)
+    if lane in {"", "data"} and total_leads == 0:
+        return _goal_objective(root, "capture", lane)
 
     action = compute_next_action(root, lane=lane or "")
     return _objective_from_next(action)

@@ -99,6 +99,41 @@ with tempfile.TemporaryDirectory(prefix='aeros_drive_risk_') as raw:
         if (risk.get("top_risk") or {}).get("risk_id") != "submission_truth_risk":
             failures.append("research risk fixture did not rank submission_truth_risk first")
 
+    candidate_fixture = r"""
+from pathlib import Path
+import json, sys, tempfile
+sys.path.insert(0, str(Path.cwd()))
+from aeros.runtime.drive import build_drive_report
+with tempfile.TemporaryDirectory(prefix='aeros_drive_candidates_') as raw:
+    root = Path(raw)
+    backfill = root/'data/backfill'
+    backfill.mkdir(parents=True)
+    rows = [f'C{i:03d},L{i:03d},https://example.test/{i}' for i in range(1, 21)]
+    (backfill/'ready_candidate_queue.csv').write_text(
+        'candidate_id,lead_id,source_url\n' + '\n'.join(rows) + '\n', encoding='utf-8'
+    )
+    print(json.dumps(build_drive_report(root)))
+"""
+    proc4 = subprocess.run(
+        [sys.executable, "-c", candidate_fixture],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        timeout=30,
+    )
+    if proc4.returncode != 0:
+        failures.append("drive candidate-pool fixture failed: " + (proc4.stderr or proc4.stdout)[-1000:])
+    else:
+        payload = json.loads(proc4.stdout)
+        objective = payload.get("chosen_objective") or {}
+        broad = (payload.get("project_signals") or {}).get("broad_capture") or {}
+        if objective.get("objective_id") != "capture_efficiency_risk":
+            failures.append(f"sufficient candidate pool should surface capture_efficiency_risk, got {objective.get('objective_id')}")
+        if "triage" not in str(objective.get("command") or "") or "broad search" in str(objective.get("command") or ""):
+            failures.append("sufficient candidate pool must route to candidate triage rather than another broad search")
+        if broad.get("lead_to_candidate_rate") is not None:
+            failures.append("drive exposed an inflated zero-lead conversion rate")
+
     if failures:
         print("FAIL: drive entrypoint problems detected")
         for failure in failures:

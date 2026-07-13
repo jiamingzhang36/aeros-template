@@ -160,6 +160,13 @@ def build_task_preflight(
     contract_intents = contract_output_intents(contract) if contract else {}
     output_intents: Any = contract_intents or list(mode.get("allowed_output_intents") or [])
     obligations = infer_skill_obligations(root, contract) if contract else _skill_obligations_from_text(root, lane, intent)
+    if str(mode.get("task_mode") or "") == "broad_capture":
+        explicit_required = bool(contract and contract.raw.get("required_skill_classes"))
+        if not explicit_required:
+            # Broad capture is intentionally low-governance. Dynamic skills may
+            # still be selected by the agent, but lead collection does not
+            # manufacture a completion-time use-or-waive obligation.
+            obligations = []
     skill_use_contract = _skill_use_contract(root, obligations)
     allowed = _contract_allowed_to_touch(contract) or _workflow_allowed_prefixes(root, workflow)
     if not allowed:

@@ -121,6 +121,23 @@ def main() -> int:
         if "capture_saturation_stop" not in summary or "recommended_next_action" not in summary:
             failures.append("broad capture metrics missing saturation/next-action fields")
 
+    with tempfile.TemporaryDirectory(prefix="aeros_broad_capture_candidates_") as tmp_name:
+        tmp = Path(tmp_name)
+        backfill = tmp / "data" / "backfill"
+        backfill.mkdir(parents=True)
+        rows = [f"C{index:03d},L{index:03d},https://example.test/{index}" for index in range(1, 21)]
+        (backfill / "ready_candidate_queue.csv").write_text(
+            "candidate_id,lead_id,source_url\n" + "\n".join(rows) + "\n",
+            encoding="utf-8",
+        )
+        summary = summarize_broad_capture(tmp)
+        if summary.get("lead_to_candidate_rate") is not None:
+            failures.append("zero-lead candidate pool must report an unavailable, not inflated, conversion rate")
+        if not summary.get("candidate_pool_sufficient") or not summary.get("capture_saturation_stop"):
+            failures.append("sufficient candidate pool must stop further broad capture for triage")
+        if "triage/promote" not in str(summary.get("recommended_next_action") or ""):
+            failures.append("sufficient candidate pool did not recommend triage/promotion")
+
     if failures:
         print("FAIL: broad capture firewall problems detected")
         for failure in failures:

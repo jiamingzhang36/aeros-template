@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -88,6 +89,25 @@ def main() -> int:
         }
         if not expected_missing <= missing:
             failures.append("fixture: expected missing capabilities were not reported")
+    with tempfile.TemporaryDirectory(prefix="aeros_sync_doctor_vendored_") as tmp:
+        project = Path(tmp) / "project"
+        project.mkdir()
+        (project / "project_manifest.yml").write_text("project:\n  name: vendored fixture\n", encoding="utf-8")
+        for rels in CAPABILITIES.values():
+            for rel in rels:
+                if rel == "pyproject.toml":
+                    continue
+                source = ROOT / rel
+                target = project / rel
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+        diag = diagnose_project(ROOT, project)
+        if diag.get("runtime_mode") != "vendored":
+            failures.append("fixture: vendored runtime mode was not detected")
+        if "devendor_package" in (diag.get("missing_capabilities") or []):
+            failures.append("fixture: vendored project incorrectly requires devendor_package")
+        if ((diag.get("capabilities") or {}).get("devendor_package") or {}).get("status") != "not_applicable":
+            failures.append("fixture: vendored devendor_package status should be not_applicable")
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))
     elif failures:
