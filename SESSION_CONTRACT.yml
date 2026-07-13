@@ -1,12 +1,12 @@
 version: '0.1'
 policy: AEROS-SESSION-SCOPE-001
 active: false
-started_at: '2026-07-13T21:00:06+00:00'
+started_at: '2026-07-13T22:09:33+00:00'
 active_lane: harness
 active_workflow: ''
 workflow_description: ''
-objective: Accept project CITE identifiers in citation-audit parsing and add regression
-  coverage
+objective: Require explicit citation-audit table rows and reject narrative-only identifier
+  mentions
 max_actions: 1
 allowed_actions:
 - aeros cockpit

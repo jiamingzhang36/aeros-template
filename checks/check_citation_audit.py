@@ -32,6 +32,11 @@ def _parse_table(text: str) -> tuple[list[str], dict[str, list[str]]]:
     return headers, rows
 
 
+def _parse_audit(text: str) -> tuple[list[str], dict[str, list[str]], set[str]]:
+    headers, rows = _parse_table(text)
+    return headers, rows, set(rows)
+
+
 def _row_faithfulness_failures(
     literature_id: str,
     cells: list[str],
@@ -55,6 +60,8 @@ def _row_faithfulness_failures(
 
 def _fixture_failures() -> list[str]:
     fixture = """
+CITE011 is discussed in narrative text but has no audit-table row.
+
 | Paper ID | Citation exists | Metadata faithful | Claim support checked | Evidence level |
 |---|---|---|---|---|
 | P001 | yes | yes | yes | full_text |
@@ -62,11 +69,13 @@ def _fixture_failures() -> list[str]:
 | CITE009 | yes | yes | TBD | full_text |
 | CITE010 | yes | yes |
 """
-    headers, rows = _parse_table(fixture)
+    headers, rows, audited_ids = _parse_audit(fixture)
     failures: list[str] = []
     if set(rows) != {"P001", "CITE008", "CITE009", "CITE010"}:
         failures.append("fixture: citation audit must parse both P### and CITE### identifiers")
         return failures
+    if "CITE011" in audited_ids:
+        failures.append("fixture: narrative-only identifier must not satisfy citation-audit coverage")
 
     header_index = {name: idx for idx, name in enumerate(headers)}
     if _row_faithfulness_failures("P001", rows["P001"], header_index):
@@ -91,8 +100,7 @@ def main() -> int:
         return 1
 
     audit_text = AUDIT.read_text(encoding="utf-8")
-    headers, audit_rows = _parse_table(audit_text)
-    audited_ids = set(audit_rows) | set(LITERATURE_ID_RE.findall(audit_text))
+    headers, audit_rows, audited_ids = _parse_audit(audit_text)
 
     failures = _fixture_failures()
     for column in REQUIRED_COLUMNS:

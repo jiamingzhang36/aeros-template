@@ -719,3 +719,25 @@ Use this file to track template or project-level changes that alter workflow, ev
   source, approve a gate, or alter downstream project evidence before sync.
   The full-profile run also refreshed the derived index for two previously
   existing framework run reports; that index refresh is mechanical hygiene.
+
+## REV046 - 2026-07-13 - Explicit citation-audit row enforcement
+
+- commit: pending
+- change_type: citation audit fail-closed coverage semantics
+- summary: Removed narrative-token fallback from citation-audit coverage so
+  only explicit table rows satisfy the audit requirement, and added an
+  executable narrative-only `CITE###` fixture.
+- files:
+  - checks/check_citation_audit.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/update_ledger_chain.jsonl
+  - decisions/revision_log.md
+- checks:
+  - `python3 checks/check_citation_audit.py`
+  - `python3 checks/check_improvement_backlog.py`
+  - `python3 checks/check_update_ledger.py`
+  - `python3 checks/check_update_ledger_hash_chain.py`
+- notes: This requires mechanically explicit audit fields. It does not certify
+  the row's interpretation, establish manuscript support, or approve a claim,
+  gate, submission, or release.

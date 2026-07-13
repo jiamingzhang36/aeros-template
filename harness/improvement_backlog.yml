@@ -571,3 +571,17 @@ entries:
     resolved_at: "2026-07-13"
     resolution_commit: "f648361"
     notes: "This repairs audit-row routing only. It does not verify a source, approve an interpretation, establish manuscript claim support, or change any downstream project until official sync."
+  - id: AEROS-IMPROVE-042
+    created_at: "2026-07-13"
+    updated_at: "2026-07-13"
+    status: resolved
+    priority: high
+    area: citation-audit
+    source: cmpd_t025_explicit_row_validation
+    issue: "Citation-audit coverage unioned parsed table IDs with every P###/CITE### token in the Markdown document, so a narrative identity-correction note could satisfy coverage without an explicit row or faithfulness fields."
+    proposed_fix: "Derive audited IDs only from parsed audit-table rows and add an executable narrative-only CITE fixture that must remain unaudited."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-07-13"
+    resolution_commit: "pending"
+    notes: "This closes a mechanical coverage bypass. It does not decide whether an explicit row is substantively correct or whether a manuscript sentence is supported."
