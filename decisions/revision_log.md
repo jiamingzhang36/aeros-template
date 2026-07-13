@@ -651,7 +651,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV043 - 2026-07-13 16:05 -0400
 
-- commit: pending
+- commit: d366738
 - change_type: downstream sync ownership / skill-class validation parity
 - summary: Preserved existing project improvement backlogs during official
   framework sync and made invocation validation recognize the same candidate

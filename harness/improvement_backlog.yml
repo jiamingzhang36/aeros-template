@@ -527,7 +527,7 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-07-13"
-    resolution_commit: "pending"
+    resolution_commit: "d366738"
     notes: "This aligns two validators; it does not prove the skill was followed correctly or that its research output is valid."
   - id: AEROS-IMPROVE-039
     created_at: "2026-07-13"
@@ -541,5 +541,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-07-13"
-    resolution_commit: "pending"
+    resolution_commit: "d366738"
     notes: "Project backlog entries are project-owned evidence of open work. Template backlog changes remain in the template and must not be laundered into downstream project state."

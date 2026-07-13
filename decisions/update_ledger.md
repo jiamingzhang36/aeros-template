@@ -2514,3 +2514,11 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Non-goal**: Do not merge template backlog facts into downstream projects, waive missing required skills, or certify skill output.
 - **Does not prove**: research progress, source truth, citation support, scientific validity, claim or gate approval.
 - **Next check**: Commit, sync CMPD, verify its backlog hash is unchanged, and complete T026 only after all task checks pass.
+
+## 2026-07-13 — Backfill sync/skill validation repair commit
+
+- **Commit(s)**: `d366738`
+- **Change type**: ledger backfill
+- **Action**: Bound the project-backlog preservation and required-skill validator parity repair to its functional commit and closed AEROS-IMPROVE-038/039.
+- **Validation**: Targeted checks and smoke 18/18 passed before commit; downstream hash-preservation and T026 checks remain the rollout proof.
+- **Does not prove**: research progress, skill output correctness, scientific validity, claim or gate approval.
