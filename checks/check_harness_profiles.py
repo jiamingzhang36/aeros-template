@@ -10,6 +10,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from checks.run_harness_checks import CHECKS  # noqa: E402
+from aeros.runtime.init_project import FILES, _seed_file_content  # noqa: E402
 
 FULL_ONLY_HEAVY_FIXTURES = {
     "check_adversarial_benchmark.py",
@@ -25,6 +26,9 @@ def main() -> int:
         failures.append("missing harness/check_profiles.yml")
     else:
         data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        seeded = yaml.safe_load(_seed_file_content("harness/check_profiles.yml", FILES["harness/check_profiles.yml"])) or {}
+        if seeded != data:
+            failures.append("init_project effective check profile drifted from canonical harness/check_profiles.yml")
         profiles = data.get("profiles") or {}
         for required in ["smoke", "lane:data", "lane:literature", "lane:method", "lane:claim", "lane:writing", "lane:compliance", "full"]:
             if required not in profiles:

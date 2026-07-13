@@ -34,14 +34,15 @@ def prepare_package_mode(root: Path, *, policy_bundle_version: str = "aeros-poli
     config_path = root / ".aeros/project.yml"
     lock_path = root / "aeros.lock"
     config_path.parent.mkdir(parents=True, exist_ok=True)
-    if not config_path.exists():
-        config_path.write_text(yaml.safe_dump({
-            "schema_version": 1,
-            "runtime_mode": "package",
-            "policy_bundle_version": policy_bundle_version,
-            "project_manifest": "project_manifest.yml",
-        }, sort_keys=False), encoding="utf-8")
     config = _project_config(root)
+    vendored = [name for name in VENDORED_SURFACES if (root / name).exists()]
+    config.update({
+        "schema_version": int(config.get("schema_version") or 1),
+        "runtime_mode": "hybrid" if vendored else "package",
+        "policy_bundle_version": str(config.get("policy_bundle_version") or policy_bundle_version),
+        "project_manifest": str(config.get("project_manifest") or "project_manifest.yml"),
+    })
+    config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
     lock = {
         "schema_version": int(config.get("schema_version") or 1),
         "aeros_version": installed_version(),
@@ -55,8 +56,10 @@ def prepare_package_mode(root: Path, *, policy_bundle_version: str = "aeros-poli
 
 def inspect_migration(root: Path) -> dict[str, Any]:
     vendored = [name for name in VENDORED_SURFACES if (root / name).exists()]
+    configured = str(_project_config(root).get("runtime_mode") or "").strip()
+    inferred = "hybrid" if vendored and (root / "aeros.lock").exists() else "vendored" if vendored else "package" if (root / "aeros.lock").exists() else "unknown"
     return {
-        "runtime_mode": str(_project_config(root).get("runtime_mode") or "vendored"),
+        "runtime_mode": configured or inferred,
         "installed_aeros_version": installed_version(),
         "runtime_identity": runtime_identity(),
         "vendored_surfaces": vendored,
@@ -70,7 +73,7 @@ def doctor_package_mode(root: Path) -> dict[str, Any]:
     config = _project_config(root)
     lock_path = root / "aeros.lock"
     failures: list[str] = []
-    if config.get("runtime_mode") != "package": failures.append(".aeros/project.yml runtime_mode is not package")
+    if config.get("runtime_mode") not in {"package", "hybrid"}: failures.append(".aeros/project.yml runtime_mode is not package or hybrid")
     if not lock_path.exists(): failures.append("missing aeros.lock")
     lock = yaml.safe_load(lock_path.read_text(encoding="utf-8")) or {} if lock_path.exists() else {}
     if str(lock.get("aeros_version") or "") != installed_version(): failures.append("installed AEROS version differs from aeros.lock")
@@ -88,4 +91,3 @@ def doctor_package_mode(root: Path) -> dict[str, Any]:
         "vendored_surfaces_present": [name for name in VENDORED_SURFACES if (root / name).exists()],
         "does_not_prove": ["scientific validity", "policy equivalence across versions", "release readiness"],
     }
-

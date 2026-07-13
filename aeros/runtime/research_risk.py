@@ -123,12 +123,17 @@ def _capture_efficiency_item(root: Path) -> ResearchRiskItem | None:
     summary = summarize_broad_capture(root)
     total_leads = int(summary.get("total_leads") or 0)
     total_candidates = int(summary.get("total_candidates") or 0)
-    saturation = bool(summary.get("capture_saturation_stop"))
+    pause_recommended = bool(summary.get("broad_capture_pause_recommended", summary.get("capture_saturation_stop")))
+    named_gaps = [str(item) for item in (summary.get("named_coverage_gaps") or [])]
     stale = int(summary.get("stale_lead_count") or 0)
     duplicates = int(summary.get("duplicate_lead_count") or 0)
-    if not saturation:
+    if not pause_recommended:
         return None
-    score = min(80, 50 + stale + duplicates + max(0, total_leads - 20))
+    score = min(80, 50 + stale + duplicates + max(0, total_leads - 20) + max(0, total_candidates - 20))
+    recommendation = str(summary.get("recommended_next_action") or "Triage the existing backlog before collecting more.")
+    intent = "triage existing broad-capture candidates for promotion readiness"
+    if named_gaps:
+        intent += "; then plan targeted capture for named gaps: " + ", ".join(named_gaps)
     return ResearchRiskItem(
         risk_id="capture_efficiency_risk",
         domain="capture_efficiency",
@@ -136,12 +141,13 @@ def _capture_efficiency_item(root: Path) -> ResearchRiskItem | None:
         score=score,
         severity=_severity(score),
         status_label="CAPTURE_LOGGED",
-        recommended_action="Triage existing leads or review/promote the candidate pool before collecting more.",
+        recommended_action=recommendation,
         why=(
-            f"Broad capture appears saturated: leads={total_leads}, candidates={total_candidates}, stale={stale}, duplicates={duplicates}, "
-            f"lead_to_candidate_rate={summary.get('lead_to_candidate_rate')}. More capture may be lower value than triage."
+            f"Broad capture pause is recommended: leads={total_leads}, candidates={total_candidates}, stale={stale}, duplicates={duplicates}, "
+            f"lead_to_candidate_rate={summary.get('lead_to_candidate_rate')}, coverage_gaps={named_gaps or 'not_declared'}. "
+            "This proves triage backlog, not search-space saturation."
         ),
-        command='python3 -m aeros.cli task preflight --lane data --intent "triage existing broad-capture candidates for promotion readiness" --json',
+        command=f'python3 -m aeros.cli task preflight --lane data --intent "{intent}" --json',
         stop_condition="Stop after lead triage/promotion blockers are visible; do not promote to processed/canonical/claim without promotion checks.",
         expected_artifacts=("data/backfill/*_lead_queue.csv", "data/backfill/*_candidate_queue.csv", "audits/broad_capture/"),
         outranks=("more_broad_capture", "routine_data_scan"),

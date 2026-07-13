@@ -1,0 +1,189 @@
+{
+  "status": "pass",
+  "profile": "smoke",
+  "failures": 0,
+  "checks": [
+    {
+      "name": "checks/check_campaign_contract.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 2.028,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: campaign contract circuit breaker is valid"
+      ]
+    },
+    {
+      "name": "checks/check_authority_evidence.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 1.575,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: tiered authority evidence is fail-closed and locally honest"
+      ]
+    },
+    {
+      "name": "checks/check_authority_lifecycle_e2e.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 5.546,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: bootstrap, signed gate approve/apply, rotation, revocation, and force resistance"
+      ]
+    },
+    {
+      "name": "checks/check_action_spec.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.126,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: ActionSpec invariants are valid"
+      ]
+    },
+    {
+      "name": "checks/check_progress_semantics.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.177,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: progress domain/class semantics are valid"
+      ]
+    },
+    {
+      "name": "checks/check_artifact_semantics.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.097,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: orthogonal artifact semantics and legacy output-intent projection are valid"
+      ]
+    },
+    {
+      "name": "checks/check_research_job_compiler.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 1.102,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: data_probe and run_specification ResearchJobs compile and execute in isolation"
+      ]
+    },
+    {
+      "name": "checks/check_econ_pack.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 1.815,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: economics object chain, five protocols, radar, six drive jobs, scorecard, and three-entry UX"
+      ]
+    },
+    {
+      "name": "checks/check_census_probe.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.278,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: Census/FRED DataContract probes pin provider/release and verify bounded coverage, missingness, join keys, artifacts, provenance, and unit boundaries"
+      ]
+    },
+    {
+      "name": "checks/check_adaptive_checks.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.581,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: observed writes select checks across six risk domains"
+      ]
+    },
+    {
+      "name": "checks/check_task_preflight.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.4,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "[kernel] task T_MATCH BLOCKED by preflight -> /private/var/folders/1q/5bbv7pvn117_jknmqmjzj5dm0000gn/T/aeros_preflight_campaign_74xl71kt/decisions/escalations/T_MATCH.md",
+        "[kernel] task T_UNDECLARED BLOCKED by preflight -> /private/var/folders/1q/5bbv7pvn117_jknmqmjzj5dm0000gn/T/aeros_preflight_campaign_74xl71kt/decisions/escalations/T_UNDECLARED.md",
+        "PASS: task preflight is valid"
+      ]
+    },
+    {
+      "name": "checks/check_owner_decisions.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.167,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: owner decision rules are enforced by preflight"
+      ]
+    },
+    {
+      "name": "checks/check_broad_capture_firewall.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.267,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: broad capture firewall is valid"
+      ]
+    },
+    {
+      "name": "checks/check_output_intent.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.292,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: output intents are valid"
+      ]
+    },
+    {
+      "name": "checks/check_sync_doctor.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.442,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: sync doctor is valid"
+      ]
+    },
+    {
+      "name": "checks/check_update_ledger_hash_chain.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 2.101,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: update ledger hash chain is valid"
+      ]
+    },
+    {
+      "name": "checks/check_protected_path_hook.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 1.124,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: protected-path pre-commit hook blocks protected staged files by default"
+      ]
+    },
+    {
+      "name": "checks/check_execution_profiles.py",
+      "status": "pass",
+      "exit_code": 0,
+      "elapsed_seconds": 0.24,
+      "draft_warning_seen": false,
+      "output_tail": [
+        "PASS: execution profiles and immutable research-profile mapping are valid"
+      ]
+    }
+  ]
+}

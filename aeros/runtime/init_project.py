@@ -252,7 +252,7 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_next_action.py, check_action_spec.py, check_session_scope.py, check_skill_coverage.py, check_execution_mode.py, check_task_mode.py, check_task_preflight.py, check_source_capture_permission.py, check_discovery_route_decision.py, check_execution_profiles.py, check_source_id_consistency.py, check_artifact_stage.py, check_output_intent.py, check_route_early_gate.py, check_improve_harvest.py, check_sync_doctor.py, check_update_ledger_hash_chain.py, check_harness_observed_receipts.py, check_protected_path_hook.py, check_evidence_sufficiency_audit.py, check_context_bundle.py, check_context_graph.py, check_cockpit.py, check_harness_profiles.py]}
+  smoke: {checks: [check_campaign_contract.py, check_authority_evidence.py, check_authority_lifecycle_e2e.py, check_action_spec.py, check_progress_semantics.py, check_artifact_semantics.py, check_research_job_compiler.py, check_econ_pack.py, check_census_probe.py, check_adaptive_checks.py, check_task_preflight.py, check_owner_decisions.py, check_broad_capture_firewall.py, check_output_intent.py, check_sync_doctor.py, check_update_ledger_hash_chain.py, check_protected_path_hook.py, check_execution_profiles.py]}
   full: {checks: all}
 """,
     "tools/hooks/pre-commit-aeros-protected-paths": """#!/usr/bin/env python3
@@ -988,6 +988,12 @@ def _sync_framework_into(root: Path) -> None:
     subprocess.run(["zsh", str(sync_script), str(root)], check=True, env=env)
 
 
+def _seed_file_content(rel: str, fallback: str) -> str:
+    """Use the canonical checkout policy when present; fallback is bootstrap-only."""
+    canonical = Path(__file__).resolve().parents[2] / rel
+    return canonical.read_text(encoding="utf-8") if canonical.is_file() else fallback
+
+
 def init_project(path: str | Path, *, force: bool = False) -> Path:
     root = Path(path).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
@@ -1000,7 +1006,7 @@ def init_project(path: str | Path, *, force: bool = False) -> Path:
         if target.exists() and not force:
             continue
         target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_text(content, encoding="utf-8")
+        target.write_text(_seed_file_content(rel, content), encoding="utf-8")
 
     for directory in DIRS:
         marker = root / directory / ".gitkeep"

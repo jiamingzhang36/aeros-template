@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import shlex
 from typing import Any
 
 import yaml
@@ -34,7 +35,7 @@ PROTOCOLS: dict[str, dict[str, Any]] = {
 DRIVE_JOBS: dict[str, dict[str, Any]] = {
     "find_data": {"lane": "data", "command": "python3 -m aeros.cli data plan", "artifact": "discovery/data_inventory.csv", "stop": "candidate provider-native sources and the smallest next probe are identified"},
     "probe_data": {"lane": "data", "command": "python3 -m aeros.cli data probe official --series-id auto --json", "artifact": "data/probes/*/probe.json", "stop": "a bounded official-source sample pins provider ID/release and verifies units, coverage, missingness, and join keys"},
-    "run_specification": {"lane": "analysis", "command": "python3 -m aeros.cli econ protocol --name panel --json", "artifact": "evidence/econ/specification_registry.csv", "stop": "specification and required diagnostics are compiled; execution awaits a registered executor/input"},
+    "run_specification": {"lane": "analysis", "command": "python3 -m aeros.cli drive --job run_specification --source-candidate PATH --target SPEC_ID --execute", "artifact": "outputs/econ/specification_runs/*.json", "stop": "a registered simple OLS specification is executed in isolation and accepted only as a nonproduction candidate result"},
     "diagnose_design": {"lane": "method", "command": "python3 -m aeros.cli econ protocol --name panel --json", "artifact": "audits/advisory/econ_protocol_packet.json", "stop": "machine diagnostics and human identification questions are separated"},
     "read_literature": {"lane": "literature", "command": "python3 -m aeros.cli econ literature-radar --json", "artifact": "audits/literature/econ_literature_radar.json", "stop": "read_now/watch/ignore queues are refreshed from project relevance"},
     "bind_or_reproduce_paper": {"lane": "writing", "command": "python3 -m aeros.cli econ chain --json", "artifact": "evidence/econ/sentence_binding_registry.csv", "stop": "every registered sentence resolves through exhibit/result/specification/sample or is reported as debt"},
@@ -146,10 +147,16 @@ def build_skill_scorecard(root: Path) -> dict[str, Any]:
     return {"model": "AEROS-SKILL-SCORECARD-001", "scorecards": scorecards, "selection_rule": "prefer eligible skills with higher blocker_resolution and acceptance, then lower correction/cost; no evidence means no ranking", "does_not_prove": ["skill scientific quality", "causal contribution of a skill to an outcome"]}
 
 
-def compile_drive_job(job: str) -> dict[str, Any]:
+def compile_drive_job(job: str, *, source_candidate: str = "", target: str = "") -> dict[str, Any]:
     if job not in DRIVE_JOBS: raise ValueError(f"unknown drive job: {job}")
     row = DRIVE_JOBS[job]
-    return {"objective_id": f"econ_job:{job}", "objective": job.replace("_", " "), "lane": row["lane"], "why": "Economics-native job selected explicitly; execution remains bounded by existing AEROS authority and promotion rules.", "command": row["command"], "stop_condition": row["stop"], "expected_artifacts": [row["artifact"]], "can_run_without_human": True, "needs_human": False, "status_label": "ROUTE_READY", "safety": ["no automatic claim upgrade", "no automatic canonical admission", "human identification judgments remain advisory"], "source": "aeros.runtime.econ_pack.DRIVE_JOBS"}
+    command = row["command"]
+    if job == "run_specification" and source_candidate and target:
+        command = (
+            "python3 -m aeros.cli drive --job run_specification "
+            f"--source-candidate {shlex.quote(source_candidate)} --target {shlex.quote(target)} --execute"
+        )
+    return {"objective_id": f"econ_job:{job}", "objective": job.replace("_", " "), "lane": row["lane"], "why": "Economics-native job selected explicitly; execution remains bounded by existing AEROS authority and promotion rules.", "command": command, "stop_condition": row["stop"], "expected_artifacts": [row["artifact"]], "can_run_without_human": True, "needs_human": False, "status_label": "ROUTE_READY", "safety": ["no automatic claim upgrade", "no automatic canonical admission", "human identification judgments remain advisory"], "source": "aeros.runtime.econ_pack.DRIVE_JOBS"}
 
 
 def submission_review_ready(driver: dict[str, Any], readiness: dict[str, Any]) -> bool:

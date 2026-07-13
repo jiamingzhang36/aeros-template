@@ -6,6 +6,7 @@ from pathlib import Path
 import yaml
 ROOT=Path(__file__).resolve().parents[1]; sys.path.insert(0,str(ROOT))
 from aeros.runtime.econ_pack import build_literature_radar, build_skill_scorecard, compile_drive_job, compile_protocol, initialize_registries, submission_review_ready, validate_object_chain
+from aeros.runtime.drive import build_drive_report
 
 def write(path:Path, fields:list[str], rows:list[dict[str,str]])->None:
     path.parent.mkdir(parents=True,exist_ok=True)
@@ -44,6 +45,10 @@ def main()->int:
         if any(empty_card[key] is not None for key in ('artifact_acceptance_rate','human_correction_rate','blocker_resolution_rate','average_runtime','average_cost')): failures.append('missing skill outcome observations were misrepresented as zero-valued evidence')
         jobs=('find_data','probe_data','run_specification','diagnose_design','read_literature','bind_or_reproduce_paper')
         if any(not compile_drive_job(j).get('command') for j in jobs): failures.append('one or more drive jobs did not compile')
+        for job in jobs:
+            handled=build_drive_report(root,job=job)
+            objective=handled.get('chosen_objective') or {}
+            if handled.get('job')!=job or objective.get('objective_id')!=f'econ_job:{job}': failures.append(f'in-process drive handler mismatch for {job}')
         if not submission_review_ready({'status':'ready'},{'recommendation':'ready_for_human_paper_readiness_review','blockers':['release_gate_not_human_approved']}): failures.append('release approval incorrectly blocks entry into human paper review')
         if submission_review_ready({'status':'blocked'},{'recommendation':'ready_for_human_paper_readiness_review'}): failures.append('blocked submission driver incorrectly entered human review')
     # Pure compilation above covers all six jobs. One representative CLI call

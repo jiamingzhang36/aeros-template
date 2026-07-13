@@ -133,6 +133,8 @@ with tempfile.TemporaryDirectory(prefix='aeros_drive_candidates_') as raw:
             failures.append("sufficient candidate pool must route to candidate triage rather than another broad search")
         if broad.get("lead_to_candidate_rate") is not None:
             failures.append("drive exposed an inflated zero-lead conversion rate")
+        if not broad.get("candidate_backlog_ready") or not broad.get("broad_capture_pause_recommended"):
+            failures.append("drive did not expose the downgraded candidate-backlog/pause semantics")
 
     if failures:
         print("FAIL: drive entrypoint problems detected")

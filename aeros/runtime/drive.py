@@ -279,7 +279,7 @@ def _auto_objective(root: Path, lane: str) -> DriveObjective:
 
     broad = summarize_broad_capture(root)
     total_leads = int(broad.get("total_leads") or 0)
-    if lane in {"", "data"} and broad.get("capture_saturation_stop"):
+    if lane in {"", "data"} and broad.get("broad_capture_pause_recommended", broad.get("capture_saturation_stop")):
         return _goal_objective(root, "promote", lane)
     if lane in {"", "data"} and total_leads == 0:
         return _goal_objective(root, "capture", lane)
@@ -377,13 +377,47 @@ def _run_official_probe_envelope(root: Path) -> dict[str, Any]:
     }
 
 
-def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lane: str = "", execute: bool = False, job: str = "") -> dict[str, Any]:
+def _run_research_job_envelope(root: Path, *, job_type: str, source_candidate: str, target: str) -> dict[str, Any]:
+    from .execution_envelope import execute_action_spec_in_isolated_worktree
+    from .research_job import ResearchJob, compile_research_job
+    if not source_candidate or not target:
+        return {
+            "attempted": True,
+            "status": "fail",
+            "reason": "run_specification requires --source-candidate and --target",
+            "command": "compiled run_specification",
+        }
+    try:
+        compiled = compile_research_job(ResearchJob(
+            "DRIVE-RUN-SPECIFICATION", job_type, target, source_candidate,
+            f"run registered specification {target} over {source_candidate}",
+        ))
+        result = execute_action_spec_in_isolated_worktree(root, compiled.action_spec, timeout_seconds=120)
+    except Exception as exc:
+        return {"attempted": True, "status": "fail", "reason": str(exc), "command": "compiled run_specification"}
+    return {
+        "attempted": True,
+        "status": "pass" if result.ok else "fail",
+        "exit_code": result.return_code,
+        "command": compiled.action_spec.command,
+        "action_spec": compiled.action_spec.to_dict(),
+        "observed_writes": list(result.observed_writes),
+        "accepted_outputs": list(result.accepted_outputs),
+        "denied_writes": list(result.denied_writes),
+        "undeclared_writes": list(result.undeclared_writes),
+        "missing_expected_outputs": list(result.missing_expected_outputs),
+        "worktree_removed": result.worktree_removed,
+        "reason": result.message,
+    }
+
+
+def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lane: str = "", execute: bool = False, job: str = "", source_candidate: str = "", target: str = "") -> dict[str, Any]:
     root = Path(root)
     goal = (goal or "auto").strip().lower()
     lane = (lane or "").strip()
     if job:
         from .econ_pack import compile_drive_job
-        objective = DriveObjective(**compile_drive_job(job))
+        objective = DriveObjective(**compile_drive_job(job, source_candidate=source_candidate, target=target))
     else:
         objective = _auto_objective(root, lane) if goal == "auto" else _goal_objective(root, goal, lane)
     preflight = build_task_preflight(root, lane=objective.lane if objective.lane in {"data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"} else lane, intent=_preflight_intent(objective))
@@ -391,11 +425,20 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
     source_permission = preflight.get("source_capture_permission") or {}
     probe_permission_ok = objective.objective_id != "econ_job:probe_data" or bool(source_permission.get("allowed_without_human_approval"))
     may_execute = execute and objective.can_run_without_human and not objective.needs_human and not preflight.get("needs_human_decision") and probe_permission_ok
-    execution = (_run_official_probe_envelope(root) if objective.objective_id == "econ_job:probe_data" else _run_safe_command(root, objective.command)) if may_execute else {
-        "attempted": False,
-        "status": "not_requested" if not execute else "needs_human_or_not_safe",
-        "command": objective.command,
-    }
+    if may_execute and objective.objective_id == "econ_job:probe_data":
+        execution = _run_official_probe_envelope(root)
+    elif may_execute and objective.objective_id == "econ_job:run_specification":
+        execution = _run_research_job_envelope(
+            root, job_type="run_specification", source_candidate=source_candidate, target=target,
+        )
+    elif may_execute:
+        execution = _run_safe_command(root, objective.command)
+    else:
+        execution = {
+            "attempted": False,
+            "status": "not_requested" if not execute else "needs_human_or_not_safe",
+            "command": objective.command,
+        }
     if execution.get("status") == "fail": status = "FAILED"
     elif objective.needs_human or (execute and not probe_permission_ok): status = "NEEDS_HUMAN"
     else: status = "EXECUTED" if execution.get("attempted") else "READY"
@@ -406,6 +449,7 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
         "model": "AEROS-USEFUL-001-drive-mvp",
         "goal": goal,
         "job": job or "auto",
+        "job_inputs": {"source_candidate": source_candidate, "target": target},
         "chosen_objective": objective.to_dict(),
         "research_risk": risk_report,
         "execution": execution,

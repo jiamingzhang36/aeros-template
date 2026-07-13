@@ -766,3 +766,46 @@ Use this file to track template or project-level changes that alter workflow, ev
 - notes: Positive Tier-1 and negative Tier-2 fixtures enforce the boundary.
   This does not certify real interpretation records, source passages, claims,
   gates, submissions, or releases.
+
+## REV048 - 2026-07-13 - Candidate/runtime convergence and bounded specification execution
+
+- commit: pending
+- change_type: candidate semantics / hybrid runtime / economics execution
+- summary: Downgraded candidate-pool claims to backlog/pause semantics, made
+  hybrid vendored/package operation explicit, aligned effective init seeds with
+  canonical profiles, measured smoke cost, exercised all six economics drive
+  handlers, and implemented one isolated nonproduction CSV/OLS specification
+  slice.
+- files:
+  - aeros/cli.py
+  - aeros/runtime/broad_capture.py
+  - aeros/runtime/devendor.py
+  - aeros/runtime/drive.py
+  - aeros/runtime/econ_pack.py
+  - aeros/runtime/init_project.py
+  - aeros/runtime/job_actions.py
+  - aeros/runtime/research_job.py
+  - aeros/runtime/research_risk.py
+  - aeros/runtime/sync_doctor.py
+  - checks/check_adaptive_checks.py
+  - checks/check_broad_capture_firewall.py
+  - checks/check_drive.py
+  - checks/check_econ_pack.py
+  - checks/check_harness_profiles.py
+  - checks/check_research_job_compiler.py
+  - checks/check_sync_doctor.py
+  - harness/adaptive_checks.yml
+  - audits/runtime/smoke_cost_baseline_2026-07-13.json
+  - audits/runtime/smoke_cost_baseline_2026-07-13.md
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/update_ledger_chain.jsonl
+  - decisions/revision_log.md
+- checks:
+  - eight targeted runtime/check fixtures
+  - `python3 checks/run_harness_checks.py --profile smoke --timeout 60 --no-observed-receipt`
+  - `python3 checks/run_harness_checks.py --profile full --timeout 60 --no-observed-receipt`
+  - `git diff --check`
+- notes: Smoke remained 18/18 at 18.752 seconds and full remained 139/139.
+  The OLS output is candidate/nonproduction and cannot approve data, results,
+  claims, gates, submissions, or releases.

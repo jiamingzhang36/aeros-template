@@ -5,6 +5,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from aeros.runtime.research_job import ResearchJob, compile_research_job, validate_compilation
 from aeros.runtime.execution_envelope import execute_action_spec_in_isolated_worktree
 from aeros.runtime.adaptive_checks import select_checks
+from aeros.runtime.drive import build_drive_report
 ROOT = Path(__file__).resolve().parents[1]
 
 def main() -> int:
@@ -44,7 +45,52 @@ def main() -> int:
         else:
             post = subprocess.run([sys.executable, "checks/check_data_probe.py"], cwd=root)
             if post.returncode != 0: failures.append("adaptive post-check failed over accepted probe artifact")
+        (root / "evidence/econ").mkdir(parents=True, exist_ok=True)
+        (root / "evidence/econ/specification_registry.csv").write_text(
+            "spec_id,estimand_id,sample_id,outcome,treatment,controls,fixed_effects,cluster,weights,window,estimator,software,package_versions,protocol,status\n"
+            "SP-OLS,E1,S1,y,d,none,none,none,none,all,ols,python,stdlib,none,registered\n",
+            encoding="utf-8",
+        )
+        (root / "data/spec_sample.csv").write_text(
+            "y,d\n1,0\n3,1\n5,2\n7,3\n9,4\n", encoding="utf-8",
+        )
+        subprocess.run(["git", "add", "."], cwd=root, check=True)
+        subprocess.run(["git", "commit", "-m", "registered specification fixture"], cwd=root, check=True, capture_output=True)
+        specification = compile_research_job(ResearchJob(
+            "RUNSPEC-E2E", "run_specification", "SP-OLS", "data/spec_sample.csv", "bounded OLS fixture",
+        ))
+        failures.extend(validate_compilation(specification))
+        spec_result = execute_action_spec_in_isolated_worktree(root, specification.action_spec, timeout_seconds=20)
+        expected_spec_outputs = (
+            "outputs/econ/specification_runs/runspec_e2e.json",
+            "outputs/econ/specification_runs/runspec_e2e_exhibit.csv",
+        )
+        if not spec_result.ok or spec_result.accepted_outputs != expected_spec_outputs:
+            failures.append(f"isolated run_specification execution failed: {spec_result}")
+        else:
+            payload = json.loads((root / expected_spec_outputs[0]).read_text(encoding="utf-8"))
+            estimate = (((payload.get("result") or {}).get("coefficients") or {}).get("d") or {}).get("estimate")
+            if payload.get("admission_status") != "nonproduction" or abs(float(estimate) - 2.0) > 1e-9:
+                failures.append("run_specification did not produce the expected nonproduction OLS result")
+            spec_plan = select_checks(root, list(spec_result.observed_writes))
+            if "specification_integrity" not in spec_plan.get("risk_domains", []):
+                failures.append("candidate specification outputs did not select specification-integrity checks")
+        driven = build_drive_report(
+            root,
+            job="run_specification",
+            execute=True,
+            source_candidate="data/spec_sample.csv",
+            target="SP-OLS",
+        )
+        drive_execution = driven.get("execution") or {}
+        if driven.get("status") != "EXECUTED" or drive_execution.get("status") != "pass":
+            failures.append(f"drive run_specification vertical slice failed: {driven}")
+        if set(drive_execution.get("accepted_outputs") or []) != {
+            "outputs/econ/specification_runs/drive_run_specification.json",
+            "outputs/econ/specification_runs/drive_run_specification_exhibit.csv",
+        }:
+            failures.append("drive run_specification did not accept exactly the declared candidate outputs")
     if failures:
         print("FAIL: ResearchJob compiler"); [print(f"- {x}") for x in failures]; return 1
-    print("PASS: data_probe ResearchJob compiles, executes in isolation, and passes adaptive post-checks"); return 0
+    print("PASS: data_probe and run_specification ResearchJobs compile and execute in isolation"); return 0
 if __name__ == "__main__": raise SystemExit(main())

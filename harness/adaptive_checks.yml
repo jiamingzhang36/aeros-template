@@ -9,7 +9,7 @@ domains:
     path_prefixes: [data/, audits/data_probe/, discovery/data_inventory.csv, docs/data_contract.yml]
     checks: [check_data_probe.py, check_data_inventory.py, check_data_contract.py, check_provenance.py]
   specification_integrity:
-    path_prefixes: [code/, docs/method_card.md, evidence/spec_run_index.csv, outputs/analysis/, outputs/figures/]
+    path_prefixes: [code/, docs/method_card.md, evidence/spec_run_index.csv, outputs/analysis/, outputs/figures/, outputs/econ/]
     checks: [check_analysis_ledger.py, check_claim_method_consistency.py, check_result_registry.py, check_output_reproducibility.py, check_provenance.py]
   evidence_claim_integrity:
     path_prefixes: [evidence/, discovery/literature/]

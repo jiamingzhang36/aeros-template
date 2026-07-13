@@ -231,6 +231,31 @@ def summarize_broad_capture(root: Path, *, today: date | None = None) -> dict[st
     validation_failures: list[str] = []
     duplicate_lead_count = 0
     seen_dedupe_keys: set[str] = set()
+    named_coverage_gaps: set[str] = set()
+    capture_batches: dict[str, dict[str, object]] = {}
+
+    def observe_optional_context(row: dict[str, str], *, lead: bool = False, candidate: bool = False) -> dict[str, object] | None:
+        for field in ("coverage_gap", "target_gap", "gap_id"):
+            value = str(row.get(field, "")).strip()
+            if value:
+                named_coverage_gaps.add(value)
+        batch_id = str(row.get("capture_batch_id", "")).strip()
+        if not batch_id:
+            return None
+        batch = capture_batches.setdefault(batch_id, {
+            "capture_batch_id": batch_id,
+            "leads_seen": 0,
+            "new_candidates": 0,
+            "duplicates": 0,
+            "rejected": 0,
+            "promoted": 0,
+        })
+        if lead:
+            batch["leads_seen"] = int(batch["leads_seen"]) + 1
+        if candidate:
+            batch["new_candidates"] = int(batch["new_candidates"]) + 1
+        return batch
+
     for path in lead_paths:
         validation = validate_lead_queue(path, today=today)
         validation_failures.extend(validation.failures)
@@ -238,20 +263,30 @@ def summarize_broad_capture(root: Path, *, today: date | None = None) -> dict[st
         total_leads += len(rows)
         stale_leads += validation.stale_count
         for row in rows:
+            batch = observe_optional_context(row, lead=True)
             status = str(row.get("promotion_status", "")).strip().lower()
             if status == "promoted":
                 promoted += 1
+                if batch is not None:
+                    batch["promoted"] = int(batch["promoted"]) + 1
             if status == "candidate":
                 candidate_status += 1
+            if status == "rejected" and batch is not None:
+                batch["rejected"] = int(batch["rejected"]) + 1
             dedupe_key = str(row.get("dedupe_key", "")).strip()
             if dedupe_key:
                 if dedupe_key in seen_dedupe_keys:
                     duplicate_lead_count += 1
+                    if batch is not None:
+                        batch["duplicates"] = int(batch["duplicates"]) + 1
                 seen_dedupe_keys.add(dedupe_key)
             blocker = str(row.get("promotion_blocker", "")).strip() or "none"
             blocker_distribution[blocker] = blocker_distribution.get(blocker, 0) + 1
     for path in candidate_paths:
-        total_candidates += len(read_csv_rows(path))
+        rows = read_csv_rows(path)
+        total_candidates += len(rows)
+        for row in rows:
+            observe_optional_context(row, candidate=True)
     denominator = total_leads or 1
     lead_to_candidate_rate = (
         round((candidate_status + total_candidates) / total_leads, 4)
@@ -259,9 +294,9 @@ def summarize_broad_capture(root: Path, *, today: date | None = None) -> dict[st
         else None
     )
     duplicate_lead_rate = round(duplicate_lead_count / denominator, 4)
-    candidate_pool_sufficient = total_candidates >= CANDIDATE_TRIAGE_THRESHOLD
-    capture_saturation_stop = bool(
-        candidate_pool_sufficient
+    candidate_backlog_ready = total_candidates >= CANDIDATE_TRIAGE_THRESHOLD
+    broad_capture_pause_recommended = bool(
+        candidate_backlog_ready
         or (
             total_leads >= 20
             and (
@@ -271,14 +306,24 @@ def summarize_broad_capture(root: Path, *, today: date | None = None) -> dict[st
             )
         )
     )
-    if candidate_pool_sufficient:
-        recommended_next_action = "triage/promote the existing candidate pool before more broad_capture"
-    elif capture_saturation_stop:
+    if candidate_backlog_ready and named_coverage_gaps:
+        recommended_next_action = (
+            "triage/promote the existing candidate backlog, then run targeted capture for named coverage gaps: "
+            + ", ".join(sorted(named_coverage_gaps))
+        )
+    elif candidate_backlog_ready:
+        recommended_next_action = "triage/promote the existing candidate backlog before any additional broad_capture"
+    elif broad_capture_pause_recommended:
         recommended_next_action = "triage/dedupe/promote existing leads before more broad_capture"
     elif total_leads == 0:
         recommended_next_action = "run a bounded broad_capture lead sweep"
     else:
         recommended_next_action = "continue broad_capture only if current candidate queue has been triaged"
+    batch_rows = []
+    for batch in sorted(capture_batches.values(), key=lambda item: str(item["capture_batch_id"])):
+        leads_seen = int(batch["leads_seen"])
+        batch["lead_to_candidate_rate"] = round(int(batch["new_candidates"]) / leads_seen, 4) if leads_seen else None
+        batch_rows.append(batch)
     return {
         "status": "PASS" if not validation_failures else "FAIL",
         "lead_queue_count": len(lead_paths),
@@ -290,9 +335,20 @@ def summarize_broad_capture(root: Path, *, today: date | None = None) -> dict[st
         "stale_lead_count": stale_leads,
         "duplicate_lead_count": duplicate_lead_count,
         "duplicate_lead_rate": duplicate_lead_rate,
-        "candidate_pool_sufficient": candidate_pool_sufficient,
+        "candidate_backlog_ready": candidate_backlog_ready,
         "candidate_triage_threshold": CANDIDATE_TRIAGE_THRESHOLD,
-        "capture_saturation_stop": capture_saturation_stop,
+        "broad_capture_pause_recommended": broad_capture_pause_recommended,
+        "named_coverage_gaps": sorted(named_coverage_gaps),
+        "coverage_gap_status": "present" if named_coverage_gaps else "not_declared",
+        "capture_batches": batch_rows,
+        # Compatibility aliases for one migration cycle. These names overstate
+        # what a count threshold proves and should not be used by new callers.
+        "candidate_pool_sufficient": candidate_backlog_ready,
+        "capture_saturation_stop": broad_capture_pause_recommended,
+        "deprecated_fields": {
+            "candidate_pool_sufficient": "candidate_backlog_ready",
+            "capture_saturation_stop": "broad_capture_pause_recommended",
+        },
         "recommended_next_action": recommended_next_action,
         "promotion_blocker_distribution": blocker_distribution,
         "validation_failures": validation_failures,

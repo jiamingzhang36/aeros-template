@@ -2598,3 +2598,15 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Action**: Bound canonical record lookup, Tier-1 automated verification, and the Tier-2 negative fixture to the functional commit and closed AEROS-IMPROVE-043.
 - **Validation**: Targeted citation/literature checks, smoke 18/18, full 139/139, and session-scope audit passed before the functional commit.
 - **Does not prove**: interpretation correctness, source truth, manuscript support, scientific validity, or claim/gate/submission/release approval.
+
+## 2026-07-13 — Converge candidate semantics and execute a bounded specification job
+
+- **Commit(s)**: pending
+- **Change type**: framework / runtime convergence / economics execution
+- **North star:** Reduce control-surface overstatement while making one economics job produce inspectable candidate artifacts under real isolation.
+- **Action**: Replaced search-saturation language with candidate-backlog and broad-capture-pause semantics while retaining deprecated compatibility projections; made vendored/package coexistence an explicit hybrid runtime mode; exercised all six economics drive handlers in process; made source-checkout initialization consume the canonical profile seed; measured the unchanged smoke profile; and added a fail-closed `run_specification` vertical slice that reads a registered CSV/OLS specification, executes in an isolated worktree, and emits nonproduction JSON plus exhibit CSV artifacts with provenance and adaptive post-check selection.
+- **Validation**: Eight targeted checks passed; smoke passed 18/18 in 18.752 seconds; full harness passed 139/139; `git diff --check` passed.
+- **Non-goal**: Do not claim search-space saturation, remove checks from smoke without detection/overlap evidence, support fixed effects/clustering/weights or arbitrary estimators, promote candidate outputs, modify downstream projects, or certify a specification scientifically.
+- **Does not prove**: data fitness; identification validity; model correctness beyond the bounded fixture; result admission; claim support; canonical promotion; gate, submission, or release approval.
+- **Drift risk**: The legacy capture fields remain temporary compatibility aliases; installed-package fallback seeds remain bootstrap-only when canonical checkout files are unavailable; the first specification executor intentionally rejects unsupported estimator features rather than guessing.
+- **Next check**: Backfill the functional commit hash, then roll the bounded specification job into one clean real project only when that project's registered data contract and specification actually require it.

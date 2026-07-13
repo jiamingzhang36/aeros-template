@@ -158,11 +158,15 @@ def _project_runtime_mode(project_root: Path) -> str:
             key, separator, value = raw.partition(":")
             if separator and key.strip() == "runtime_mode":
                 mode = value.strip().strip("\"'").lower()
-                if mode in {"package", "vendored"}:
+                if mode in {"package", "vendored", "hybrid"}:
                     return mode
-    if (project_root / "aeros").is_dir():
+    has_vendored = (project_root / "aeros").is_dir()
+    has_package_lock = (project_root / "aeros.lock").exists()
+    if has_vendored and has_package_lock:
+        return "hybrid"
+    if has_vendored:
         return "vendored"
-    if (project_root / "aeros.lock").exists():
+    if has_package_lock:
         return "package"
     return "unknown"
 
@@ -175,11 +179,16 @@ def diagnose_project(template_root: Path, project_root: Path) -> dict[str, Any]:
     outdated_capabilities: list[str] = []
     runtime_mode = _project_runtime_mode(project_root)
     for capability, rels in CAPABILITIES.items():
-        if capability == "devendor_package" and runtime_mode == "vendored":
+        if capability == "devendor_package" and runtime_mode in {"vendored", "hybrid"}:
+            status = "not_applicable" if runtime_mode == "vendored" else "migration_active"
             capabilities[capability] = {
-                "status": "not_applicable",
-                "reason": "vendored runtime does not require a project-local package build surface",
-                "files": [{"path": rel, "status": "not_applicable"} for rel in rels],
+                "status": status,
+                "reason": (
+                    "vendored runtime does not require a project-local package build surface"
+                    if runtime_mode == "vendored"
+                    else "hybrid is an explicit additive migration state; package metadata and retained vendored surfaces are audited separately"
+                ),
+                "files": [{"path": rel, "status": status} for rel in rels],
             }
             continue
         file_rows: list[dict[str, str]] = []

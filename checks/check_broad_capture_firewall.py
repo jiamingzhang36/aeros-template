@@ -118,25 +118,32 @@ def main() -> int:
             failures.append("broad capture metrics did not count stale leads")
         if summary.get("duplicate_lead_count") != 0 or summary.get("duplicate_lead_rate") != 0:
             failures.append("broad capture duplicate metrics should be zero in the fixture")
-        if "capture_saturation_stop" not in summary or "recommended_next_action" not in summary:
+        if "broad_capture_pause_recommended" not in summary or "recommended_next_action" not in summary:
             failures.append("broad capture metrics missing saturation/next-action fields")
 
     with tempfile.TemporaryDirectory(prefix="aeros_broad_capture_candidates_") as tmp_name:
         tmp = Path(tmp_name)
         backfill = tmp / "data" / "backfill"
         backfill.mkdir(parents=True)
-        rows = [f"C{index:03d},L{index:03d},https://example.test/{index}" for index in range(1, 21)]
+        rows = [f"C{index:03d},L{index:03d},https://example.test/{index},B001,official_denominator" for index in range(1, 21)]
         (backfill / "ready_candidate_queue.csv").write_text(
-            "candidate_id,lead_id,source_url\n" + "\n".join(rows) + "\n",
+            "candidate_id,lead_id,source_url,capture_batch_id,target_gap\n" + "\n".join(rows) + "\n",
             encoding="utf-8",
         )
         summary = summarize_broad_capture(tmp)
         if summary.get("lead_to_candidate_rate") is not None:
             failures.append("zero-lead candidate pool must report an unavailable, not inflated, conversion rate")
-        if not summary.get("candidate_pool_sufficient") or not summary.get("capture_saturation_stop"):
-            failures.append("sufficient candidate pool must stop further broad capture for triage")
-        if "triage/promote" not in str(summary.get("recommended_next_action") or ""):
-            failures.append("sufficient candidate pool did not recommend triage/promotion")
+        if not summary.get("candidate_backlog_ready") or not summary.get("broad_capture_pause_recommended"):
+            failures.append("ready candidate backlog must pause further broad capture for triage")
+        if summary.get("candidate_pool_sufficient") != summary.get("candidate_backlog_ready"):
+            failures.append("legacy candidate_pool_sufficient alias drifted during migration")
+        if summary.get("named_coverage_gaps") != ["official_denominator"]:
+            failures.append("named coverage gap was not retained for targeted capture")
+        if "targeted capture" not in str(summary.get("recommended_next_action") or ""):
+            failures.append("ready candidate backlog with a named gap did not recommend targeted capture")
+        batches = summary.get("capture_batches") or []
+        if len(batches) != 1 or batches[0].get("new_candidates") != 20 or batches[0].get("lead_to_candidate_rate") is not None:
+            failures.append("cohort metrics did not keep zero-lead candidate conversion unavailable")
 
     if failures:
         print("FAIL: broad capture firewall problems detected")

@@ -115,6 +115,15 @@ def main() -> int:
             failures.append("fixture: vendored project incorrectly requires devendor_package")
         if ((diag.get("capabilities") or {}).get("devendor_package") or {}).get("status") != "not_applicable":
             failures.append("fixture: vendored devendor_package status should be not_applicable")
+        config = project / ".aeros" / "project.yml"
+        config.parent.mkdir(parents=True, exist_ok=True)
+        config.write_text("runtime_mode: hybrid\n", encoding="utf-8")
+        (project / "aeros.lock").write_text("schema_version: 1\n", encoding="utf-8")
+        hybrid = diagnose_project(ROOT, project)
+        if hybrid.get("runtime_mode") != "hybrid":
+            failures.append("fixture: explicit hybrid runtime mode was not preserved")
+        if ((hybrid.get("capabilities") or {}).get("devendor_package") or {}).get("status") != "migration_active":
+            failures.append("fixture: hybrid migration should be visible without a false missing capability")
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))
     elif failures:

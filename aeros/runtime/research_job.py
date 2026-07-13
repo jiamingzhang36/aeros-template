@@ -47,9 +47,45 @@ def load_research_job(path: Path) -> ResearchJob:
 
 
 def compile_research_job(job: ResearchJob) -> CompiledResearchJob:
-    if job.job_type != "data_probe":
-        raise ValueError("ResearchJob v1 supports only job_type=data_probe")
+    if job.job_type not in {"data_probe", "run_specification"}:
+        raise ValueError("ResearchJob supports job_type=data_probe or run_specification")
     slug = "".join(ch.lower() if ch.isalnum() else "_" for ch in job.job_id).strip("_")
+    if job.job_type == "run_specification":
+        output = f"outputs/econ/specification_runs/{slug}.json"
+        exhibit = f"outputs/econ/specification_runs/{slug}_exhibit.csv"
+        registry = "evidence/econ/specification_registry.csv"
+        task = {
+            "task_id": job.job_id,
+            "stage": "analysis",
+            "work_lane": "analysis",
+            "goal": job.objective,
+            "inputs": [job.source_candidate, registry],
+            "checks": ["checks/check_econ_pack.py"],
+            "allowed_outputs": [output, exhibit],
+            "output_intents": {output: "staging_artifact", exhibit: "staging_artifact"},
+            "required_skill_classes": [],
+            "budget": {"max_agent_calls": 0, "max_dollars": 0},
+        }
+        command = (
+            "python3 -m aeros.runtime.job_actions run-specification "
+            f"--source {shlex.quote(job.source_candidate)} --registry {shlex.quote(registry)} "
+            f"--spec-id {shlex.quote(job.target)} --output {shlex.quote(output)} --exhibit {shlex.quote(exhibit)}"
+        )
+        digest = sha256(json.dumps(task, sort_keys=True).encode()).hexdigest()[:12]
+        envelope = ExecutionEnvelope(
+            read_roots=(".",), write_roots=("outputs/econ/specification_runs/",),
+            deny_roots=("data/raw/", "data/processed/", "evidence/claim_registry.md", "paper/", "tex/"),
+            expected_outputs=(output, exhibit), runtime_profile="isolated-local-specification",
+        )
+        action = ActionSpec(
+            id=f"AS-{digest}", kind="run_specification", lane="analysis", effect_class="local_write_preview",
+            capabilities=("read_registered_specification", "read_candidate_data", "run_simple_ols"),
+            expected_outputs=(output, exhibit), acceptance_checks=("checks/check_econ_pack.py",),
+            command=command, stop_condition="candidate result and exhibit produced without Result admission, claim upgrade, or paper binding",
+            runtime_profile=envelope.runtime_profile, execution_envelope=envelope.to_dict(),
+            authority_boundary={"claim":"none","release":"none","canonical":"none","human_decision_required":"false"},
+        )
+        return CompiledResearchJob(job, task, action, envelope)
     output = f"audits/data_probe/{slug}.json"
     task = {
         "task_id": job.job_id,

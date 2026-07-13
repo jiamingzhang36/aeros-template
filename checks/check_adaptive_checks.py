@@ -12,6 +12,7 @@ def main() -> int:
     data=select_checks(ROOT,["data/processed/panel.csv"])
     approval=select_checks(ROOT,["decisions/approvals/G3.md"])
     analysis=select_checks(ROOT,["outputs/analysis/model.csv","outputs/figures/figure.png"])
+    econ_analysis=select_checks(ROOT,["outputs/econ/specification_runs/run.json"])
     manuscript=select_checks(ROOT,["docs/manuscript/paper.md"])
     if "paper_binding_integrity" not in paper["risk_domains"] or "check_manuscript_citation_faithfulness.py" not in paper["checks"]: failures.append("paper changes did not select paper-binding checks")
     if "data_sample_integrity" not in data["risk_domains"] or "check_provenance.py" not in data["checks"]: failures.append("data changes did not select data/provenance checks")
@@ -19,6 +20,8 @@ def main() -> int:
     required_result_checks={"check_result_registry.py","check_output_reproducibility.py","check_provenance.py"}
     if "specification_integrity" not in analysis["risk_domains"] or not required_result_checks.issubset(set(analysis["checks"])):
         failures.append("analysis/figure outputs did not select result/provenance checks")
+    if "specification_integrity" not in econ_analysis["risk_domains"]:
+        failures.append("economics specification output did not select specification-integrity checks")
     if "paper_binding_integrity" not in manuscript["risk_domains"] or not required_result_checks.issubset(set(manuscript["checks"])):
         failures.append("docs/manuscript work did not select result/provenance checks")
 

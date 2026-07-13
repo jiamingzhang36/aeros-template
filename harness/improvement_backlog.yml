@@ -599,3 +599,17 @@ entries:
     resolved_at: "2026-07-13"
     resolution_commit: "9aa5f43"
     notes: "This aligns parser and tier semantics. It does not verify a real source passage, create project interpretation records, or weaken Tier-2 human/independent review in the submission scanner."
+  - id: AEROS-IMPROVE-044
+    created_at: "2026-07-13"
+    updated_at: "2026-07-13"
+    status: resolved
+    priority: high
+    area: runtime-convergence
+    source: architecture_subtraction_sequence_ca9d724
+    issue: "Candidate-pool metrics overstated search saturation, hybrid vendored/package projects were not first-class, economics drive handlers lacked direct coverage, init profile seeds could drift, smoke cost lacked a measured baseline, and run_specification had no real isolated executor."
+    proposed_fix: "Downgrade capture semantics, recognize hybrid mode, exercise all economics handlers, derive effective init seeds from canonical profiles, measure smoke cost before subtraction, and implement one bounded CSV/OLS ResearchJob in an isolated worktree."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-07-13"
+    resolution_commit: "pending"
+    notes: "This is runtime/substantive framework work. It does not prove search saturation, general econometric support, scientific validity, result admission, claim support, or downstream rollout success."
