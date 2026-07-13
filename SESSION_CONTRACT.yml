@@ -1,13 +1,12 @@
 version: '0.1'
 policy: AEROS-SESSION-SCOPE-001
 active: false
-started_at: '2026-07-13T19:56:59+00:00'
+started_at: '2026-07-13T20:19:10+00:00'
 active_lane: harness
 active_workflow: ''
 workflow_description: ''
-objective: Preserve project-owned improvement backlog during sync and align required-skill
-  validation
-max_actions: 2
+objective: Scope sync-script contract checks to the root template
+max_actions: 1
 allowed_actions:
 - aeros cockpit
 - aeros next

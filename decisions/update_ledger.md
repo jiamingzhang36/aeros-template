@@ -2522,3 +2522,11 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Action**: Bound the project-backlog preservation and required-skill validator parity repair to its functional commit and closed AEROS-IMPROVE-038/039.
 - **Validation**: Targeted checks and smoke 18/18 passed before commit; downstream hash-preservation and T026 checks remain the rollout proof.
 - **Does not prove**: research progress, skill output correctness, scientific validity, claim or gate approval.
+
+## 2026-07-13 — Scope sync-script assertions to template mode
+
+- **Commit(s)**: pending
+- **Change type**: framework / sync-doctor mode boundary
+- **Action**: Kept source-level assertions for the template-only sync driver when that file exists, while allowing vendored downstream projects to run sync-doctor capability checks without the intentionally unsynced driver.
+- **Validation**: Template and CMPD sync-doctor checks plus smoke profile.
+- **Does not prove**: project currency, research validity, claim support, or gate approval.

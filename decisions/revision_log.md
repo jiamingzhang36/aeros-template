@@ -675,3 +675,22 @@ Use this file to track template or project-level changes that alter workflow, ev
 - notes: This preserves project-owned obligations and aligns validators. It
   does not waive a required skill, certify skill output, or copy project facts
   into the root template.
+
+## REV044 - 2026-07-13 16:18 -0400
+
+- commit: pending
+- change_type: sync-doctor template/downstream mode boundary
+- summary: Guarded sync-script source assertions behind the template-only
+  script's existence so downstream projects continue to run capability
+  diagnosis without requiring the unsynced driver.
+- files:
+  - checks/check_sync_doctor.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/update_ledger_chain.jsonl
+  - decisions/revision_log.md
+- checks:
+  - `python3 checks/check_sync_doctor.py` in template
+  - `python3 checks/check_sync_doctor.py` in synced CMPD
+  - smoke profile
+- notes: This does not weaken capability checks or change project evidence.

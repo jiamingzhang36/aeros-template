@@ -543,3 +543,17 @@ entries:
     resolved_at: "2026-07-13"
     resolution_commit: "d366738"
     notes: "Project backlog entries are project-owned evidence of open work. Template backlog changes remain in the template and must not be laundered into downstream project state."
+  - id: AEROS-IMPROVE-040
+    created_at: "2026-07-13"
+    updated_at: "2026-07-13"
+    status: resolved
+    priority: medium
+    area: sync-doctor
+    source: cmpd_second_sync_validation
+    issue: "The new sync-script contract assertion ran in downstream projects even though tools/sync_aeros_latest.zsh is intentionally template-only and never vendored, causing check_sync_doctor.py to crash after a valid sync."
+    proposed_fix: "Run sync-script source assertions only when the template-only script exists; retain capability diagnosis in downstream projects."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-07-13"
+    resolution_commit: "pending"
+    notes: "This is a mode-boundary fix. It does not weaken downstream capability checks or require the sync driver to be vendored."

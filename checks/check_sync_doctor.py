@@ -43,11 +43,13 @@ def _capability_checks() -> set[str]:
 
 def main() -> int:
     failures: list[str] = []
-    sync_script = (ROOT / "tools/sync_aeros_latest.zsh").read_text(encoding="utf-8")
-    if "--exclude 'improvement_backlog.yml'" not in sync_script:
-        failures.append("sync script must preserve an existing project improvement backlog")
-    if '[ ! -f "$T/harness/improvement_backlog.yml" ]' not in sync_script:
-        failures.append("sync script must seed improvement_backlog.yml only when the target lacks it")
+    sync_script_path = ROOT / "tools/sync_aeros_latest.zsh"
+    if sync_script_path.is_file():
+        sync_script = sync_script_path.read_text(encoding="utf-8")
+        if "--exclude 'improvement_backlog.yml'" not in sync_script:
+            failures.append("sync script must preserve an existing project improvement backlog")
+        if '[ ! -f "$T/harness/improvement_backlog.yml" ]' not in sync_script:
+            failures.append("sync script must seed improvement_backlog.yml only when the target lacks it")
     profile_checks = _profile_checks()
     covered = _capability_checks()
     missing_meta = sorted(profile_checks - covered - set(CAPABILITY_EXEMPT_CHECKS))

@@ -1,0 +1,27 @@
+version: 1
+policy: AEROS-ACTION-RECEIPT-001
+action_id: aeros_sync_doctor_mode_boundary_2026_07_13
+generated_at: '2026-07-13T20:21:21+00:00'
+action_mode: harness_triage
+honest_progress_label: mechanical_hygiene
+why_this_now: The second real CMPD sync showed the template-only driver assertion
+  was running in vendored mode.
+summary: Scoped sync-script source assertions to template mode while preserving downstream
+  capability diagnosis.
+data_impact:
+  inventory_changed: false
+  source_verified: false
+  data_rows_changed: false
+  coverage_changed: false
+  backfill_queue_changed: false
+  probe_completed: false
+research_impact:
+  claim_ceiling_changed: false
+  gate_candidate_changed: false
+  evidence_graph_changed: false
+  result_registered: false
+evidence_paths:
+- agent_runs/AEROS_sync_doctor_mode_boundary_2026-07-13.md
+causal_attribution:
+  would_progress_without_this_action: false
+  dependency_type: blocking_resolution
