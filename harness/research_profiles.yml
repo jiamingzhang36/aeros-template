@@ -1,7 +1,7 @@
 version: "0.1"
 policy: AEROS-RESEARCH-PROFILES-001
 default_profile: research
-status: mapping_only
+status: runtime_enforced
 principle: >
   Profiles may reduce ceremony around reversible candidate work, but they may
   not weaken immutable authority, evidence, provenance, or resource bounds.
@@ -40,7 +40,7 @@ profiles:
   submit:
     workspace: isolated_candidate_worktree
     check_strategy: submit_plus_full_release_candidate
-    skill_policy: contract_required_or_dynamic_optional
+    skill_policy: submission_review_required_plus_dynamic_optional
     promotion_authority: unchanged
     intended_use: "citation, claim, number, replication, and package review"
   regulated:
@@ -65,9 +65,9 @@ candidate_boundary:
     - human_decision_record
     - submission_or_release
   implementation_boundary: >
-    This file maps desired behavior only. Deterministic local actions already
-    use isolated worktrees; provider/LLM actions remain AgentEnvelope-audited
-    until they have real isolated execution.
+    Deterministic local actions and write-producing agent/provider callbacks use
+    isolated candidate worktrees. Accepted candidate artifacts remain subject
+    to unchanged canonical, claim, gate, credential, release, and budget authority.
 
 candidate_post_action_contract:
   command: "aeros checks select --changed PATH --action-exit N --expected-output PATH"

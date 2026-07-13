@@ -11,6 +11,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from aeros.runtime.execution_profile import load_execution_profiles, resolved_command  # noqa: E402
+from aeros.runtime.profile_runtime import runtime_check_plan  # noqa: E402
 
 
 def main() -> int:
@@ -35,6 +36,8 @@ def main() -> int:
         policy = yaml.safe_load(policy_path.read_text(encoding="utf-8")) or {}
         if policy.get("default_profile") != "research":
             failures.append("research profile must be the user-facing default")
+        if policy.get("status") != "runtime_enforced":
+            failures.append("research profiles must be runtime-enforced, not mapping-only")
         research_profiles = policy.get("profiles") or {}
         expected = {"explore", "research", "submit", "regulated"}
         if set(research_profiles) != expected:
@@ -45,6 +48,8 @@ def main() -> int:
         for name, mapping in research_profiles.items():
             if not isinstance(mapping, dict) or mapping.get("promotion_authority") != "unchanged":
                 failures.append(f"{name}: profile must not weaken promotion authority")
+            if not isinstance(mapping, dict) or mapping.get("workspace") != "isolated_candidate_worktree":
+                failures.append(f"{name}: profile must use isolated candidate worktree")
         post_action = policy.get("candidate_post_action_contract") or {}
         required_inputs = set(post_action.get("required_inputs") or [])
         required_failures = set(post_action.get("fail_closed_on") or [])
@@ -63,6 +68,20 @@ def main() -> int:
             "expected_output_outside_project",
         }.issubset(required_failures):
             failures.append("candidate post-action contract is not fail-closed")
+        research_plan = runtime_check_plan(
+            root,
+            contract_checks=["check_task_preflight.py", "check_action_receipts.py"],
+            observed_paths=["outputs/analysis/fixture.csv"],
+            profile="research",
+        )
+        if "check_task_preflight.py" in research_plan.checks or "check_provenance.py" not in research_plan.checks:
+            failures.append("ordinary research profile did not replace process checks with artifact-selected checks")
+        submit_plan = runtime_check_plan(root, contract_checks=[], observed_paths=["paper/main.tex"], profile="submit")
+        if "check_manuscript_citation_interpretation.py" not in submit_plan.checks:
+            failures.append("submit profile did not automatically include manuscript truth checks")
+        regulated_plan = runtime_check_plan(root, contract_checks=["check_task_preflight.py"], observed_paths=[], profile="regulated")
+        if regulated_plan.checks != ("check_task_preflight.py",):
+            failures.append("regulated profile did not preserve explicit contract checks")
     if failures:
         print("FAIL: execution profile problems detected")
         for failure in failures:

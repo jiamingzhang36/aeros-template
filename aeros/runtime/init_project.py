@@ -175,13 +175,16 @@ does_not_prove: [scientific validity, claim support, gate approval, release read
 policy: AEROS-SKILL-OBLIGATION-001
 principle: Ordinary tasks may dynamically use zero or more skills without a waiver; use-or-waive applies only to explicit required_skill_classes.
 default_requirement: optional_record_if_used
+max_dynamic_skills: 3
 use_or_waive_trigger: explicit_required_skill_classes
+profile_required_skill_classes: {submit: [submission_review], regulated: []}
 classes:
   data_source: {skills: [data-inventory, data-quality-checker, data-merge-audit], triggers: [data, source, probe, capture, inventory, denominator, gdp, schema]}
   literature: {skills: [academic-research-suite, lit-review-assistant], triggers: [literature, citation, paper_registry, full-text, fulltext, synthesis]}
   writing: {skills: [econ-write, pre-submission-audit], triggers: [paper, draft, writing, submission, referee, response]}
   causal_identification: {skills: [causal-id-review, did-checklist], triggers: [identification, causal, did, event study, method_card, design]}
   replication: {skills: [code-review-econ, replication-check], triggers: [replication, reproduc, provenance, pipeline, result_validation, code_review]}
+  submission_review: {skills: [bib-manager, academic-research-suite, pre-submission-audit], triggers: [submission, submit, manuscript, paper, citation, package]}
 allowed_waiver_classes: [ledger_hash_only, typo_only, mechanical_revalidation, single_line_parser_patch]
 required_waiver_fields: [skill_class, reason, scope, progress_label]
 does_not_prove: [skill invocation, skill output correctness, scientific validity, claim support, human gate approval]
@@ -189,7 +192,7 @@ does_not_prove: [skill invocation, skill output correctness, scientific validity
     "harness/research_profiles.yml": """version: "0.1"
 policy: AEROS-RESEARCH-PROFILES-001
 default_profile: research
-status: mapping_only
+status: runtime_enforced
 immutable_invariants:
   - {id: no_forged_human_decision, rule: Agent cannot generate or apply a human decision.}
   - {id: external_authority_required, rule: Credentials paid access external writes and release require human authority.}
@@ -202,7 +205,7 @@ immutable_invariants:
 profiles:
   explore: {workspace: isolated_candidate_worktree, check_strategy: minimal_pre_drive_plus_artifact_selected_post_action, skill_policy: dynamic_optional, promotion_authority: unchanged}
   research: {workspace: isolated_candidate_worktree, check_strategy: adaptive_post_action, skill_policy: dynamic_optional, promotion_authority: unchanged}
-  submit: {workspace: isolated_candidate_worktree, check_strategy: submit_plus_full_release_candidate, skill_policy: contract_required_or_dynamic_optional, promotion_authority: unchanged}
+  submit: {workspace: isolated_candidate_worktree, check_strategy: submit_plus_full_release_candidate, skill_policy: submission_review_required_plus_dynamic_optional, promotion_authority: unchanged}
   regulated: {workspace: isolated_candidate_worktree, check_strategy: full, skill_policy: contract_required_use_or_waive, promotion_authority: unchanged}
 does_not_prove: [scientific validity, provider sandboxing, promotion approval]
 """,

@@ -13,18 +13,18 @@ from pathlib import Path
 from . import critic as critic_mod
 from . import identity
 from . import state as state_mod
-from .agent import build_prompt, run_agent
-from .agent_envelope import (
-    audit_agent_writes,
-    format_agent_envelope_audit,
-    load_agent_envelope_policy,
-    snapshot_agent_envelope,
-    write_agent_envelope_audit,
+from .agent import AgentResult, build_prompt, run_agent
+from .candidate_workspace import (
+    execute_callback_in_candidate_worktree,
+    format_candidate_workspace_failure,
+    load_candidate_policy,
+    write_candidate_workspace_audit,
 )
 from .checks import format_feedback, run_checks
 from .completion import write_completion_receipt, validate_completion_receipts
 from .contract import Contract, load_contract
 from .execution_envelope import ExecutionEnvelope, execute_in_isolated_worktree
+from .profile_runtime import runtime_check_plan
 from .report import AttemptRecord, RunRecord, write_run_report
 from .skill_receipt import write_skill_invocation_receipt
 from .task_preflight import build_task_preflight
@@ -743,6 +743,7 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
         print(f"[kernel]   envelope: isolated worktree; allowed outputs={contract.allowed_outputs}")
         return 0
 
+    accepted_paths: list[str] = []
     if contract.run_command:
         print(f"[kernel] deterministic command under ExecutionEnvelope: {' '.join(contract.run_command)}")
         result = execute_in_isolated_worktree(
@@ -759,11 +760,21 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
             state_mod.save_state(project_root, state)
             print(f"[kernel] task {contract.task_id} ESCALATED -> {path}")
             return 2
+        accepted_paths = list(result.accepted_outputs)
         print("[kernel]   envelope accepted outputs: "
               f"{', '.join(result.accepted_outputs) or '(none)'}")
 
     from .checks import run_checks, format_feedback
-    passed, results = run_checks(project_root, contract.checks)
+    check_names = list(contract.checks)
+    if accepted_paths:
+        plan = runtime_check_plan(
+            project_root,
+            contract_checks=contract.checks,
+            observed_paths=[*accepted_paths, *contract.inputs],
+        )
+        check_names = list(plan.checks)
+        print(f"[kernel]   profile={plan.profile}; checks={plan.strategy}")
+    passed, results = run_checks(project_root, check_names)
     for r in results:
         print(f"[kernel]   check {r.name}: {'PASS' if r.passed else 'FAIL'}")
     if passed:
@@ -895,14 +906,26 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
         print(f"[kernel] attempt {attempt + 1}/{max_retries + 1}: invoking agent "
               f"(spent ${run_cost:.4f}/{contract.max_dollars:.2f}, call cap ${call_cap:.2f})...")
 
-        agent_policy = load_agent_envelope_policy(project_root)
-        agent_snapshot = snapshot_agent_envelope(project_root)
-        result = run_agent(prompt, project_root,
-                           timeout=task_timeout_override or contract.timeout_seconds,
-                           max_budget_usd=call_cap)
-        agent_audit = None
-        if str(agent_policy.get("mode") or "audit") != "off":
-            agent_audit = audit_agent_writes(project_root, contract, agent_snapshot, policy=agent_policy)
+        agent_policy = load_candidate_policy(project_root)
+        expected_outputs = tuple(
+            path for path in contract.allowed_outputs
+            if not str(path).startswith(("agent_runs/", "decisions/", "aeros/state/"))
+        ) or tuple(contract.allowed_outputs)
+        candidate_run = execute_callback_in_candidate_worktree(
+            project_root,
+            lambda candidate_root: run_agent(
+                prompt,
+                candidate_root,
+                timeout=task_timeout_override or contract.timeout_seconds,
+                max_budget_usd=call_cap,
+            ),
+            allowed_outputs=tuple(contract.allowed_outputs),
+            expected_outputs=expected_outputs,
+            deny_roots=tuple(agent_policy.get("deny_roots") or ()),
+        )
+        result = candidate_run.callback_value
+        if not isinstance(result, AgentResult):
+            result = AgentResult(False, "", candidate_run.callback_error or "candidate agent callback returned no AgentResult")
         # Account for spend regardless of outcome (a failed call can still cost).
         run_calls += 1
         run_cost += result.cost_usd
@@ -914,9 +937,9 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
             print(f"[kernel]   call cost ${result.cost_usd:.4f} "
                   f"({result.input_tokens} in / {result.output_tokens} out)")
 
-        if agent_audit is not None and not agent_audit.ok and bool(agent_policy.get("block_on_violation", True)):
-            audit_path = write_agent_envelope_audit(project_root, agent_audit)
-            feedback = format_agent_envelope_audit(agent_audit)
+        if not candidate_run.boundary_ok:
+            audit_path = write_candidate_workspace_audit(project_root, contract.task_id, candidate_run)
+            feedback = format_candidate_workspace_failure(candidate_run)
             print(f"[kernel] agent envelope violation -> {audit_path.relative_to(project_root)}")
             attempts_log.append(AttemptRecord(
                 attempt=attempt + 1,
@@ -936,7 +959,13 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
             feedback = f"Agent invocation failed: {result.error}"
             continue
 
-        passed, results = run_checks(project_root, contract.checks)
+        plan = runtime_check_plan(
+            project_root,
+            contract_checks=contract.checks,
+            observed_paths=[*candidate_run.accepted_outputs, *contract.inputs],
+        )
+        print(f"[kernel]   profile={plan.profile}; checks={plan.strategy}")
+        passed, results = run_checks(project_root, list(plan.checks))
         for r in results:
             print(f"[kernel]   check {r.name}: {'PASS' if r.passed else 'FAIL'}")
 

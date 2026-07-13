@@ -14,6 +14,7 @@ sys.path.insert(0, str(ROOT))
 
 from aeros.runtime import kernel  # noqa: E402
 from aeros.runtime.agent import AgentResult  # noqa: E402
+from aeros.runtime.collection import CollectionConfig, collect_prompt_grid  # noqa: E402
 
 
 def _run(cwd: Path, args: list[str]) -> None:
@@ -33,7 +34,7 @@ def _repo() -> Path:
     _run(tmp, ["git", "config", "user.email", "aeros@example.test"])
     _run(tmp, ["git", "config", "user.name", "aeros-test"])
     _write(tmp / "project_manifest.yml", "project:\n  name: fixture\n")
-    _write(tmp / "harness/agent_envelope_policy.yml", "mode: audit\nblock_on_violation: true\ndeny_roots:\n- data/raw/\n- decisions/approvals/\n- aeros/state/\n")
+    _write(tmp / "harness/agent_envelope_policy.yml", "mode: isolated_candidate\nblock_on_violation: true\ndeny_roots:\n- data/raw/\n- data/processed/\n- decisions/approvals/\n- aeros/state/\n- evidence/claim_registry.md\n")
     _write(tmp / "checks/check_allowed.py", "from pathlib import Path\nassert Path('outputs/agent/allowed.txt').exists()\nprint('PASS: allowed output exists')\n")
     _write(tmp / "checks/check_always.py", "print('PASS: fixture check')\n")
     _write(tmp / "tasks/T_AGENT_ALLOWED.yml", """task_id: T_AGENT_ALLOWED
@@ -92,7 +93,10 @@ def main() -> int:
     try:
         repo = _repo()
 
+        candidate_roots: list[Path] = []
+
         def allowed_agent(_prompt: str, project_root: Path, **_kwargs) -> AgentResult:
+            candidate_roots.append(project_root)
             _write(project_root / "outputs/agent/allowed.txt", "allowed\n")
             return AgentResult(ok=True, output="ok", error="")
 
@@ -100,6 +104,10 @@ def main() -> int:
         rc = kernel.run_task(repo / "tasks/T_AGENT_ALLOWED.yml")
         if rc != 0:
             failures.append(f"allowed agent task should pass, got rc={rc}")
+        if not candidate_roots or candidate_roots[-1].resolve() == repo.resolve():
+            failures.append("write-producing agent did not execute in a separate candidate worktree")
+        if not (repo / "outputs/agent/allowed.txt").exists():
+            failures.append("accepted candidate output was not copied back")
 
         def denied_agent(_prompt: str, project_root: Path, **_kwargs) -> AgentResult:
             _write(project_root / "outputs/agent/denied.txt", "declared\n")
@@ -110,6 +118,8 @@ def main() -> int:
         rc = kernel.run_task(repo / "tasks/T_AGENT_DENIED.yml")
         if rc == 0:
             failures.append("denied-write agent task unexpectedly passed")
+        if (repo / "data/raw/secret.csv").exists() or (repo / "outputs/agent/denied.txt").exists():
+            failures.append("rejected candidate writes leaked into the main project")
         audits = sorted((repo / "agent_runs/agent_envelope_audits").glob("T_AGENT_DENIED_*.json"))
         if not audits or "denied_writes" not in audits[-1].read_text(encoding="utf-8"):
             failures.append("denied-write agent task did not write an AgentEnvelope audit")
@@ -122,9 +132,35 @@ def main() -> int:
         rc = kernel.run_task(repo / "tasks/T_AGENT_UNDECLARED.yml")
         if rc == 0:
             failures.append("undeclared-write agent task unexpectedly passed")
+        if (repo / "outputs/agent/unexpected.txt").exists():
+            failures.append("undeclared candidate output leaked into the main project")
         audits = sorted((repo / "agent_runs/agent_envelope_audits").glob("T_AGENT_UNDECLARED_*.json"))
         if not audits or "undeclared_writes" not in audits[-1].read_text(encoding="utf-8"):
             failures.append("undeclared-write agent task did not write an AgentEnvelope audit")
+
+        grid = repo / "work/provider_grid.csv"
+        _write(
+            grid,
+            "prompt_id,persona,prompt_variant,model,run_index,prompt_text\n"
+            "P1,test,baseline,mock,1,Return a bounded fixture response.\n",
+        )
+        collection_rc = collect_prompt_grid(
+            repo,
+            grid=grid,
+            out=repo / "outputs/provider/collection.jsonl",
+            report=repo / "agent_runs/provider_collection.md",
+            config=CollectionConfig(provider="mock", model="mock", max_retries=0),
+            max_rows=1,
+        )
+        if collection_rc != 0:
+            failures.append(f"provider collection candidate run failed with rc={collection_rc}")
+        for expected in (
+            repo / "outputs/provider/collection.jsonl",
+            repo / "agent_runs/provider_collection.md",
+            repo / "outputs/.provenance/provider_collection.json",
+        ):
+            if not expected.is_file() or expected.stat().st_size == 0:
+                failures.append(f"provider candidate output was not accepted: {expected}")
     finally:
         kernel.run_agent = original
         if "repo" in locals():
@@ -135,7 +171,7 @@ def main() -> int:
         failures.append("missing harness/agent_envelope_policy.yml")
     else:
         text = policy.read_text(encoding="utf-8")
-        for phrase in ["mode: audit", "block_on_violation: true", "does_not_prove"]:
+        for phrase in ["mode: isolated_candidate", "block_on_violation: true", "does_not_prove"]:
             if phrase not in text:
                 failures.append(f"agent envelope policy missing {phrase!r}")
 
@@ -144,7 +180,7 @@ def main() -> int:
         for failure in failures:
             print(f"- {failure}")
         return 1
-    print("PASS: AgentEnvelope audit mode is valid")
+    print("PASS: agent/provider candidate-worktree enforcement is valid")
     return 0
 
 

@@ -4,8 +4,24 @@ principle: >
   Bibliographies may be broad, but manuscript citations must be function-grounded.
   The evidence requirement is determined by how the cited sentence uses the
   source, not by whether the source merely appears in the registry.
+risk_tiers:
+  tier_0_bibliographic:
+    uses: [existence, author_year, ordinary_background]
+    verification_floor: [registry_metadata]
+    blocking: false
+  tier_1_interpretive:
+    uses: [specific_finding, method_precedent, limited_attribution]
+    verification_floor: [fulltext_or_source_snapshot, passage_locator, automated_interpretation]
+    low_confidence_action: human_review
+    blocking: false
+  tier_2_claim_bearing:
+    uses: [core_claim, number, mechanism, identification, policy_welfare]
+    verification_floor: [fulltext, passage_locator, producer_interpretation, independent_verification]
+    disagreement_action: human_review
+    blocking: true
 functions:
   metadata_only:
+    risk_tier: tier_0_bibliographic
     meaning: "The citation only identifies that a work/source exists."
     minimum_evidence: registry_metadata
     required_evidence: [registry_metadata]
@@ -14,6 +30,7 @@ functions:
     allowed_status: metadata_only_ok
     blocking: false
   background_pointer:
+    risk_tier: tier_0_bibliographic
     meaning: "The citation provides weak background orientation, not a substantive claim."
     minimum_evidence: registry_metadata_or_abstract
     required_evidence: [registry_metadata]
@@ -22,6 +39,7 @@ functions:
     allowed_status: background_ok
     blocking: false
   related_literature:
+    risk_tier: tier_1_interpretive
     meaning: "The citation places the paper in a literature or points to related work."
     minimum_evidence: registry_metadata_or_extraction_card
     required_evidence: [registry_metadata]
@@ -31,6 +49,7 @@ functions:
     allowed_status: related_literature_ok
     blocking: false
   method_precedent:
+    risk_tier: tier_1_interpretive
     meaning: "The citation supports a method, design, identification, or estimator statement."
     minimum_evidence: method_section_extraction
     required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
@@ -39,6 +58,7 @@ functions:
     allowed_status: grounded
     blocking: true
   data_source:
+    risk_tier: tier_1_interpretive
     meaning: "The citation supports a data-source, dataset, variable, or measurement statement."
     minimum_evidence: data_or_source_snapshot
     required_evidence: [registry_metadata, extraction_card]
@@ -48,6 +68,7 @@ functions:
     allowed_status: grounded_or_snapshot_backed
     blocking: true
   result_claim:
+    risk_tier: tier_2_claim_bearing
     meaning: "The citation supports what a paper finds, estimates, shows, reports, or concludes."
     minimum_evidence: result_passage_extraction
     required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
@@ -56,6 +77,7 @@ functions:
     allowed_status: grounded
     blocking: true
   mechanism_claim:
+    risk_tier: tier_2_claim_bearing
     meaning: "The citation supports a mechanism, channel, explanation, or interpretation claim."
     minimum_evidence: mechanism_passage_extraction
     required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
@@ -64,6 +86,7 @@ functions:
     allowed_status: grounded
     blocking: true
   number_fact:
+    risk_tier: tier_2_claim_bearing
     meaning: "The citation supports a number, statistic, table value, magnitude, or percentage."
     minimum_evidence: table_or_source_snapshot
     required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
@@ -73,6 +96,7 @@ functions:
     allowed_status: grounded
     blocking: true
   policy_fact:
+    risk_tier: tier_1_interpretive
     meaning: "The citation supports an institutional or policy fact. Official source snapshots are preferred."
     minimum_evidence: official_source_snapshot_or_registry_metadata
     required_evidence: [registry_metadata]
@@ -82,6 +106,7 @@ functions:
     allowed_status: policy_source_ok
     blocking: false
   legal_fact:
+    risk_tier: tier_1_interpretive
     meaning: "The citation supports a legal/regulatory fact. Official legal source snapshots are preferred."
     minimum_evidence: official_legal_snapshot_or_registry_metadata
     required_evidence: [registry_metadata]
@@ -91,6 +116,7 @@ functions:
     allowed_status: legal_source_ok
     blocking: false
   literature_gap:
+    risk_tier: tier_2_claim_bearing
     meaning: "The citation supports a claim about what the literature lacks or has established."
     minimum_evidence: multi_paper_fulltext_synthesis
     required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]

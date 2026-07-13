@@ -72,13 +72,17 @@ def write_skill_invocation_receipt(
     skill_map = load_core_skill_map(project_root)
     allowed = set(str(s).strip() for s in (contract.raw.get("allowed_skills") or []) if str(s).strip())
     recommended = sorted(str(s).strip() for s in (contract.raw.get("recommended_skills") or []) if str(s).strip())
-    required_classes = sorted(str(s).strip() for s in (contract.raw.get("required_skill_classes") or []) if str(s).strip())
     try:
-        from .skill_obligation import infer_skill_obligations
+        from .skill_obligation import infer_skill_obligations, obligation_classes, required_skill_classes_for_profile
 
         obligations = sorted(infer_skill_obligations(project_root, contract))
+        required_classes = sorted(required_skill_classes_for_profile(project_root, contract))
+        classes = obligation_classes(project_root)
+        for cls in required_classes:
+            allowed.update(str(skill).strip() for skill in (classes.get(cls, {}).get("skills") or []) if str(skill).strip())
     except Exception:
         obligations = sorted(str(s).strip() for s in (contract.raw.get("skill_obligations") or []) if str(s).strip())
+        required_classes = sorted(str(s).strip() for s in (contract.raw.get("required_skill_classes") or []) if str(s).strip())
     waivers = [w for w in (skill_waivers or contract.raw.get("skill_waivers") or []) if isinstance(w, dict)]
     records: list[dict[str, Any]] = []
     for name in sorted({s for s in skills_used if s and s != "none" and s != "n/a"}):
@@ -94,6 +98,7 @@ def write_skill_invocation_receipt(
             "human_gate_required": bool(meta.get("human_gate_required", False)),
             "aeros_constraints": meta.get("aeros_constraints", []),
         })
+    too_many_dynamic_skills = len(records) > 3
     missing_skill_decision = bool(required_classes and not records and not waivers)
     payload = {
         "version": 1,
@@ -109,7 +114,9 @@ def write_skill_invocation_receipt(
         "skills_used": [r["skill_name"] for r in records],
         "invocations": records,
         "missing_skill_decision": missing_skill_decision,
-        "verdict": "fail" if missing_skill_decision or any(not r["known_to_aeros"] or not r["allowed_by_contract"] for r in records) else "pass",
+        "max_dynamic_skills": 3,
+        "too_many_dynamic_skills": too_many_dynamic_skills,
+        "verdict": "fail" if missing_skill_decision or too_many_dynamic_skills or any(not r["known_to_aeros"] or not r["allowed_by_contract"] for r in records) else "pass",
     }
     path = receipt_path(project_root, contract.task_id)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -126,12 +133,15 @@ def build_skill_use_attestation(
     """Enforce use-or-waive only for explicitly required skill classes."""
     skill_map = load_core_skill_map(project_root)
     try:
-        from .skill_obligation import infer_skill_obligations
+        from .skill_obligation import infer_skill_obligations, obligation_classes, required_skill_classes_for_profile
 
         obligations = sorted(set(infer_skill_obligations(project_root, contract)))
+        required_classes = sorted(set(required_skill_classes_for_profile(project_root, contract)))
+        class_specs = obligation_classes(project_root)
     except Exception:
         obligations = sorted(str(s).strip() for s in (contract.raw.get("skill_obligations") or []) if str(s).strip())
-    required_classes = sorted({str(s).strip() for s in (contract.raw.get("required_skill_classes") or []) if str(s).strip()})
+        required_classes = sorted({str(s).strip() for s in (contract.raw.get("required_skill_classes") or []) if str(s).strip()})
+        class_specs = {}
     recommended = sorted(str(s).strip() for s in (contract.raw.get("recommended_skills") or []) if str(s).strip())
     allowed = sorted(str(s).strip() for s in (contract.raw.get("allowed_skills") or []) if str(s).strip())
     contract_waivers = [w for w in (contract.raw.get("skill_waivers") or []) if isinstance(w, dict)]
@@ -163,11 +173,15 @@ def build_skill_use_attestation(
         for name in skills_used
         if str(skill_map.get(name, {}).get("aeros_stage", "")).strip()
     }
+    used_classes = {
+        cls for cls, spec in class_specs.items()
+        if set(str(skill) for skill in (spec.get("skills") or [])) & set(skills_used)
+    }
     failures: list[str] = []
     use_or_waive_required = bool(required_classes)
     missing_classes = sorted(
         cls for cls in required_classes
-        if cls not in waiver_classes and "all" not in waiver_classes and cls not in skills_used and cls not in used_stages
+        if cls not in waiver_classes and "all" not in waiver_classes and cls not in skills_used and cls not in used_stages and cls not in used_classes
     )
     if use_or_waive_required and not receipt_present and not waivers:
         failures.append("skill use-or-waive decision is required but no skill receipt or waiver is recorded")
@@ -177,6 +191,8 @@ def build_skill_use_attestation(
         failures.append("skill invocation receipt verdict is fail")
     if receipt_payload.get("missing_skill_decision"):
         failures.append("skill invocation receipt reports a missing skill decision")
+    if receipt_payload.get("too_many_dynamic_skills") or len(skills_used) > 3:
+        failures.append("skill invocation exceeds the dynamic maximum of three skills")
     for cls in missing_classes:
         failures.append(f"required skill class {cls!r} has neither invocation nor waiver")
     verdict = "not_required"
@@ -192,7 +208,7 @@ def build_skill_use_attestation(
         "recommended_skills": recommended,
         "allowed_skills": allowed,
         "skills_used": skills_used,
-        "used_skill_classes": sorted(used_stages),
+        "used_skill_classes": sorted(used_stages | used_classes),
         "skill_waivers": waivers,
         "waiver_classes": sorted(waiver_classes),
         "missing_skill_classes": missing_classes,

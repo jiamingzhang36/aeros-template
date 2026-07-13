@@ -28,6 +28,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "skill_coverage": ["aeros/runtime/skill_obligation.py", "harness/skill_obligation_policy.yml", "checks/check_skill_coverage.py"],
     "skill_use_attestation": ["aeros/runtime/skill_receipt.py", "aeros/runtime/completion.py", "checks/check_skill_use_attestation.py"],
     "research_profiles": ["harness/research_profiles.yml", "checks/check_execution_profiles.py", "docs/design/profile_ab_protocol.md"],
+    "candidate_provider_workspace": ["aeros/runtime/candidate_workspace.py", "aeros/runtime/profile_runtime.py", "harness/agent_envelope_policy.yml", "checks/check_agent_envelope.py"],
     "output_intent": ["aeros/runtime/output_intent.py", "harness/output_intent_policy.yml", "checks/check_output_intent.py"],
     "source_capture_permission": ["aeros/runtime/source_capture_permission.py", "harness/source_capture_permission_policy.yml", "checks/check_source_capture_permission.py"],
     "task_preflight": ["aeros/runtime/task_preflight.py", "checks/check_task_preflight.py"],

@@ -161,9 +161,10 @@ Reversible model work should converge on an isolated candidate-worktree
 default. Candidate paper, claim, specification, code, public-source lead, and
 nonproduction-probe edits may be broad inside that workspace. Canonical data,
 admitted Results, accepted claims, human decisions, submission, and release
-remain promotion boundaries. Current deterministic local actions already use
-isolated worktrees; provider/LLM tasks remain audit-mode only and must not be
-described as fully sandboxed.
+remain promotion boundaries. Deterministic local actions and write-producing
+provider/LLM callbacks now use isolated candidate worktrees with declared-output
+acceptance. This confines project writes; it does not sandbox networks,
+credentials, provider billing, or scientific judgment.
 
 Skills are dynamic optional capabilities by default. Only an explicit
 `required_skill_classes` contract creates a use-or-waive completion obligation.

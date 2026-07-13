@@ -1,24 +1,31 @@
 version: "0.1"
 policy: AEROS-AGENT-ENVELOPE-001
-mode: audit
+mode: isolated_candidate
 block_on_violation: true
 principle: >
-  Provider-backed agent tasks are not yet claimed to be fully sandboxed. In
-  audit mode, AEROS snapshots the project before and after each successful
-  agent call, blocks task acceptance on denied or undeclared writes, and writes
-  an audit artifact when a violation is detected.
+  Every write-producing agent/provider callback runs in an isolated candidate
+  git worktree. Only declared non-protected outputs are accepted back into the
+  main project after observed-write, non-empty-output, and conflict checks.
 deny_roots:
   - data/raw/
+  - data/processed/
+  - data/canonical/
   - decisions/approvals/
+  - decisions/decision_log.csv
   - aeros/state/
+  - evidence/claim_registry.md
+  - evidence/evidence_ledger.csv
+  - evidence/result_registry.csv
 allowed_runtime_outputs:
   - agent_runs/agent_envelope_audits/
 must_block:
   - denied_writes
   - undeclared_writes
   - sensitive_write_without_declared_output
+  - missing_or_empty_expected_output
+  - main_workspace_conflict
 does_not_prove:
-  - full LLM-agent sandboxing
+  - provider/network/credential sandboxing
   - safe provider/network behavior
   - scientific validity
   - claim support

@@ -6,7 +6,11 @@ principle: >
   is enforced only for classes explicitly listed in required_skill_classes.
   Skill use does not approve gates, certify claims, or weaken AEROS checks.
 default_requirement: optional_record_if_used
+max_dynamic_skills: 3
 use_or_waive_trigger: explicit_required_skill_classes
+profile_required_skill_classes:
+  submit: [submission_review]
+  regulated: []
 classes:
   data_source:
     skills: [data-inventory, data-quality-checker, data-merge-audit]
@@ -23,6 +27,9 @@ classes:
   replication:
     skills: [code-review-econ, replication-check]
     triggers: [replication, reproduc, provenance, pipeline, result_validation, code_review]
+  submission_review:
+    skills: [bib-manager, academic-research-suite, pre-submission-audit]
+    triggers: [submission, submit, manuscript, paper, citation, package]
 allowed_waiver_classes:
   - ledger_hash_only
   - typo_only

@@ -38,6 +38,10 @@ DEFAULT_CLASSES: dict[str, dict[str, Any]] = {
         "skills": ["code-review-econ", "replication-check"],
         "triggers": ["replication", "reproduc", "provenance", "pipeline", "result_validation", "code_review"],
     },
+    "submission_review": {
+        "skills": ["bib-manager", "academic-research-suite", "pre-submission-audit"],
+        "triggers": ["submission", "submit", "manuscript", "paper", "citation", "package"],
+    },
 }
 
 MECHANICAL_WAIVER_CLASSES = {
@@ -85,15 +89,30 @@ def explicit_skill_obligations(contract: Contract) -> list[str]:
     return _norm_list(contract.raw.get("skill_obligations"))
 
 
+def required_skill_classes_for_profile(project_root: Path, contract: Contract) -> list[str]:
+    required = _norm_list(contract.raw.get("required_skill_classes"))
+    try:
+        from .profile_runtime import resolve_research_profile
+
+        profile = resolve_research_profile(project_root)
+    except Exception:
+        profile = "research"
+    policy = _load_policy(project_root)
+    profile_required = policy.get("profile_required_skill_classes") or {"submit": ["submission_review"]}
+    if contract.work_lane != "harness" and isinstance(profile_required, dict):
+        required.extend(_norm_list(profile_required.get(profile)))
+    return list(dict.fromkeys(required))
+
+
 def skill_waivers(contract: Contract) -> list[dict[str, Any]]:
     return [item for item in (contract.raw.get("skill_waivers") or []) if isinstance(item, dict)]
 
 
 def infer_skill_obligations(project_root: Path, contract: Contract) -> list[str]:
     explicit = explicit_skill_obligations(contract)
+    required = required_skill_classes_for_profile(project_root, contract)
     if explicit:
-        return explicit
-    required = _norm_list(contract.raw.get("required_skill_classes"))
+        return list(dict.fromkeys([*explicit, *required]))
     if required:
         return required
     if (
@@ -138,7 +157,7 @@ def skill_obligation_report(project_root: Path, contract: Contract) -> dict[str,
     obligations = infer_skill_obligations(project_root, contract)
     allowed = set(_norm_list(contract.raw.get("allowed_skills")))
     recommended = set(_norm_list(contract.raw.get("recommended_skills")))
-    required = set(_norm_list(contract.raw.get("required_skill_classes")))
+    required = set(required_skill_classes_for_profile(project_root, contract))
     waived = _waived_classes(contract)
     known_skills = set(load_core_skill_map(project_root))
     failures: list[str] = []

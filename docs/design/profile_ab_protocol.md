@@ -87,6 +87,12 @@ result and provenance checks. Manuscript work that depends on registered
 results must declare that dependency so those checks also run. This contract
 does not prove that an output is fresh or scientifically valid.
 
+Write-producing agent/provider callbacks use the same candidate-worktree
+boundary. Ordinary `explore`/`research` actions run artifact-selected checks;
+`submit` adds manuscript truth, number, result, and provenance checks; and
+`regulated` retains the explicit full contract check set. None of these profiles
+changes promotion authority.
+
 ## Boundaries
 
 This protocol does not prove scientific quality, model superiority, profile

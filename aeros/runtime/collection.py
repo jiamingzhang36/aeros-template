@@ -165,7 +165,7 @@ def _write_collection_provenance(project_root: Path, *, grid: Path, out: Path,
     return path
 
 
-def collect_prompt_grid(
+def _collect_prompt_grid_direct(
     project_root: Path,
     *,
     grid: Path,
@@ -263,4 +263,73 @@ def collect_prompt_grid(
     print(f"[collect] wrote {out}")
     print(f"[collect] wrote {report}")
     print(f"[collect] wrote {provenance}")
+    return 0
+
+
+def collect_prompt_grid(
+    project_root: Path,
+    *,
+    grid: Path,
+    out: Path,
+    report: Path,
+    config: CollectionConfig,
+    dry_run: bool = False,
+    max_rows: int | None = None,
+) -> int:
+    """Collect in an isolated candidate worktree, then accept declared outputs."""
+    if dry_run:
+        return _collect_prompt_grid_direct(
+            project_root, grid=grid, out=out, report=report,
+            config=config, dry_run=True, max_rows=max_rows,
+        )
+    from .candidate_workspace import (
+        execute_callback_in_candidate_worktree,
+        format_candidate_workspace_failure,
+        load_candidate_policy,
+        write_candidate_workspace_audit,
+    )
+
+    root = project_root.resolve()
+    grid = grid if grid.is_absolute() else root / grid
+    out = out if out.is_absolute() else root / out
+    report = report if report.is_absolute() else root / report
+    try:
+        out_rel = out.resolve().relative_to(root).as_posix()
+        report_rel = report.resolve().relative_to(root).as_posix()
+    except ValueError as exc:
+        raise ValueError("provider collection outputs must be inside the project") from exc
+    provenance_rel = "outputs/.provenance/provider_collection.json"
+    policy = load_candidate_policy(root)
+
+    def _candidate_collect(candidate_root: Path) -> int:
+        try:
+            grid_rel = grid.resolve().relative_to(root)
+            candidate_grid = candidate_root / grid_rel
+            if not candidate_grid.exists():
+                candidate_grid = grid
+        except ValueError:
+            candidate_grid = grid
+        return _collect_prompt_grid_direct(
+            candidate_root,
+            grid=candidate_grid,
+            out=candidate_root / out_rel,
+            report=candidate_root / report_rel,
+            config=config,
+            dry_run=False,
+            max_rows=max_rows,
+        )
+
+    candidate = execute_callback_in_candidate_worktree(
+        root,
+        _candidate_collect,
+        allowed_outputs=(out_rel, report_rel, provenance_rel),
+        expected_outputs=(out_rel, report_rel, provenance_rel),
+        deny_roots=tuple(policy.get("deny_roots") or ()),
+    )
+    if not candidate.boundary_ok:
+        audit = write_candidate_workspace_audit(root, "provider_collection", candidate)
+        raise RuntimeError(format_candidate_workspace_failure(candidate) + f"\naudit={audit.relative_to(root)}")
+    if not candidate.callback_ok:
+        raise RuntimeError(candidate.callback_error or "provider collection candidate callback failed")
+    print("[collect] candidate envelope accepted: " + ", ".join(candidate.accepted_outputs))
     return 0

@@ -37,6 +37,14 @@ def _write_common(root: Path) -> None:
     aeros_stage: data_source
     human_gate_required: false
     aeros_constraints: []
+  pre_submission:
+    name: pre-submission-audit
+    source: fixture
+    tier: core
+    use_status: enabled
+    aeros_stage: submission_review
+    human_gate_required: false
+    aeros_constraints: []
 """,
         encoding="utf-8",
     )
@@ -97,6 +105,32 @@ def main() -> int:
         waived = write_completion_receipt(root, waiver_contract, mode="recover", check_results=[CheckResult()])
         if not waived.passed:
             failures.append(f"completion with explicit waiver did not pass: {waived.failures}")
+
+        (root / "harness/research_profiles.yml").write_text(
+            "default_profile: submit\nprofiles:\n  submit:\n    workspace: isolated_candidate_worktree\n",
+            encoding="utf-8",
+        )
+        (root / "harness/skill_obligation_policy.yml").write_text(
+            "profile_required_skill_classes:\n  submit: [submission_review]\nclasses:\n  submission_review:\n    skills: [pre-submission-audit]\n    triggers: [submission]\n",
+            encoding="utf-8",
+        )
+        submit_path = root / "task_submit.yml"
+        submit_path.write_text(
+            "task_id: T_SUBMIT\nstage: paper\ngate: G10\nwork_lane: writing\n"
+            "goal: submission manuscript audit\nchecks: [check_fixture.py]\n"
+            "allowed_outputs: [outputs/demo.txt]\n",
+            encoding="utf-8",
+        )
+        submit_contract = load_contract(submit_path)
+        missing_submit = write_completion_receipt(root, submit_contract, mode="recover", check_results=[CheckResult()])
+        if missing_submit.passed:
+            failures.append("submit profile passed without its automatic submission-review skill")
+        submit_receipt = write_skill_invocation_receipt(root, submit_contract, skills_used=["pre-submission-audit"])
+        used_submit = write_completion_receipt(
+            root, submit_contract, mode="recover", check_results=[CheckResult()], skill_receipt_path=submit_receipt,
+        )
+        if not used_submit.passed:
+            failures.append(f"submit profile did not accept its automatic review skill: {used_submit.failures}")
     if failures:
         print("FAIL: skill use attestation problems detected")
         for failure in failures:
@@ -108,4 +142,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

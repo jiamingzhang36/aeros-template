@@ -140,7 +140,7 @@ Every task contract must include a Mainline Alignment Gate section before execut
 - Every substantive literature synthesis claim must cite a `paper_id` with an extraction card.
 
 - Literature adapter outputs are ROUTE_READY only: OpenAlex/Semantic Scholar/CrossRef/RePEc/CitEc metadata may populate search logs, paper registries, and citation queues, but cannot support synthesis, gap claims, method claims, paper positioning, or claim registry entries without full-text extraction.
-- Citation faithfulness has three layers: citation exists, metadata faithful, and claim support checked. A real citation can still fail claim-support alignment.
+- Citation faithfulness is risk-tiered: Tier 0 bibliographic/background uses metadata; Tier 1 finding/method/limited attribution requires passage+locator+automatic interpretation and escalates low confidence; Tier 2 core claim/number/mechanism/identification/welfare requires full text, locator, producer interpretation, and an independent verifier. A real citation can still fail claim-support alignment.
 - Economics method skills are advisory compilers. They may suggest DiD/IV/RDD/panel diagnostics and defaults, but cannot certify identification, approve gates, or silently change estimators.
 
 
@@ -300,7 +300,7 @@ In an active or adopted research project, data state drives the next action. Do 
 - Completion receipts distinguish `staging_artifact_paths` from `substantive_evidence_paths`. Staging artifacts such as `work/`, Chrome/OCR review notes, recapture pools, source-promotion queues, audits, and quality reports may justify `ROUTE_READY`, but they do not by themselves prove substantive research progress.
 - Use `substantive_evidence_paths` only for canonical data, full-text extraction, registered result, paper edit, or approved evidence artifacts that materially change the research substance.
 - Completion attestation is mechanical only. It proves that declared task outputs and checks exist; it does not prove scientific validity, identification quality, claim support, or human gate approval.
-- If a task declares `recommended_skills` or `required_skill_classes`, the skill receipt must record either the invoked skill(s) or a waiver explaining why the skill was not used.
+- Ordinary tasks may dynamically select zero to three relevant skills and need no waiver when none is useful. Use-or-waive applies only to explicit required classes, the `submit` profile's submission-review class, and organization-defined `regulated` requirements.
 
 
 
@@ -431,7 +431,7 @@ Backfill is the bridge between governance automation and data repair automation.
 
 ## Harness Rules
 
-- Prefer a branch or isolated worktree for substantial tasks.
+- Write-producing agent/provider actions run in an isolated candidate worktree by default. Only declared non-protected candidate outputs may return to the main project; canonical data, admitted results/claims, human decisions, credentials, release, and budget changes remain separate authority boundaries.
 - Treat `harness/permissions.yml` as the permission policy.
 - Treat `harness/protocols/worker_protocol.md` as the worker run protocol.
 - Treat `harness/protocols/critic_protocol.md` as the read-only review protocol.
@@ -519,11 +519,11 @@ Treat `harness/external_tool_registry.yml` as the registry for external economic
 - AEA Data Editor guidance is an external replication standard. Alignment helps package quality, but it does not certify journal acceptance or waive data-license, privacy, IRB, or redistribution constraints.
 - Econstellar-style endpoint reproducibility may be recorded in the result registry through local commands, public endpoints, and endpoint status. Endpoint availability does not prove the estimate, identification, or claim.
 - Econometrics-Agent, Causal-Copilot, and CausalAgent are advisory reviewers only. Route their output through AEROS result, identification, claim, and human-gate checks before it affects the paper.
-- Any task that uses a skill must have a passing skill invocation receipt in `agent_runs/skill_invocations/`.
-- `recommended_skills` are advisory routing hints; `allowed_skills` are the hard authorization boundary. A recommended skill must also be allowed by the task.
+- Any task that actually uses a skill must record its finding and artifact impact in a passing invocation receipt. Ordinary unused recommendations require no waiver; explicit/submit/regulated required classes remain fail-closed.
+- `recommended_skills` are dynamic routing hints; `allowed_skills` and profile-required specialist classes are the authorization boundary.
 - For data-lane tasks, follow the data-first chain: source inventory before description, codebook before quality checks, quality checks before merge audits, and diagnostics only after a real data or schema artifact exists.
 - A skill invocation receipt proves routing compliance only. It does not prove substantive data progress, literature synthesis, empirical validity, claim support, or human gate approval.
-- If a required or recommended data skill cannot run, record a waiver/blocker and the next probe; do not report the task as substantively complete because a skill was considered.
+- If a required skill cannot run, record a waiver/blocker and the next probe; do not report the task as substantively complete because a skill was considered.
 
 ## Claim Rules
 
@@ -613,7 +613,7 @@ Before committing project work with raw captures or staging files, prefer `aeros
 
 ## Skill Obligation Layer
 
-For skill-eligible tasks, do not leave skill use implicit. Check the task contract for `skill_obligations`, `required_skill_classes`, `allowed_skills`, and `recommended_skills`. Use the smallest relevant skill when it helps; if no skill is used, record an explicit waiver or blocker with `skill_class`, `reason`, `scope`, and `progress_label`.
+For ordinary tasks, dynamically choose zero to three useful skills and record only actual use, findings, and artifact impact. Do not create waiver ceremony for a skill that was merely recommended. Explicit required classes, submit-profile specialist review, and regulated-profile requirements still require use-or-waive evidence.
 
 Skill use and skill waivers are audit evidence only. They do not approve gates, certify claims, prove identification quality, or convert `ROUTE_READY` into `SUBSTANTIVE_PRODUCED`.
 

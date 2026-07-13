@@ -49,6 +49,12 @@ VALID_CLAIM_STRENGTH = {"pass", "weak", "fail"}
 VALID_REVIEW_VERDICTS = {"faithful", "weak", "overclaimed", "unsupported"}
 VALID_HUMAN_STATUS = {"pending", "approved", "rejected"}
 VALID_CITATION_GROUNDING_TIERS = {"tier_0_bibliographic", "tier_1_interpretive", "tier_2_claim_bearing"}
+TIER_RANK = {"tier_0_bibliographic": 0, "tier_1_interpretive": 1, "tier_2_claim_bearing": 2}
+IDENTIFICATION_MARKERS = (
+    "identification", "causal", "instrument", "exclusion restriction",
+    "parallel trend", "difference-in-differences", "regression discontinuity",
+    "event study", "synthetic control", "random assignment",
+)
 CLAIM_BEARING_MARKERS = (
     " we find",
     " we show",
@@ -309,25 +315,28 @@ def _citation_grounding_tier(
     record_data: dict[str, Any] | None = None,
     registry_row: dict[str, str] | None = None,
 ) -> str:
+    explicit = ""
     if isinstance(record_data, dict):
         explicit = str(record_data.get("citation_grounding_tier") or "").strip().lower()
-        if explicit in VALID_CITATION_GROUNDING_TIERS:
-            return explicit
     registry_row = registry_row or {}
     citation_function = str(registry_row.get("citation_function") or registry_row.get("primary_function") or "").strip().lower()
     source_type = str(registry_row.get("source_type") or "").strip().lower()
-    if (
+    lowered = f" {_normalise_sentence(sentence).lower()} "
+    if any(marker in lowered for marker in CLAIM_BEARING_MARKERS) or any(marker in lowered for marker in IDENTIFICATION_MARKERS):
+        inferred = "tier_2_claim_bearing"
+    elif (
         "method" in citation_function
         or citation_function in {"related_literature", "background", "background-institutional"}
         or source_type in {"official_source"}
     ):
-        return "tier_1_interpretive"
-    lowered = f" {_normalise_sentence(sentence).lower()} "
-    if any(marker in lowered for marker in CLAIM_BEARING_MARKERS):
-        return "tier_2_claim_bearing"
-    if any(marker in lowered for marker in INTERPRETIVE_MARKERS):
-        return "tier_1_interpretive"
-    return "tier_0_bibliographic"
+        inferred = "tier_1_interpretive"
+    elif any(marker in lowered for marker in INTERPRETIVE_MARKERS):
+        inferred = "tier_1_interpretive"
+    else:
+        inferred = "tier_0_bibliographic"
+    if explicit in VALID_CITATION_GROUNDING_TIERS and TIER_RANK[explicit] > TIER_RANK[inferred]:
+        return explicit
+    return inferred
 
 
 def _mismatch_type_from_notes(notes: list[str]) -> str:
@@ -363,6 +372,8 @@ def _interpretation_status(
     sentence: str,
     citation_key: str,
     paper_id: str,
+    tier: str,
+    registry_row: dict[str, str],
 ) -> tuple[str, str, str, str, str, str, str]:
     if record_entry is None:
         return (
@@ -389,6 +400,16 @@ def _interpretation_status(
         hard.append("citation_key mismatch")
     if str(data.get("paper_id") or "").strip() != paper_id:
         hard.append("paper_id mismatch")
+
+    if tier == "tier_2_claim_bearing":
+        fulltext = str(
+            registry_row.get("full_text_available")
+            or registry_row.get("fulltext_available")
+            or registry_row.get("full_text_status")
+            or ""
+        ).strip().lower()
+        if fulltext not in {"yes", "true", "full_text", "full_text_obtained", "full_text_read", "indexed_fulltext"}:
+            hard.append("tier_2 full text unavailable")
 
     source_passage = data.get("source_passage") if isinstance(data.get("source_passage"), dict) else {}
     if _is_placeholder(source_passage.get("page_or_section")):
@@ -440,13 +461,43 @@ def _interpretation_status(
         hard.append(f"review_verdict={review_verdict}")
     if human_status not in VALID_HUMAN_STATUS:
         hard.append("human_status invalid_or_missing")
-    elif human_status != "approved":
-        hard.append(f"human_status={human_status}")
+    elif human_status == "rejected":
+        hard.append("human_status=rejected")
+    if tier == "tier_1_interpretive" and human_status != "approved":
+        automated = data.get("automated_verification") if isinstance(data.get("automated_verification"), dict) else {}
+        confidence = str(automated.get("confidence") or "").strip().lower()
+        auto_verdict = str(automated.get("verdict") or "").strip().lower()
+        if _is_placeholder(automated.get("verifier")) or _is_placeholder(automated.get("verified_at")):
+            hard.append("tier_1 automated verifier metadata missing")
+        if auto_verdict not in {"faithful", "direct_support", "supports"}:
+            hard.append("tier_1 automated verifier did not return faithful")
+        if confidence not in {"high", "medium"}:
+            weak.append("tier_1 automated confidence low; human review required")
+    if tier == "tier_2_claim_bearing" and human_status != "approved":
+        hard.append(f"tier_2 human_status={human_status or 'missing'}")
     if human_status == "approved":
         if _is_placeholder(data.get("reviewer")):
             hard.append("reviewer missing for approved record")
         if _is_placeholder(data.get("reviewed_at")):
             hard.append("reviewed_at missing for approved record")
+    if tier == "tier_2_claim_bearing":
+        independent = data.get("independent_verification") if isinstance(data.get("independent_verification"), dict) else {}
+        producer = str(data.get("producer") or "").strip()
+        verifier = str(independent.get("verifier") or "").strip()
+        independent_verdict = str(independent.get("verdict") or "").strip().lower()
+        if not independent:
+            hard.append("tier_2 independent_verification missing")
+        else:
+            if _is_placeholder(verifier) or _is_placeholder(independent.get("verified_at")):
+                hard.append("tier_2 independent verifier metadata missing")
+            if not _truthy(independent.get("independent_of_producer")):
+                hard.append("tier_2 verifier is not attested independent of producer")
+            if producer and verifier and producer == verifier:
+                hard.append("tier_2 verifier equals producer")
+            if independent_verdict not in {"faithful", "direct_support", "supports"}:
+                hard.append("tier_2 independent verifier did not return faithful")
+            if _is_placeholder(independent.get("source_fingerprint")):
+                hard.append("tier_2 independent source_fingerprint missing")
 
     if hard:
         if any("unsupported" in item or "contradicts" in item or "overclaim" in item for item in hard):
@@ -526,6 +577,8 @@ def build_citation_faithfulness_rows(root: Path | str = Path.cwd()) -> list[Cita
                         sentence=sentence,
                         citation_key=key,
                         paper_id=paper_id,
+                        tier=tier,
+                        registry_row=registry_row,
                     )
                     if interpretation_status != "faithful":
                         notes.append(interpretation_notes)
@@ -533,7 +586,7 @@ def build_citation_faithfulness_rows(root: Path | str = Path.cwd()) -> list[Cita
                     if card_status == "faithful" and interpretation_status == "faithful":
                         support_status = "faithful"
                         required_action = "none"
-                        notes.append("citation has registry mapping, extraction support, and approved interpretation record")
+                        notes.append("citation satisfies its tier-specific registry, extraction, interpretation, and verification floor")
                     elif card_status == "faithful" and interpretation_status == "weak":
                         support_status = "weak"
                         required_action = interpretation_action
