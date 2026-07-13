@@ -583,5 +583,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-07-13"
-    resolution_commit: "pending"
+    resolution_commit: "b3cda68"
     notes: "This closes a mechanical coverage bypass. It does not decide whether an explicit row is substantively correct or whether a manuscript sentence is supported."

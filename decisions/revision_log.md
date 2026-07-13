@@ -722,7 +722,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV046 - 2026-07-13 - Explicit citation-audit row enforcement
 
-- commit: pending
+- commit: b3cda68
 - change_type: citation audit fail-closed coverage semantics
 - summary: Removed narrative-token fallback from citation-audit coverage so
   only explicit table rows satisfy the audit requirement, and added an

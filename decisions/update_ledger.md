@@ -2561,7 +2561,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-13 — Require explicit citation-audit table rows
 
-- **Commit(s)**: pending
+- **Commit(s)**: `b3cda68`
 - **Change type**: framework / citation audit / fail-closed coverage
 - **North star:** Ensure citation coverage is demonstrated by inspectable faithfulness fields rather than an identifier appearing somewhere in prose.
 - **Action**: Removed the union between parsed audit rows and arbitrary `P###`/`CITE###` tokens in the audit document. Added an executable fixture where `CITE011` appears only in narrative text and must remain outside the audited-ID set.
@@ -2570,3 +2570,11 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: source truth; passage interpretation; manuscript sentence support; scientific validity; claim, gate, submission, or release approval.
 - **Drift risk**: Downstream vendored checks retain the narrative-token bypass until officially synced; explicit row presence still cannot substitute for Tier-1 sentence interpretation.
 - **Next check**: Commit, sync clean CMPD, verify all seven explicit T025 rows pass, and close the project-local parser obligation in a harness-scoped change.
+
+## 2026-07-13 — Backfill explicit citation-audit row commit
+
+- **Commit(s)**: `b3cda68`
+- **Change type**: ledger backfill
+- **Action**: Bound narrative-token bypass removal and its executable fixture to the functional commit and closed AEROS-IMPROVE-042.
+- **Validation**: Targeted checks, smoke 18/18, full 139/139, and session-scope audit passed before the functional commit.
+- **Does not prove**: source truth, passage interpretation, manuscript sentence support, scientific validity, or claim/gate/submission/release approval.
