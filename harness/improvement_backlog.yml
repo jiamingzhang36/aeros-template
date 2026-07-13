@@ -611,5 +611,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-07-13"
-    resolution_commit: "pending"
+    resolution_commit: "f63e583"
     notes: "This is runtime/substantive framework work. It does not prove search saturation, general econometric support, scientific validity, result admission, claim support, or downstream rollout success."

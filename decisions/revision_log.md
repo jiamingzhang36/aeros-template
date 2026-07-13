@@ -769,7 +769,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV048 - 2026-07-13 - Candidate/runtime convergence and bounded specification execution
 
-- commit: pending
+- commit: f63e583
 - change_type: candidate semantics / hybrid runtime / economics execution
 - summary: Downgraded candidate-pool claims to backlog/pause semantics, made
   hybrid vendored/package operation explicit, aligned effective init seeds with

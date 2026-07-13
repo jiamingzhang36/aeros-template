@@ -2601,7 +2601,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-13 — Converge candidate semantics and execute a bounded specification job
 
-- **Commit(s)**: pending
+- **Commit(s)**: `f63e583`
 - **Change type**: framework / runtime convergence / economics execution
 - **North star:** Reduce control-surface overstatement while making one economics job produce inspectable candidate artifacts under real isolation.
 - **Action**: Replaced search-saturation language with candidate-backlog and broad-capture-pause semantics while retaining deprecated compatibility projections; made vendored/package coexistence an explicit hybrid runtime mode; exercised all six economics drive handlers in process; made source-checkout initialization consume the canonical profile seed; measured the unchanged smoke profile; and added a fail-closed `run_specification` vertical slice that reads a registered CSV/OLS specification, executes in an isolated worktree, and emits nonproduction JSON plus exhibit CSV artifacts with provenance and adaptive post-check selection.
@@ -2610,3 +2610,11 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: data fitness; identification validity; model correctness beyond the bounded fixture; result admission; claim support; canonical promotion; gate, submission, or release approval.
 - **Drift risk**: The legacy capture fields remain temporary compatibility aliases; installed-package fallback seeds remain bootstrap-only when canonical checkout files are unavailable; the first specification executor intentionally rejects unsupported estimator features rather than guessing.
 - **Next check**: Backfill the functional commit hash, then roll the bounded specification job into one clean real project only when that project's registered data contract and specification actually require it.
+
+## 2026-07-13 — Backfill candidate/runtime convergence provenance
+
+- **Commit(s)**: `f63e583`
+- **Change type**: ledger backfill
+- **Action**: Bound candidate-semantics downgrade, hybrid runtime recognition, economics handler coverage, effective init-profile parity, measured smoke cost, and isolated nonproduction specification execution to the functional commit; closed AEROS-IMPROVE-044 and REV048.
+- **Validation**: Eight targeted checks, smoke 18/18, full 139/139, metadata checks, and staged diff hygiene passed before the functional commit.
+- **Does not prove**: data fitness, identification validity, general econometric support, scientific validity, result admission, claim support, canonical promotion, or gate/submission/release approval.
