@@ -741,3 +741,28 @@ Use this file to track template or project-level changes that alter workflow, ev
 - notes: This requires mechanically explicit audit fields. It does not certify
   the row's interpretation, establish manuscript support, or approve a claim,
   gate, submission, or release.
+
+## REV047 - 2026-07-13 - Canonical Tier-1 citation-record compatibility
+
+- commit: pending
+- change_type: citation-grounding parser and tier-semantics alignment
+- summary: Let legacy sentence grounding resolve canonical interpretation
+  records by manuscript path, normalized sentence, and citation key; accept
+  medium/high automated verification only for explicit Tier-1 records while
+  preserving Tier-2 human approval.
+- files:
+  - aeros/runtime/citation_sentence_grounding.py
+  - harness/citation_function_requirements.yml
+  - checks/check_manuscript_citation_faithfulness.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/update_ledger_chain.jsonl
+  - decisions/revision_log.md
+- checks:
+  - `python3 checks/check_manuscript_citation_faithfulness.py`
+  - `python3 checks/check_manuscript_citation_interpretation.py`
+  - `python3 checks/check_literature_tools.py`
+  - `python3 checks/check_update_ledger_hash_chain.py`
+- notes: Positive Tier-1 and negative Tier-2 fixtures enforce the boundary.
+  This does not certify real interpretation records, source passages, claims,
+  gates, submissions, or releases.

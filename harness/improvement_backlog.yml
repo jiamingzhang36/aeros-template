@@ -585,3 +585,17 @@ entries:
     resolved_at: "2026-07-13"
     resolution_commit: "b3cda68"
     notes: "This closes a mechanical coverage bypass. It does not decide whether an explicit row is substantively correct or whether a manuscript sentence is supported."
+  - id: AEROS-IMPROVE-043
+    created_at: "2026-07-13"
+    updated_at: "2026-07-13"
+    status: resolved
+    priority: high
+    area: citation-grounding
+    source: cmpd_t027_dual_scanner_validation
+    issue: "The legacy sentence-grounding check included line numbers in sentence IDs and required human-approved interpretations for method_precedent, while the canonical submission scanner uses content-stable IDs and permits medium/high automated verification for Tier-1. One honest Tier-1 record therefore could not satisfy both checks without duplicate records or false human approval."
+    proposed_fix: "Resolve canonical records by manuscript path, normalized sentence, and citation key; accept medium/high faithful automation only for explicit Tier-1 records; retain human approval for Tier-2; and add positive Tier-1 plus negative Tier-2 fixtures."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-07-13"
+    resolution_commit: "pending"
+    notes: "This aligns parser and tier semantics. It does not verify a real source passage, create project interpretation records, or weaken Tier-2 human/independent review in the submission scanner."

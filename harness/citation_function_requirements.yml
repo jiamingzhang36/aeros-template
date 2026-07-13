@@ -52,7 +52,8 @@ functions:
     risk_tier: tier_1_interpretive
     meaning: "The citation supports a method, design, identification, or estimator statement."
     minimum_evidence: method_section_extraction
-    required_evidence: [registry_metadata, extraction_card, source_passage, approved_interpretation]
+    required_evidence: [registry_metadata, extraction_card, source_passage, automated_interpretation]
+    preferred_evidence: [approved_interpretation]
     fulltext_required: true
     interpretation_required: true
     allowed_status: grounded

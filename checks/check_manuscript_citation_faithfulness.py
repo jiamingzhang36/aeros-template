@@ -110,6 +110,42 @@ def _fixture_fail_then_pass() -> tuple[bool, list[str]]:
         if routed_statuses.get("cameron2008") != "route_admission_ok":
             failures.append("bounded method route admission should pass without pretending full-text support")
 
+        tier1_sentence = r"Because the EPV ratio is 8.1, we use Firth's penalized-likelihood logit \citep{firth1993}."
+        (root / "discovery/literature/interpretation_records/canonical_tier1.json").write_text(
+            json.dumps(
+                {
+                    "sentence_id": "S_CANONICAL_TIER1",
+                    "manuscript_path": "tex/paper.tex",
+                    "manuscript_sentence": tier1_sentence,
+                    "citation_key": "firth1993",
+                    "paper_id": "P005",
+                    "citation_grounding_tier": "tier_1_interpretive",
+                    "producer": "fixture-producer",
+                    "source_passage": {
+                        "page_or_section": "p. 27, Method",
+                        "quote_or_paraphrase_basis": "Firth penalized likelihood reduces small-sample bias.",
+                    },
+                    "our_interpretation": "The passage supports the bounded method precedent.",
+                    "support_relation": "direct_support",
+                    "review_verdict": "faithful",
+                    "human_status": "pending",
+                    "automated_verification": {
+                        "verifier": "fixture-passage-checker",
+                        "verified_at": "2026-07-13",
+                        "confidence": "medium",
+                        "verdict": "faithful",
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        tier1_fixed = build_sentence_citation_grounding(root)
+        tier1_row = next((row for row in tier1_fixed.get("rows") or [] if row.get("citation_key") == "firth1993"), {})
+        if tier1_row.get("blocking") or tier1_row.get("support_status") != "grounded":
+            failures.append("canonical Tier-1 record with medium automated verification did not satisfy method grounding")
+        if not str(tier1_row.get("interpretation_record") or "").endswith("canonical_tier1.json"):
+            failures.append("legacy sentence grounding did not resolve canonical record by manuscript content")
+
         (root / "tex/paper.tex").write_text(
             r"Smith (2020) is a prior study \citep{smith2020}. "
             r"We find a significant policy effect on adoption \citep{jones2021}. "
@@ -124,7 +160,29 @@ def _fixture_fail_then_pass() -> tuple[bool, list[str]]:
             encoding="utf-8",
         )
         sentence_id = next((row.get("sentence_id") for row in fail_rows if row.get("citation_key") == "jones2021"), "")
-        (root / f"discovery/literature/interpretation_records/{sentence_id}.yml").write_text(
+        result_record_path = root / f"discovery/literature/interpretation_records/{sentence_id}.yml"
+        result_record_path.write_text(
+            json.dumps(
+                {
+                    "citation_grounding_tier": "tier_2_claim_bearing",
+                    "human_status": "pending",
+                    "review_verdict": "faithful",
+                    "support_relation": "direct_support",
+                    "source_passage": "the study estimates a policy effect on adoption",
+                    "automated_verification": {
+                        "verifier": "fixture-passage-checker",
+                        "verified_at": "2026-07-13",
+                        "confidence": "high",
+                        "verdict": "faithful",
+                    },
+                }
+            ),
+            encoding="utf-8",
+        )
+        auto_only = build_sentence_citation_grounding(root)
+        if not any(row.get("citation_key") == "jones2021" for row in auto_only.get("failures") or []):
+            failures.append("Tier-2 result claim passed with automation but without human approval")
+        result_record_path.write_text(
             "human_status: approved\n"
             "review_verdict: faithful\n"
             "support_relation: direct_support\n"

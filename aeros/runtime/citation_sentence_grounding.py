@@ -53,12 +53,13 @@ APPROVED_FAITHFUL = {"faithful", "direct_support", "supports"}
 WEAK_VALUES = {"weak", "partial_support", "background_only"}
 BAD_VALUES = {"unsupported", "overclaimed", "contradicts", "mismatch", "fail"}
 STRONG_FUNCTIONS = {"method_precedent", "data_source", "result_claim", "mechanism_claim", "number_fact", "literature_gap"}
+TIER_1_FUNCTIONS = {"related_literature", "method_precedent", "data_source", "policy_fact", "legal_fact"}
 
 DEFAULT_REQUIREMENTS: dict[str, dict[str, Any]] = {
     "metadata_only": {"required_evidence": ["registry_metadata"], "blocking": False, "allowed_status": "metadata_only_ok"},
     "background_pointer": {"required_evidence": ["registry_metadata"], "blocking": False, "allowed_status": "background_ok"},
     "related_literature": {"required_evidence": ["registry_metadata"], "blocking": False, "allowed_status": "related_literature_ok"},
-    "method_precedent": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "approved_interpretation"], "blocking": True, "allowed_status": "grounded"},
+    "method_precedent": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "automated_interpretation"], "blocking": True, "allowed_status": "grounded"},
     "data_source": {"required_evidence": ["registry_metadata", "extraction_card"], "blocking": True, "allowed_status": "grounded_or_snapshot_backed"},
     "result_claim": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "approved_interpretation"], "blocking": True, "allowed_status": "grounded"},
     "mechanism_claim": {"required_evidence": ["registry_metadata", "extraction_card", "source_passage", "approved_interpretation"], "blocking": True, "allowed_status": "grounded"},
@@ -380,15 +381,51 @@ def _load_record(path: Path) -> dict[str, Any]:
     return {}
 
 
-def _interpretation_record(root: Path, sentence_id: str, key: str) -> tuple[Path | None, dict[str, Any]]:
+def _normalise_record_sentence(value: Any) -> str:
+    return re.sub(r"\s+", " ", str(value or "")).strip()
+
+
+def _interpretation_records(root: Path) -> dict[str, dict[Any, tuple[Path, dict[str, Any]]]]:
     base = root / INTERPRETATION_DIR
-    candidates = []
-    for stem in (sentence_id, key):
-        candidates.extend([base / f"{stem}.yml", base / f"{stem}.yaml", base / f"{stem}.json"])
-    for path in candidates:
+    indexes: dict[str, dict[Any, tuple[Path, dict[str, Any]]]] = {
+        "by_stem": {},
+        "by_id": {},
+        "by_content": {},
+    }
+    if not base.exists():
+        return indexes
+    paths = sorted(list(base.glob("*.yml")) + list(base.glob("*.yaml")) + list(base.glob("*.json")))
+    for path in paths:
         data = _load_record(path)
         if data:
-            return path, data
+            entry = (path, data)
+            indexes["by_stem"].setdefault(path.stem, entry)
+            sid = str(data.get("sentence_id") or "").strip()
+            key = str(data.get("citation_key") or "").strip()
+            manuscript_path = str(data.get("manuscript_path") or "").strip()
+            sentence = _normalise_record_sentence(data.get("manuscript_sentence"))
+            if sid and key:
+                indexes["by_id"].setdefault((sid, key), entry)
+            if manuscript_path and sentence and key:
+                indexes["by_content"].setdefault((manuscript_path, sentence, key), entry)
+    return indexes
+
+
+def _interpretation_record(
+    records: dict[str, dict[Any, tuple[Path, dict[str, Any]]]],
+    sentence_id: str,
+    key: str,
+    manuscript_path: str,
+    sentence: str,
+) -> tuple[Path | None, dict[str, Any]]:
+    entry = records["by_id"].get((sentence_id, key))
+    if entry is None:
+        entry = records["by_stem"].get(sentence_id) or records["by_stem"].get(key)
+    if entry is None:
+        content_key = (manuscript_path, _normalise_record_sentence(sentence), key)
+        entry = records["by_content"].get(content_key)
+    if entry is not None:
+        return entry
     return None, {}
 
 
@@ -399,20 +436,39 @@ def _verdict_from_record(record: dict[str, Any]) -> tuple[str, str]:
     verdict = str(record.get("review_verdict") or record.get("verdict") or record.get("support_status") or "").strip().lower()
     relation = str(record.get("support_relation") or "").strip().lower()
     passage = str(record.get("source_passage") or record.get("quoted_passage") or "").strip()
-    if human not in {"approved", "yes", "true"}:
-        return "needs_human_review", "interpretation record is not human-approved"
     if not passage:
-        return "missing_passage", "approved interpretation record lacks source_passage"
+        return "missing_passage", "interpretation record lacks source_passage"
     if verdict in BAD_VALUES or relation in BAD_VALUES:
-        return "overclaimed", "approved record marks support as unsupported/overclaimed/contradictory"
-    if verdict in APPROVED_FAITHFUL or relation in APPROVED_FAITHFUL:
+        return "overclaimed", "interpretation record marks support as unsupported/overclaimed/contradictory"
+    faithful = verdict in APPROVED_FAITHFUL or relation in APPROVED_FAITHFUL
+    if human in {"approved", "yes", "true"} and faithful:
         return "faithful", "approved interpretation record supports sentence"
+    tier = str(record.get("citation_grounding_tier") or "").strip().lower()
+    automated = record.get("automated_verification") if isinstance(record.get("automated_verification"), dict) else {}
+    auto_verdict = str(automated.get("verdict") or "").strip().lower()
+    confidence = str(automated.get("confidence") or "").strip().lower()
+    auto_metadata = bool(str(automated.get("verifier") or "").strip() and str(automated.get("verified_at") or "").strip())
+    if (
+        tier == "tier_1_interpretive"
+        and faithful
+        and auto_verdict in APPROVED_FAITHFUL
+        and confidence in {"medium", "high"}
+        and auto_metadata
+    ):
+        return "faithful", "Tier-1 interpretation has medium/high automated passage verification"
     if verdict in WEAK_VALUES or relation in WEAK_VALUES:
         return "weak_support", "approved interpretation record is weak/partial/background-only"
-    return "needs_human_review", "approved interpretation record has unclear support verdict"
+    return "needs_human_review", "interpretation record lacks required Tier-1 automation or Tier-2 human approval"
 
 
-def _available_evidence(pid: str, row: dict[str, str], card_ok: bool, rec: dict[str, Any], record_status: str) -> set[str]:
+def _available_evidence(
+    pid: str,
+    row: dict[str, str],
+    card_ok: bool,
+    rec: dict[str, Any],
+    record_status: str,
+    function: str,
+) -> set[str]:
     available: set[str] = set()
     if pid:
         available.add("registry_metadata")
@@ -432,7 +488,10 @@ def _available_evidence(pid: str, row: dict[str, str], card_ok: bool, rec: dict[
         available.add("interpretation_record")
     if str(rec.get("source_passage") or rec.get("quoted_passage") or "").strip():
         available.add("source_passage")
-    if record_status == "faithful":
+    human = str(rec.get("human_status") or rec.get("approved") or "").strip().lower()
+    if record_status == "faithful" and function in TIER_1_FUNCTIONS:
+        available.add("automated_interpretation")
+    if record_status == "faithful" and human in {"approved", "yes", "true"}:
         available.add("approved_interpretation")
     if any((rec.get(col) or "") for col in ("page", "table", "figure", "locator", "page_or_table")):
         available.add("table_or_page_locator")
@@ -465,6 +524,8 @@ def _missing_status(function: str, missing: list[str], row: dict[str, str]) -> s
         return "missing_passage"
     if "approved_interpretation" in missing:
         return "missing_interpretation"
+    if "automated_interpretation" in missing:
+        return "missing_interpretation"
     return "needs_human_review"
 
 
@@ -489,7 +550,7 @@ def _evaluate_requirement(
     record_note: str,
 ) -> tuple[str, str, bool, str, str, str]:
     required = [str(item) for item in requirement.get("required_evidence") or ["registry_metadata"]]
-    available = _available_evidence(pid, row, card_ok, rec, record_status)
+    available = _available_evidence(pid, row, card_ok, rec, record_status, function)
     missing = [item for item in required if item not in available]
     blocks_when_missing = bool(requirement.get("blocking", function in STRONG_FUNCTIONS))
     if missing:
@@ -499,7 +560,7 @@ def _evaluate_requirement(
         status = _missing_status(function, missing, row)
         if "extraction_card" in missing:
             status = _missing_status(function, missing, row)
-        elif "approved_interpretation" in missing and not rec:
+        elif ("approved_interpretation" in missing or "automated_interpretation" in missing) and not rec:
             status = "missing_interpretation"
         elif "source_passage" in missing and rec:
             status = "missing_passage"
@@ -515,7 +576,7 @@ def _evaluate_requirement(
         note = f"missing evidence: {', '.join(missing)}"
         if not card_ok and "extraction_card" in missing:
             note = card_note
-        if "approved_interpretation" in missing or "source_passage" in missing:
+        if "approved_interpretation" in missing or "automated_interpretation" in missing or "source_passage" in missing:
             note = record_note
         blocking = blocks_when_missing
         return status, action, blocking, note, ";".join(required), ";".join(sorted(available))
@@ -552,6 +613,7 @@ def build_sentence_citation_grounding(root: Path | str = Path.cwd()) -> dict[str
     root = Path(root)
     requirements = _load_requirements(root)
     registry, by_key = _registry_rows(root)
+    records = _interpretation_records(root)
     rows: list[SentenceCitationGroundingRow] = []
     manuscripts = _manuscripts(root)
     for manuscript in manuscripts:
@@ -570,7 +632,7 @@ def build_sentence_citation_grounding(root: Path | str = Path.cwd()) -> dict[str
                 stype = _source_type(reg_row) if reg_row else "unknown"
                 card = _card_path(root, pid, reg_row) if pid else None
                 card_ok, card_note = _card_has_support(card)
-                rec_path, rec = _interpretation_record(root, sid, key)
+                rec_path, rec = _interpretation_record(records, sid, key, rel, sentence)
                 record_status, record_note = _verdict_from_record(rec)
                 support, action, blocking, note, required, available = _evaluate_requirement(
                     function=function,

@@ -2578,3 +2578,15 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Action**: Bound narrative-token bypass removal and its executable fixture to the functional commit and closed AEROS-IMPROVE-042.
 - **Validation**: Targeted checks, smoke 18/18, full 139/139, and session-scope audit passed before the functional commit.
 - **Does not prove**: source truth, passage interpretation, manuscript sentence support, scientific validity, or claim/gate/submission/release approval.
+
+## 2026-07-13 — Align canonical Tier-1 records across citation scanners
+
+- **Commit(s)**: pending
+- **Change type**: framework / sentence grounding / tier semantics
+- **North star:** One honest citation interpretation record should receive one consistent verdict across AEROS checks without fabricated human approval.
+- **Action**: Added content-key lookup for canonical records when the legacy line-bearing sentence ID differs, changed method-precedent evidence from human-approved to Tier-1 automated interpretation, and taught the legacy verifier to accept only explicit Tier-1 records with faithful medium/high automation plus verifier metadata. Human-approved records remain valid; Tier-2 automation without human approval remains blocking. Added both positive and negative executable fixtures.
+- **Validation**: Both citation checks, the literature wrapper, backlog/ledger/hash-chain checks, smoke, and full profile before downstream sync.
+- **Non-goal**: Do not auto-create project interpretation records, certify source passages, infer human review, or weaken Tier-2 independent verification in the submission scanner.
+- **Does not prove**: interpretation correctness; source truth; manuscript support; scientific validity; claim, gate, submission, or release approval.
+- **Drift risk**: Vendored projects retain incompatible IDs and Tier-1 semantics until official sync; content lookup requires an exact normalized manuscript sentence and citation key, so prose edits correctly invalidate the record.
+- **Next check**: Commit, sync clean CMPD, create the 36 canonical source/rendered Tier-1 records under T027, and require both scanners to report zero weak/blocking rows without any human-approval fabrication.
