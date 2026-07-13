@@ -569,5 +569,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-07-13"
-    resolution_commit: "pending"
+    resolution_commit: "f648361"
     notes: "This repairs audit-row routing only. It does not verify a source, approve an interpretation, establish manuscript claim support, or change any downstream project until official sync."

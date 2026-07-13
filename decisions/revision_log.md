@@ -697,7 +697,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV045 - 2026-07-13 - Citation-audit identifier compatibility
 
-- commit: pending
+- commit: f648361
 - change_type: citation audit parser / executable regression fixture
 - summary: Extended citation-audit parsing from the legacy `P###` family to
   both canonical `P###` and project `CITE###` identifiers, while retaining

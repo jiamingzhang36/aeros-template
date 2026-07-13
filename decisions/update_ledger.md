@@ -2541,7 +2541,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-13 — Accept project citation identifiers in the citation audit
 
-- **Commit(s)**: pending
+- **Commit(s)**: `f648361`
 - **Change type**: framework / citation audit parser / regression fixture
 - **North star:** Keep citation-faithfulness checks fail-closed without confusing a parser vocabulary mismatch with missing literature evidence.
 - **Action**: Extended `check_citation_audit.py` to parse both `P###` and `CITE###` identifiers. Factored row-level faithfulness validation into one path and added an executable fixture proving both identifier families are visible while a `TBD` claim-support field still fails closed.
@@ -2550,3 +2550,11 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: bibliographic truth; full-text interpretation quality; manuscript sentence support; scientific validity; claim, gate, submission, or release approval.
 - **Drift risk**: Vendored projects remain unable to recognize `CITE###` audit rows until officially synced; audit presence alone must not be treated as passage-level claim support.
 - **Next check**: Commit the template repair, sync clean CMPD, add the seven source-bounded audit rows, and require the complete T025 contract to pass.
+
+## 2026-07-13 — Backfill citation-audit parser repair commit
+
+- **Commit(s)**: `f648361`
+- **Change type**: ledger backfill
+- **Action**: Bound the `P###`/`CITE###` parser compatibility and fail-closed regression fixture to its functional commit and closed AEROS-IMPROVE-041.
+- **Validation**: Targeted checks, smoke 18/18, full 139/139, and session-scope audit passed before the functional commit.
+- **Does not prove**: source truth, passage interpretation, manuscript sentence support, scientific validity, or claim/gate/submission/release approval.
