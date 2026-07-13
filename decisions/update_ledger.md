@@ -2530,3 +2530,11 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Action**: Kept source-level assertions for the template-only sync driver when that file exists, while allowing vendored downstream projects to run sync-doctor capability checks without the intentionally unsynced driver.
 - **Validation**: Template and CMPD sync-doctor checks plus smoke profile.
 - **Does not prove**: project currency, research validity, claim support, or gate approval.
+
+## 2026-07-13 — Backfill sync-doctor mode-boundary commit
+
+- **Commit(s)**: `40ef1dc`
+- **Change type**: ledger backfill
+- **Action**: Bound the template/downstream sync-doctor guard to its functional commit and closed AEROS-IMPROVE-040.
+- **Validation**: Template smoke 18/18 before commit; downstream CMPD sync-doctor remains the rollout check.
+- **Does not prove**: project currency, research validity, claim support, or gate approval.

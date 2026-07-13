@@ -555,5 +555,5 @@ entries:
     owner: human
     target_gate: G0
     resolved_at: "2026-07-13"
-    resolution_commit: "pending"
+    resolution_commit: "40ef1dc"
     notes: "This is a mode-boundary fix. It does not weaken downstream capability checks or require the sync driver to be vendored."

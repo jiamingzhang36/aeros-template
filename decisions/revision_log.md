@@ -678,7 +678,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV044 - 2026-07-13 16:18 -0400
 
-- commit: pending
+- commit: 40ef1dc
 - change_type: sync-doctor template/downstream mode boundary
 - summary: Guarded sync-script source assertions behind the template-only
   script's existence so downstream projects continue to run capability
