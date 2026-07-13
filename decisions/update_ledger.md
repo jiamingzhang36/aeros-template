@@ -2538,3 +2538,15 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Action**: Bound the template/downstream sync-doctor guard to its functional commit and closed AEROS-IMPROVE-040.
 - **Validation**: Template smoke 18/18 before commit; downstream CMPD sync-doctor remains the rollout check.
 - **Does not prove**: project currency, research validity, claim support, or gate approval.
+
+## 2026-07-13 — Accept project citation identifiers in the citation audit
+
+- **Commit(s)**: pending
+- **Change type**: framework / citation audit parser / regression fixture
+- **North star:** Keep citation-faithfulness checks fail-closed without confusing a parser vocabulary mismatch with missing literature evidence.
+- **Action**: Extended `check_citation_audit.py` to parse both `P###` and `CITE###` identifiers. Factored row-level faithfulness validation into one path and added an executable fixture proving both identifier families are visible while a `TBD` claim-support field still fails closed.
+- **Validation**: Citation-audit, improvement-backlog, update-ledger, hash-chain, smoke, and full-profile checks before downstream sync.
+- **Non-goal**: Do not create citation-audit rows, verify source identity, approve sentence interpretations, strengthen claims, or change downstream projects outside the official sync path.
+- **Does not prove**: bibliographic truth; full-text interpretation quality; manuscript sentence support; scientific validity; claim, gate, submission, or release approval.
+- **Drift risk**: Vendored projects remain unable to recognize `CITE###` audit rows until officially synced; audit presence alone must not be treated as passage-level claim support.
+- **Next check**: Commit the template repair, sync clean CMPD, add the seven source-bounded audit rows, and require the complete T025 contract to pass.

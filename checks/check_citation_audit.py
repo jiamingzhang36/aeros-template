@@ -11,7 +11,7 @@ from pathlib import Path
 
 REGISTRY = Path("discovery/literature/paper_registry.csv")
 AUDIT = Path("discovery/literature/citation_audit.md")
-PAPER_ID_RE = re.compile(r"\bP\d{3,}\b")
+LITERATURE_ID_RE = re.compile(r"\b(?:P\d{3,}|CITE\d{3,})\b")
 REQUIRED_COLUMNS = ["Citation exists", "Metadata faithful", "Claim support checked", "Evidence level"]
 OK_VALUES = {"yes", "no", "partial", "abstract_only", "full_text", "not_checked", "n/a", "na"}
 
@@ -27,9 +27,59 @@ def _parse_table(text: str) -> tuple[list[str], dict[str, list[str]]]:
         if cells and cells[0] == "Paper ID":
             headers = cells
             continue
-        if cells and PAPER_ID_RE.fullmatch(cells[0]):
+        if cells and LITERATURE_ID_RE.fullmatch(cells[0]):
             rows[cells[0]] = cells
     return headers, rows
+
+
+def _row_faithfulness_failures(
+    literature_id: str,
+    cells: list[str],
+    header_index: dict[str, int],
+) -> list[str]:
+    failures: list[str] = []
+    for column in REQUIRED_COLUMNS:
+        idx = header_index.get(column)
+        if idx is None:
+            continue
+        if idx >= len(cells):
+            failures.append(f"{literature_id}: {column} must be explicit before evidence use")
+            continue
+        value = cells[idx].strip().lower()
+        if not value or value in {"tbd", "todo", "unknown"}:
+            failures.append(f"{literature_id}: {column} must be explicit before evidence use")
+        elif column != "Evidence level" and value not in OK_VALUES:
+            failures.append(f"{literature_id}: {column} has non-standard value {value!r}")
+    return failures
+
+
+def _fixture_failures() -> list[str]:
+    fixture = """
+| Paper ID | Citation exists | Metadata faithful | Claim support checked | Evidence level |
+|---|---|---|---|---|
+| P001 | yes | yes | yes | full_text |
+| CITE008 | yes | yes | yes | full_text |
+| CITE009 | yes | yes | TBD | full_text |
+| CITE010 | yes | yes |
+"""
+    headers, rows = _parse_table(fixture)
+    failures: list[str] = []
+    if set(rows) != {"P001", "CITE008", "CITE009", "CITE010"}:
+        failures.append("fixture: citation audit must parse both P### and CITE### identifiers")
+        return failures
+
+    header_index = {name: idx for idx, name in enumerate(headers)}
+    if _row_faithfulness_failures("P001", rows["P001"], header_index):
+        failures.append("fixture: valid P### row failed faithfulness validation")
+    if _row_faithfulness_failures("CITE008", rows["CITE008"], header_index):
+        failures.append("fixture: valid CITE### row failed faithfulness validation")
+    invalid_failures = _row_faithfulness_failures("CITE009", rows["CITE009"], header_index)
+    if not any("Claim support checked must be explicit" in failure for failure in invalid_failures):
+        failures.append("fixture: unresolved CITE### faithfulness field did not fail closed")
+    truncated_failures = _row_faithfulness_failures("CITE010", rows["CITE010"], header_index)
+    if not any("Evidence level must be explicit" in failure for failure in truncated_failures):
+        failures.append("fixture: truncated CITE### row did not fail closed")
+    return failures
 
 
 def main() -> int:
@@ -42,9 +92,9 @@ def main() -> int:
 
     audit_text = AUDIT.read_text(encoding="utf-8")
     headers, audit_rows = _parse_table(audit_text)
-    audited_ids = set(audit_rows) | set(PAPER_ID_RE.findall(audit_text))
+    audited_ids = set(audit_rows) | set(LITERATURE_ID_RE.findall(audit_text))
 
-    failures: list[str] = []
+    failures = _fixture_failures()
     for column in REQUIRED_COLUMNS:
         if column not in headers:
             failures.append(f"citation audit table missing faithfulness column: {column}")
@@ -68,16 +118,7 @@ def main() -> int:
                 failures.append(f"{paper_id}: missing from citation audit")
                 continue
             if (used or extracted or status in {"extracted", "included"}) and paper_id in audit_rows and headers:
-                cells = audit_rows[paper_id]
-                for column in REQUIRED_COLUMNS:
-                    idx = header_index.get(column)
-                    if idx is None or idx >= len(cells):
-                        continue
-                    value = cells[idx].strip().lower()
-                    if not value or value in {"tbd", "todo", "unknown"}:
-                        failures.append(f"{paper_id}: {column} must be explicit before evidence use")
-                    elif column != "Evidence level" and value not in OK_VALUES:
-                        failures.append(f"{paper_id}: {column} has non-standard value {value!r}")
+                failures.extend(_row_faithfulness_failures(paper_id, audit_rows[paper_id], header_index))
 
     if failures:
         print("FAIL: citation audit problems detected:")

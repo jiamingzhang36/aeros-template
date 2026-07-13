@@ -694,3 +694,28 @@ Use this file to track template or project-level changes that alter workflow, ev
   - `python3 checks/check_sync_doctor.py` in synced CMPD
   - smoke profile
 - notes: This does not weaken capability checks or change project evidence.
+
+## REV045 - 2026-07-13 - Citation-audit identifier compatibility
+
+- commit: pending
+- change_type: citation audit parser / executable regression fixture
+- summary: Extended citation-audit parsing from the legacy `P###` family to
+  both canonical `P###` and project `CITE###` identifiers, while retaining
+  fail-closed validation for unresolved faithfulness fields.
+- files:
+  - agent_runs/INDEX.csv
+  - checks/check_citation_audit.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/update_ledger_chain.jsonl
+  - decisions/revision_log.md
+- checks:
+  - `python3 checks/check_citation_audit.py`
+  - `python3 checks/check_improvement_backlog.py`
+  - `python3 checks/check_update_ledger.py`
+  - `python3 checks/check_update_ledger_hash_chain.py`
+- notes: This makes valid audit records mechanically visible. It does not
+  determine whether a citation supports a manuscript sentence, certify a
+  source, approve a gate, or alter downstream project evidence before sync.
+  The full-profile run also refreshed the derived index for two previously
+  existing framework run reports; that index refresh is mechanical hygiene.

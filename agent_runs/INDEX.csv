@@ -1,2 +1,4 @@
 run_file,run_id,task_id,task_name,agent,date,mode,work_mode,completion_status,branch_commit,start_commit,end_commit,updated_at,requires_critic,requires_human_gate
 agent_runs/AEROS_skill_lane_registry_repair_2026-07-13.md,,,,,2026-07-13,,,,,,,2026-07-13T19:52:50.619018+00:00,,
+agent_runs/AEROS_sync_doctor_mode_boundary_2026-07-13.md,,,,,2026-07-13,,,,,,,2026-07-13T20:21:16.861562+00:00,,
+agent_runs/AEROS_sync_skill_validation_repair_2026-07-13.md,,,,,2026-07-13,,,,,,,2026-07-13T20:10:14.327013+00:00,,

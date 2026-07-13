@@ -557,3 +557,17 @@ entries:
     resolved_at: "2026-07-13"
     resolution_commit: "40ef1dc"
     notes: "This is a mode-boundary fix. It does not weaken downstream capability checks or require the sync driver to be vendored."
+  - id: AEROS-IMPROVE-041
+    created_at: "2026-07-13"
+    updated_at: "2026-07-13"
+    status: resolved
+    priority: high
+    area: citation-audit
+    source: cmpd_t025_downstream_validation
+    issue: "check_citation_audit.py accepted only P### identifiers, so valid CITE### audit rows were invisible and seven source-extracted CMPD citations were falsely reported as missing."
+    proposed_fix: "Accept both canonical literature identifier families and add an executable fixture proving that P### and CITE### rows parse while unresolved faithfulness fields still fail closed."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-07-13"
+    resolution_commit: "pending"
+    notes: "This repairs audit-row routing only. It does not verify a source, approve an interpretation, establish manuscript claim support, or change any downstream project until official sync."
