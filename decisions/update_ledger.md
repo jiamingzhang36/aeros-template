@@ -2418,7 +2418,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-12 — Reduce process ceremony behind immutable research boundaries
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `6453b9e`
 - **Change type**: framework / profile mapping / control-tax reduction / measurement protocol
 - **North star:** Maximize model capability inside reversible candidate work while enforcing only boundaries that cannot safely be delegated.
 - **Alignment**: Added a mapping-only `explore/research/submit/regulated` profile policy with `research` as the user-facing default and exactly eight profile-invariant authority/evidence/resource rules. Ordinary tasks may now use zero skills without a waiver; only explicit `required_skill_classes` create completion-level use-or-waive enforcement. Recorded the candidate-worktree default design without claiming provider/LLM sandboxing, and added a paired real-project A/B protocol that measures accepted artifacts, control tax, human interruptions, and safety escapes before any old rule can be retired. Smoke remains 18 checks by replacing skill ceremony with profile/invariant validation rather than adding another daily check.
