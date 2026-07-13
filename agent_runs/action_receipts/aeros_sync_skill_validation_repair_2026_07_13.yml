@@ -1,0 +1,27 @@
+version: 1
+policy: AEROS-ACTION-RECEIPT-001
+action_id: aeros_sync_skill_validation_repair_2026_07_13
+generated_at: '2026-07-13T20:11:01+00:00'
+action_mode: harness_triage
+honest_progress_label: mechanical_hygiene
+why_this_now: The first real CMPD rollout exposed project-backlog overwrite and inconsistent
+  required-class interpretation.
+summary: Preserved existing project improvement backlogs during sync and aligned skill
+  invocation validation with completion class semantics.
+data_impact:
+  inventory_changed: false
+  source_verified: false
+  data_rows_changed: false
+  coverage_changed: false
+  backfill_queue_changed: false
+  probe_completed: false
+research_impact:
+  claim_ceiling_changed: false
+  gate_candidate_changed: false
+  evidence_graph_changed: false
+  result_registered: false
+evidence_paths:
+- agent_runs/AEROS_sync_skill_validation_repair_2026-07-13.md
+causal_attribution:
+  would_progress_without_this_action: false
+  dependency_type: blocking_resolution

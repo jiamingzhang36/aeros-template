@@ -258,7 +258,23 @@ def validate_skill_invocations(project_root: Path, contracts: dict[str, tuple[Co
         if required_classes:
             used = set(payload.get("skills_used") or [])
             used_stages = {str(skill_map.get(name, {}).get("aeros_stage", "")).strip() for name in used}
-            missing = sorted(cls for cls in required_classes if cls not in waiver_classes and cls not in used and cls not in used_stages)
+            try:
+                from .skill_obligation import obligation_classes
+
+                class_specs = obligation_classes(project_root)
+            except Exception:
+                class_specs = {}
+            used_classes = {
+                cls for cls, spec in class_specs.items()
+                if set(str(skill) for skill in (spec.get("skills") or [])) & used
+            }
+            missing = sorted(
+                cls for cls in required_classes
+                if cls not in waiver_classes
+                and cls not in used
+                and cls not in used_stages
+                and cls not in used_classes
+            )
             for cls in missing:
                 failures.append(f"{task_id}: required skill class {cls!r} has neither invocation nor waiver")
         if recommended and not payload.get("skills_used") and not waivers:

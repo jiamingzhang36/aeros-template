@@ -47,7 +47,10 @@ for T in "${TARGETS[@]}"; do
   echo "==> sync framework to $T"
   rsync -a "$SRC/aeros/" "$T/aeros/"
   rsync -a "$SRC/checks/" "$T/checks/"
-  rsync -a "$SRC/harness/" "$T/harness/"
+  rsync -a --exclude 'improvement_backlog.yml' "$SRC/harness/" "$T/harness/"
+  if [ ! -f "$T/harness/improvement_backlog.yml" ]; then
+    rsync -a "$SRC/harness/improvement_backlog.yml" "$T/harness/improvement_backlog.yml"
+  fi
   rsync -a "$SRC/examples/" "$T/examples/"
   mkdir -p "$T/docs" "$T/docs/design" "$T/templates" "$T/tests/adversarial" "$T/tests/parser" "$T/tests/evidence_units" "$T/decisions"
   if [ ! -f "$T/CURRENT_STATE.md" ]; then

@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
 
 from aeros.runtime.completion import write_completion_receipt
 from aeros.runtime.contract import load_contract
-from aeros.runtime.skill_receipt import write_skill_invocation_receipt
+from aeros.runtime.skill_receipt import validate_skill_invocations, write_skill_invocation_receipt
 
 
 class CheckResult:
@@ -34,7 +34,7 @@ def _write_common(root: Path) -> None:
     source: fixture
     tier: core
     use_status: enabled
-    aeros_stage: data_source
+    aeros_stage: data_scouting
     human_gate_required: false
     aeros_constraints: []
   pre_submission:
@@ -46,6 +46,13 @@ def _write_common(root: Path) -> None:
     human_gate_required: false
     aeros_constraints: []
 """,
+        encoding="utf-8",
+    )
+    (root / "harness/skill_obligation_policy.yml").write_text(
+        "profile_required_skill_classes:\n  submit: [submission_review]\n"
+        "classes:\n"
+        "  data_source:\n    skills: [data-inventory]\n    triggers: [data]\n"
+        "  submission_review:\n    skills: [pre-submission-audit]\n    triggers: [submission]\n",
         encoding="utf-8",
     )
 
@@ -100,6 +107,14 @@ def main() -> int:
             failures.append(f"completion with valid skill invocation did not pass: {used.failures}")
         if (used.payload.get("skill_use_attestation") or {}).get("verdict") != "pass":
             failures.append("valid skill invocation did not produce passing attestation")
+        invocation_failures = validate_skill_invocations(
+            root, {contract.task_id: (contract, contract.path)}
+        )
+        if invocation_failures:
+            failures.append(
+                "candidate skill did not satisfy its required class in invocation validation: "
+                + "; ".join(invocation_failures)
+            )
 
         waiver_contract = load_contract(_write_contract(root, waiver=True))
         waived = write_completion_receipt(root, waiver_contract, mode="recover", check_results=[CheckResult()])
@@ -108,10 +123,6 @@ def main() -> int:
 
         (root / "harness/research_profiles.yml").write_text(
             "default_profile: submit\nprofiles:\n  submit:\n    workspace: isolated_candidate_worktree\n",
-            encoding="utf-8",
-        )
-        (root / "harness/skill_obligation_policy.yml").write_text(
-            "profile_required_skill_classes:\n  submit: [submission_review]\nclasses:\n  submission_review:\n    skills: [pre-submission-audit]\n    triggers: [submission]\n",
             encoding="utf-8",
         )
         submit_path = root / "task_submit.yml"

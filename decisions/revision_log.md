@@ -648,3 +648,30 @@ Use this file to track template or project-level changes that alter workflow, ev
 - notes: This is routing, registry, and bookkeeping-classification repair. It does not admit literature
   evidence, verify bibliography content, allow manuscript prose edits, approve
   a gate, or strengthen a claim.
+
+## REV043 - 2026-07-13 16:05 -0400
+
+- commit: pending
+- change_type: downstream sync ownership / skill-class validation parity
+- summary: Preserved existing project improvement backlogs during official
+  framework sync and made invocation validation recognize the same candidate
+  skills for required classes as completion attestation.
+- files:
+  - aeros/runtime/skill_receipt.py
+  - checks/check_skill_use_attestation.py
+  - tools/sync_aeros_latest.zsh
+  - checks/check_sync_doctor.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/update_ledger_chain.jsonl
+  - decisions/revision_log.md
+- checks:
+  - `python3 checks/check_skill_use_attestation.py`
+  - `python3 checks/check_skill_invocations.py`
+  - `python3 checks/check_sync_doctor.py`
+  - `python3 checks/check_improvement_backlog.py`
+  - `python3 checks/check_update_ledger.py`
+  - `python3 checks/check_update_ledger_hash_chain.py`
+- notes: This preserves project-owned obligations and aligns validators. It
+  does not waive a required skill, certify skill output, or copy project facts
+  into the root template.

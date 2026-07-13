@@ -515,3 +515,31 @@ entries:
     resolved_at: "2026-07-13"
     resolution_commit: "7cc59a3"
     notes: "The hash-chain writer and validation remain unchanged and fail-closed. This classification does not make approvals, gates, releases, or arbitrary decisions/ files bookkeeping."
+  - id: AEROS-IMPROVE-038
+    created_at: "2026-07-13"
+    updated_at: "2026-07-13"
+    status: resolved
+    priority: high
+    area: skill-router
+    source: cmpd_t026_downstream_validation
+    issue: "Completion attestation accepted a candidate skill listed for a required class, but validate_skill_invocations only accepted a literal class name or matching aeros_stage. Academic Research Suite therefore failed the literature class despite being an explicit literature candidate."
+    proposed_fix: "Use the same obligation-class candidate mapping in validate_skill_invocations that completion attestation already uses, and add a fixture whose skill stage differs from the required class name."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-07-13"
+    resolution_commit: "pending"
+    notes: "This aligns two validators; it does not prove the skill was followed correctly or that its research output is valid."
+  - id: AEROS-IMPROVE-039
+    created_at: "2026-07-13"
+    updated_at: "2026-07-13"
+    status: resolved
+    priority: high
+    area: sync
+    source: cmpd_t026_downstream_validation
+    issue: "Official framework sync overwrote a downstream project's harness/improvement_backlog.yml, replacing project-specific analytical-provenance and citation obligations with template-development entries."
+    proposed_fix: "Exclude improvement_backlog.yml from harness rsync when it already exists and seed the template backlog only for targets that lack the file; add a sync-doctor contract check."
+    owner: human
+    target_gate: G0
+    resolved_at: "2026-07-13"
+    resolution_commit: "pending"
+    notes: "Project backlog entries are project-owned evidence of open work. Template backlog changes remain in the template and must not be laundered into downstream project state."

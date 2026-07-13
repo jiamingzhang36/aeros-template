@@ -2503,3 +2503,14 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Action**: Bound the skill-registration, exact bibliography-lane, and update-ledger session-classification repair to its functional commit and closed AEROS-IMPROVE-036/037.
 - **Validation**: Template full profile passed 139/139 before commit; update-ledger and append-only hash-chain checks rerun after this backfill.
 - **Does not prove**: source truth, citation support, scientific validity, claim or gate approval.
+
+## 2026-07-13 — Preserve downstream backlog ownership and align skill-class validation
+
+- **Commit(s)**: pending
+- **Change type**: framework / sync ownership / skill receipt validation
+- **North star:** Framework rollout must not erase project obligations, and one skill-use fact must receive the same verdict from every validator.
+- **Action**: Changed official sync to preserve an existing project `harness/improvement_backlog.yml` and seed it only when absent. Changed invocation validation to recognize skills listed as candidates for a required class, matching completion attestation semantics, and added fixtures for both contracts.
+- **Validation**: Skill-use attestation, skill-invocation, sync-doctor, backlog, update-ledger, hash-chain, smoke/full profile, then a second clean CMPD sync with its 036/037/038 entries byte-preserved.
+- **Non-goal**: Do not merge template backlog facts into downstream projects, waive missing required skills, or certify skill output.
+- **Does not prove**: research progress, source truth, citation support, scientific validity, claim or gate approval.
+- **Next check**: Commit, sync CMPD, verify its backlog hash is unchanged, and complete T026 only after all task checks pass.
