@@ -2438,7 +2438,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Next check**: Backfill this pending entry with the commit hash.
 ## 2026-07-13 — Fail-close candidate profiles from real-project paired A/B
 
-- **Commit(s)**: pending
+- **Commit(s)**: 2992742
 - **Change type**: framework / adaptive profile enforcement / rollout evidence
 - **North star:** Reduce control tax only where real-project evidence shows that truthful progress remains observable.
 - **Action**: Converted the existing adaptive selector into a fail-closed post-action assessment when callers provide an observed action exit and expected outputs. Nonzero or missing exits and missing, empty, or out-of-worktree expected outputs now fail. Added analysis/figure and manuscript path mappings to result-registry, reproducibility, and provenance checks. Recorded the CMPD/MAHA/VLM paired decision: no rule is retired; candidate profiles remain reversible preflight only.
