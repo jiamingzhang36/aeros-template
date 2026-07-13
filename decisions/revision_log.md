@@ -593,3 +593,25 @@ Use this file to track template or project-level changes that alter workflow, ev
 - checks:
   - `python checks/check_update_ledger.py`
 - notes: This is a sync completeness repair. It does not overwrite existing route decisions or make research progress.
+
+## REV041 - 2026-07-13 14:50 -0400
+
+- commit: pending
+- change_type: skill registry / downstream approval-integrity repair
+- summary: Registered the already installed `latex-compile-qa` and
+  `project-rigor-check` skills with bounded authority and made the skill-layer
+  check require both entries.
+- files:
+  - harness/skill_map_core.yml
+  - checks/check_skill_layer.py
+  - harness/improvement_backlog.yml
+  - decisions/update_ledger.md
+  - decisions/revision_log.md
+- checks:
+  - `python3 checks/check_skill_layer.py`
+  - `python3 checks/check_skill_invocations.py`
+  - `python3 checks/check_improvement_backlog.py`
+  - `python3 checks/check_update_ledger.py`
+- notes: This registers skill names and bounded output authority only. It does
+  not prove that a skill was used correctly, validate prior scientific work,
+  approve a gate, or alter downstream projects until the official sync runs.

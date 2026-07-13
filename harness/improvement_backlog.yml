@@ -473,3 +473,17 @@ entries:
     resolved_at: ""
     resolution_commit: ""
     notes: "Backlogged after reverting the 2026-07-04 Context Compiler communication-budget feature. Keep the principle 'compress communication, not evidence' as design guidance, not an active framework surface, until measured need is shown."
+  - id: AEROS-IMPROVE-035
+    created_at: "2026-07-13"
+    updated_at: "2026-07-13"
+    status: open
+    priority: high
+    area: skill-router
+    source: cmpd_full_profile_validation
+    issue: "The core skill map omits the installed local skills latex-compile-qa and project-rigor-check even though the practical menu and multiple valid downstream task contracts name them. Skill invocation validation therefore fails and can invalidate otherwise evidence-backed gate approvals."
+    proposed_fix: "Register both skills with bounded compile/audit-only authority, make check_skill_layer require their entries, validate the template, then propagate through tools/sync_aeros_latest.zsh and rerun downstream skill and approval-integrity checks."
+    owner: human
+    target_gate: G0
+    resolved_at: ""
+    resolution_commit: ""
+    notes: "Do not close from the template edit alone; close after a clean downstream sync proves skill_invocations and approval_integrity pass without altering skill receipts or gate artifacts."

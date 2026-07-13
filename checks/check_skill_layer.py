@@ -42,6 +42,8 @@ REQUIRED_FILES = {
         "research_ideation:",
         "lit_review_assistant:",
         "academic_research_suite_deep_research:",
+        "latex_compile_qa:",
+        "project_rigor_check:",
         "data_inventory:",
         "causal_id_review:",
         "did_checklist:",

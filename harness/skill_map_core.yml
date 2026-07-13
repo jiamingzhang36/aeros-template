@@ -234,6 +234,39 @@ skills:
     human_gate_required: false
     tier: optional
     default_use: false
+  latex_compile_qa:
+    name: latex-compile-qa
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: writing_quality_assurance
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/latex_compile_qa_notes.md
+    - output/LATEX_BUILD_REPORT.md
+    - latex/*.pdf
+    - tex/*.pdf
+    aeros_constraints:
+    - Deterministic compilation and LaTeX diagnostics only; may not rewrite substantive content or strengthen claims.
+    - A successful build does not certify citation truth, empirical validity, submission readiness, or gate approval.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  project_rigor_check:
+    name: project-rigor-check
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: engineering_maintenance
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/project_rigor_check_notes.md
+    - outputs/logs/rigor_check_latest.md
+    - outputs/logs/rigor_check_latest.json
+    aeros_constraints:
+    - Deterministic repository audit only; findings do not authorize deletion, relocation, or protected-path changes.
+    - A passing rigor report does not certify scientific validity, reproducibility, claim support, or release readiness.
+    human_gate_required: false
+    tier: optional
+    default_use: false
   causal_id_review:
     name: causal-id-review
     source: local_codex_skills

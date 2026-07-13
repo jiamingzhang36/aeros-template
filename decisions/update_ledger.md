@@ -2471,3 +2471,15 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: that 20 is optimal for every project; that any candidate is admissible evidence; that triage will produce a canonical artifact; that skill-free capture is scientifically sufficient; or that package migration is unnecessary.
 - **Drift risk**: The threshold is a deterministic default and may need project-level calibration. Projects without explicit candidate counts cannot benefit from saturation routing. Runtime-mode detection is structural and does not prove a vendored copy is current.
 - **Next check**: Backfill the functional commit hash, then resync the VLM project and confirm its 0-lead/697-candidate state routes to triage, carries no inferred skill obligation, and reports vendored mode without a de-vendor false positive.
+
+## 2026-07-13 — Register compile-QA and repository-rigor skills
+
+- **Commit(s)**: pending
+- **Change type**: framework / skill registry / downstream integrity repair
+- **North star:** Keep skill receipts mechanically honest without granting skills scientific or approval authority.
+- **Action**: Added bounded core-map entries for the already installed `latex-compile-qa` and `project-rigor-check` skills, which were named by the practical menu and valid downstream contracts but absent from the machine-readable registry. The skill-layer check now requires both entries so the omission cannot silently recur.
+- **Validation**: Targeted skill-layer, skill-invocation, improvement-backlog, and update-ledger checks; downstream CMPD sync and approval-integrity validation remain required before closing the backlog item.
+- **Non-goal**: Do not rewrite prior skill receipts, waive missing invocations, certify LaTeX content, treat repository hygiene as research evidence, or approve a gate.
+- **Does not prove**: correct skill use; scientific validity; citation truth; reproducibility; claim support; gate or release approval.
+- **Drift risk**: Projects remain on their vendored map until synced; project-owned backlog entries must be preserved during the framework rollout.
+- **Next check**: Commit the template, sync the clean CMPD project with `tools/sync_aeros_latest.zsh`, and require `check_skill_invocations.py` plus `check_approval_integrity.py` to pass there.
