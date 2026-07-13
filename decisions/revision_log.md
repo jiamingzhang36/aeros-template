@@ -618,7 +618,7 @@ Use this file to track template or project-level changes that alter workflow, ev
 
 ## REV042 - 2026-07-13 15:55 -0400
 
-- commit: pending
+- commit: 7cc59a3
 - change_type: skill registry repair / exact work-lane exception
 - summary: Moved `sci-download` into the parsed `skills:` registry, removed the
   unreachable duplicated legacy subtree, allowed literature tasks to edit only

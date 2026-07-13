@@ -2495,3 +2495,11 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: source truth; full-text interpretation quality; citation support; scientific validity; claim, gate, submission, or release approval.
 - **Drift risk**: Downstream vendored projects retain the malformed map and coarse lane rule until an official sync; the exact exception must not become a prefix exception.
 - **Next check**: Commit the template, sync clean CMPD, and require T026 skill, lane, bibliography, and session checks to pass before completing the task.
+
+## 2026-07-13 — Backfill skill/lane registry repair commit
+
+- **Commit(s)**: `7cc59a3`
+- **Change type**: ledger backfill
+- **Action**: Bound the skill-registration, exact bibliography-lane, and update-ledger session-classification repair to its functional commit and closed AEROS-IMPROVE-036/037.
+- **Validation**: Template full profile passed 139/139 before commit; update-ledger and append-only hash-chain checks rerun after this backfill.
+- **Does not prove**: source truth, citation support, scientific validity, claim or gate approval.
