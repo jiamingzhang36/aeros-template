@@ -488,3 +488,51 @@ skills:
     human_gate_required: false
     tier: optional
     default_use: false
+  research_portfolio_gatekeeper:
+    name: research-portfolio-gatekeeper
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: portfolio_governance
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/research_portfolio_gatekeeper_notes.md
+    - audits/advisory/research_portfolio_gatekeeper.json
+    aeros_constraints:
+    - Read-only by default; may recommend Go/Pivot/Hold/Kill but may not delete evidence, change human decisions, approve gates, or start new WIP.
+    - Must deduplicate repeated symptoms to root causes and return one bounded work packet with stop conditions.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  evidence_recovery_and_claim_ceiling:
+    name: evidence-recovery-and-claim-ceiling
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: evidence_recovery
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/evidence_recovery_notes.md
+    - audits/evidence_recovery/
+    - work/leads/
+    - data/backfill/
+    aeros_constraints:
+    - Search effort and access failures must not be treated as substantive evidence or zeros.
+    - Only audited paper_safe_count may reach manuscript-facing artifacts; claim upgrades remain human-gated.
+    human_gate_required: false
+    tier: optional
+    default_use: false
+  research_release_controller:
+    name: research-release-controller
+    source: local_codex_skills
+    invocation: local_skill
+    aeros_stage: release_control
+    use_status: allowed_with_constraints
+    allowed_outputs:
+    - audits/advisory/research_release_controller_notes.md
+    - release/
+    - outputs/release/
+    aeros_constraints:
+    - Coordinate existing checks and canonical-source builds; do not reopen substantive research without an acceptance failure.
+    - Preparing a release package never authorizes sending, uploading, publishing, or changing accepted claim status.
+    human_gate_required: false
+    tier: optional
+    default_use: false

@@ -181,11 +181,42 @@ def _fingerprint_paths(project_root: Path, rel_paths: list[str]) -> str:
                 continue
             digest.update(rel_file.encode("utf-8"))
             digest.update(b"\0")
-            payload = (_manifest_fingerprint_bytes(file_path)
-                       if rel_file == "project_manifest.yml"
-                       else file_path.read_bytes())
-            digest.update(hashlib.sha256(payload).digest())
+            if rel_file == "project_manifest.yml":
+                digest.update(hashlib.sha256(_manifest_fingerprint_bytes(file_path)).digest())
+            else:
+                file_digest = hashlib.sha256()
+                with file_path.open("rb") as stream:
+                    for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                        file_digest.update(chunk)
+                digest.update(file_digest.digest())
     return digest.hexdigest()
+
+
+def _stat_guard_paths(project_root: Path, rel_paths: list[str]) -> str:
+    """Cheap change detector used before content hashing large artifacts.
+
+    It has no admission authority: a stat match only permits runtime reuse of
+    an already content-hashed acceptance. New acceptance, promotion, and
+    release continue to use SHA-256 and artifact-specific validators.
+    """
+    records: list[tuple] = []
+    for rel in sorted(str(item).rstrip("/") for item in rel_paths if item):
+        if rel == "agent_runs" or rel.startswith("agent_runs/"):
+            continue
+        if rel == "outputs/pending_tasks" or rel.startswith("outputs/pending_tasks/"):
+            continue
+        path = project_root / rel
+        if not path.exists():
+            records.append((rel, "MISSING"))
+            continue
+        files = [path] if path.is_file() else sorted(p for p in path.rglob("*") if p.is_file())
+        for file_path in files:
+            rel_file = file_path.relative_to(project_root).as_posix()
+            if rel_file == "outputs/pending_tasks" or rel_file.startswith("outputs/pending_tasks/"):
+                continue
+            stat = file_path.stat()
+            records.append((rel_file, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns, stat.st_ino))
+    return hashlib.sha256(json.dumps(records, sort_keys=True).encode("utf-8")).hexdigest()
 
 
 def _dependency_fingerprint(project_root: Path, contract: Contract, contracts: dict) -> str:
@@ -200,6 +231,18 @@ def _dependency_fingerprint(project_root: Path, contract: Contract, contracts: d
     return hashlib.sha256(json.dumps(deps, sort_keys=True).encode("utf-8")).hexdigest()
 
 
+def _dependency_stat_guard(project_root: Path, contract: Contract, contracts: dict) -> str:
+    deps: dict[str, str] = {}
+    for dep in sorted(contract.depends_on):
+        dep_record = contracts.get(dep)
+        if not dep_record:
+            deps[dep] = "missing-contract"
+            continue
+        dep_contract, _ = dep_record
+        deps[dep] = _stat_guard_paths(project_root, dep_contract.allowed_outputs)
+    return hashlib.sha256(json.dumps(deps, sort_keys=True).encode("utf-8")).hexdigest()
+
+
 def _record_task_fingerprints(
     state: dict,
     contract: Contract,
@@ -210,6 +253,9 @@ def _record_task_fingerprints(
     entry["input_fingerprint"] = _fingerprint_paths(project_root, contract.inputs)
     entry["output_fingerprint"] = _fingerprint_paths(project_root, contract.allowed_outputs)
     entry["dependency_fingerprint"] = _dependency_fingerprint(project_root, contract, contracts)
+    entry["input_stat_guard"] = _stat_guard_paths(project_root, contract.inputs)
+    entry["output_stat_guard"] = _stat_guard_paths(project_root, contract.allowed_outputs)
+    entry["dependency_stat_guard"] = _dependency_stat_guard(project_root, contract, contracts)
 
 
 def _stale_reason(
@@ -219,6 +265,18 @@ def _stale_reason(
     contracts: dict,
 ) -> str:
     entry = state_mod.task_entry(state, contract.task_id)
+    current_input_stat = _stat_guard_paths(project_root, contract.inputs)
+    current_dep_stat = _dependency_stat_guard(project_root, contract, contracts)
+    current_output_stat = _stat_guard_paths(project_root, contract.allowed_outputs)
+    if (
+        entry.get("input_stat_guard") == current_input_stat
+        and entry.get("dependency_stat_guard") == current_dep_stat
+        and entry.get("output_stat_guard") == current_output_stat
+        and entry.get("input_fingerprint")
+        and entry.get("dependency_fingerprint")
+        and entry.get("output_fingerprint")
+    ):
+        return ""
     current_input = _fingerprint_paths(project_root, contract.inputs)
     current_dep = _dependency_fingerprint(project_root, contract, contracts)
     current_output = _fingerprint_paths(project_root, contract.allowed_outputs)
@@ -228,6 +286,9 @@ def _stale_reason(
         entry["input_fingerprint"] = current_input
         entry["dependency_fingerprint"] = current_dep
         entry["output_fingerprint"] = current_output
+        entry["input_stat_guard"] = current_input_stat
+        entry["dependency_stat_guard"] = current_dep_stat
+        entry["output_stat_guard"] = current_output_stat
         return ""
     if entry.get("input_fingerprint") != current_input:
         return "input_changed"
@@ -235,6 +296,9 @@ def _stale_reason(
         return "dependency_output_changed"
     if entry.get("output_fingerprint") != current_output:
         return "output_changed"
+    entry["input_stat_guard"] = current_input_stat
+    entry["dependency_stat_guard"] = current_dep_stat
+    entry["output_stat_guard"] = current_output_stat
     return ""
 
 
@@ -720,8 +784,18 @@ def _envelope_feedback(result) -> str:
         parts.append("denied_writes=" + ", ".join(result.denied_writes))
     if result.undeclared_writes:
         parts.append("undeclared_writes=" + ", ".join(result.undeclared_writes))
+    if result.unexpected_outputs:
+        parts.append("unexpected_outputs=" + ", ".join(result.unexpected_outputs))
     if result.missing_expected_outputs:
         parts.append("missing_expected_outputs=" + ", ".join(result.missing_expected_outputs))
+    if result.unproduced_expected_outputs:
+        parts.append("unproduced_expected_outputs=" + ", ".join(result.unproduced_expected_outputs))
+    if result.failed_acceptance_checks:
+        parts.append("failed_acceptance_checks=" + ", ".join(result.failed_acceptance_checks))
+    if result.validator_modified_outputs:
+        parts.append("validator_modified_outputs=" + ", ".join(result.validator_modified_outputs))
+    if result.copyback_error:
+        parts.append("copyback_error=" + result.copyback_error)
     return "\n".join(parts)
 
 
@@ -752,6 +826,7 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
             _contract_envelope(contract),
             timeout_seconds=task_timeout_override or contract.timeout_seconds,
             cwd_rel=contract.run_cwd,
+            acceptance_checks=tuple(contract.checks),
         )
         if not result.ok:
             feedback = _envelope_feedback(result)
@@ -819,6 +894,20 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
     contract = load_contract(contract_path)
     project_root = find_project_root(Path(contract_path).resolve())
     state = state_mod.load_state(project_root)
+    entry = state_mod.task_entry(state, contract.task_id)
+    if entry.get("status") == "passed" and entry.get("output_fingerprint"):
+        contracts = discover_contracts(project_root)
+        stale_reason = _stale_reason(state, contract, project_root, contracts)
+        if not stale_reason:
+            state_mod.save_state(project_root, state)
+            print(
+                f"[kernel] task {contract.task_id} already PASSED with unchanged "
+                "inputs/dependencies/outputs; reusing accepted artifacts without an agent, provider, or data rerun."
+            )
+            return 0
+        state_mod.set_status(state, contract.task_id, "stale")
+        state_mod.task_entry(state, contract.task_id)["stale_reason"] = stale_reason
+        state_mod.save_state(project_root, state)
     preflight = build_task_preflight(
         project_root,
         task_id=contract.task_id,

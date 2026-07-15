@@ -8,7 +8,6 @@ safe/zero-cost preview or check commands; real task runs require an explicit
 from __future__ import annotations
 
 from dataclasses import dataclass
-import hashlib
 import json
 from pathlib import Path
 import shlex
@@ -18,30 +17,30 @@ import time
 from typing import Any
 
 from .action_spec import validate_action_spec
+from .episode_watchdog import (
+    EpisodeStep,
+    WatchdogPolicy,
+    action_fingerprint,
+    artifact_hashes,
+    artifact_state_fingerprint,
+    assess_after,
+    assess_before,
+    blocker_fingerprints,
+    changed_artifacts,
+    frontier_fingerprint,
+    input_fingerprint,
+    load_episode_steps,
+    new_episode_id,
+    record_episode_step,
+    research_value_events_since,
+    semantic_state_fingerprint,
+    tool_result_fingerprint,
+)
 from .next_action import NextAction, compute_next_action
 
 
 UNTIL_CHOICES = {"human-gate", "blocked", "no-progress", "max-steps"}
 LANE_CHOICES = {"", "data", "literature", "method", "analysis", "claim", "writing", "compliance", "harness"}
-
-SUBSTANTIVE_ROOTS = [
-    "data",
-    "discovery/literature/extraction_cards",
-    "discovery/literature/synthesis",
-    "evidence",
-    "outputs/source_snapshots",
-    "outputs/tables",
-    "outputs/figures",
-    "outputs/model_outputs",
-    "paper",
-    "replication",
-]
-
-SUBSTANTIVE_FILES = [
-    "decisions/human_gate_queue.yml",
-    "decisions/decision_log.csv",
-    "aeros_state.yml",
-]
 
 SAFE_AEROS_COMMANDS = {
     "status",
@@ -77,97 +76,20 @@ class ControllerLoopArgs:
     max_retries: int | None = None
 
 
-def _hash_file(path: Path) -> str:
-    h = hashlib.sha256()
-    try:
-        with path.open("rb") as handle:
-            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
-                h.update(chunk)
-    except OSError:
-        return ""
-    return h.hexdigest()
-
-
 def _substantive_snapshot(root: Path) -> str:
-    """Hash only research-substantive surfaces, not logs/check chatter."""
-    rows: list[str] = []
-    for rel in SUBSTANTIVE_FILES:
-        path = root / rel
-        if path.is_file():
-            rows.append(f"{rel}:{_hash_file(path)}")
-    for rel in SUBSTANTIVE_ROOTS:
-        base = root / rel
-        if not base.exists():
-            continue
-        for path in sorted(p for p in base.rglob("*") if p.is_file()):
-            if "__pycache__" in path.parts or path.name == ".DS_Store":
-                continue
-            try:
-                rel_path = path.relative_to(root).as_posix()
-            except ValueError:
-                rel_path = path.as_posix()
-            rows.append(f"{rel_path}:{_hash_file(path)}")
-    return hashlib.sha256("\n".join(rows).encode("utf-8")).hexdigest()
+    return artifact_state_fingerprint(root)
 
 
 def _semantic_state_hash(root: Path) -> str:
-    """Hash coarse semantic control state, not every log/check artifact.
-
-    This is intentionally smaller than a full artifact hash. It should flip when
-    runtime state, blocker queues, data/literature/claim/result state, or paper
-    readiness surfaces change. It should not flip because a chatty log file grew.
-    """
-    semantic_files = [
-        "aeros_state.yml",
-        "CURRENT_STATE.md",
-        "decisions/human_gate_queue.yml",
-        "decisions/decision_log.csv",
-        "data/data_state.yml",
-        "data/data_gap_plan.yml",
-        "data/backfill/backfill_queue.yml",
-        "discovery/data_inventory.csv",
-        "discovery/literature/paper_registry.csv",
-        "discovery/literature/search_log.csv",
-        "discovery/literature/missing_fulltext_queue.csv",
-        "evidence/claim_registry.md",
-        "evidence/result_index.csv",
-        "evidence/result_registry.csv",
-        "evidence/research_graph.yml",
-        "paper/draft.md",
-        "replication/aea_data_package_manifest.yml",
-    ]
-    rows: list[str] = []
-    for rel in semantic_files:
-        path = root / rel
-        if path.is_file():
-            rows.append(f"{rel}:{_hash_file(path)}")
-        elif path.exists():
-            rows.append(f"{rel}:exists")
-    return hashlib.sha256("\n".join(rows).encode("utf-8")).hexdigest()
+    return semantic_state_fingerprint(root)
 
 
 def _frontier_hash(action: NextAction, spec_data: dict[str, Any]) -> str:
-    rows = [
-        str(action.lane),
-        str(action.status_label),
-        str(spec_data.get("id", "")),
-        str(spec_data.get("kind", "")),
-        str(spec_data.get("effect_class", "")),
-        str(spec_data.get("requires_decision", "")),
-        str(action.source),
-    ]
-    return hashlib.sha256("\n".join(rows).encode("utf-8")).hexdigest()
+    return frontier_fingerprint(action.to_dict(), spec_data)
 
 
 def _action_signature(spec_data: dict[str, Any]) -> str:
-    rows = [
-        str(spec_data.get("id", "")),
-        str(spec_data.get("kind", "")),
-        str(spec_data.get("effect_class", "")),
-        str(spec_data.get("command", "")),
-        str(spec_data.get("idempotency_key", "")),
-    ]
-    return hashlib.sha256("\n".join(rows).encode("utf-8")).hexdigest()
+    return action_fingerprint(spec_data)
 
 
 def _estimated_provider_calls(spec_data: dict[str, Any]) -> int:
@@ -182,6 +104,16 @@ def _estimated_cost_usd(spec_data: dict[str, Any]) -> float:
         return float(budget.get("estimated_cost_usd") or 0.0)
     except (TypeError, ValueError):
         return 0.0
+
+
+def _estimated_tokens(spec_data: dict[str, Any]) -> tuple[int, int]:
+    budget = spec_data.get("resource_budget") or {}
+    try:
+        input_tokens = int(budget.get("estimated_input_tokens") or 0)
+        output_tokens = int(budget.get("estimated_output_tokens") or 0)
+    except (TypeError, ValueError):
+        return 0, 0
+    return max(input_tokens, 0), max(output_tokens, 0)
 
 
 def _run_post_run_hooks(root: Path, spec_data: dict[str, Any], timeout_seconds: int) -> str:
@@ -297,6 +229,15 @@ def _step_record(step: int, action: NextAction, *, status: str, reason: str = ""
                  semantic_state_hash_after: str = "",
                  frontier_hash: str = "",
                  action_signature: str = "",
+                 input_fingerprint_value: str = "",
+                 expected_artifacts: tuple[str, ...] = (),
+                 accepted_artifacts: tuple[str, ...] = (),
+                 research_value_events: tuple[dict[str, Any], ...] = (),
+                 tokens_input: int = 0,
+                 tokens_output: int = 0,
+                 cost: float = 0.0,
+                 wall_time: float = 0.0,
+                 watchdog: dict[str, Any] | None = None,
                  action_spec: dict[str, Any] | None = None) -> dict[str, Any]:
     action_data = action.to_dict()
     if action_spec is not None:
@@ -314,6 +255,15 @@ def _step_record(step: int, action: NextAction, *, status: str, reason: str = ""
         "semantic_state_hash_after": semantic_state_hash_after,
         "frontier_hash": frontier_hash,
         "action_signature": action_signature,
+        "input_fingerprint": input_fingerprint_value,
+        "expected_artifacts": list(expected_artifacts),
+        "accepted_artifacts": list(accepted_artifacts),
+        "research_value_events": list(research_value_events),
+        "tokens_input": tokens_input,
+        "tokens_output": tokens_output,
+        "cost": cost,
+        "wall_time": wall_time,
+        "watchdog": watchdog or {},
         "action": action_data,
         "action_spec": action_data.get("action_spec"),
     }
@@ -333,11 +283,12 @@ def run_until(root: Path, args: ControllerLoopArgs) -> tuple[int, list[dict[str,
     max_cost_usd = max(float(args.max_cost_usd or 0.0), 0.0)
 
     records: list[dict[str, Any]] = []
-    no_progress_count = 0
     provider_calls_used = 0
     cost_used = 0.0
-    seen_cycles: set[tuple[str, str, str]] = set()
     started_at = time.monotonic()
+    episode_id = new_episode_id(root, lane)
+    episode_history = load_episode_steps(root)
+    watchdog_policy = WatchdogPolicy(no_state_change_limit=max(no_progress_limit, 2))
 
     for step in range(1, max_steps + 1):
         action = compute_next_action(root, lane=lane)
@@ -345,21 +296,43 @@ def run_until(root: Path, args: ControllerLoopArgs) -> tuple[int, list[dict[str,
         semantic_before = _semantic_state_hash(root)
         frontier = _frontier_hash(action, spec_data)
         signature = _action_signature(spec_data)
-        cycle_key = (semantic_before, frontier, signature)
-        if cycle_key in seen_cycles:
+        input_hash = input_fingerprint(root, spec_data)
+        expected_artifacts = tuple(str(item) for item in spec_data.get("expected_outputs") or [] if str(item).strip())
+        blockers_before = blocker_fingerprints(root)
+        objective_id = str(spec_data.get("campaign_id") or action.source or action.lane or frontier)
+        assistant_text = f"{action.recommended_next_action}\n{action.why_this_next}"
+        draft_step = EpisodeStep(
+            episode_id=episode_id,
+            objective_id=objective_id,
+            frontier_id=frontier,
+            step=step,
+            action_signature=signature,
+            input_fingerprint=input_hash,
+            state_fingerprint_before=semantic_before,
+            state_fingerprint_after=semantic_before,
+            expected_artifacts=expected_artifacts,
+            blockers_before=blockers_before,
+            blockers_after=blockers_before,
+            assistant_text=assistant_text,
+        )
+        preflight_watchdog = assess_before(root, episode_history, draft_step, watchdog_policy)
+        if preflight_watchdog.stop:
             records.append(_step_record(
                 step,
                 action,
                 status="stopped",
-                reason="controller_cycle_detected",
-                primary_stop_reason="controller_cycle_detected",
+                reason=preflight_watchdog.reason,
+                primary_stop_reason=preflight_watchdog.reason,
                 semantic_state_hash_before=semantic_before,
                 frontier_hash=frontier,
                 action_signature=signature,
+                input_fingerprint_value=input_hash,
+                expected_artifacts=expected_artifacts,
+                accepted_artifacts=preflight_watchdog.previous_artifacts,
+                watchdog=preflight_watchdog.to_dict(),
                 action_spec=spec_data,
             ))
             return 0, records
-        seen_cycles.add(cycle_key)
 
         spec_failures = validate_action_spec(spec_data)
         if spec_failures:
@@ -465,6 +438,9 @@ def run_until(root: Path, args: ControllerLoopArgs) -> tuple[int, list[dict[str,
             return 0, records
 
         before = _substantive_snapshot(root)
+        expected_before = artifact_hashes(root, expected_artifacts)
+        action_started_epoch = time.time()
+        action_started_monotonic = time.monotonic()
         remaining_wall_time = max(1, int(max_wall_time - (time.monotonic() - started_at)))
         try:
             proc = subprocess.run(  # noqa: S603 - argv-only allowlisted commands
@@ -475,6 +451,31 @@ def run_until(root: Path, args: ControllerLoopArgs) -> tuple[int, list[dict[str,
             )
         except subprocess.TimeoutExpired:
             semantic_after = _semantic_state_hash(root)
+            accepted_hashes = changed_artifacts(root, expected_artifacts, expected_before)
+            watchdog_step = EpisodeStep(
+                episode_id=episode_id,
+                objective_id=objective_id,
+                frontier_id=frontier,
+                step=step,
+                action_signature=signature,
+                input_fingerprint=input_hash,
+                state_fingerprint_before=semantic_before,
+                state_fingerprint_after=semantic_after,
+                expected_artifacts=expected_artifacts,
+                accepted_artifacts=tuple(accepted_hashes),
+                accepted_artifact_hashes=accepted_hashes,
+                research_value_events=research_value_events_since(root, action_started_epoch),
+                blockers_before=blockers_before,
+                blockers_after=blocker_fingerprints(root),
+                tool_result_hash=tool_result_fingerprint(124, semantic_after, accepted_hashes),
+                error_code="TIMEOUT",
+                cost=_estimated_cost_usd(spec_data),
+                wall_time=time.monotonic() - action_started_monotonic,
+                assistant_text=assistant_text,
+            )
+            watchdog_decision = assess_after(episode_history, watchdog_step, watchdog_policy)
+            record_episode_step(root, watchdog_step, watchdog_decision)
+            episode_history.append(watchdog_step)
             records.append(_step_record(
                 step,
                 action,
@@ -487,9 +488,19 @@ def run_until(root: Path, args: ControllerLoopArgs) -> tuple[int, list[dict[str,
                 semantic_state_hash_after=semantic_after,
                 frontier_hash=frontier,
                 action_signature=signature,
+                input_fingerprint_value=input_hash,
+                expected_artifacts=expected_artifacts,
+                accepted_artifacts=watchdog_step.accepted_artifacts,
+                research_value_events=watchdog_step.research_value_events,
+                cost=watchdog_step.cost,
+                wall_time=watchdog_step.wall_time,
+                watchdog=watchdog_decision.to_dict(),
                 action_spec=spec_data,
             ))
             return 124, records
+        hook_failure = ""
+        if proc.returncode == 0:
+            hook_failure = _run_post_run_hooks(root, spec_data, remaining_wall_time)
         after = _substantive_snapshot(root)
         semantic_after = _semantic_state_hash(root)
         artifact_changed = before != after
@@ -497,6 +508,43 @@ def run_until(root: Path, args: ControllerLoopArgs) -> tuple[int, list[dict[str,
         substantive_changed = semantic_progress and action.status_label in {"SUBSTANTIVE_PRODUCED", "SUBSTANTIVE_DONE"}
         provider_calls_used = projected_provider_calls
         cost_used = projected_cost
+        accepted_hashes = changed_artifacts(root, expected_artifacts, expected_before)
+        value_events = research_value_events_since(root, action_started_epoch)
+        tokens_input, tokens_output = _estimated_tokens(spec_data)
+        error_code = f"EXIT_{proc.returncode}" if proc.returncode != 0 else hook_failure
+        watchdog_step = EpisodeStep(
+            episode_id=episode_id,
+            objective_id=objective_id,
+            frontier_id=frontier,
+            step=step,
+            action_signature=signature,
+            input_fingerprint=input_hash,
+            state_fingerprint_before=semantic_before,
+            state_fingerprint_after=semantic_after,
+            expected_artifacts=expected_artifacts,
+            accepted_artifacts=tuple(accepted_hashes),
+            accepted_artifact_hashes=accepted_hashes,
+            research_value_events=value_events,
+            blockers_before=blockers_before,
+            blockers_after=blocker_fingerprints(root),
+            tool_result_hash=tool_result_fingerprint(proc.returncode, semantic_after, accepted_hashes),
+            error_code=error_code,
+            tokens_input=tokens_input,
+            tokens_output=tokens_output,
+            cost=_estimated_cost_usd(spec_data),
+            wall_time=time.monotonic() - action_started_monotonic,
+            assistant_text=assistant_text,
+        )
+        watchdog_decision = assess_after(episode_history, watchdog_step, watchdog_policy)
+        record_episode_step(root, watchdog_step, watchdog_decision)
+        episode_history.append(watchdog_step)
+        stop_reason = ""
+        if proc.returncode != 0:
+            stop_reason = watchdog_decision.reason if watchdog_decision.stop else "command_failed"
+        elif hook_failure:
+            stop_reason = hook_failure
+        elif watchdog_decision.stop:
+            stop_reason = watchdog_decision.reason
         records.append(_step_record(
             step,
             action,
@@ -509,23 +557,25 @@ def run_until(root: Path, args: ControllerLoopArgs) -> tuple[int, list[dict[str,
             semantic_state_hash_after=semantic_after,
             frontier_hash=frontier,
             action_signature=signature,
+            input_fingerprint_value=input_hash,
+            expected_artifacts=expected_artifacts,
+            accepted_artifacts=watchdog_step.accepted_artifacts,
+            research_value_events=value_events,
+            tokens_input=tokens_input,
+            tokens_output=tokens_output,
+            cost=watchdog_step.cost,
+            wall_time=watchdog_step.wall_time,
+            watchdog=watchdog_decision.to_dict(),
             action_spec=spec_data,
         ))
+        if stop_reason:
+            records[-1]["primary_stop_reason"] = stop_reason
+            records[-1]["reason"] = stop_reason
         if proc.returncode != 0:
             return proc.returncode, records
-        hook_failure = _run_post_run_hooks(root, spec_data, remaining_wall_time)
         if hook_failure:
-            records[-1]["primary_stop_reason"] = hook_failure
-            records[-1]["reason"] = hook_failure
             return 1, records
-
-        if semantic_progress:
-            no_progress_count = 0
-        else:
-            no_progress_count += 1
-
-        if no_progress_count >= no_progress_limit:
-            records[-1]["primary_stop_reason"] = "no_semantic_progress"
+        if watchdog_decision.stop:
             return 0, records
         if until == "max-steps" and step >= max_steps:
             records[-1]["primary_stop_reason"] = "max_actions_reached"
@@ -565,6 +615,11 @@ def format_run_until(records: list[dict[str, Any]]) -> str:
         lines.append(f"  substantive_changed: {record.get('substantive_changed')}")
         if record.get("primary_stop_reason"):
             lines.append(f"  primary_stop_reason: {record.get('primary_stop_reason')}")
+        watchdog = record.get("watchdog") or {}
+        if watchdog:
+            lines.append(
+                f"  watchdog: {watchdog.get('reason')} disposition={watchdog.get('disposition')}"
+            )
     lines.append("does_not_prove: controller execution does not approve gates, upgrade claims, certify identification, or prove paper readiness")
     return "\n".join(lines)
 

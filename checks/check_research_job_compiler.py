@@ -4,6 +4,7 @@ import json, os, subprocess, sys, tempfile
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from aeros.runtime.research_job import ResearchJob, compile_research_job, validate_compilation
 from aeros.runtime.execution_envelope import execute_action_spec_in_isolated_worktree
+from aeros.runtime.run_bundle import execute_research_job_run_bundle
 from aeros.runtime.adaptive_checks import select_checks
 from aeros.runtime.drive import build_drive_report
 ROOT = Path(__file__).resolve().parents[1]
@@ -20,8 +21,12 @@ def main() -> int:
         (root / "harness/adaptive_checks.yml").write_text((ROOT / "harness/adaptive_checks.yml").read_text(encoding="utf-8"), encoding="utf-8")
         fixture_check = root / "checks/check_data_probe.py"
         fixture_check.write_text(
-            "from pathlib import Path\nimport json\np=next(Path('audits/data_probe').glob('*.json'))\n"
+            "from pathlib import Path\nimport json\np=Path('audits/data_probe/probe_e2e.json')\n"
             "d=json.loads(p.read_text())\nraise SystemExit(0 if d.get('rows_observed')==2 and d.get('source_sha256') else 1)\n",
+            encoding="utf-8",
+        )
+        (root / "checks/check_specification_run.py").write_text(
+            (ROOT / "checks/check_specification_run.py").read_text(encoding="utf-8"),
             encoding="utf-8",
         )
         subprocess.run(["git", "init"], cwd=root, check=True, capture_output=True)
@@ -60,14 +65,29 @@ def main() -> int:
             "RUNSPEC-E2E", "run_specification", "SP-OLS", "data/spec_sample.csv", "bounded OLS fixture",
         ))
         failures.extend(validate_compilation(specification))
-        spec_result = execute_action_spec_in_isolated_worktree(root, specification.action_spec, timeout_seconds=20)
+        os.environ["PYTHONPATH"] = str(ROOT) + os.pathsep + (old_pythonpath or "")
+        spec_result = execute_research_job_run_bundle(root, specification.action_spec, timeout_seconds=20)
+        if not spec_result.run_id:
+            failures.append("run_specification did not produce a content-addressed run_id")
         expected_spec_outputs = (
-            "outputs/econ/specification_runs/runspec_e2e.json",
-            "outputs/econ/specification_runs/runspec_e2e_exhibit.csv",
+            f"outputs/econ/runs/{spec_result.run_id}/result.json",
+            f"outputs/econ/runs/{spec_result.run_id}/exhibit.csv",
         )
-        if not spec_result.ok or spec_result.accepted_outputs != expected_spec_outputs:
+        if not spec_result.ok or set(spec_result.accepted_outputs) != set(expected_spec_outputs):
             failures.append(f"isolated run_specification execution failed: {spec_result}")
+        if not spec_result.validation_passed or spec_result.failed_acceptance_checks:
+            failures.append("run_specification outputs were accepted without a passing artifact validator")
+        if not spec_result.validation_manifest or not (root / spec_result.validation_manifest).is_file():
+            failures.append("run_specification did not persist its validation manifest")
+        if not spec_result.run_bundle_manifest or not (root / spec_result.run_bundle_manifest).is_file():
+            failures.append("run_specification did not persist an immutable RunBundle manifest")
         else:
+            bundle = json.loads((root / spec_result.run_bundle_manifest).read_text(encoding="utf-8"))
+            if bundle.get("run_id") != spec_result.run_id or bundle.get("status") != "accepted":
+                failures.append("RunBundle manifest does not bind the accepted run identity")
+            context_budget = bundle.get("context_budget") or {}
+            if not context_budget.get("active_brief_sha256") or context_budget.get("estimated_tokens", 0) <= 0:
+                failures.append("RunBundle did not consume a bounded pointer-first context packet")
             payload = json.loads((root / expected_spec_outputs[0]).read_text(encoding="utf-8"))
             estimate = (((payload.get("result") or {}).get("coefficients") or {}).get("d") or {}).get("estimate")
             if payload.get("admission_status") != "nonproduction" or abs(float(estimate) - 2.0) > 1e-9:
@@ -85,11 +105,23 @@ def main() -> int:
         drive_execution = driven.get("execution") or {}
         if driven.get("status") != "EXECUTED" or drive_execution.get("status") != "pass":
             failures.append(f"drive run_specification vertical slice failed: {driven}")
+        if not drive_execution.get("validation_passed") or drive_execution.get("failed_acceptance_checks"):
+            failures.append("drive reported success without passing declared acceptance checks")
+        if not drive_execution.get("validation_manifest") or not (root / drive_execution["validation_manifest"]).is_file():
+            failures.append("drive did not surface a durable validation manifest")
         if set(drive_execution.get("accepted_outputs") or []) != {
-            "outputs/econ/specification_runs/drive_run_specification.json",
-            "outputs/econ/specification_runs/drive_run_specification_exhibit.csv",
+            *expected_spec_outputs,
         }:
             failures.append("drive run_specification did not accept exactly the declared candidate outputs")
+        if drive_execution.get("run_id") != spec_result.run_id or not drive_execution.get("cache_hit"):
+            failures.append("drive did not validate and reuse the identical immutable RunBundle")
+        original_result = (root / expected_spec_outputs[0]).read_text(encoding="utf-8")
+        (root / expected_spec_outputs[0]).write_text(original_result + "\n", encoding="utf-8")
+        tampered = execute_research_job_run_bundle(root, specification.action_spec, timeout_seconds=20)
+        if tampered.ok or tampered.cache_hit or "changed or removed" not in tampered.message:
+            failures.append("tampered RunBundle was not rejected without overwrite")
+        if old_pythonpath is None: os.environ.pop("PYTHONPATH", None)
+        else: os.environ["PYTHONPATH"] = old_pythonpath
     if failures:
         print("FAIL: ResearchJob compiler"); [print(f"- {x}") for x in failures]; return 1
     print("PASS: data_probe and run_specification ResearchJobs compile and execute in isolation"); return 0

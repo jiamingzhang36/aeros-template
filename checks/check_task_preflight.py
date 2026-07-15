@@ -14,7 +14,59 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from aeros.runtime.task_preflight import build_task_preflight
+from aeros.runtime import kernel as kernel_mod
+from aeros.runtime import state as state_mod
+from aeros.runtime.contract import load_contract
 from aeros.runtime.kernel import run_task
+
+
+def _accepted_task_reuse_is_enforced() -> list[str]:
+    failures: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="aeros_preflight_reuse_") as name:
+        tmp = Path(name)
+        (tmp / "tasks").mkdir()
+        (tmp / "data").mkdir()
+        (tmp / "outputs").mkdir()
+        (tmp / "project_manifest.yml").write_text("project:\n  name: reuse-fixture\n", encoding="utf-8")
+        (tmp / "data/input.csv").write_text("id,value\n1,10\n", encoding="utf-8")
+        (tmp / "outputs/result.csv").write_text("id,result\n1,20\n", encoding="utf-8")
+        task_path = tmp / "tasks/T_REUSE.yml"
+        task_path.write_text(
+            "task_id: T_REUSE\nstage: execution\ngate: G4\nwork_lane: data\n"
+            "goal: process a large data input once\ninputs:\n  - data/input.csv\n"
+            "checks: []\nallowed_outputs:\n  - outputs/result.csv\n"
+            "allowed_skills: []\nrequired_skill_classes: []\n"
+            "budget:\n  max_agent_calls: 1\n  max_dollars: 0.01\n"
+            "  max_retries: 0\n  task_timeout_seconds: 5\n",
+            encoding="utf-8",
+        )
+        contract = load_contract(task_path)
+        contracts = {contract.task_id: (contract, task_path)}
+        state = state_mod.load_state(tmp)
+        state_mod.set_status(state, contract.task_id, "passed")
+        kernel_mod._record_task_fingerprints(state, contract, tmp, contracts)
+        state_mod.save_state(tmp, state)
+        report = build_task_preflight(tmp, task_id=contract.task_id, lane="data", intent=contract.goal)
+        reuse = report.get("reuse_decision") or {}
+        if reuse.get("status") != "PREVIOUSLY_ACCEPTED" or reuse.get("should_execute") is not False:
+            failures.append("passed task with present accepted output was not routed to reuse")
+        original_fingerprint = kernel_mod._fingerprint_paths
+        try:
+            def _unexpected_content_hash(*_args, **_kwargs):
+                raise AssertionError("unchanged stat guards should avoid content hashing")
+            kernel_mod._fingerprint_paths = _unexpected_content_hash
+            if kernel_mod._stale_reason(state, contract, tmp, contracts):
+                failures.append("unchanged stat guards unexpectedly marked the task stale")
+            if run_task(task_path) != 0:
+                failures.append("direct run did not reuse an unchanged passed task")
+        except AssertionError as exc:
+            failures.append(str(exc))
+        finally:
+            kernel_mod._fingerprint_paths = original_fingerprint
+        (tmp / "data/input.csv").write_text("id,value\n1,11\n", encoding="utf-8")
+        if kernel_mod._stale_reason(state, contract, tmp, contracts) != "input_changed":
+            failures.append("changed large-data input was not detected after the stat-guard fast path")
+    return failures
 
 
 def _campaign_breaker_blocks_preflight() -> list[str]:
@@ -228,6 +280,19 @@ def main() -> int:
     promote = build_task_preflight(ROOT, lane="data", intent="promote source candidate to canonical processed data")
     if promote.get("task_mode") == "broad_capture":
         failures.append("promotion/canonical work must not remain in broad_capture mode")
+    portfolio = build_task_preflight(ROOT, intent="prioritize the research portfolio, enforce WIP, and decide pivot or hold")
+    portfolio_skills = ((portfolio.get("skill_use_contract") or {}).get("candidate_skills_by_class") or {})
+    if "research-portfolio-gatekeeper" not in portfolio_skills.get("portfolio_governance", []):
+        failures.append("portfolio work did not surface research-portfolio-gatekeeper")
+    recovery = build_task_preflight(ROOT, intent="recover missing evidence after 403 and enforce the claim ceiling")
+    recovery_skills = ((recovery.get("skill_use_contract") or {}).get("candidate_skills_by_class") or {})
+    if "evidence-recovery-and-claim-ceiling" not in recovery_skills.get("evidence_recovery", []):
+        failures.append("evidence recovery work did not surface evidence-recovery-and-claim-ceiling")
+    release = build_task_preflight(ROOT, intent="prepare the canonical PDF release package")
+    release_skills = ((release.get("skill_use_contract") or {}).get("candidate_skills_by_class") or {})
+    if "research-release-controller" not in release_skills.get("release_control", []):
+        failures.append("release work did not surface research-release-controller")
+    failures.extend(_accepted_task_reuse_is_enforced())
     failures.extend(_campaign_breaker_blocks_preflight())
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))

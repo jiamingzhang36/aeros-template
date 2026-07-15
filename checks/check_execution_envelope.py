@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -38,9 +39,18 @@ def _repo() -> Path:
     _write(tmp / "scripts/good.py", "from pathlib import Path\nPath('outputs/envelope/allowed.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/allowed.txt').write_text('allowed\\n')\n")
     _write(tmp / "scripts/bad.py", "from pathlib import Path\nPath('outputs/envelope/bad.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/bad.txt').write_text('bad\\n')\nPath('paper/draft.md').parent.mkdir(parents=True, exist_ok=True)\nPath('paper/draft.md').write_text('denied\\n')\n")
     _write(tmp / "scripts/undeclared.py", "from pathlib import Path\nPath('outputs/other.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/other.txt').write_text('undeclared\\n')\n")
+    _write(tmp / "scripts/extra.py", "from pathlib import Path\nPath('outputs/envelope/expected.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/expected.txt').write_text('expected\\n')\nPath('outputs/envelope/extra.txt').write_text('extra\\n')\n")
+    _write(tmp / "scripts/fail_validation.py", "from pathlib import Path\nPath('outputs/envelope/unvalidated.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/unvalidated.txt').write_text('candidate\\n')\n")
+    _write(tmp / "scripts/validator_target.py", "from pathlib import Path\nPath('outputs/envelope/validator_target.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/validator_target.txt').write_text('original\\n')\n")
+    _write(tmp / "scripts/transaction.py", "from pathlib import Path\np=Path('outputs/envelope'); p.mkdir(parents=True, exist_ok=True); (p/'tx_a.txt').write_text('a\\n'); (p/'tx_b.txt').write_text('b\\n')\n")
+    _write(tmp / "scripts/module_target.py", "from pathlib import Path\nPath('outputs/envelope/module_target.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/module_target.txt').write_text('candidate\\n')\n")
     _write(tmp / "scripts/run_good_task.py", "from pathlib import Path\nPath('outputs/enveloped/from_run.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/enveloped/from_run.txt').write_text('run allowed\\n')\n")
     _write(tmp / "scripts/run_bad_task.py", "from pathlib import Path\nPath('outputs/enveloped/from_bad.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/enveloped/from_bad.txt').write_text('run bad\\n')\nPath('data/raw/secret.csv').parent.mkdir(parents=True, exist_ok=True)\nPath('data/raw/secret.csv').write_text('denied\\n')\n")
     _write(tmp / "checks/check_fixture_read_only.py", "from pathlib import Path\nassert Path('scripts/good.py').exists()\nprint('PASS: fixture read-only check')\n")
+    _write(tmp / "checks/check_accept_allowed.py", "from pathlib import Path\nassert Path('outputs/envelope/allowed.txt').read_text() == 'allowed\\n'\nprint('PASS: allowed artifact')\n")
+    _write(tmp / "checks/check_accept_fail.py", "raise SystemExit('intentional validation failure')\n")
+    _write(tmp / "checks/check_mutate_then_pass.py", "from pathlib import Path\nPath('outputs/envelope/validator_target.txt').write_text('mutated\\n')\nprint('PASS: but mutation must invalidate acceptance')\n")
+    _write(tmp / "checks/check_accept_transaction.py", "from pathlib import Path\nassert Path('outputs/envelope/tx_a.txt').is_file() and Path('outputs/envelope/tx_b.txt').is_file()\nprint('PASS: transaction inputs exist')\n")
     _write(tmp / "checks/check_env_good.py", "from pathlib import Path\nassert Path('outputs/enveloped/from_run.txt').exists()\nprint('PASS: env good output exists')\n")
     _write(tmp / "tasks/execution/T_ENV_GOOD.yml", f"""task_id: T_ENV_GOOD
 stage: execution
@@ -99,13 +109,117 @@ def main() -> int:
         expected_outputs=("outputs/envelope/allowed.txt",),
         runtime_profile="local-safe",
     )
-    good = execute_in_isolated_worktree(repo, [sys.executable, "scripts/good.py"], envelope)
+    good = execute_in_isolated_worktree(
+        repo,
+        [sys.executable, "scripts/good.py"],
+        envelope,
+        acceptance_checks=("checks/check_accept_allowed.py",),
+    )
     if not good.ok:
         failures.append(f"allowed write was not accepted: {good}")
     if not (repo / "outputs/envelope/allowed.txt").exists():
         failures.append("allowed output was not copied back to main repo")
     if not good.worktree_removed:
         failures.append("good run worktree was not removed")
+    if not good.validation_passed or good.failed_acceptance_checks:
+        failures.append(f"allowed output was copied without a passing validator: {good}")
+    if not good.validation_manifest or not (repo / good.validation_manifest).is_file():
+        failures.append("passing acceptance did not persist a validation manifest")
+    else:
+        import json
+        manifest = json.loads((repo / good.validation_manifest).read_text(encoding="utf-8"))
+        if manifest.get("status") != "passed" or not manifest.get("acceptance_checks"):
+            failures.append("durable validation manifest is incomplete")
+
+    missing_check = execute_in_isolated_worktree(repo, [sys.executable, "scripts/good.py"], envelope)
+    if missing_check.ok or missing_check.accepted_outputs:
+        failures.append("write action without an acceptance check was accepted")
+
+    extra_env = ExecutionEnvelope(
+        write_roots=("outputs/envelope/",),
+        expected_outputs=("outputs/envelope/expected.txt",),
+    )
+    extra = execute_in_isolated_worktree(
+        repo,
+        [sys.executable, "scripts/extra.py"],
+        extra_env,
+        acceptance_checks=("checks/check_accept_allowed.py",),
+    )
+    if extra.ok or "outputs/envelope/extra.txt" not in extra.unexpected_outputs:
+        failures.append(f"extra file inside write root was not rejected: {extra}")
+    if (repo / "outputs/envelope/expected.txt").exists() or (repo / "outputs/envelope/extra.txt").exists():
+        failures.append("unexpected-output run polluted the main repo")
+
+    failed_validation_env = ExecutionEnvelope(
+        write_roots=("outputs/envelope/",),
+        expected_outputs=("outputs/envelope/unvalidated.txt",),
+    )
+    failed_validation = execute_in_isolated_worktree(
+        repo,
+        [sys.executable, "scripts/fail_validation.py"],
+        failed_validation_env,
+        acceptance_checks=("checks/check_accept_fail.py",),
+    )
+    if failed_validation.ok or not failed_validation.failed_acceptance_checks:
+        failures.append(f"failed acceptance check did not block copyback: {failed_validation}")
+    if (repo / "outputs/envelope/unvalidated.txt").exists():
+        failures.append("failed-validation run polluted the main repo")
+
+    mutating_env = ExecutionEnvelope(
+        write_roots=("outputs/envelope/",),
+        expected_outputs=("outputs/envelope/validator_target.txt",),
+    )
+    mutating = execute_in_isolated_worktree(
+        repo,
+        [sys.executable, "scripts/validator_target.py"],
+        mutating_env,
+        acceptance_checks=("checks/check_mutate_then_pass.py",),
+    )
+    if mutating.ok or "outputs/envelope/validator_target.txt" not in mutating.validator_modified_outputs:
+        failures.append(f"validator mutation was not rejected: {mutating}")
+    if (repo / "outputs/envelope/validator_target.txt").exists():
+        failures.append("validator mutation polluted the main repo")
+
+    module_env = ExecutionEnvelope(
+        write_roots=("outputs/envelope/",),
+        expected_outputs=("outputs/envelope/module_target.txt",),
+    )
+    module_check = execute_in_isolated_worktree(
+        repo,
+        [sys.executable, "scripts/module_target.py"],
+        module_env,
+        acceptance_checks=("python3 -m compileall",),
+    )
+    if module_check.ok or not module_check.failed_acceptance_checks:
+        failures.append("python -m acceptance command bypass was not rejected")
+    if (repo / "outputs/envelope/module_target.txt").exists():
+        failures.append("rejected module acceptance command polluted the main repo")
+
+    transaction_env = ExecutionEnvelope(
+        write_roots=("outputs/envelope/",),
+        expected_outputs=("outputs/envelope/tx_a.txt", "outputs/envelope/tx_b.txt"),
+    )
+    real_replace = __import__("os").replace
+    stage_replacements = {"count": 0}
+
+    def fail_second_stage_replace(src, dst):
+        if ".aeros-stage-" in Path(src).name:
+            stage_replacements["count"] += 1
+            if stage_replacements["count"] == 2:
+                raise OSError("injected second-file copyback failure")
+        return real_replace(src, dst)
+
+    with patch("aeros.runtime.execution_envelope.os.replace", side_effect=fail_second_stage_replace):
+        transaction = execute_in_isolated_worktree(
+            repo,
+            [sys.executable, "scripts/transaction.py"],
+            transaction_env,
+            acceptance_checks=("checks/check_accept_transaction.py",),
+        )
+    if transaction.ok or not transaction.copyback_error:
+        failures.append(f"injected transactional copyback failure was not surfaced: {transaction}")
+    if any((repo / rel).exists() for rel in ("outputs/envelope/tx_a.txt", "outputs/envelope/tx_b.txt")):
+        failures.append("transactional copyback failure left a partial result in the main repo")
 
     bad_env = ExecutionEnvelope(
         write_roots=("outputs/envelope/",),

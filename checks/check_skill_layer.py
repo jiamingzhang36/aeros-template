@@ -65,6 +65,9 @@ REQUIRED_MAPPED_SKILL_NAMES = {
     "sci-download",
     "latex-compile-qa",
     "project-rigor-check",
+    "research-portfolio-gatekeeper",
+    "evidence-recovery-and-claim-ceiling",
+    "research-release-controller",
 }
 
 

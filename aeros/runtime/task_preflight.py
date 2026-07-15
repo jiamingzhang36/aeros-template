@@ -26,6 +26,7 @@ from .output_intent import contract_output_intents
 from .owner_decisions import evaluate_owner_decision_rules
 from .skill_obligation import infer_skill_obligations, obligation_classes
 from .source_capture_permission import classify_source_capture_permission
+from . import state as state_mod
 from .task_mode import infer_task_mode, load_contract_by_id
 
 
@@ -146,6 +147,85 @@ def _contract_allowed_to_touch(contract: Contract | None) -> list[str]:
     return sorted(dict.fromkeys(contract.allowed_outputs))
 
 
+def _nonempty_artifact_exists(root: Path, rel: str) -> bool:
+    """Check output presence using directory metadata, never file contents."""
+    if not rel or rel == "agent_runs" or rel.startswith("agent_runs/"):
+        return True
+    try:
+        matches = list(root.glob(rel)) if any(ch in rel for ch in "*?[") else [root / rel]
+    except (OSError, ValueError):
+        return False
+    for path in matches:
+        try:
+            if path.is_file() and path.stat().st_size > 0:
+                return True
+            if path.is_dir() and any(
+                child.is_file() and child.stat().st_size > 0
+                for child in path.rglob("*")
+            ):
+                return True
+        except OSError:
+            continue
+    return False
+
+
+def _reuse_decision(root: Path, contract: Contract | None) -> dict[str, Any]:
+    """Expose prior acceptance before an agent/provider or large-data rerun.
+
+    This is a cheap routing decision. The kernel remains responsible for
+    fingerprint freshness and artifact-specific validation.
+    """
+    base = {
+        "status": "NEW_WORK",
+        "should_execute": True,
+        "recommended_action": "execute the bounded task",
+        "identity_source": "runtime state plus output-presence metadata",
+        "does_not_prove": [
+            "artifact freshness",
+            "scientific validity",
+            "canonical promotion",
+            "claim or gate authority",
+        ],
+    }
+    if not contract:
+        return base
+    state = state_mod.load_state(root)
+    entry = ((state.get("tasks") or {}).get(contract.task_id) or {})
+    status = str(entry.get("status") or "")
+    semantic_outputs = [
+        rel for rel in contract.allowed_outputs
+        if rel and rel != "agent_runs" and not rel.startswith("agent_runs/")
+    ]
+    missing = [rel for rel in semantic_outputs if not _nonempty_artifact_exists(root, rel)]
+    if status == "stale":
+        return {
+            **base,
+            "status": "REVALIDATE_FIRST",
+            "should_execute": False,
+            "missing_outputs": missing,
+            "recommended_action": f"python3 -m aeros.cli recover {contract.task_id} --check",
+        }
+    if status == "passed" and entry.get("output_fingerprint") and not missing:
+        return {
+            **base,
+            "status": "PREVIOUSLY_ACCEPTED",
+            "should_execute": False,
+            "missing_outputs": [],
+            "recommended_action": (
+                "reuse accepted artifacts; the kernel will confirm stat guards "
+                f"and fingerprints, or run python3 -m aeros.cli recover {contract.task_id} --check"
+            ),
+        }
+    if status == "passed" and missing:
+        return {
+            **base,
+            "status": "RERUN_REQUIRED",
+            "missing_outputs": missing,
+            "recommended_action": "restore or rerun only the missing declared outputs",
+        }
+    return base
+
+
 def build_task_preflight(
     root: Path,
     *,
@@ -168,6 +248,7 @@ def build_task_preflight(
             # manufacture a completion-time use-or-waive obligation.
             obligations = []
     skill_use_contract = _skill_use_contract(root, obligations)
+    reuse_decision = _reuse_decision(root, contract)
     allowed = _contract_allowed_to_touch(contract) or _workflow_allowed_prefixes(root, workflow)
     if not allowed:
         allowed = ["agent_runs/", "audits/", "outputs/context/", "work/"]
@@ -338,6 +419,7 @@ def build_task_preflight(
         "execution_mode": mode.get("execution_mode"),
         "skill_obligations": obligations,
         "skill_use_contract": skill_use_contract,
+        "reuse_decision": reuse_decision,
         "output_intents": output_intents,
         "source_capture_permission": permission,
         "owner_decision_status": owner_decisions.get("status"),
@@ -376,6 +458,9 @@ def format_task_preflight(report: dict[str, Any]) -> str:
         f"campaign_id: {report.get('campaign_id')}",
         f"campaign_status: {report.get('campaign_status')}",
         f"owner_decision_status: {report.get('owner_decision_status')}",
+        f"reuse_status: {(report.get('reuse_decision') or {}).get('status')}",
+        f"reuse_should_execute: {(report.get('reuse_decision') or {}).get('should_execute')}",
+        f"reuse_recommended_action: {(report.get('reuse_decision') or {}).get('recommended_action')}",
         "",
         "owner_decision_blocks:",
     ]

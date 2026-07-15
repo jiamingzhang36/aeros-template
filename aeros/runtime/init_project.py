@@ -184,7 +184,10 @@ classes:
   writing: {skills: [econ-write, pre-submission-audit], triggers: [paper, draft, writing, submission, referee, response]}
   causal_identification: {skills: [causal-id-review, did-checklist], triggers: [identification, causal, did, event study, method_card, design]}
   replication: {skills: [code-review-econ, replication-check], triggers: [replication, reproduc, provenance, pipeline, result_validation, code_review]}
-  submission_review: {skills: [bib-manager, academic-research-suite, pre-submission-audit], triggers: [submission, submit, manuscript, paper, citation, package]}
+  submission_review: {skills: [bib-manager, academic-research-suite, pre-submission-audit, research-release-controller], triggers: [submission, submit, manuscript, paper, citation, package]}
+  portfolio_governance: {skills: [research-portfolio-gatekeeper], triggers: [portfolio, project priority, prioritize projects, pivot, hold, kill, wip, stop workstream, avoid spinning]}
+  evidence_recovery: {skills: [evidence-recovery-and-claim-ceiling], triggers: [missing evidence, source recovery, evidence recovery, 403, 429, tls, wayback, foia, manual retrieval, paper_safe_count, claim ceiling]}
+  release_control: {skills: [research-release-controller], triggers: [release, canonical handoff, submission package, pdf, docx, poster, publish, final artifact]}
 allowed_waiver_classes: [ledger_hash_only, typo_only, mechanical_revalidation, single_line_parser_patch]
 required_waiver_fields: [skill_class, reason, scope, progress_label]
 does_not_prove: [skill invocation, skill output correctness, scientific validity, claim support, human gate approval]

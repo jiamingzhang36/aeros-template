@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 import csv
 
@@ -16,7 +17,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from aeros.runtime.kernel import find_project_root  # noqa: E402
 from aeros.runtime.action_spec import validate_action_spec  # noqa: E402
 from aeros.runtime.controller_loop import ControllerLoopArgs, _command_args, run_until  # noqa: E402
+from aeros.runtime.episode_watchdog import (  # noqa: E402
+    EpisodeStep,
+    WatchdogPolicy,
+    assess_after,
+    assess_before,
+    artifact_hashes,
+    load_episode_steps,
+    record_episode_step,
+    semantic_state_fingerprint,
+)
 from aeros.runtime.next_action import VALID_LABELS, compute_next_action  # noqa: E402
+from aeros.runtime.context_budget import pointer_first_result, prepare_context_packet  # noqa: E402
 
 
 REQUIRED_FIELDS = [
@@ -35,6 +47,123 @@ ACTION_SPEC_FIELDS = [
     "action_spec_requires_decision:",
     "action_spec_producer_mode:",
 ]
+
+
+def _watchdog_step(**overrides) -> EpisodeStep:
+    values = {
+        "episode_id": "EP-FIX",
+        "objective_id": "OBJ-FIX",
+        "frontier_id": "FRONTIER-FIX",
+        "step": 1,
+        "action_signature": "ACTION-FIX",
+        "input_fingerprint": "INPUT-FIX",
+        "state_fingerprint_before": "STATE-A",
+        "state_fingerprint_after": "STATE-B",
+        "expected_artifacts": (),
+        "accepted_artifacts": (),
+        "accepted_artifact_hashes": {},
+        "research_value_events": (),
+        "blockers_before": (),
+        "blockers_after": (),
+        "tool_result_hash": "RESULT-FIX",
+        "error_code": "",
+        "tokens_input": 0,
+        "tokens_output": 0,
+        "cost": 0.0,
+        "wall_time": 0.1,
+        "assistant_text": "",
+    }
+    values.update(overrides)
+    return EpisodeStep(**values)
+
+
+def _watchdog_fixtures() -> list[str]:
+    failures: list[str] = []
+    policy = WatchdogPolicy(max_tokens_without_value=100)
+    with tempfile.TemporaryDirectory(prefix="aeros_watchdog_") as name:
+        root = Path(name)
+        (root / "outputs").mkdir()
+        artifact = root / "outputs/result.json"
+        artifact.write_text('{"ok": true}\n', encoding="utf-8")
+        hashes = artifact_hashes(root, ("outputs/result.json",))
+        prior = _watchdog_step(
+            accepted_artifacts=("outputs/result.json",),
+            accepted_artifact_hashes=hashes,
+        )
+        cache = assess_before(root, [prior], _watchdog_step())
+        if cache.reason != "CACHE_HIT" or not cache.stop:
+            failures.append("watchdog did not prevent a duplicate accepted action via cache hit")
+
+        repeats = [_watchdog_step(step=1), _watchdog_step(step=2)]
+        repeated = assess_before(root, repeats, _watchdog_step(step=3))
+        if repeated.reason != "STOP_REPEATED_ACTION":
+            failures.append("watchdog did not stop a third unchanged repeated action")
+
+        stalled = _watchdog_step(state_fingerprint_after="STATE-A")
+        first_stall = assess_after([], stalled, policy)
+        second_stall = assess_after([stalled], _watchdog_step(step=2, state_fingerprint_after="STATE-A"), policy)
+        if first_stall.reason != "REPLAN_REQUIRED" or second_stall.reason != "STOP_NO_STATE_CHANGE":
+            failures.append("watchdog no-state-change escalation is invalid")
+
+        errored = _watchdog_step(error_code="EXIT_7")
+        same_error = assess_after([errored], _watchdog_step(step=2, error_code="EXIT_7"), policy)
+        if same_error.reason != "STOP_SAME_ERROR":
+            failures.append("watchdog allowed the same action/input/error twice")
+
+        loop_text = "The same sources were checked and the next step is to check the same sources again."
+        text_history = [
+            _watchdog_step(step=1, state_fingerprint_after="STATE-B", assistant_text=loop_text),
+            _watchdog_step(step=2, state_fingerprint_before="STATE-B", state_fingerprint_after="STATE-C", assistant_text=loop_text),
+        ]
+        text_loop = assess_after(
+            text_history,
+            _watchdog_step(step=3, state_fingerprint_before="STATE-C", state_fingerprint_after="STATE-D", assistant_text=loop_text),
+            policy,
+        )
+        if text_loop.reason != "STOP_TEXT_LOOP":
+            failures.append("watchdog did not detect a three-output text loop")
+
+        compact = assess_after([], _watchdog_step(tokens_input=60, tokens_output=50), policy)
+        token_stop = assess_after(
+            [_watchdog_step(tokens_input=60, tokens_output=50)],
+            _watchdog_step(step=2, tokens_input=60, tokens_output=50),
+            policy,
+        )
+        if compact.reason != "REPLAN_WITH_COMPACT_CONTEXT" or token_stop.reason != "STOP_TOKEN_WASTE":
+            failures.append("watchdog token-waste escalation is invalid")
+
+        decision = assess_after([], prior, policy)
+        record_episode_step(root, prior, decision)
+        loaded = load_episode_steps(root)
+        if len(loaded) != 1 or loaded[0].accepted_artifacts != ("outputs/result.json",):
+            failures.append("watchdog did not persist/reload its episode observation through the event log")
+
+        before = semantic_state_fingerprint(root)
+        (root / "agent_runs").mkdir()
+        (root / "agent_runs/noise.log").write_text("timestamp-only noise\n", encoding="utf-8")
+        after = semantic_state_fingerprint(root)
+        if before != after:
+            failures.append("runtime log noise incorrectly changed the semantic state fingerprint")
+
+        # Per-save volatile metadata (state.py stamps updated_at=_now()) must not
+        # move the semantic fingerprint, or the no_state_change stop is defeated;
+        # a substantive change must still move it.
+        (root / "aeros_state.yml").write_text(
+            "current_gate: G0\ncurrent_stage: discovery\ntasks: {}\nupdated_at: 2026-07-11T10:00:00Z\n",
+            encoding="utf-8")
+        stamp_a = semantic_state_fingerprint(root)
+        (root / "aeros_state.yml").write_text(
+            "current_gate: G0\ncurrent_stage: discovery\ntasks: {}\nupdated_at: 2026-07-11T10:00:09Z\n",
+            encoding="utf-8")
+        stamp_b = semantic_state_fingerprint(root)
+        if stamp_a != stamp_b:
+            failures.append("re-stamped updated_at wrongly changed the semantic state fingerprint")
+        (root / "aeros_state.yml").write_text(
+            "current_gate: G3\ncurrent_stage: execution\ntasks: {}\nupdated_at: 2026-07-11T10:00:09Z\n",
+            encoding="utf-8")
+        if semantic_state_fingerprint(root) == stamp_b:
+            failures.append("a substantive gate/stage change did not move the semantic state fingerprint")
+    return failures
 
 
 def _validate_next_action_file(path: Path) -> list[str]:
@@ -85,6 +214,7 @@ def _is_template_project(root: Path) -> bool:
 def main() -> int:
     root = find_project_root(Path.cwd())
     failures: list[str] = []
+    failures.extend(_watchdog_fixtures())
 
     template = root / "templates" / "NEXT_ACTION.md"
     if not template.exists():
@@ -205,6 +335,32 @@ def main() -> int:
         missing = [paper_id for paper_id in blocked_fulltext_ids if paper_id not in text]
         if missing:
             failures.append(f"lane literature: blocked full-text ids missing from recommendation: {', '.join(missing)}")
+
+    with tempfile.TemporaryDirectory(prefix="aeros_context_budget_") as context_name:
+        context_root = Path(context_name)
+        (context_root / "events").mkdir(parents=True)
+        (context_root / "CURRENT_STATE.md").write_text("goal: test\n" + ("high-signal state\n" * 400), encoding="utf-8")
+        event_lines = []
+        for index in range(8):
+            event_lines.append(json.dumps({
+                "event_type": "episode_step",
+                "payload": {"step": index, "action_signature": f"A-{index}", "state_changed": index == 7},
+            }))
+        (context_root / "events/event_log.jsonl").write_text("\n".join(event_lines) + "\n", encoding="utf-8")
+        packet = prepare_context_packet(context_root, max_input_tokens=600, compact_ratio=0.68)
+        if len(packet.recent_events) > 5 or packet.omitted_event_count < 3:
+            failures.append("Context Budget did not retain only the latest five episode events")
+        if packet.estimated_tokens > int(packet.max_input_tokens * 0.68) or not packet.compacted:
+            failures.append("Context Budget did not compact before its configured threshold")
+        pointer = pointer_first_result(
+            artifact_path="outputs/example.json",
+            summary="bounded result",
+            key_facts=("one", "two"),
+            changed_state="none",
+            next_question="review",
+        )
+        if pointer.get("raw_output_in_context") is not False or pointer.get("artifact_path") != "outputs/example.json":
+            failures.append("Context Budget result is not pointer-first")
 
     failures.extend(_validate_next_action_file(root / "NEXT_ACTION.md"))
 

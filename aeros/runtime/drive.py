@@ -371,14 +371,22 @@ def _run_official_probe_envelope(root: Path) -> dict[str, Any]:
         "accepted_outputs": list(result.accepted_outputs),
         "denied_writes": list(result.denied_writes),
         "undeclared_writes": list(result.undeclared_writes),
+        "unexpected_outputs": list(result.unexpected_outputs),
         "missing_expected_outputs": list(result.missing_expected_outputs),
+        "unproduced_expected_outputs": list(result.unproduced_expected_outputs),
+        "acceptance_checks": [item.to_dict() for item in result.acceptance_checks],
+        "failed_acceptance_checks": list(result.failed_acceptance_checks),
+        "validator_modified_outputs": list(result.validator_modified_outputs),
+        "validation_passed": result.validation_passed,
+        "validation_manifest": result.validation_manifest,
+        "copyback_error": result.copyback_error,
         "worktree_removed": result.worktree_removed,
         "reason": result.message,
     }
 
 
 def _run_research_job_envelope(root: Path, *, job_type: str, source_candidate: str, target: str) -> dict[str, Any]:
-    from .execution_envelope import execute_action_spec_in_isolated_worktree
+    from .run_bundle import execute_research_job_run_bundle
     from .research_job import ResearchJob, compile_research_job
     if not source_candidate or not target:
         return {
@@ -392,7 +400,7 @@ def _run_research_job_envelope(root: Path, *, job_type: str, source_candidate: s
             "DRIVE-RUN-SPECIFICATION", job_type, target, source_candidate,
             f"run registered specification {target} over {source_candidate}",
         ))
-        result = execute_action_spec_in_isolated_worktree(root, compiled.action_spec, timeout_seconds=120)
+        result = execute_research_job_run_bundle(root, compiled.action_spec, timeout_seconds=120)
     except Exception as exc:
         return {"attempted": True, "status": "fail", "reason": str(exc), "command": "compiled run_specification"}
     return {
@@ -405,7 +413,18 @@ def _run_research_job_envelope(root: Path, *, job_type: str, source_candidate: s
         "accepted_outputs": list(result.accepted_outputs),
         "denied_writes": list(result.denied_writes),
         "undeclared_writes": list(result.undeclared_writes),
+        "unexpected_outputs": list(result.unexpected_outputs),
         "missing_expected_outputs": list(result.missing_expected_outputs),
+        "unproduced_expected_outputs": list(result.unproduced_expected_outputs),
+        "acceptance_checks": [item.to_dict() for item in result.acceptance_checks],
+        "failed_acceptance_checks": list(result.failed_acceptance_checks),
+        "validator_modified_outputs": list(result.validator_modified_outputs),
+        "validation_passed": result.validation_passed,
+        "validation_manifest": result.validation_manifest,
+        "run_id": result.run_id,
+        "run_bundle_manifest": result.run_bundle_manifest,
+        "cache_hit": result.cache_hit,
+        "copyback_error": result.copyback_error,
         "worktree_removed": result.worktree_removed,
         "reason": result.message,
     }
