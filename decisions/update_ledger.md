@@ -2620,7 +2620,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: data fitness, identification validity, general econometric support, scientific validity, result admission, claim support, canonical promotion, or gate/submission/release approval.
 ## 2026-07-11 — Bounded autonomous execution + watchdog fingerprint hygiene fix
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `428f8be`
 - **Change type**: framework / autonomous execution / bugfix
 - **Action**: Commits the coherent green batch that formalizes bounded autonomous execution — `controller_loop` (default-deny command execution: only read-only/dry-run/check unless `--allow-task-runs`), `episode_watchdog` (deterministic anti-loop stop/replan/cache decisions), `context_budget` (pointer-first token budgeting), `run_bundle` (content-addressed, fail-closed reproducible runs), and `check_specification_run` — plus this session's watchdog fingerprint-hygiene fix. `episode_watchdog.semantic_state_fingerprint` now strips per-save volatile metadata lines (`updated_at` in aeros_state.yml, written by `state.py` as `_now()` on every save; `last_validation` in CURRENT_STATE.md) before hashing, so a step that only re-stamps a timestamp is not mistaken for substantive state change. Without this the `no_state_change` stop never fired. A `check_next_action` fixture locks in that a re-stamped timestamp leaves the fingerprint unchanged while a substantive gate/stage change moves it.
 - **Why**: The controller loop needs a trustworthy anti-loop watchdog; a volatile timestamp in a semantic-fingerprint file silently defeated one of its named stop conditions. Timestamps that accompany real progress (search_log/registry rows) are deliberately not stripped.
