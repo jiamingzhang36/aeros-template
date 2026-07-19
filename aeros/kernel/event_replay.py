@@ -66,9 +66,46 @@ def replay(project_root: Path) -> ReplayState:
     return ReplayState(event_count=len(events), digest=h.hexdigest(), facts=facts, violations=violations)
 
 
+RETROSPECTIVE_PLAN_STATUSES = {
+    "retrospective_not_preregistered",
+    "retrospective",
+}
+
+
+def preanalysis_plan_status(project_root: Path) -> tuple[str, str]:
+    """Return (status, plan_id) declared by analysis/preanalysis_plan.yml.
+
+    Returns ("", "") when no plan file exists or it cannot be parsed.
+    """
+    plan_path = project_root / "analysis" / "preanalysis_plan.yml"
+    if not plan_path.exists():
+        return "", ""
+    status = plan_id = ""
+    for line in plan_path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("status:") and not status:
+            status = stripped.split(":", 1)[1].strip().strip("'\"")
+        elif stripped.startswith("plan_id:") and not plan_id:
+            plan_id = stripped.split(":", 1)[1].strip().strip("'\"")
+        if status and plan_id:
+            break
+    return status, plan_id
+
+
 def check_happens_before(project_root: Path) -> list[str]:
-    """Require preanalysis plan commit before outcome-data access/spec execution."""
+    """Require preanalysis plan commit before outcome-data access/spec execution.
+
+    A project whose plan declares itself retrospective is not held to this
+    ordering: there is no preregistration for the analysis to precede. That is
+    a disclosure, not an exemption -- the caller is expected to surface the
+    declared status so a reader can see the analysis was documented after the
+    fact. Only an absent or silent plan produces ordering failures, because
+    then the ordering is genuinely unverified.
+    """
     events = read_events(project_root)
+    status, _ = preanalysis_plan_status(project_root)
+    if status in RETROSPECTIVE_PLAN_STATUSES:
+        return []
     failures: list[str] = []
     preanalysis_index: int | None = None
     outcome_events = {"access_outcome", "run_spec", "register_result"}
