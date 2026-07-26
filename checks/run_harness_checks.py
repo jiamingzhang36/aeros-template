@@ -41,6 +41,7 @@ CHECKS = [
     "check_authority_lifecycle_e2e.py",
     "check_artifact_semantics.py",
     "check_research_job_compiler.py",
+    "check_heavy_run.py",
     "check_specification_run.py",
     "check_adaptive_checks.py",
     "check_devendor_package.py",

@@ -1752,6 +1752,47 @@ def _cmd_task_preflight(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_heavy(args: argparse.Namespace) -> int:
+    from .runtime.heavy_run import (
+        find_heavy_project_root,
+        inspect_heavy_job,
+        list_heavy_jobs,
+        run_heavy_job,
+    )
+
+    try:
+        root = find_heavy_project_root(Path.cwd())
+        if args.heavy_command == "list":
+            payload = {"project_root": str(root), "jobs": list_heavy_jobs(root)}
+            if args.json:
+                print(json.dumps(payload, indent=2, sort_keys=True))
+            else:
+                for job_id in payload["jobs"]:
+                    print(job_id)
+            return 0
+        result = (
+            run_heavy_job(
+                root, args.job, dry_run=bool(getattr(args, "dry_run", False))
+            )
+            if args.heavy_command == "run"
+            else inspect_heavy_job(root, args.job)
+        )
+    except (FileNotFoundError, KeyError, OSError, ValueError) as exc:
+        print(f"FAIL: {exc}", file=sys.stderr)
+        return 2
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, sort_keys=True))
+    else:
+        print(f"{result.status}: {result.job_id} {result.run_key}")
+        print(f"  {result.message}")
+        if result.pid:
+            print(f"  pid: {result.pid}")
+        if result.log_path:
+            print(f"  log: {result.log_path}")
+        print(f"  resume: {result.resume_pack}")
+    return 0 if result.ok else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="aeros", description="AEROS runtime")
     sub = parser.add_subparsers(dest="command", required=False)
@@ -1915,6 +1956,28 @@ def main(argv: list[str] | None = None) -> int:
     job = sub.add_parser("job", help="compile ResearchJob into TaskContract, ActionSpec, and ExecutionEnvelope")
     job_sub = job.add_subparsers(dest="job_command", required=True); job_compile = job_sub.add_parser("compile")
     job_compile.add_argument("--file", required=True); job_compile.add_argument("--write", action="store_true"); job_compile.set_defaults(func=_cmd_job)
+
+    heavy = sub.add_parser(
+        "heavy",
+        help="single-flight execution and cache reuse for declared expensive jobs",
+    )
+    heavy_sub = heavy.add_subparsers(dest="heavy_command", required=True)
+    heavy_list = heavy_sub.add_parser("list", help="list project-declared heavy jobs")
+    heavy_list.add_argument("--json", action="store_true")
+    heavy_list.set_defaults(func=_cmd_heavy)
+    heavy_status = heavy_sub.add_parser(
+        "status", help="inspect RunKey, lease, cache, and retry status"
+    )
+    heavy_status.add_argument("--job", required=True)
+    heavy_status.add_argument("--json", action="store_true")
+    heavy_status.set_defaults(func=_cmd_heavy)
+    heavy_run = heavy_sub.add_parser(
+        "run", help="run once, attach, reuse, or stop at plateau"
+    )
+    heavy_run.add_argument("--job", required=True)
+    heavy_run.add_argument("--dry-run", action="store_true")
+    heavy_run.add_argument("--json", action="store_true")
+    heavy_run.set_defaults(func=_cmd_heavy)
 
     adaptive = sub.add_parser("checks", help="select change-aware checks from observed writes")
     adaptive_sub = adaptive.add_subparsers(dest="adaptive_command", required=True); adaptive_select = adaptive_sub.add_parser("select")

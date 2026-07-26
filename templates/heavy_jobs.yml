@@ -1,0 +1,22 @@
+version: 1
+jobs:
+  example_heavy_job:
+    working_root: .
+    artifact_root: .
+    fallback_root_env: ""
+    fallback_root: ""
+    required_mounts: []
+    command: [python3, code/run_all.py, --mode, bounded]
+    cost_class: heavy
+    max_attempts: 1
+    hash_inputs:
+      - code/run_all.py
+      - config/analysis.yml
+    hash_globs:
+      - code/stages/*.py
+    stat_inputs: []
+    environment_locks:
+      - requirements.txt
+    expected_outputs:
+      - outputs/run_manifest.json
+    acceptance_checks: []

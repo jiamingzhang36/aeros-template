@@ -2627,3 +2627,15 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: `python3.10 checks/check_next_action.py`; `python3.10 checks/run_harness_checks.py --profile full` (all pass); demonstrated timestamp-only change → identical fingerprint, substantive change → different fingerprint.
 - **Does not prove**: that every volatile field across all semantic files is covered; that the controller loop is useful in real projects; scientific validity; gate approval.
 - **Next check**: Backfill this pending entry with the commit hash.
+
+## 2026-07-25 — Add single-flight execution for expensive project jobs
+
+- **Commit(s)**: pending
+- **Change type**: framework / execution efficiency / real-project rollout
+- **North star:** Expensive research jobs with unchanged declared inputs must attach, reuse, or stop instead of spawning another data-intensive process.
+- **Action**: Added `aeros heavy` with a deterministic RunKey, atomic single-flight lease, byte-validated accepted-output cache, cost-class retry budget, unchanged-failure plateau, and compact Resume Pack. Added separate working/artifact roots, environment-aware external-data fallback, and fail-closed `BLOCKED_EXTERNAL_INPUT` status so disconnected drives do not become configuration errors or accidental reruns. Registered a real fixture in smoke and exposed the capability through sync doctor.
+- **Validation**: `check_heavy_run.py` passed; smoke passed 19/19; Habit, Tobacco, and GLP1 read-only status calls returned `BLOCKED_EXTERNAL_INPUT` with no heavy process spawned while their external storage was unavailable.
+- **Non-goal**: Do not execute project pipelines, recursively inventory large datasets, certify scientific validity, admit results, promote claims, or grant release authority.
+- **Does not prove**: that every agent obeys project instructions instead of invoking Python directly; that disconnected external data are current; that project outputs pass their substantive acceptance gates.
+- **Drift risk**: A job can only be safely reused when every identity-relevant script, configuration, manifest, and cheap stat input is declared. Project rollout remains blocked until its external roots are mounted and status is re-evaluated.
+- **Next check**: Commit the framework slice, backfill its hash, then mount each project's external storage and run status only before authorizing any heavy execution.
