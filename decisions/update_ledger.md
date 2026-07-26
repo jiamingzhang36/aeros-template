@@ -2630,7 +2630,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-25 — Add single-flight execution for expensive project jobs
 
-- **Commit(s)**: pending
+- **Commit(s)**: `53d3201`
 - **Change type**: framework / execution efficiency / real-project rollout
 - **North star:** Expensive research jobs with unchanged declared inputs must attach, reuse, or stop instead of spawning another data-intensive process.
 - **Action**: Added `aeros heavy` with a deterministic RunKey, atomic single-flight lease, byte-validated accepted-output cache, cost-class retry budget, unchanged-failure plateau, and compact Resume Pack. Added separate working/artifact roots, environment-aware external-data fallback, and fail-closed `BLOCKED_EXTERNAL_INPUT` status so disconnected drives do not become configuration errors or accidental reruns. Registered a real fixture in smoke and exposed the capability through sync doctor.
@@ -2639,3 +2639,24 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: that every agent obeys project instructions instead of invoking Python directly; that disconnected external data are current; that project outputs pass their substantive acceptance gates.
 - **Drift risk**: A job can only be safely reused when every identity-relevant script, configuration, manifest, and cheap stat input is declared. Project rollout remains blocked until its external roots are mounted and status is re-evaluated.
 - **Next check**: Commit the framework slice, backfill its hash, then mount each project's external storage and run status only before authorizing any heavy execution.
+
+## 2026-07-25 — Add risk-based independent completion review
+
+- **Commit(s)**: `211b907`
+- **Change type**: framework / completion acceptance / independent critic
+- **North star:** Review high-risk accepted artifacts independently without rerunning expensive worker jobs or taxing low-risk mechanical work.
+- **Action**: Compiled completion risk as low, medium, high, or critical from task boundaries and accepted output paths. Low-risk work remains deterministic; medium review is optional; high-risk work requires a separate critic; critical authority surfaces require critic review plus a human gate. Replaced shallow output snippets with a bounded review packet containing artifact hashes, observed writes, check exit codes, exact candidate diff, and explicit non-proof boundaries. Added content-addressed review reuse under agent-denied runtime state, invalidation when evidence or reviewer identity changes, fail-closed required review, and direct escalation instead of worker retry. Applied the same review boundary to deterministic tasks and registered an executable fixture in smoke and sync doctor.
+- **Validation**: `check_completion_review.py` and `check_sync_doctor.py` passed; smoke passed 20/20 and wrote a harness-observed receipt.
+- **Non-goal**: Do not make every task call a subagent, rerun workers or heavy pipelines during review, treat critic output as scientific certification, or allow a critic to approve canonical promotion, claims, gates, or release.
+- **Does not prove**: scientific truth, causal identification, artifact interpretation correctness, real-world reviewer independence, provider availability, human approval, or claim/gate/submission/release readiness.
+- **Drift risk**: Risk classification is deterministic and intentionally conservative but may need real-project calibration; medium review remains off unless enabled; a required critic depends on a configured independent provider; cached verdict integrity depends on protecting runtime state and preserving all identity-relevant packet fields.
+- **Next check**: Sync one clean project, run one low-risk and one high-risk completion, confirm the former makes no provider call and the latter reviews the immutable accepted artifacts without rerunning the worker.
+
+## 2026-07-25 — Backfill retrospective analysis-plan semantics
+
+- **Commit(s)**: `3ce46f7`
+- **Change type**: ledger backfill / event semantics / preregistration disclosure
+- **Action**: Recorded the existing framework change that distinguishes an explicitly retrospective analysis plan from a missing or falsely preregistered plan. Retrospective disclosure no longer creates a permanent impossible ordering failure, while absent plans and unsupported prospective/preregistered status still fail.
+- **Validation**: The functional commit included positive retrospective behavior and negative missing/non-retrospective cases in `check_preanalysis_happens_before.py`; this entry repairs update-ledger provenance only.
+- **Non-goal**: Do not treat retrospective disclosure as preregistration, waive outcome-access timing concerns, or certify the analysis design.
+- **Does not prove**: preregistration, absence of specification search, identification validity, scientific validity, claim support, or gate/release approval.
