@@ -437,6 +437,10 @@ Backfill is the bridge between governance automation and data repair automation.
 - Treat `harness/protocols/critic_protocol.md` as the read-only review protocol.
 - Treat `harness/protocols/human_gate.md` as the approval policy for research judgment changes.
 - If a task affects protected definitions, claim strength, preferred specifications, or publication-facing outputs, mark `critic_required: true` and `human_gate_required: true`.
+- Completion review is risk-based: low-risk work uses deterministic checks; medium-risk work may receive an advisory critic; high-risk work requires an independent critic; critical authority surfaces require both critic review and a human gate.
+- A critic reviews the bounded completion packet and accepted artifacts. It must not rerun the worker or a heavy data pipeline, modify project artifacts, or approve canonical promotion, claims, gates, or release.
+- Reuse a prior critic verdict only when the runtime-generated `review_key` is unchanged. A changed artifact hash, observed-write set, check result, task goal, critic provider/model, or review policy requires a fresh review.
+- `unverified` is not a passing verdict for high-risk work and must never be cached as if review succeeded.
 
 ## Framework Propagation Discipline
 

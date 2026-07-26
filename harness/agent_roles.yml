@@ -14,6 +14,24 @@ roles:
     may_edit: true
     must_log_decision: true
 
+completion_review:
+  principle: >
+    Deterministic checks remain the default for low-risk work. Independent
+    critics review accepted artifacts rather than rerunning workers. High-risk
+    completion requires a critic; critical authority surfaces require both a
+    critic and a human gate.
+  risk_levels:
+    low: deterministic_checks_only
+    medium: critic_when_advisory_enabled
+    high: independent_critic_required
+    critical: independent_critic_and_human_gate_required
+  cache_identity: review_key
+  cache_rule: "reuse only when artifact hashes, observed writes, checks, goal, and policy inputs are unchanged"
+  critic_must_not:
+    - rerun the worker task
+    - modify project artifacts
+    - approve a gate, claim, canonical promotion, or release
+
 skills:
   project_intake:
     output: "audits/project_intake_report.md"

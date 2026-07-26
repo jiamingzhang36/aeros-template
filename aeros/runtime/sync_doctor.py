@@ -49,6 +49,13 @@ CAPABILITIES: dict[str, list[str]] = {
     "research_job_compiler": ["aeros/runtime/research_job.py", "aeros/runtime/job_actions.py", "templates/research_job_data_probe.yml", "checks/check_research_job_compiler.py", "checks/check_specification_run.py"],
     "heavy_run_single_flight": ["aeros/runtime/heavy_run.py", "templates/heavy_jobs.yml", "checks/check_heavy_run.py", "aeros/cli.py"],
     "adaptive_checks": ["aeros/runtime/adaptive_checks.py", "harness/adaptive_checks.yml", "checks/check_adaptive_checks.py"],
+    "risk_based_completion_review": [
+        "aeros/runtime/completion_review.py",
+        "aeros/runtime/critic.py",
+        "harness/agent_roles.yml",
+        "harness/protocols/critic_protocol.md",
+        "checks/check_completion_review.py",
+    ],
     "devendor_package": ["aeros/runtime/devendor.py", "checks/check_devendor_package.py", "pyproject.toml"],
 }
 

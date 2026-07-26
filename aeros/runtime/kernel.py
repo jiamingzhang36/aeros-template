@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 import yaml
 from functools import partial
 from pathlib import Path
+from types import SimpleNamespace
 
 from . import critic as critic_mod
 from . import identity
@@ -22,6 +23,7 @@ from .candidate_workspace import (
 )
 from .checks import format_feedback, run_checks
 from .completion import write_completion_receipt, validate_completion_receipts
+from .completion_review import build_review_packet, classify_completion_review, render_review_evidence
 from .contract import Contract, load_contract
 from .execution_envelope import ExecutionEnvelope, execute_in_isolated_worktree
 from .profile_runtime import runtime_check_plan
@@ -339,37 +341,79 @@ def _critic_config(project_root: Path) -> dict:
     }
 
 
-def _run_critic_pass(project_root: Path, contract: "Contract", state: dict) -> bool:
+def _run_critic_pass(
+    project_root: Path,
+    contract: "Contract",
+    state: dict,
+    candidate_run: object,
+    check_results: list,
+) -> tuple[bool, str]:
     """Independent verification pass after the worker passes deterministic checks.
     Returns True if the run may proceed (advisory, or no blocking finding), False
     if a blocking critic finding should escalate. Records a summary in state."""
     cfg = _critic_config(project_root)
-    if not cfg["enabled"]:
-        return True
-    evidence_parts: list[str] = [f"Goal: {contract.goal}"]
-    for rel in (contract.allowed_outputs or []):
-        p = project_root / rel
-        if p.is_file():
-            evidence_parts.append(f"--- {rel} ---\n{p.read_text(encoding='utf-8', errors='ignore')[:4000]}")
-    verdict = critic_mod.run_critic(
-        task_id=contract.task_id, goal=contract.goal,
-        evidence="\n\n".join(evidence_parts),
-        provider=cfg["provider"], model=cfg["model"], timeout_seconds=cfg["timeout_seconds"],
-    )
-    report = critic_mod.write_critic_report(project_root, contract.task_id, verdict)
     entry = state_mod.task_entry(state, contract.task_id)
+    accepted = tuple(getattr(candidate_run, "accepted_outputs", ()) or ())
+    plan = classify_completion_review(contract, accepted)
+    if not plan.should_run(advisory_enabled=cfg["enabled"]):
+        entry["critic"] = {
+            "verdict": "not_required",
+            "risk": plan.risk,
+            "required": False,
+            "human_gate_required": False,
+            "reasons": list(plan.reasons),
+        }
+        return True, ""
+
+    packet = build_review_packet(
+        project_root,
+        contract,
+        candidate_run,
+        check_results,
+        reviewer_identity={"provider": cfg["provider"], "model": cfg["model"]},
+    )
+    review_key = str(packet["review_key"])
+    verdict = critic_mod.load_cached_verdict(project_root, review_key)
+    if verdict is None:
+        verdict = critic_mod.run_critic(
+            task_id=contract.task_id,
+            goal=contract.goal,
+            evidence=render_review_evidence(packet),
+            provider=cfg["provider"],
+            model=cfg["model"],
+            timeout_seconds=cfg["timeout_seconds"],
+        )
+        verdict.review_key = review_key
+        if verdict.verdict != "unverified":
+            critic_mod.save_cached_verdict(project_root, verdict)
+    report = critic_mod.write_critic_report(
+        project_root,
+        contract.task_id,
+        verdict,
+        risk=plan.risk,
+        required=plan.required,
+        human_gate_required=plan.human_gate_required,
+    )
     entry["critic"] = {
         "verdict": verdict.verdict,
         "concern_modes": verdict.concern_modes,
         "blocking": verdict.has_blocking,
+        "risk": plan.risk,
+        "required": plan.required,
+        "human_gate_required": plan.human_gate_required,
+        "review_key": review_key,
+        "cached": verdict.cached,
         "report": str(report.relative_to(project_root)),
     }
     print(f"[kernel]   critic ({verdict.provider}): {verdict.verdict}"
           + (f" — concerns: {', '.join(verdict.concern_modes)}" if verdict.concern_modes else ""))
-    if cfg["blocking"] and verdict.has_blocking:
-        print(f"[kernel]   critic raised a BLOCKING concern; escalating {contract.task_id}.")
-        return False
-    return True
+    if plan.human_gate_required:
+        return False, "Critical completion requires an independent critic and a human gate."
+    if plan.required and verdict.verdict == "unverified":
+        return False, "Required independent critic was unavailable or unparseable."
+    if (plan.required or cfg["blocking"]) and verdict.has_blocking:
+        return False, "Independent critic raised a high-severity integrity concern."
+    return True, ""
 
 
 def _gate_lifecycle(project_root: Path) -> dict:
@@ -853,6 +897,21 @@ def _run_deterministic_task(contract: "Contract", project_root: Path,
     for r in results:
         print(f"[kernel]   check {r.name}: {'PASS' if r.passed else 'FAIL'}")
     if passed:
+        review_candidate = result if contract.run_command else SimpleNamespace(
+            accepted_outputs=tuple(accepted_paths),
+            observed_writes=tuple(accepted_paths),
+            denied_writes=(),
+            undeclared_writes=(),
+        )
+        critic_ok, critic_feedback = _run_critic_pass(
+            project_root, contract, state, review_candidate, results
+        )
+        if not critic_ok:
+            path = _escalate(project_root, contract, critic_feedback)
+            state_mod.set_status(state, contract.task_id, "escalated")
+            state_mod.save_state(project_root, state)
+            print(f"[kernel] task {contract.task_id} ESCALATED -> {path}")
+            return 2
         contracts = discover_contracts(project_root)
         _record_task_fingerprints(state, contract, project_root, contracts)
         entry = state_mod.task_entry(state, contract.task_id)
@@ -1068,10 +1127,13 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
         if passed:
             # Independent verification pass (separate from the worker) before the
             # task is accepted. Advisory by default; can block on high-severity.
-            if not _run_critic_pass(project_root, contract, state):
-                feedback = "Independent critic raised a blocking integrity concern."
+            critic_ok, critic_feedback = _run_critic_pass(
+                project_root, contract, state, candidate_run, results
+            )
+            if not critic_ok:
+                feedback = critic_feedback
                 state_mod.save_state(project_root, state)
-                continue
+                break
             contracts = discover_contracts(project_root)
             _record_task_fingerprints(state, contract, project_root, contracts)
             temp_run = RunRecord(

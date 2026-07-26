@@ -18,6 +18,11 @@ You are the critic agent. Your job is to verify the worker agent's output, not t
 - `docs/method_card.md`
 - `evidence/claim_registry.md`
 
+When the runtime supplies a content-addressed completion review packet, treat
+that packet as the bounded review surface. It contains accepted artifact hashes,
+observed writes, check exit codes, bounded artifact excerpts, and the exact
+candidate diff. Do not rerun the worker or a heavy data pipeline.
+
 ## Review Questions
 
 - Did the worker stay within allowed files?
@@ -40,3 +45,6 @@ You are the critic agent. Your job is to verify the worker agent's output, not t
 ## Output
 
 Write a critic report using `agent_runs/TEMPLATE_critic_report.md`.
+
+The report must preserve the runtime `review_key`. A cached verdict may be
+reused only when the review key is unchanged.

@@ -63,12 +63,16 @@ automation:
   # a task passes its deterministic checks. It screens for empirical-research
   # failure modes (data leakage, metric misuse, significance-driven spec
   # selection, overclaiming) and surfaces concerns into the gate decision packet.
-  # Advisory by default (does not block); set blocking: true to escalate on a
+  # Risk-based completion review: high-risk work requires this independent
+  # critic and critical authority surfaces also require a human gate.
+  # `enabled` turns on optional medium-risk advisory review; low-risk work stays
+  # mechanical. `blocking` makes an optional review's high-severity finding
+  # escalate. Required high-risk review always fails closed on unverified or a
   # high-severity finding. Use a DIFFERENT model from the worker if you can
   # (LLMs verify better than they generate, but cannot self-verify reliably).
   # The non-LLM backstop remains check_output_reproducibility.
   critic:
-    enabled: false          # opt-in; set true once a real provider is configured
+    enabled: false          # optional medium-risk advisory review
     provider: claude-cli    # mock | openai | claude-cli | codex-cli
     model: claude
     blocking: false
@@ -370,6 +374,7 @@ checks:
   operating_dashboard: checks/check_operating_dashboard.py
   next_action: checks/check_next_action.py
   action_spec: checks/check_action_spec.py
+  completion_review: checks/check_completion_review.py
   agent_envelope: checks/check_agent_envelope.py
   derived_vs_asserted_audit: checks/check_derived_vs_asserted_audit.py
   preanalysis_happens_before: checks/check_preanalysis_happens_before.py

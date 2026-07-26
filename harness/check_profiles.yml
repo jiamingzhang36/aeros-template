@@ -20,6 +20,7 @@ profiles:
       - check_econ_pack.py
       - check_census_probe.py
       - check_adaptive_checks.py
+      - check_completion_review.py
       - check_task_preflight.py
       - check_owner_decisions.py
       - check_broad_capture_firewall.py

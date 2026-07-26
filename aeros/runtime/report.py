@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from .contract import Contract
+from .completion_review import classify_completion_review
 
 
 @dataclass
@@ -80,6 +81,7 @@ def _commands_block(run: RunRecord) -> str:
 
 def write_run_report(project_root: Path, run: RunRecord) -> Path:
     c = run.contract
+    review_plan = classify_completion_review(c, c.allowed_outputs)
     now = datetime.now(timezone.utc)
     date = now.date().isoformat()
     run_id = f"{c.task_id}-{now.strftime('%Y%m%dT%H%M%SZ')}"
@@ -125,8 +127,9 @@ def write_run_report(project_root: Path, run: RunRecord) -> Path:
 - Mode: {c.stage}
 - Work mode: runtime
 - Completion Status: {run.final_status}
-- Critic required: no
-- Human gate required: {"yes" if run.final_status == "escalated" else "no"}
+- Critic required: {"yes" if review_plan.required else "no"}
+- Completion review risk: {review_plan.risk}
+- Human gate required: {"yes" if review_plan.human_gate_required or run.final_status == "escalated" else "no"}
 - Attempts: {len(run.attempts)}
 - Agent calls (this run): {run.run_calls}
 - Cost (this run): {cost_str}

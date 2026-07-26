@@ -44,6 +44,8 @@ class CriticVerdict:
     raw: str = ""
     provider: str = ""
     model: str = ""
+    review_key: str = ""
+    cached: bool = False
 
     @property
     def has_blocking(self) -> bool:
@@ -135,7 +137,57 @@ def run_critic(*, task_id: str, goal: str, evidence: str,
                              provider=provider, model=model)
 
 
-def write_critic_report(project_root: Path, task_id: str, verdict: CriticVerdict) -> Path:
+def _cache_path(project_root: Path, review_key: str) -> Path:
+    # Runtime state is denied to candidate workers; agent_runs/ may be a declared
+    # worker output and therefore must not hold authority-bearing review cache.
+    return project_root / "aeros" / "state" / "critic_reviews" / f"{review_key}.json"
+
+
+def load_cached_verdict(project_root: Path, review_key: str) -> CriticVerdict | None:
+    path = _cache_path(project_root, review_key)
+    if not path.is_file():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, json.JSONDecodeError):
+        return None
+    if data.get("review_key") != review_key:
+        return None
+    return CriticVerdict(
+        verdict=str(data.get("verdict", "unverified")),
+        findings=list(data.get("findings") or []),
+        raw=str(data.get("raw", "")),
+        provider=str(data.get("provider", "")),
+        model=str(data.get("model", "")),
+        review_key=review_key,
+        cached=True,
+    )
+
+
+def save_cached_verdict(project_root: Path, verdict: CriticVerdict) -> Path:
+    path = _cache_path(project_root, verdict.review_key)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "review_key": verdict.review_key,
+        "verdict": verdict.verdict,
+        "findings": verdict.findings,
+        "raw": verdict.raw,
+        "provider": verdict.provider,
+        "model": verdict.model,
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return path
+
+
+def write_critic_report(
+    project_root: Path,
+    task_id: str,
+    verdict: CriticVerdict,
+    *,
+    risk: str = "unknown",
+    required: bool = False,
+    human_gate_required: bool = False,
+) -> Path:
     out_dir = project_root / "agent_runs"
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f"{task_id}_critic.md"
@@ -144,6 +196,11 @@ def write_critic_report(project_root: Path, task_id: str, verdict: CriticVerdict
         "",
         f"- verdict: {verdict.verdict}",
         f"- provider: {verdict.provider} / {verdict.model}",
+        f"- completion risk: {risk}",
+        f"- critic required: {'yes' if required else 'no'}",
+        f"- human gate required: {'yes' if human_gate_required else 'no'}",
+        f"- review key: {verdict.review_key or 'n/a'}",
+        f"- reused cached review: {'yes' if verdict.cached else 'no'}",
         f"- blocking findings: {'yes' if verdict.has_blocking else 'no'}",
         "",
         "## Findings",
