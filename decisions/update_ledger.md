@@ -2660,3 +2660,15 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Validation**: The functional commit included positive retrospective behavior and negative missing/non-retrospective cases in `check_preanalysis_happens_before.py`; this entry repairs update-ledger provenance only.
 - **Non-goal**: Do not treat retrospective disclosure as preregistration, waive outcome-access timing concerns, or certify the analysis design.
 - **Does not prove**: preregistration, absence of specification search, identification validity, scientific validity, claim support, or gate/release approval.
+
+## 2026-08-04 — Add source-grounded manuscript fact checking
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / academic writing / citation verification
+- **North star:** A manuscript citation should be accepted only at the evidence strength actually observed: bibliographic identity, exact source passage, or independently verified Tier-2 support.
+- **Action**: Added `aeros submit fact-check --manuscript <path>` as a vertical slice over the existing sentence-grounding and submission system. It maps cited sentences to registry records, extraction cards, interpretation records, local or bounded public-HTTPS sources, exact passages, source fingerprints, and Tier-2 independent verification. Results are compiled as `VERIFIED`, `CONTRADICTED`, or `UNRESOLVED`; optional writes produce an audit JSON and a human-review queue without modifying manuscripts or authority-bearing artifacts. Added an executable fixture covering exact Tier-1 support, independently verified Tier-2 support, stale passage failure, and no claim-authority mutation. Made broad-capture fixture time deterministic so its stale-lead assertion cannot decay with wall-clock time.
+- **Validation**: `check_grounded_fact_check.py` passed; `check_broad_capture_firewall.py` passed; smoke passed 20/20 and wrote an observed harness receipt.
+- **Non-goal**: Do not infer semantic entailment from fuzzy similarity, fabricate missing passages, auto-edit prose or claims, approve interpretations, certify paper readiness, or grant release authority.
+- **Does not prove**: source truth; scientific truth; causal identification; correctness of unresolved paraphrases; completeness of source discovery; human approval; claim, gate, submission, or release authority.
+- **Drift risk**: Exact matching is deliberately conservative; paraphrases remain unresolved unless existing tier-specific verification satisfies the declared floor. Public retrieval is opt-in, HTTPS-only, credential-free, size-bounded, and may remain unavailable behind paywalls or unsupported PDF parsing.
+- **Next check**: Backfill the functional commit hash, then sync one clean manuscript project and measure verified, contradicted, and unresolved rows against a human citation audit.

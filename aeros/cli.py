@@ -691,6 +691,20 @@ def _cmd_econ(args: argparse.Namespace) -> int:
 
 
 def _cmd_submit(args: argparse.Namespace) -> int:
+    if getattr(args, "submit_action", "readiness") == "fact-check":
+        from .runtime.grounded_fact_check import build_grounded_fact_check, write_grounded_fact_check
+        root = _project_root()
+        payload = build_grounded_fact_check(
+            root,
+            manuscript=args.manuscript,
+            allow_network=args.allow_network,
+        )
+        if args.write:
+            payload["written_to"] = write_grounded_fact_check(root, payload)
+        print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(payload, sort_keys=False, allow_unicode=True))
+        if payload["status"] == "FAIL":
+            return 1
+        return 2 if payload["status"] == "BLOCKED" else 0
     from .runtime.econ_pack import submission_review_ready
     from .runtime.paper_readiness import assess_paper_readiness
     from .runtime.submission_driver import build_submission_driver
@@ -2024,7 +2038,11 @@ def main(argv: list[str] | None = None) -> int:
     drive_p.add_argument("--target", default="", help="registered target ID, such as a specification ID")
     drive_p.set_defaults(func=_cmd_drive)
 
-    submit_p = sub.add_parser("submit", help="aggregate paper, evidence, and reproduction readiness without granting release")
+    submit_p = sub.add_parser("submit", help="assess readiness or source-ground manuscript citations without granting release")
+    submit_p.add_argument("submit_action", nargs="?", default="readiness", choices=["readiness", "fact-check"])
+    submit_p.add_argument("--manuscript", default="", help="project-relative manuscript path for fact-check; defaults to discovered manuscripts")
+    submit_p.add_argument("--allow-network", action="store_true", help="allow bounded retrieval from credential-free public HTTPS sources")
+    submit_p.add_argument("--write", action="store_true", help="write fact-check report and unresolved human-review queue")
     submit_p.add_argument("--json", action="store_true")
     submit_p.set_defaults(func=_cmd_submit)
 

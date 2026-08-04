@@ -413,6 +413,7 @@ checks:
   literature_tools: checks/check_literature_tools.py
   manuscript_citation_faithfulness: checks/check_manuscript_citation_faithfulness.py
   manuscript_citation_interpretation: checks/check_manuscript_citation_interpretation.py
+  grounded_fact_check: checks/check_grounded_fact_check.py
   literature_wrapper_sync: checks/check_literature_wrapper_sync.py
   literature_fulltext_execution: checks/check_literature_fulltext_execution.py
   framing_deck: checks/check_framing_deck.py

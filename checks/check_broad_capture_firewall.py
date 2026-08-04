@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import sys
 import tempfile
+from datetime import date
 from pathlib import Path
 
 import yaml
@@ -109,7 +110,7 @@ def main() -> int:
         )
         candidate_queue = backfill / "demo_candidate_queue.csv"
         candidate_queue.write_text("candidate_id,lead_id,source_url\nC001,L001,https://example.test/a\n", encoding="utf-8")
-        summary = summarize_broad_capture(tmp)
+        summary = summarize_broad_capture(tmp, today=date(2026, 7, 15))
         if summary.get("status") != "PASS":
             failures.append("broad capture lead schema fixture failed: " + "; ".join(summary.get("validation_failures") or []))
         if summary.get("total_leads") != 2 or summary.get("total_candidates") != 1:

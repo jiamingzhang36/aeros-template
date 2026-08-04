@@ -141,6 +141,7 @@ Every task contract must include a Mainline Alignment Gate section before execut
 
 - Literature adapter outputs are ROUTE_READY only: OpenAlex/Semantic Scholar/CrossRef/RePEc/CitEc metadata may populate search logs, paper registries, and citation queues, but cannot support synthesis, gap claims, method claims, paper positioning, or claim registry entries without full-text extraction.
 - Citation faithfulness is risk-tiered: Tier 0 bibliographic/background uses metadata; Tier 1 finding/method/limited attribution requires passage+locator+automatic interpretation and escalates low confidence; Tier 2 core claim/number/mechanism/identification/welfare requires full text, locator, producer interpretation, and an independent verifier. A real citation can still fail claim-support alignment.
+- Before submission, use `aeros submit fact-check --manuscript <path> --write` to compile sentence-level citations into `VERIFIED`, `CONTRADICTED`, or `UNRESOLVED`; unresolved Tier-1/2 rows remain a human queue and never authorize claim or release changes.
 - Economics method skills are advisory compilers. They may suggest DiD/IV/RDD/panel diagnostics and defaults, but cannot certify identification, approve gates, or silently change estimators.
 
 

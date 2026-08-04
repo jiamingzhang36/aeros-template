@@ -70,6 +70,7 @@ profiles:
       - check_literature_wrapper_sync.py
       - check_manuscript_citation_faithfulness.py
       - check_manuscript_citation_interpretation.py
+      - check_grounded_fact_check.py
       - check_citation_risk_radar.py
       - check_evidence_units.py
       - check_parser_benchmark.py
