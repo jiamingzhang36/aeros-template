@@ -2663,7 +2663,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-08-04 — Add source-grounded manuscript fact checking
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `c0af1bb`
 - **Change type**: framework / academic writing / citation verification
 - **North star:** A manuscript citation should be accepted only at the evidence strength actually observed: bibliographic identity, exact source passage, or independently verified Tier-2 support.
 - **Action**: Added `aeros submit fact-check --manuscript <path>` as a vertical slice over the existing sentence-grounding and submission system. It maps cited sentences to registry records, extraction cards, interpretation records, local or bounded public-HTTPS sources, exact passages, source fingerprints, and Tier-2 independent verification. Results are compiled as `VERIFIED`, `CONTRADICTED`, or `UNRESOLVED`; optional writes produce an audit JSON and a human-review queue without modifying manuscripts or authority-bearing artifacts. Added an executable fixture covering exact Tier-1 support, independently verified Tier-2 support, stale passage failure, and no claim-authority mutation. Made broad-capture fixture time deterministic so its stale-lead assertion cannot decay with wall-clock time.
