@@ -2684,3 +2684,14 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: prior transcript correctness; current relevance of a historical match; optimality of the next action; research validity; claim, gate, promotion, submission, or release authority.
 - **Drift risk**: The adapter depends on ai-hist's optional machine-readable CLI contract and fails open to no memory hints when unavailable; search previews can contain sensitive research text and therefore remain local/untrusted and are stripped from persisted drive JSON.
 - **Next check**: In a downstream project with a prior accepted heavy run, measure whether the combined history pointer and acceptance cache prevent an actual redundant rerun.
+
+## 2026-08-07 — Restore profile-to-harness check registration
+
+- **Commit(s)**: `pending`
+- **Change type**: bug fix / harness profile integrity
+- **Action**: Registered the existing completion-review and grounded-fact checks in the full harness inventory so profile validation no longer rejects valid profile references as unknown checks.
+- **Validation**: Full harness exposed the mismatch; targeted profile validation and a clean full rerun are required before push.
+- **Non-goal**: No new policy, check implementation, authority rule, or research claim was added.
+- **Does not prove**: scientific validity; completeness of any downstream project; claim, gate, submission, or release authority.
+- **Drift risk**: Future profile additions must remain represented in the canonical harness inventory.
+- **Next check**: Run `check_harness_profiles.py`, then rerun the full harness.
