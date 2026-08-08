@@ -652,6 +652,7 @@ def _cmd_drive(args: argparse.Namespace) -> int:
         job=getattr(args, "job", "") or "",
         source_candidate=getattr(args, "source_candidate", "") or "",
         target=getattr(args, "target", "") or "",
+        include_history=not bool(getattr(args, "no_history", False)),
     )
     if getattr(args, "json", False):
         print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
@@ -2036,6 +2037,7 @@ def main(argv: list[str] | None = None) -> int:
     drive_p.add_argument("--job", default="", choices=["", "find_data", "probe_data", "run_specification", "diagnose_design", "read_literature", "bind_or_reproduce_paper"], help="run one economics-native drive job")
     drive_p.add_argument("--source-candidate", default="", help="project-relative input artifact for an executable ResearchJob")
     drive_p.add_argument("--target", default="", help="registered target ID, such as a specification ID")
+    drive_p.add_argument("--no-history", action="store_true", help="skip optional local ai-hist prior-session lookup")
     drive_p.set_defaults(func=_cmd_drive)
 
     submit_p = sub.add_parser("submit", help="assess readiness or source-ground manuscript citations without granting release")

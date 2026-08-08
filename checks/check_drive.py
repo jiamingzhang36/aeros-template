@@ -47,6 +47,41 @@ def main() -> int:
         preflight = ((report.get("project_signals") or {}).get("preflight") or {})
         if objective.get("objective_id") == "broad_capture" and preflight.get("task_mode") != "broad_capture":
             failures.append("drive broad_capture objective must use broad_capture preflight")
+        continuation = report.get("continuation_decision") or {}
+        if continuation.get("model") != "AEROS-CONTINUATION-001" or not continuation.get("decision"):
+            failures.append("drive must compile one typed continuation decision")
+        prior_work = report.get("prior_work") or {}
+        if prior_work.get("status") not in {"adapter_unavailable", "adapter_error", "matches_found", "no_matches", "disabled"}:
+            failures.append("drive prior-work adapter must expose a bounded status")
+        if prior_work.get("authority") != "derived local retrieval hint only":
+            failures.append("prior session history must remain a derived hint, not authority")
+
+    from aeros.runtime.drive import _normalise_history_payload, compile_continuation_decision
+    history_rows = _normalise_history_payload({"results": [{
+        "id": 7, "source": "codex", "session_id": "session-7", "project": "/tmp/project",
+        "timestamp_ms": 123, "prompt": "retry policy token=secret-value",
+    }]})
+    if len(history_rows) != 1 or history_rows[0].get("untrusted_transcript") is not True:
+        failures.append("history adapter did not produce one explicitly untrusted pointer")
+    if "secret-value" in str(history_rows[0].get("match_preview")):
+        failures.append("history adapter did not redact a token-like secret")
+    if _normalise_history_payload([]) != []:
+        failures.append("an empty ai-hist JSON result must normalize as no matches")
+
+    budget_stop = compile_continuation_decision(
+        ROOT,
+        preflight={"campaign_breakers": []}, execution={"status": "not_requested"},
+        campaign={"task_budget": 8, "tasks_observed": 8, "breakers": [{"breaker_id": "task_budget_exhausted"}]},
+    )
+    if budget_stop.get("decision") != "STOP_BUDGET" or budget_stop.get("should_run") is not False:
+        failures.append("campaign task-budget breaker did not compile to STOP_BUDGET")
+    no_value = compile_continuation_decision(
+        ROOT,
+        preflight={"campaign_breakers": []}, execution={"status": "not_requested"},
+        campaign={"task_budget": 8, "tasks_observed": 3, "breakers": [{"breaker_id": "low_decision_value"}]},
+    )
+    if no_value.get("decision") != "STOP_NO_VALUE" or no_value.get("needs_human") is not True:
+        failures.append("low decision value did not stop the matching campaign and request review")
 
     proc2 = subprocess.run(
         [sys.executable, "-m", "aeros.cli", "drive", "--goal", "citation-risk", "--execute", "--json"],

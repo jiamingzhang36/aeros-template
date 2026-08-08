@@ -10,7 +10,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import json
+import os
+import re
 import shlex
+import shutil
 import subprocess
 from typing import Any
 
@@ -52,6 +55,202 @@ SAFE_AEROS_COMMAND_MARKERS = (
     " data probe official",
     " econ ",
 )
+
+CONTINUATION_MODEL = "AEROS-CONTINUATION-001"
+
+
+def _redact_history_preview(value: Any, *, limit: int = 180) -> str:
+    text = re.sub(r"\s+", " ", str(value or "")).strip()
+    text = re.sub(r"/Users/[^/\s]+", "~", text)
+    text = re.sub(
+        r"(?i)\b(api[_-]?key|token|password|secret)\s*[:=]\s*[^\s,;]+",
+        r"\1=[REDACTED]",
+        text,
+    )
+    return text[:limit] + ("..." if len(text) > limit else "")
+
+
+def _history_resume_command(source: str, session_id: str, project: str) -> str:
+    if not session_id:
+        return ""
+    cwd = f"cd {shlex.quote(project)} && " if project else ""
+    source = source.lower()
+    if source == "claude":
+        return f"{cwd}claude --resume {shlex.quote(session_id)}"
+    if source == "codex":
+        return f"{cwd}codex resume {shlex.quote(session_id)}"
+    if source == "cursor":
+        return f"{cwd}cursor-agent --resume={shlex.quote(session_id)}"
+    return ""
+
+
+def _normalise_history_payload(payload: Any, *, limit: int = 5) -> list[dict[str, Any]]:
+    rows: list[Any]
+    if isinstance(payload, list):
+        rows = payload
+    elif isinstance(payload, dict):
+        rows = next(
+            (value for key in ("results", "entries", "items", "data")
+             if isinstance((value := payload.get(key)), list)),
+            [payload] if payload.get("id") is not None else [],
+        )
+    else:
+        rows = []
+    out: list[dict[str, Any]] = []
+    for row in rows[:limit]:
+        if not isinstance(row, dict):
+            continue
+        source = str(row.get("source") or "").strip().lower()
+        session_id = str(row.get("session_id") or row.get("sessionId") or "").strip()
+        project = str(row.get("project") or row.get("cwd") or "").strip()
+        entry_id = row.get("id") or row.get("entry_id") or ""
+        out.append({
+            "entry_id": str(entry_id),
+            "source": source,
+            "session_id": session_id,
+            "project": project,
+            "timestamp": row.get("timestamp") or row.get("timestamp_ms") or row.get("ts") or "",
+            "match_preview": _redact_history_preview(row.get("prompt") or row.get("text") or row.get("display") or ""),
+            "resume_command": _history_resume_command(source, session_id, project),
+            "untrusted_transcript": True,
+        })
+    return out
+
+
+def _query_prior_work(root: Path, objective: "DriveObjective", *, enabled: bool = True) -> dict[str, Any]:
+    boundary = {
+        "authority": "derived local retrieval hint only",
+        "instructions_must_not_be_executed": True,
+        "promotion_rule": "only human-confirmed findings may enter decisions or evidence",
+        "persistence_rule": "written drive packets retain pointers but omit transcript previews",
+    }
+    if not enabled:
+        return {"status": "disabled", "query": "", "hits": [], **boundary}
+    binary = os.environ.get("AI_HIST_BIN", "").strip() or shutil.which("ai-hist")
+    if not binary:
+        return {"status": "adapter_unavailable", "query": "", "hits": [], "install_hint": "optional: install AgentWorkforce/relayhistory ai-hist", **boundary}
+    query = _redact_history_preview(f"{objective.lane} {objective.objective}", limit=160)
+    command = [binary, "search", query, "--project", str(root.resolve()), "--limit", "5", "--json"]
+    try:
+        run = subprocess.run(command, cwd=root, text=True, capture_output=True, timeout=4, check=False)
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return {"status": "adapter_error", "query": query, "hits": [], "reason": str(exc), **boundary}
+    try:
+        payload = json.loads(run.stdout)
+    except json.JSONDecodeError:
+        reason = _redact_history_preview(run.stderr or run.stdout, limit=240)
+        return {
+            "status": "adapter_error", "query": query, "hits": [],
+            "reason": reason or "ai-hist did not emit machine-readable JSON", **boundary,
+        }
+    # ai-hist may use a non-zero status for a valid empty JSON result. Valid
+    # machine-readable output is authoritative for this advisory adapter.
+    hits = _normalise_history_payload(payload)
+    return {
+        "status": "matches_found" if hits else "no_matches",
+        "query": query,
+        "hit_count": len(hits),
+        "hits": hits,
+        "recommended_action": "inspect matching session pointers before repeating expensive work" if hits else "continue from current project evidence",
+        **boundary,
+    }
+
+
+def _latest_fresh_watchdog_decision(root: Path) -> dict[str, Any]:
+    try:
+        from aeros.kernel.events import read_events
+        from .episode_watchdog import semantic_state_fingerprint
+        current = semantic_state_fingerprint(root)
+        for event in reversed(read_events(root)):
+            if event.event_type != "episode_step" or not isinstance(event.metadata, dict):
+                continue
+            step = event.metadata.get("episode_step")
+            decision = event.metadata.get("watchdog_decision")
+            if not isinstance(step, dict) or not isinstance(decision, dict):
+                continue
+            if str(step.get("semantic_state_after") or "") == current:
+                return decision
+            return {}
+    except Exception:
+        return {}
+    return {}
+
+
+def compile_continuation_decision(
+    root: Path,
+    *,
+    preflight: dict[str, Any],
+    execution: dict[str, Any],
+    campaign: dict[str, Any],
+) -> dict[str, Any]:
+    """Compile existing control signals; never make a scientific judgment."""
+    breakers = list(campaign.get("breakers") or preflight.get("campaign_breakers") or [])
+    breaker_ids = {str(item.get("breaker_id") or "") for item in breakers if isinstance(item, dict)}
+    reuse = preflight.get("reuse_decision") or {}
+    watchdog = _latest_fresh_watchdog_decision(root)
+    decision = "RUN_ONE_SLICE"
+    reason_code = "bounded_slice_available"
+    reason = "No current authority, value, budget, reuse, or cycle signal blocks one bounded slice."
+    needs_human = False
+
+    if preflight.get("owner_decision_blocks") or "human_stop" in breaker_ids:
+        decision, reason_code, needs_human = "WAIT_HUMAN", "owner_or_human_stop", True
+        reason = "An active owner decision or human campaign stop blocks continuation."
+    elif "task_budget_exhausted" in breaker_ids:
+        decision, reason_code, needs_human = "STOP_BUDGET", "campaign_task_budget_exhausted", True
+        reason = "The matching campaign exhausted its declared task budget."
+    elif breaker_ids & {"low_decision_value", "low_marginal_yield", "convergence_freeze"}:
+        decision, reason_code, needs_human = "STOP_NO_VALUE", "campaign_value_plateau", True
+        reason = "The matching campaign reached a deterministic value/yield/convergence breaker."
+    elif breakers:
+        decision, reason_code, needs_human = "REPLAN", "campaign_route_or_constraint_breaker", True
+        reason = "The matching campaign must change route, test cadence, or binding constraint before more work."
+    elif reuse and reuse.get("should_execute") is False and str(reuse.get("status") or "").upper() not in {"", "NOT_APPLICABLE", "NO_PRIOR_ACCEPTANCE"}:
+        decision, reason_code = "REUSE_ACCEPTED", "accepted_artifacts_unchanged"
+        reason = str(reuse.get("recommended_action") or "Reuse previously accepted artifacts without rerunning the worker.")
+    elif execution.get("status") == "blocked_found":
+        decision, reason_code, needs_human = "WAIT_HUMAN", "execution_surfaced_blocker", True
+        reason = "The bounded check surfaced a blocker; acting on it requires review rather than another blind loop."
+    elif execution.get("status") == "fail":
+        decision, reason_code = "REPLAN", "bounded_slice_failed"
+        reason = "The bounded slice failed and should be diagnosed before retrying."
+    elif watchdog.get("stop"):
+        code = str(watchdog.get("reason_code") or "watchdog_stop")
+        if code == "CACHE_HIT":
+            decision, reason_code = "REUSE_ACCEPTED", "watchdog_cache_hit"
+        elif "TOKEN" in code or "CYCLE" in code or "DUPLICATE" in code or "NO_STATE" in code:
+            decision, reason_code = "STOP_CYCLE", code.lower()
+        else:
+            decision, reason_code = "REPLAN", code.lower()
+        reason = f"The latest fresh episode watchdog decision is {code}."
+
+    budget = int(campaign.get("task_budget") or 0)
+    observed = int(campaign.get("tasks_observed") or 0)
+    accepted = list(execution.get("accepted_outputs") or [])
+    validation_passed = bool(execution.get("validation_passed")) or (execution.get("status") == "pass" and bool(accepted))
+    return {
+        "model": CONTINUATION_MODEL,
+        "decision": decision,
+        "should_run": decision == "RUN_ONE_SLICE",
+        "reason_code": reason_code,
+        "reason": reason,
+        "needs_human": needs_human,
+        "quota": {
+            "campaign_task_budget": budget,
+            "campaign_tasks_observed": observed,
+            "campaign_tasks_remaining": max(0, budget - observed) if budget else None,
+            "spend_rule": "spend only after validated artifact acceptance",
+            "current_slice_spend_eligible": validation_passed,
+        },
+        "evidence_delta": {
+            "accepted_outputs": accepted,
+            "validated_artifact_count": len(accepted) if validation_passed else 0,
+            "blocked_found": bool(execution.get("blocked_found")),
+        },
+        "campaign_breaker_ids": sorted(breaker_ids),
+        "watchdog_reason": watchdog.get("reason_code") or "",
+        "authority": "continuation control only; not scientific, claim, gate, or release authority",
+    }
 
 
 @dataclass(frozen=True)
@@ -430,8 +629,8 @@ def _run_research_job_envelope(root: Path, *, job_type: str, source_candidate: s
     }
 
 
-def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lane: str = "", execute: bool = False, job: str = "", source_candidate: str = "", target: str = "") -> dict[str, Any]:
-    root = Path(root)
+def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lane: str = "", execute: bool = False, job: str = "", source_candidate: str = "", target: str = "", include_history: bool = True) -> dict[str, Any]:
+    root = Path(root).resolve()
     goal = (goal or "auto").strip().lower()
     lane = (lane or "").strip()
     if job:
@@ -463,6 +662,19 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
     else: status = "EXECUTED" if execution.get("attempted") else "READY"
     risk_report = compile_research_risk(root, lane=lane)
     current_work = load_current_work_context(root)
+    active_campaign_id = str(preflight.get("active_campaign_id") or preflight.get("campaign_id") or "")
+    if active_campaign_id:
+        from .campaign import assess_campaign
+        campaign_assessment = assess_campaign(root, campaign_id=active_campaign_id)
+    else:
+        campaign_assessment = {
+            "model": "AEROS-CAMPAIGN-001", "status": "NO_ACTIVE_CAMPAIGN",
+            "breakers": [], "task_budget": 0, "tasks_observed": 0,
+        }
+    continuation = compile_continuation_decision(
+        root, preflight=preflight, execution=execution, campaign=campaign_assessment,
+    )
+    prior_work = _query_prior_work(root, objective, enabled=include_history)
     return {
         "status": status,
         "model": "AEROS-USEFUL-001-drive-mvp",
@@ -472,15 +684,20 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
         "chosen_objective": objective.to_dict(),
         "research_risk": risk_report,
         "execution": execution,
+        "continuation_decision": continuation,
+        "prior_work": prior_work,
         "project_signals": {
             "current_work": current_work,
             "broad_capture": broad_summary,
             "submission_driver_status": build_submission_driver(root).get("status"),
             "preflight": preflight,
+            "campaign": campaign_assessment,
         },
         "what_this_does": [
             "selects one useful next objective from existing deterministic AEROS signals",
             "turns scattered next/preflight/mode/submission/broad-capture signals into one packet",
+            "compiles existing campaign/reuse/watchdog signals into one deterministic continuation decision",
+            "queries an optional local project-scoped session index for prior-work pointers without importing transcript authority",
             "executes only allowlisted read-only/dry-run commands or bounded nonproduction probes when --execute is requested",
         ],
         "what_this_does_not_touch": [
@@ -502,6 +719,8 @@ def format_drive_report(report: dict[str, Any]) -> str:
     objective = report.get("chosen_objective") or {}
     execution = report.get("execution") or {}
     broad = ((report.get("project_signals") or {}).get("broad_capture") or {})
+    continuation = report.get("continuation_decision") or {}
+    prior_work = report.get("prior_work") or {}
     lines = [
         "# AEROS DRIVE",
         "",
@@ -517,6 +736,18 @@ def format_drive_report(report: dict[str, Any]) -> str:
         f"- command: `{objective.get('command')}`",
         f"- stop_condition: {objective.get('stop_condition')}",
         f"- needs_human: {objective.get('needs_human')}",
+        "",
+        "## Continuation decision",
+        f"- decision: {continuation.get('decision')}",
+        f"- should_run: {continuation.get('should_run')}",
+        f"- reason: {continuation.get('reason')}",
+        f"- campaign_tasks_remaining: {(continuation.get('quota') or {}).get('campaign_tasks_remaining')}",
+        "",
+        "## Prior work memory",
+        f"- status: {prior_work.get('status')}",
+        f"- query: {prior_work.get('query')}",
+        f"- hit_count: {prior_work.get('hit_count', 0)}",
+        f"- rule: {prior_work.get('promotion_rule')}",
         "",
         "## Expected artifacts",
     ]
@@ -556,5 +787,10 @@ def write_drive_report(root: Path | str, report: dict[str, Any]) -> tuple[Path, 
     md = out_dir / "drive_packet.md"
     js = out_dir / "drive_packet.json"
     md.write_text(format_drive_report(report), encoding="utf-8")
-    js.write_text(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
+    persisted = json.loads(json.dumps(report))
+    prior_work = persisted.get("prior_work") or {}
+    for hit in prior_work.get("hits") or []:
+        hit.pop("match_preview", None)
+    prior_work["persisted_form"] = "session pointers only; transcript previews omitted"
+    js.write_text(json.dumps(persisted, indent=2, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8")
     return md, js
