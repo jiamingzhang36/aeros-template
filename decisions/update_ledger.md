@@ -2675,7 +2675,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-08-07 — Fuse searchable session memory with bounded continuation control
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `5684b0a`
 - **Change type**: framework / drive integration / anti-repeat execution
 - **North star:** Before repeating expensive research work, AEROS should expose relevant prior-session pointers and deterministically decide whether one more bounded slice is justified by current authority, value, quota, reuse, and cycle signals.
 - **Action**: Extended the existing `aeros drive` packet rather than adding a memory lane, registry, dashboard, or second controller. Drive now compiles existing campaign breakers, task budgets, accepted-artifact reuse, fresh episode-watchdog decisions, execution outcomes, and human decisions into `RUN_ONE_SLICE`, `REUSE_ACCEPTED`, `WAIT_HUMAN`, `STOP_NO_VALUE`, `STOP_BUDGET`, `STOP_CYCLE`, or `REPLAN`. When the optional local `ai-hist` executable is available, drive performs a bounded project-scoped lookup and returns redacted, explicitly untrusted session pointers and resume commands. Written packets omit transcript previews and retain pointers only.
