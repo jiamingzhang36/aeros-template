@@ -2687,7 +2687,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-08-07 — Restore profile-to-harness check registration
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `ab2b730`
 - **Change type**: bug fix / harness profile integrity
 - **Action**: Registered the existing completion-review and grounded-fact checks in the full harness inventory so profile validation no longer rejects valid profile references as unknown checks.
 - **Validation**: Full harness exposed the mismatch; targeted profile validation and a clean full rerun are required before push.
