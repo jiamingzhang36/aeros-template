@@ -51,9 +51,12 @@ project-local contract is `.aeros/project.yml` plus `aeros.lock`; this document
 does not authorize migration yet.
 
 Cultured-meat rollout commit `bdda9324` satisfied this admission condition for
-the bounded data-probe path. Package mode is now available through `aeros
-migrate prepare` and `aeros doctor`; migration remains additive and never
-deletes vendored files automatically.
+the bounded data-probe path. Package mode is available through `aeros migrate
+prepare` and `aeros doctor`. Fresh projects can instead use `aeros attach
+--package`, which records the exact metadata it created. `aeros detach
+--dry-run` reports the removal set; `aeros detach --confirm` removes only
+unchanged attach-managed metadata and never deletes research artifacts or a
+vendored runtime.
 
 ## Vertical proof status
 

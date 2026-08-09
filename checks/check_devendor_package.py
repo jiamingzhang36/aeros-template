@@ -48,6 +48,18 @@ def main() -> int:
         if report.get("status")!="PASS": failures.append(f"doctor status is not PASS: {report}")
         if any((project/name).exists() for name in ("aeros","checks","harness","templates","tools","tests")): failures.append("package-mode fixture unexpectedly contains vendored runtime surfaces")
         if not (project/".aeros/project.yml").exists() or not (project/"aeros.lock").exists(): failures.append("package-mode project/lock files missing")
+        detachable=base/"detachable"; detachable.mkdir()
+        (detachable/"project_manifest.yml").write_text("project:\n  name: detachable\n",encoding="utf-8")
+        attach=subprocess.run([str(py),"-m","aeros.cli","attach","--package","--json"],cwd=detachable,env=env,capture_output=True,text=True)
+        preview=subprocess.run([str(py),"-m","aeros.cli","detach","--dry-run","--json"],cwd=detachable,env=env,capture_output=True,text=True)
+        detach=subprocess.run([str(py),"-m","aeros.cli","detach","--confirm","--json"],cwd=detachable,env=env,capture_output=True,text=True)
+        try: attached=json.loads(attach.stdout); preview_report=json.loads(preview.stdout); detached=json.loads(detach.stdout)
+        except Exception: attached=preview_report=detached={}; failures.append("attach/detach did not emit JSON")
+        if attach.returncode!=0 or attached.get("status")!="PASS": failures.append(f"package attach failed: {attach.stderr or attach.stdout}")
+        if preview.returncode!=0 or preview_report.get("status")!="DRY_RUN": failures.append(f"package detach preview failed: {preview.stderr or preview.stdout}")
+        if detach.returncode!=0 or detached.get("status")!="DETACHED": failures.append(f"package detach failed: {detach.stderr or detach.stdout}")
+        if any((detachable/name).exists() for name in ("aeros.lock", ".aeros/attachment.yml", ".aeros/project.yml")): failures.append("clean detach left attach-managed metadata behind")
+        if not (detachable/"project_manifest.yml").exists(): failures.append("detach removed project-owned manifest")
         if failures: print("FAIL: de-vendor package E2E"); [print(f"- {x}") for x in failures]; return 1
     print("PASS: locally installed AEROS runs package-mode project without vendored runtime surfaces"); return 0
 if __name__=="__main__": raise SystemExit(main())

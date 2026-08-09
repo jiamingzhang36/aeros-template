@@ -1,4 +1,4 @@
-"""Incremental package-mode preparation; never deletes a vendored runtime."""
+"""Incremental package-mode preparation and conservative project detachment."""
 from __future__ import annotations
 
 from hashlib import sha256
@@ -9,6 +9,8 @@ import subprocess
 import yaml
 
 VENDORED_SURFACES = ("aeros", "checks", "harness", "templates", "tools", "tests")
+ATTACHMENT_MANIFEST = ".aeros/attachment.yml"
+ATTACHMENT_MANAGED_PATHS = (".aeros/project.yml", "aeros.lock")
 
 
 def installed_version() -> str:
@@ -28,6 +30,10 @@ def _project_config(root: Path) -> dict[str, Any]:
     path = root / ".aeros/project.yml"
     if not path.exists(): return {}
     return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+
+
+def _file_hash(path: Path) -> str:
+    return sha256(path.read_bytes()).hexdigest()
 
 
 def prepare_package_mode(root: Path, *, policy_bundle_version: str = "aeros-policy-v1") -> tuple[Path, Path]:
@@ -52,6 +58,103 @@ def prepare_package_mode(root: Path, *, policy_bundle_version: str = "aeros-poli
     }
     lock_path.write_text(yaml.safe_dump(lock, sort_keys=False), encoding="utf-8")
     return config_path, lock_path
+
+
+def attach_package_mode(root: Path, *, policy_bundle_version: str = "aeros-policy-v1") -> dict[str, Any]:
+    """Attach a fresh project to the installed runtime without vendoring it.
+
+    Attachment is deliberately limited to package metadata. It refuses to
+    overwrite existing package metadata or silently convert a vendored project.
+    """
+    root = Path(root).resolve()
+    manifest_path = root / ATTACHMENT_MANIFEST
+    conflicts = [rel for rel in (*ATTACHMENT_MANAGED_PATHS, ATTACHMENT_MANIFEST) if (root / rel).exists()]
+    vendored = [name for name in VENDORED_SURFACES if (root / name).exists()]
+    failures: list[str] = []
+    if not (root / "project_manifest.yml").is_file():
+        failures.append("missing project_manifest.yml")
+    if conflicts:
+        failures.append("existing AEROS metadata: " + ", ".join(conflicts))
+    if vendored:
+        failures.append("vendored runtime present: " + ", ".join(vendored))
+    if failures:
+        return {
+            "status": "ATTENTION", "attached": False, "failures": failures,
+            "does_not_prove": ["package compatibility", "research validity", "safe removal of an existing migration"],
+        }
+    config_path, lock_path = prepare_package_mode(root, policy_bundle_version=policy_bundle_version)
+    records = [{"path": rel, "sha256": _file_hash(root / rel)} for rel in ATTACHMENT_MANAGED_PATHS]
+    manifest_path.write_text(yaml.safe_dump({
+        "schema_version": 1,
+        "runtime_mode": "package",
+        "managed_files": records,
+        "detach_rule": "remove only when every managed file still matches its attach-time SHA-256",
+    }, sort_keys=False), encoding="utf-8")
+    return {
+        "status": "PASS", "attached": True,
+        "created": [str(config_path.relative_to(root)), str(lock_path.relative_to(root)), ATTACHMENT_MANIFEST],
+        "does_not_prove": ["scientific validity", "policy compatibility", "release readiness"],
+    }
+
+
+def detach_package_mode(root: Path, *, confirm: bool = False) -> dict[str, Any]:
+    """Report or remove only unchanged metadata created by ``attach``.
+
+    This is intentionally all-or-nothing for managed metadata. If a project
+    changed any tracked metadata, the caller must review it manually rather
+    than risking a partial, misleading detachment.
+    """
+    root = Path(root).resolve()
+    manifest_path = root / ATTACHMENT_MANIFEST
+    if not manifest_path.is_file():
+        return {
+            "status": "NOT_ATTACHED", "detached": False, "would_remove": [],
+            "failures": [f"missing {ATTACHMENT_MANIFEST}; only attach-managed projects can detach automatically"],
+            "does_not_prove": ["that manually created package metadata is safe to remove"],
+        }
+    try:
+        payload = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as exc:
+        return {"status": "ATTENTION", "detached": False, "would_remove": [], "failures": [f"invalid attachment manifest: {exc}"], "does_not_prove": ["safe detachment"]}
+    records = payload.get("managed_files") if isinstance(payload, dict) else None
+    expected = {str(item.get("path")): str(item.get("sha256")) for item in records or [] if isinstance(item, dict)}
+    if tuple(expected) != ATTACHMENT_MANAGED_PATHS or any(not expected[rel] for rel in ATTACHMENT_MANAGED_PATHS):
+        return {
+            "status": "ATTENTION", "detached": False, "would_remove": [],
+            "failures": ["attachment manifest does not match the fixed package metadata allowlist"],
+            "does_not_prove": ["safe detachment"],
+        }
+    unchanged: list[str] = []
+    missing: list[str] = []
+    modified: list[str] = []
+    for rel in ATTACHMENT_MANAGED_PATHS:
+        path = root / rel
+        if not path.exists():
+            missing.append(rel)
+        elif _file_hash(path) == expected[rel]:
+            unchanged.append(rel)
+        else:
+            modified.append(rel)
+    report = {
+        "status": "DRY_RUN" if not modified else "ATTENTION",
+        "detached": False,
+        "would_remove": [*unchanged, *missing, ATTACHMENT_MANIFEST],
+        "retained_modified": modified,
+        "does_not_prove": ["that the installed package is uninstalled", "scientific validity", "safe removal of user-modified metadata"],
+    }
+    if not confirm or modified:
+        return report
+    for rel in unchanged:
+        (root / rel).unlink()
+    manifest_path.unlink()
+    aeros_dir = root / ".aeros"
+    try:
+        aeros_dir.rmdir()
+        report["removed_empty_directory"] = ".aeros"
+    except OSError:
+        report["retained_project_state"] = ".aeros/"
+    report.update({"status": "DETACHED", "detached": True, "removed": report.pop("would_remove")})
+    return report
 
 
 def inspect_migration(root: Path) -> dict[str, Any]:

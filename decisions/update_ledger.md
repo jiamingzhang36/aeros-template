@@ -2695,3 +2695,15 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: scientific validity; completeness of any downstream project; claim, gate, submission, or release authority.
 - **Drift risk**: Future profile additions must remain represented in the canonical harness inventory.
 - **Next check**: Run `check_harness_profiles.py`, then rerun the full harness.
+
+## 2026-08-09 — Add reversible package attachment for fresh projects
+
+- **Commit(s)**: `pending`
+- **Change type**: framework / package lifecycle / project hygiene
+- **North star:** AEROS should be usable as a small installed runtime, not necessarily a copied framework tree, and a user who stops using it should be able to remove its untouched metadata without touching research work.
+- **Action**: Added `aeros attach --package`, which refuses vendored or already configured projects and creates only `.aeros/project.yml`, `.aeros/attachment.yml`, and `aeros.lock`. Added `aeros detach --dry-run|--confirm`: detach uses an attach-time SHA-256 allowlist, removes metadata only when every managed file remains unchanged, and retains all state for manual review if any metadata was modified. Existing `migrate prepare` remains additive for legacy projects.
+- **Validation**: `check_devendor_package.py` now exercises attach, dry-run, confirm detach, and preservation of `project_manifest.yml`; targeted and full harness pending.
+- **Non-goal**: Do not uninstall the machine-level package, convert or delete vendored projects, delete `.aeros/` if it contains project state, remove data/paper/evidence/decisions, or claim package attachment validates research.
+- **Does not prove**: package compatibility beyond `aeros doctor`; scientific validity; policy equivalence; safe removal of user-modified metadata.
+- **Drift risk**: The attachment manifest must remain limited to its fixed two-file allowlist; a legacy project must migrate deliberately rather than relying on detach.
+- **Next check**: Run the package E2E and full harness, then backfill the functional commit and append the ledger hash-chain record.

@@ -578,6 +578,23 @@ def _cmd_migrate(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_attach(args: argparse.Namespace) -> int:
+    from .runtime.devendor import attach_package_mode
+    if not args.package:
+        print("FAIL: attach currently requires --package")
+        return 2
+    report = attach_package_mode(_project_root(), policy_bundle_version=args.policy_bundle_version)
+    print(json.dumps(report, indent=2) if args.json else "status: " + report["status"] + "\n" + "\n".join(report.get("created") or report.get("failures") or []))
+    return 0 if report["status"] == "PASS" else 1
+
+
+def _cmd_detach(args: argparse.Namespace) -> int:
+    from .runtime.devendor import detach_package_mode
+    report = detach_package_mode(_project_root(), confirm=args.confirm)
+    print(json.dumps(report, indent=2) if args.json else "status: " + report["status"] + "\n" + "\n".join(report.get("removed") or report.get("would_remove") or report.get("failures") or []))
+    return 0 if report["status"] in {"DRY_RUN", "DETACHED"} else 1
+
+
 def _cmd_doctor(args: argparse.Namespace) -> int:
     from .runtime.devendor import doctor_package_mode
     report = doctor_package_mode(_project_root())
@@ -2007,6 +2024,16 @@ def main(argv: list[str] | None = None) -> int:
     migrate_prepare = migrate_sub.add_parser("prepare"); migrate_prepare.add_argument("--policy-bundle-version", default="aeros-policy-v1"); migrate_prepare.set_defaults(func=_cmd_migrate)
     doctor = sub.add_parser("doctor", help="validate installed package against .aeros/project.yml and aeros.lock")
     doctor.add_argument("--json", action="store_true"); doctor.set_defaults(func=_cmd_doctor)
+    attach = sub.add_parser("attach", help="attach a fresh project to the installed AEROS package")
+    attach.add_argument("--package", action="store_true", help="create only attach-managed package metadata")
+    attach.add_argument("--policy-bundle-version", default="aeros-policy-v1")
+    attach.add_argument("--json", action="store_true")
+    attach.set_defaults(func=_cmd_attach)
+    detach = sub.add_parser("detach", help="dry-run or remove unchanged metadata created by aeros attach --package")
+    detach.add_argument("--dry-run", action="store_true", help="report removable metadata (the default)")
+    detach.add_argument("--confirm", action="store_true", help="remove only unchanged attach-managed metadata")
+    detach.add_argument("--json", action="store_true")
+    detach.set_defaults(func=_cmd_detach)
 
     campaign = sub.add_parser("campaign", help="assess repeated-loop campaign contracts and marginal-yield breakers")
     campaign_sub = campaign.add_subparsers(dest="campaign_command", required=True)

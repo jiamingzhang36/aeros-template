@@ -446,11 +446,11 @@ Backfill is the bridge between governance automation and data repair automation.
 
 ## Framework Propagation Discipline
 
-- This template is the single source of truth for framework code (`aeros/`, `checks/`, `harness/`, `templates/`). Downstream projects vendor a copy.
+- This template is the single source of truth for framework code (`aeros/`, `checks/`, `harness/`, `templates/`). Legacy downstream projects may vendor a copy; fresh projects can use `aeros attach --package` and keep only `.aeros/project.yml`, `.aeros/attachment.yml`, and `aeros.lock`.
 - Propagate framework changes to projects only with `tools/sync_aeros_latest.zsh`. Do not hand-copy or hand-rsync framework files into individual projects — partial manual syncs are the main source of "each project runs a different aeros" drift.
 - The sync is forward-only and non-destructive (`rsync` without `--delete`): it updates framework code and preserves project-owned files that live alongside it (e.g. a project's `aeros/project_contract.yml`, `task_registry.csv`). Do not relocate project-owned files out of `aeros/` to "fix" the name overlap — they are referenced widely and the sync already tolerates them.
 - Before running the sync, commit the target project's in-progress work so the rsync never overwrites uncommitted edits to shared files (`project_manifest.yml`, `checks/run_harness_checks.py`, `AGENTS.md`).
-- After a template change, run the sync rather than letting projects fall behind; a project on stale framework code is a silent correctness risk, not just untidiness.
+- After a template change, sync vendored projects rather than letting them fall behind; package-mode projects pin their installed runtime in `aeros.lock`. `aeros detach --dry-run` must precede `aeros detach --confirm`; detach never removes research artifacts or user-modified package metadata.
 
 ## Update and Improvement Tracking
 
