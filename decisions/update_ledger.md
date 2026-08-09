@@ -2698,7 +2698,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-08-09 — Add reversible package attachment for fresh projects
 
-- **Commit(s)**: `pending`
+- **Commit(s)**: `24bcbef`
 - **Change type**: framework / package lifecycle / project hygiene
 - **North star:** AEROS should be usable as a small installed runtime, not necessarily a copied framework tree, and a user who stops using it should be able to remove its untouched metadata without touching research work.
 - **Action**: Added `aeros attach --package`, which refuses vendored or already configured projects and creates only `.aeros/project.yml`, `.aeros/attachment.yml`, and `aeros.lock`. Added `aeros detach --dry-run|--confirm`: detach uses an attach-time SHA-256 allowlist, removes metadata only when every managed file remains unchanged, and retains all state for manual review if any metadata was modified. Existing `migrate prepare` remains additive for legacy projects.
