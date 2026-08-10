@@ -23,6 +23,77 @@ DATA_SKILL_NAMES = {
 }
 
 
+def compile_drive_skill_plan(
+    *,
+    objective_id: str,
+    lane: str,
+    task_mode: str,
+    top_risk_id: str = "",
+    job: str = "",
+) -> dict[str, Any]:
+    """Compile a bounded, advisory skill workflow plan for ``aeros drive``.
+
+    AEROS can select a relevant SOP, but the host agent or human must actually
+    invoke it.  A receipt may record resulting findings and artifact impact; it
+    cannot prove that a model followed a skill's instructions.  Broad capture is
+    deliberately excluded so early discovery remains cheap.
+    """
+    context = " ".join([objective_id, lane, task_mode, top_risk_id, job]).lower()
+    if task_mode == "broad_capture" or objective_id in {"broad_capture", "capture_efficiency_risk"}:
+        return {
+            "status": "NO_SKILL_NEEDED",
+            "selection_rule": "broad capture remains lightweight until candidate triage or promotion",
+            "selected": [],
+            "does_not_prove": [
+                "that no specialist skill could improve an individual lead",
+                "that a lead is admissible evidence or ready for promotion",
+            ],
+        }
+
+    selected: list[dict[str, str]] = []
+
+    def add(name: str, skill_class: str, workflow: str, reason: str, expected_finding: str) -> None:
+        if len(selected) >= 3 or any(item["skill_name"] == name for item in selected):
+            return
+        selected.append({
+            "skill_name": name,
+            "skill_class": skill_class,
+            "workflow": workflow,
+            "reason": reason,
+            "expected_finding": expected_finding,
+            "artifact_impact_required": "yes",
+            "requirement": "advisory_unless_existing_contract_requires_class",
+        })
+
+    if any(token in context for token in ("citation", "submission", "manuscript", "paper", "claim")):
+        add("academic-research-suite", "literature", "academic-paper/citation-check", "claim-bearing citation or submission risk", "sentence-to-source support, contradiction, or unresolved debt")
+        add("bib-manager", "literature", "bibliography verification", "citation identity or mapping risk", "verified citation-key, paper, and version mapping")
+        add("pre-submission-audit", "submission_review", "paper readiness audit", "submission-facing risk", "bounded list of blocking manuscript issues")
+    elif any(token in context for token in ("literature", "fulltext", "full-text", "evidence recovery")):
+        add("academic-research-suite", "literature", "deep-research/literature-review", "literature evidence recovery or synthesis work", "source-bounded extraction or unresolved evidence gap")
+        add("bib-manager", "literature", "bibliography verification", "paper identity and working-paper/version control", "deduplicated bibliographic mapping")
+    elif any(token in context for token in ("probe_data", "data", "source", "inventory")):
+        add("data-inventory", "data_source", "data source inventory", "data probe or source feasibility work", "coverage, unit, and source constraints")
+        add("data-quality-checker", "data_source", "bounded data quality review", "candidate data needs a quality decision", "schema, missingness, and duplicate-risk findings")
+    elif any(token in context for token in ("specification", "diagnose", "causal", "did", "iv", "rd", "method")):
+        add("causal-id-review", "causal_identification", "identification review", "design or identification risk", "assumptions, threats, and claim ceiling")
+        add("diagnostics-panel", "causal_identification", "diagnostic plan", "specification diagnostics", "diagnostic obligations and failure modes")
+    elif any(token in context for token in ("replication", "reproduce", "code")):
+        add("replication-check", "replication", "reproduction audit", "reproducibility risk", "reproducible or blocked exhibit chain")
+        add("code-review-econ", "replication", "econometric code review", "analysis-code risk", "concrete code or specification findings")
+
+    return {
+        "status": "CANDIDATES" if selected else "NO_SKILL_NEEDED",
+        "selection_rule": "deterministic objective/risk mapping; at most three candidate skills",
+        "selected": selected,
+        "does_not_prove": [
+            "that the selected skill was invoked by the host agent",
+            "that a skill finding is correct without its cited artifact impact",
+            "scientific validity, claim approval, or release authority",
+        ],
+    }
+
+
 def _norm_list(value: Any) -> list[str]:
     if not isinstance(value, list):
         return []

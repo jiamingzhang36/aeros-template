@@ -44,6 +44,11 @@ def main() -> int:
             failures.append("drive report must state protected data/processed boundary")
         if not report.get("does_not_prove"):
             failures.append("drive report must include does_not_prove boundaries")
+        skill_plan = report.get("skill_workflow_plan") or {}
+        if skill_plan.get("status") not in {"CANDIDATES", "NO_SKILL_NEEDED"}:
+            failures.append("drive report must expose one bounded skill-workflow-plan status")
+        if len(skill_plan.get("selected") or []) > 3:
+            failures.append("drive skill workflow plan must select at most three skills")
         preflight = ((report.get("project_signals") or {}).get("preflight") or {})
         if objective.get("objective_id") == "broad_capture" and preflight.get("task_mode") != "broad_capture":
             failures.append("drive broad_capture objective must use broad_capture preflight")
@@ -133,6 +138,10 @@ with tempfile.TemporaryDirectory(prefix='aeros_drive_risk_') as raw:
             failures.append(f"citation debt should outrank mechanical fallback, got {objective.get('objective_id')}")
         if (risk.get("top_risk") or {}).get("risk_id") != "submission_truth_risk":
             failures.append("research risk fixture did not rank submission_truth_risk first")
+        plan = payload.get("skill_workflow_plan") or {}
+        selected = {item.get("skill_name") for item in plan.get("selected") or []}
+        if "academic-research-suite" not in selected:
+            failures.append("citation-risk fixture must surface the ARS citation-check workflow")
 
     candidate_fixture = r"""
 from pathlib import Path
@@ -170,6 +179,9 @@ with tempfile.TemporaryDirectory(prefix='aeros_drive_candidates_') as raw:
             failures.append("drive exposed an inflated zero-lead conversion rate")
         if not broad.get("candidate_backlog_ready") or not broad.get("broad_capture_pause_recommended"):
             failures.append("drive did not expose the downgraded candidate-backlog/pause semantics")
+        plan = payload.get("skill_workflow_plan") or {}
+        if plan.get("status") != "NO_SKILL_NEEDED" or plan.get("selected"):
+            failures.append("candidate-backlog broad-capture fixture must not impose skills")
 
     if failures:
         print("FAIL: drive entrypoint problems detected")

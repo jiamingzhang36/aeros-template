@@ -661,6 +661,14 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
     elif objective.needs_human or (execute and not probe_permission_ok): status = "NEEDS_HUMAN"
     else: status = "EXECUTED" if execution.get("attempted") else "READY"
     risk_report = compile_research_risk(root, lane=lane)
+    from .skill_router import compile_drive_skill_plan
+    skill_workflow_plan = compile_drive_skill_plan(
+        objective_id=objective.objective_id,
+        lane=objective.lane,
+        task_mode=str(preflight.get("task_mode") or ""),
+        top_risk_id=str((risk_report.get("top_risk") or {}).get("risk_id") or ""),
+        job=job,
+    )
     current_work = load_current_work_context(root)
     active_campaign_id = str(preflight.get("active_campaign_id") or preflight.get("campaign_id") or "")
     if active_campaign_id:
@@ -683,6 +691,7 @@ def build_drive_report(root: Path | str = Path.cwd(), *, goal: str = "auto", lan
         "job_inputs": {"source_candidate": source_candidate, "target": target},
         "chosen_objective": objective.to_dict(),
         "research_risk": risk_report,
+        "skill_workflow_plan": skill_workflow_plan,
         "execution": execution,
         "continuation_decision": continuation,
         "prior_work": prior_work,
@@ -721,6 +730,7 @@ def format_drive_report(report: dict[str, Any]) -> str:
     broad = ((report.get("project_signals") or {}).get("broad_capture") or {})
     continuation = report.get("continuation_decision") or {}
     prior_work = report.get("prior_work") or {}
+    skill_plan = report.get("skill_workflow_plan") or {}
     lines = [
         "# AEROS DRIVE",
         "",
@@ -752,6 +762,12 @@ def format_drive_report(report: dict[str, Any]) -> str:
         "## Expected artifacts",
     ]
     lines.extend(f"- {item}" for item in objective.get("expected_artifacts") or ["<none declared>"])
+    lines.extend(["", "## Skill workflow plan", f"- status: {skill_plan.get('status')}", f"- rule: {skill_plan.get('selection_rule')}"])
+    if skill_plan.get("selected"):
+        for item in skill_plan["selected"]:
+            lines.append(f"- {item.get('skill_name')}: `{item.get('workflow')}`; {item.get('reason')}")
+    else:
+        lines.append("- none: this objective should remain lightweight")
     lines.extend([
         "",
         "## Safety",

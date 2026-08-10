@@ -2707,3 +2707,14 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: package compatibility beyond `aeros doctor`; scientific validity; policy equivalence; safe removal of user-modified metadata.
 - **Drift risk**: The attachment manifest must remain limited to its fixed two-file allowlist; a legacy project must migrate deliberately rather than relying on detach.
 - **Next check**: Run the package E2E and full harness, then backfill the functional commit and append the ledger hash-chain record.
+
+## 2026-08-09 — Route current ARS workflows through bounded drive skill plans
+
+- **Commit(s)**: pending
+- **Change type**: framework / skill routing / research-driver integration
+- **Action**: Updated the local ARS-Codex skill installation to version 0.1.24 and added a deterministic `skill_workflow_plan` projection to `aeros drive`. The plan selects at most three relevant workflows from the current objective, task mode, and top research risk. It routes manuscript/citation risks to ARS `academic-paper/citation-check`, bibliography verification, and pre-submission review; literature evidence work to ARS deep research; and data, causal-design, and replication work to the existing focused skills. Broad capture and candidate-backlog triage explicitly remain skill-free to avoid turning lead collection into process overhead.
+- **Validation**: `check_drive.py` exercises both the citation-risk route and the zero-skill broad-capture route; targeted skill and smoke checks remain required before release.
+- **Non-goal**: Do not invoke a host skill from the CLI, claim that a model read or followed a selected skill, make skills gate authority, add a new command, or require skills for early lead capture.
+- **Does not prove**: skill use; correctness of a reported finding; scientific validity; citation entailment; claim, gate, promotion, submission, or release authority.
+- **Drift risk**: The plan is a small deterministic mapping, not a semantic planner. New skills must be added deliberately to the mapping only when they improve a measured research action.
+- **Next check**: Run the targeted drive and skill checks, then the smoke/full harness; backfill the functional commit and append its ledger hash-chain record.
