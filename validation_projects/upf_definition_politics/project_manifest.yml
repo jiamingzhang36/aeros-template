@@ -1,0 +1,118 @@
+project:
+  name: "UPF Definition Politics"
+  version: "0.1"
+  template: "aeros-template"
+  status: "active"
+  private_by_default: true
+
+research:
+  field_or_domain: "Agricultural and food policy economics"
+  topic: >-
+    The political economy of legally defining ultra-processed food, and how the
+    chosen legal boundary determines regulatory incidence.
+  one_sentence_question: >-
+    How do competing legal definitions of ultra-processed food change which
+    products, firms and households fall inside the regulated boundary?
+  current_stage: "discovery"
+  human_owner: "jiaming"
+  collaborators: []
+
+repository:
+  working_dir: "~/Desktop/UPF_Definition_Politics"
+  remote: "https://github.com/jiamingzhang36/UPF_Definition_Politics"
+  visibility: "private"
+  local_only_paths:
+    - "data/raw/**"   # ~150MB legislative archive, re-fetchable from the manifest
+
+gate_lifecycle:
+  current_gate: "G1 Data Readiness"
+  gates:
+    - "G0 Project Intake"
+    - "G1 Data Readiness"
+    - "G2 Measurement / Variable Construction"
+    - "G3 Research Design"
+    - "G4 Main Estimation"
+    - "G5 Robustness"
+    - "G6 Result Validation"
+    - "G7 Claim Audit"
+    - "G8 Referee Simulation"
+    - "G9 Replication Package"
+
+automation:
+  pipeline:
+    cwd: "~/Desktop/UPF_Definition_Politics"
+    # No single run_all entry point yet. Documented rerun order:
+    command:
+      - "python3"
+      - "src/extract_definition_clauses.py"
+    downstream_order:
+      - "src/code_definition_clauses.py"
+      - "src/parse_definition_logic.py"
+      - "src/extract_exemption_clauses.py"
+      - "src/apply_source_verified_clause_arbitrations.py"
+    discovery_order:
+      - "src/audit_expanded_phrase_discovery.py"
+      - "src/screen_additive_signature_candidates.py"
+      - "src/screen_adjacent_tier_candidates.py"
+    key_outputs:
+      - "data/interim/upf_high_priority_bill_universe_v0.csv"
+      - "data/interim/upf_bill_version_timeline_v0.csv"
+      - "data/interim/upf_definition_clause_text_v0.csv"
+      - "data/interim/upf_clause_logic_v0.csv"
+      - "data/interim/upf_exemption_items_v0.csv"
+
+gate_exit_criteria:
+  G1:
+    requires:
+      - type: "human_judgement"
+        criterion: >-
+          Licensed UPC / household purchase data secured, or the claim scaled to
+          a category pilot without national coverage. FoodData Central alone is
+          sufficient to validate rule execution but not to estimate exposure.
+      - type: "artifact_exists"
+        artifact: "analysis/phase0_upc_feasibility_gate_2026-08-10.md"
+  G2:
+    requires:
+      - type: "human_judgement"
+        criterion: >-
+          Protocol section 6 satisfied: two independent human coders plus a
+          recorded arbitration decision on the clause codings. Currently open.
+      - type: "artifact_exists"
+        artifact: "data/interim/coding/upf_coder_agreement_v0.csv"
+  G3:
+    requires:
+      - type: "human_judgement"
+        criterion: >-
+          4-6 definitions operationalised as executable rules in
+          config/definition_families.yml with explicit AND/OR precedence, NOT
+          arms and trigger overrides.
+
+claim_ceiling:
+  stated_in: "docs/project-charter.md"
+  non_claims:
+    - "no causal effect of policy on consumption, health or price"
+    - "additive regulation is not equated with UPF regulation"
+    - "definition narrowing is not attributed to lobbying without evidence"
+    - "NOVA is not treated as uncontested ground truth"
+  headline_ceiling: >-
+    "139 official-text-supported UPF-relevant instruments", not "139
+    definitions". The analytic definition/boundary sample is 51 instruments and
+    independent textual variation is smaller still, because bills cluster into
+    model-language families.
+
+protected_definitions:
+  - "docs/coding-protocol.md"
+  - "docs/project-charter.md"
+  - "config/definition_families.yml"
+  - "config/data_freeze.yml"
+  - "data/interim/upf_clause_coding_v0.csv:human_coder_1"
+  - "data/interim/upf_clause_coding_v0.csv:human_coder_2"
+  - "data/interim/upf_clause_coding_v0.csv:human_agreed_family"
+
+permissions:
+  policy_file: "~/Desktop/UPF_Definition_Politics/harness/permissions.yml"
+  push_to_remote: "agent_allowed"
+  push_divergence_note: >-
+    AEROS default is human_only. This project keeps the global auto-commit
+    protocol by explicit human decision on 2026-08-10, recorded in the repo's
+    CLAUDE.md so the policies do not contradict each other.
