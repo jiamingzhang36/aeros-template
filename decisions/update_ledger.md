@@ -2474,7 +2474,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-07-13 — Register compile-QA and repository-rigor skills
 
-- **Commit(s)**: pending
+- **Commit(s)**: `d4e00fe`
 - **Change type**: framework / skill registry / downstream integrity repair
 - **North star:** Keep skill receipts mechanically honest without granting skills scientific or approval authority.
 - **Action**: Added bounded core-map entries for the already installed `latex-compile-qa` and `project-rigor-check` skills, which were named by the practical menu and valid downstream contracts but absent from the machine-readable registry. The skill-layer check now requires both entries so the omission cannot silently recur.
