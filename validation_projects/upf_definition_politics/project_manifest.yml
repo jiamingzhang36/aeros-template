@@ -63,12 +63,26 @@ automation:
 
 gate_exit_criteria:
   G1:
+    # Corrected 2026-08-15. The onboarding entry named purchase data as the
+    # blocker; that was wrong. A Nielsen UPC-year market base exists
+    # (3,155,327 rows, 2021-2024, external drive, built 2026-08-12) with an
+    # internally consistent sample spend weight. The binding constraint is that
+    # the Nielsen attribute file carries no ingredient statement, and every
+    # compiled rule except the nutrient limb needs one.
     requires:
       - type: "human_judgement"
         criterion: >-
-          Licensed UPC / household purchase data secured, or the claim scaled to
-          a category pilot without national coverage. FoodData Central alone is
-          sufficient to validate rule execution but not to estimate exposure.
+          Ingredient statements sourced for the Nielsen UPC universe, or the
+          claim scaled to the nutrient-only limb with bounds reported. Complete
+          core nutrients currently reach 4.71% of UPC-years and 3.31% of sample
+          spend, declining year on year.
+      - type: "human_judgement"
+        criterion: >-
+          Annual Nielsen projection factor recovered before any national
+          estimate. Sample spend is not projected and must not be reported as
+          national dollar sales.
+      - type: "artifact_exists"
+        artifact: "analysis/nielsen_market_base_2021_2024_2026-08-12.md"
       - type: "artifact_exists"
         artifact: "analysis/phase0_upc_feasibility_gate_2026-08-10.md"
   G2:
