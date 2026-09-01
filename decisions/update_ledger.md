@@ -2743,7 +2743,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-09-01 — Add reversible context-aware project entrypoint
 
-- **Commit(s)**: pending
+- **Commit(s)**: 2ea6d91
 - **Change type**: framework / project attachment / task-entry guidance
 - **Action**: Added `aeros attach --install-entrypoint`, which appends one bounded AEROS block to an existing `AGENTS.md` or creates it for a package-attached project. The block requires task preflight and startup-brief review before substantive work without replacing project instructions. Package attachment records only the inserted block; `aeros detach --confirm` removes it only when it remains intact and restores the original instruction file byte-for-byte.
 - **Validation**: Extended the package attach/detach fixture to prove existing instructions survive installation and exact removal; run sync-doctor, context, task-preflight, smoke, and full harness checks before release.
