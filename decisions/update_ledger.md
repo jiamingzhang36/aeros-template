@@ -2768,7 +2768,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ### 2026-09-01 — Add context-bound generic candidate execution and observable effect records
 
-**Commit(s)**: `pending`
+**Commit(s)**: `9f3954c`
 
 **Action**: Bound contract execution to a durable context episode and added a generic `aeros run --intent --command` path for attached projects without task contracts. Generic actions compile a declared ActionSpec, run in an isolated worktree, and can copy back only validator-accepted outputs under candidate/audit paths. Context close records an effect status that distinguishes no preflight, a mechanical block, reuse/redirection, risk raising, guidance only, and an observed response artifact. The protected-path hook now requires a staged, path-matching effect report for significant paper/data/evidence/code changes in addition to existing human overrides for protected authority paths.
 
