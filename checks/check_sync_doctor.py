@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from aeros.runtime.devendor import installed_version
+from aeros.runtime.devendor import detach_package_mode, installed_version
 from aeros.runtime.project_adapter import attach_project, detect_project_adapter
 from aeros.runtime.sync_doctor import CAPABILITIES, CAPABILITY_EXEMPT_CHECKS, diagnose_project, sync_doctor
 from checks.run_harness_checks import CHECKS
@@ -159,6 +159,19 @@ def main() -> int:
         detected = detect_project_adapter(project)
         if detected.get("project_kind") != "research_project" or "paper" not in (detected.get("path_map") or {}).get("manuscript", []):
             failures.append("fixture: generic project adapter did not detect manuscript surface")
+    with tempfile.TemporaryDirectory(prefix="aeros_entrypoint_attachment_") as tmp:
+        project = Path(tmp) / "plain"
+        project.mkdir()
+        original_agents = "# Existing project instructions\n\nKeep project-specific rules.\n"
+        (project / "AGENTS.md").write_text(original_agents, encoding="utf-8")
+        attached = attach_project(project, install_entrypoint=True)
+        agents_path = project / "AGENTS.md"
+        attached_text = agents_path.read_text(encoding="utf-8")
+        if attached.get("status") != "PASS" or "<!-- AEROS:ENTRYPOINT:BEGIN -->" not in attached_text:
+            failures.append("fixture: package attachment did not install the bounded AEROS task entrypoint")
+        detached = detach_package_mode(project, confirm=True)
+        if detached.get("status") != "DETACHED" or agents_path.read_text(encoding="utf-8") != original_agents:
+            failures.append("fixture: package detach did not remove only the intact AEROS entrypoint block")
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))
     elif failures:

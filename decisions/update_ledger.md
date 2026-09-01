@@ -2740,3 +2740,14 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: optimal research prioritization; external human identity; source admissibility; claim support; gate approval; paper readiness; or release authorization.
 - **Drift risk**: Generic attachment must remain metadata-first; environment profiles may only narrow ActionSpec/ExecutionEnvelope authority; context episodes remain compact ephemeral history; and rubric support stays limited to the tested `data_probe` slice until another slice is explicitly specified and verified.
 - **Next check**: Backfill the functional commit, append the ledger hash-chain record, then run package-mode attachment and real-project rollout tests separately. If episode storage is unavailable, verify the explicit `EPHEMERAL_UNPERSISTED` advice basis rather than treating advice as unavailable.
+
+## 2026-09-01 — Add reversible context-aware project entrypoint
+
+- **Commit(s)**: pending
+- **Change type**: framework / project attachment / task-entry guidance
+- **Action**: Added `aeros attach --install-entrypoint`, which appends one bounded AEROS block to an existing `AGENTS.md` or creates it for a package-attached project. The block requires task preflight and startup-brief review before substantive work without replacing project instructions. Package attachment records only the inserted block; `aeros detach --confirm` removes it only when it remains intact and restores the original instruction file byte-for-byte.
+- **Validation**: Extended the package attach/detach fixture to prove existing instructions survive installation and exact removal; run sync-doctor, context, task-preflight, smoke, and full harness checks before release.
+- **Non-goal**: Do not auto-attach arbitrary projects, replace project instructions, create research artifacts, execute research actions, certify scientific validity, or claim that a preflight is human approval.
+- **Does not prove**: that every agent host automatically invokes project instructions; scientific validity; research priority optimality; claim support; human approval; or release readiness.
+- **Drift risk**: The installed block must remain one small, explicit, removable entrypoint. Do not turn attachment into a vendored runtime, a transcript store, or a new project-state authority.
+- **Next check**: Backfill the functional commit, append the ledger hash-chain record, then test one explicitly chosen clean project separately.

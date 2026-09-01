@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import yaml
 
-from .project_adapter import detect_project_adapter, write_project_adapter
+from .project_adapter import detach_entrypoint, detect_project_adapter, entrypoint_plan, install_entrypoint, write_project_adapter
 
 VENDORED_SURFACES = ("aeros", "checks", "harness", "templates", "tools", "tests")
 ATTACHMENT_MANIFEST = ".aeros/attachment.yml"
@@ -100,7 +100,12 @@ def prepare_package_mode(root: Path, *, policy_bundle_version: str = "aeros-poli
     return config_path, lock_path
 
 
-def attach_package_mode(root: Path, *, policy_bundle_version: str = "aeros-policy-v1") -> dict[str, Any]:
+def attach_package_mode(
+    root: Path,
+    *,
+    policy_bundle_version: str = "aeros-policy-v1",
+    with_entrypoint: bool = False,
+) -> dict[str, Any]:
     """Attach a fresh project to the installed runtime without vendoring it.
 
     Attachment is deliberately limited to package metadata. It refuses to
@@ -108,6 +113,7 @@ def attach_package_mode(root: Path, *, policy_bundle_version: str = "aeros-polic
     """
     root = Path(root).resolve()
     manifest_path = root / ATTACHMENT_MANIFEST
+    entrypoint_preview = entrypoint_plan(root) if with_entrypoint else None
     conflicts = [rel for rel in (*ATTACHMENT_MANAGED_PATHS, ATTACHMENT_MANIFEST) if (root / rel).exists()]
     vendored = [name for name in VENDORED_SURFACES if (root / name).exists()]
     failures: list[str] = []
@@ -115,6 +121,8 @@ def attach_package_mode(root: Path, *, policy_bundle_version: str = "aeros-polic
         failures.append("existing AEROS metadata: " + ", ".join(conflicts))
     if vendored:
         failures.append("vendored runtime present: " + ", ".join(vendored))
+    if entrypoint_preview and entrypoint_preview.get("status") != "READY":
+        failures.extend(entrypoint_preview.get("failures") or ["entrypoint installation needs manual review"])
     if failures:
         return {
             "status": "ATTENTION", "attached": False, "failures": failures,
@@ -124,13 +132,17 @@ def attach_package_mode(root: Path, *, policy_bundle_version: str = "aeros-polic
     adapter = detect_project_adapter(root)
     adapter["runtime_mode"] = "package"
     adapter_path = write_project_adapter(root, adapter)
+    entrypoint = install_entrypoint(root) if with_entrypoint else None
     records = [{"path": rel, "sha256": _file_hash(root / rel)} for rel in ATTACHMENT_MANAGED_PATHS]
-    manifest_path.write_text(yaml.safe_dump({
+    manifest = {
         "schema_version": 1,
         "runtime_mode": "package",
         "managed_files": records,
         "detach_rule": "remove only when every managed file still matches its attach-time SHA-256",
-    }, sort_keys=False), encoding="utf-8")
+    }
+    if entrypoint and entrypoint.get("attachment"):
+        manifest["entrypoint"] = entrypoint["attachment"]
+    manifest_path.write_text(yaml.safe_dump(manifest, sort_keys=False), encoding="utf-8")
     return {
         "status": "PASS", "attached": True,
         "created": [
@@ -138,6 +150,7 @@ def attach_package_mode(root: Path, *, policy_bundle_version: str = "aeros-polic
             str(lock_path.relative_to(root)),
             str(adapter_path.relative_to(root)),
             ATTACHMENT_MANIFEST,
+            *((entrypoint.get("created") or []) if entrypoint else []),
         ],
         "does_not_prove": ["scientific validity", "policy compatibility", "release readiness"],
     }
@@ -163,6 +176,7 @@ def detach_package_mode(root: Path, *, confirm: bool = False) -> dict[str, Any]:
     except yaml.YAMLError as exc:
         return {"status": "ATTENTION", "detached": False, "would_remove": [], "failures": [f"invalid attachment manifest: {exc}"], "does_not_prove": ["safe detachment"]}
     records = payload.get("managed_files") if isinstance(payload, dict) else None
+    entrypoint_attachment = payload.get("entrypoint") if isinstance(payload, dict) and isinstance(payload.get("entrypoint"), dict) else None
     expected = {str(item.get("path")): str(item.get("sha256")) for item in records or [] if isinstance(item, dict)}
     managed_paths = tuple(expected)
     if managed_paths not in {LEGACY_ATTACHMENT_MANAGED_PATHS, ATTACHMENT_MANAGED_PATHS} or any(not expected[rel] for rel in managed_paths):
@@ -182,8 +196,13 @@ def detach_package_mode(root: Path, *, confirm: bool = False) -> dict[str, Any]:
             unchanged.append(rel)
         else:
             modified.append(rel)
+    entrypoint = detach_entrypoint(root, attachment=entrypoint_attachment, confirm=False) if entrypoint_attachment else None
+    if entrypoint and entrypoint.get("status") == "ATTENTION":
+        modified.append("AGENTS.md#AEROS-entrypoint")
     removable_context, retained_context_state = _removable_context_state(root)
     would_remove = [*unchanged, *missing, ATTACHMENT_MANIFEST]
+    if entrypoint and entrypoint.get("status") == "DRY_RUN":
+        would_remove.extend(entrypoint.get("would_remove") or [])
     if removable_context:
         would_remove.append(f"{ATTACHMENT_CONTEXT_ROOT.as_posix()}/")
     report = {
@@ -202,6 +221,8 @@ def detach_package_mode(root: Path, *, confirm: bool = False) -> dict[str, Any]:
     manifest_path.unlink()
     if removable_context:
         shutil.rmtree(root / ATTACHMENT_CONTEXT_ROOT)
+    if entrypoint and entrypoint.get("status") == "DRY_RUN":
+        detach_entrypoint(root, attachment=entrypoint_attachment, confirm=True)
     aeros_dir = root / ".aeros"
     try:
         aeros_dir.rmdir()

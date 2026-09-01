@@ -6,6 +6,7 @@ it only tells the runtime where common research surfaces appear to be.
 """
 from __future__ import annotations
 
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +14,21 @@ import yaml
 
 
 ADAPTER_PATH = Path(".aeros/adapter.yml")
+ENTRYPOINT_PATH = Path("AGENTS.md")
+ENTRYPOINT_BEGIN = "<!-- AEROS:ENTRYPOINT:BEGIN -->"
+ENTRYPOINT_END = "<!-- AEROS:ENTRYPOINT:END -->"
+ENTRYPOINT_BLOCK = """<!-- AEROS:ENTRYPOINT:BEGIN -->
+## AEROS task entrypoint
+
+Before any substantive research or project change:
+
+1. Run `aeros task preflight --intent "<task request>" --json`.
+2. Read `startup_brief` before proposing or executing work. It contains the current goal, highest deterministic research risk, and recommended bounded action.
+3. If `startup_brief.status` is `ATTENTION_REQUIRED`, explain that P0 risk and keep unrelated work on hold until the user redirects or clears it.
+4. Treat AEROS output as advisory except for explicit process or authority blocks. It does not certify scientific validity, human approval, claim support, or paper readiness.
+
+Do not store raw conversation transcripts in this project merely to satisfy this entrypoint.
+<!-- AEROS:ENTRYPOINT:END -->"""
 VENDORED_SURFACES = ("aeros", "checks", "harness", "templates", "tools", "tests")
 
 PATH_CANDIDATES: dict[str, tuple[str, ...]] = {
@@ -40,6 +56,145 @@ DOES_NOT_PROVE = [
     "that a missing surface is unnecessary",
     "that a package/runtime policy is compatible with every project convention",
 ]
+
+
+def _sha256_text(text: str) -> str:
+    return sha256(text.encode("utf-8")).hexdigest()
+
+
+def _entrypoint_span(text: str) -> tuple[int, int] | None:
+    start = text.find(ENTRYPOINT_BEGIN)
+    if start < 0:
+        return None
+    end_start = text.find(ENTRYPOINT_END, start)
+    if end_start < 0:
+        return None
+    return start, end_start + len(ENTRYPOINT_END)
+
+
+def entrypoint_plan(root: Path | str) -> dict[str, Any]:
+    """Inspect whether a minimal, AEROS-owned task entrypoint can be installed."""
+    project_root = Path(root).expanduser().resolve()
+    path = project_root / ENTRYPOINT_PATH
+    if not path.exists():
+        return {"status": "READY", "action": "create", "path": ENTRYPOINT_PATH.as_posix()}
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        return {"status": "ATTENTION", "failures": [f"cannot read {ENTRYPOINT_PATH}: {exc}"]}
+    has_begin = ENTRYPOINT_BEGIN in text
+    has_end = ENTRYPOINT_END in text
+    if has_begin != has_end:
+        return {"status": "ATTENTION", "failures": ["AEROS entrypoint markers are incomplete; repair manually before installation"]}
+    if has_begin:
+        span = _entrypoint_span(text)
+        if span is None or text[span[0]:span[1]] != ENTRYPOINT_BLOCK:
+            return {"status": "ATTENTION", "failures": ["existing AEROS entrypoint block was modified; it will not be overwritten"]}
+        return {"status": "READY", "action": "already_installed", "path": ENTRYPOINT_PATH.as_posix()}
+    return {"status": "READY", "action": "append", "path": ENTRYPOINT_PATH.as_posix()}
+
+
+def install_entrypoint(root: Path | str, *, dry_run: bool = False) -> dict[str, Any]:
+    """Install one bounded task-entry block without replacing project instructions."""
+    project_root = Path(root).expanduser().resolve()
+    plan = entrypoint_plan(project_root)
+    if plan.get("status") != "READY":
+        return {"status": "ATTENTION", "installed": False, **plan, "does_not_prove": DOES_NOT_PROVE}
+    action = str(plan.get("action") or "")
+    if action == "already_installed":
+        return {"status": "ALREADY_INSTALLED", "installed": False, "created": [], "does_not_prove": DOES_NOT_PROVE}
+    label = f"{ENTRYPOINT_PATH.as_posix()}#AEROS-entrypoint"
+    if dry_run:
+        return {"status": "DRY_RUN", "installed": False, "would_create": [label], "does_not_prove": DOES_NOT_PROVE}
+    path = project_root / ENTRYPOINT_PATH
+    before = path.read_text(encoding="utf-8") if path.exists() else ""
+    inserted_text = ""
+    if action == "create":
+        after = ENTRYPOINT_BLOCK + "\n"
+    else:
+        separator = "" if before.endswith("\n\n") else "\n" if before.endswith("\n") else "\n\n"
+        inserted_text = separator + ENTRYPOINT_BLOCK + "\n"
+        after = before + inserted_text
+    path.write_text(after, encoding="utf-8")
+    attachment = {
+        "path": ENTRYPOINT_PATH.as_posix(),
+        "mode": action,
+        "block_sha256": _sha256_text(ENTRYPOINT_BLOCK),
+    }
+    if action == "create":
+        attachment["file_sha256"] = _sha256_text(after)
+    else:
+        attachment["inserted_text"] = inserted_text
+    return {
+        "status": "INSTALLED",
+        "installed": True,
+        "created": [label],
+        "attachment": attachment,
+        "does_not_prove": DOES_NOT_PROVE,
+    }
+
+
+def detach_entrypoint(
+    root: Path | str,
+    *,
+    attachment: dict[str, Any] | None = None,
+    confirm: bool = False,
+) -> dict[str, Any]:
+    """Remove only an intact AEROS entrypoint block, never surrounding instructions."""
+    project_root = Path(root).expanduser().resolve()
+    path = project_root / ENTRYPOINT_PATH
+    if not path.exists():
+        return {"status": "NOT_PRESENT", "detached": False, "would_remove": []}
+    plan = entrypoint_plan(project_root)
+    if plan.get("status") != "READY" or plan.get("action") != "already_installed":
+        return {
+            "status": "ATTENTION",
+            "detached": False,
+            "would_remove": [],
+            "failures": plan.get("failures") or ["no intact AEROS entrypoint block is available for safe removal"],
+        }
+    text = path.read_text(encoding="utf-8")
+    span = _entrypoint_span(text)
+    assert span is not None
+    mode = str((attachment or {}).get("mode") or "append")
+    expected_file_hash = str((attachment or {}).get("file_sha256") or "")
+    if mode == "create":
+        if expected_file_hash and _sha256_text(text) != expected_file_hash:
+            return {
+                "status": "ATTENTION",
+                "detached": False,
+                "would_remove": [],
+                "failures": ["AEROS-created AGENTS.md changed after attachment; retaining it for manual review"],
+            }
+        would_remove = [ENTRYPOINT_PATH.as_posix()]
+        if confirm:
+            path.unlink()
+        return {"status": "DETACHED" if confirm else "DRY_RUN", "detached": bool(confirm), "would_remove": would_remove, "removed": would_remove if confirm else []}
+    inserted_text = str((attachment or {}).get("inserted_text") or "")
+    if attachment and not inserted_text:
+        return {
+            "status": "ATTENTION",
+            "detached": False,
+            "would_remove": [],
+            "failures": ["entrypoint attachment lacks its original inserted text; retaining project instructions for manual review"],
+        }
+    if inserted_text:
+        if not text.endswith(inserted_text):
+            return {
+                "status": "ATTENTION",
+                "detached": False,
+                "would_remove": [],
+                "failures": ["AEROS entrypoint is no longer its original appended suffix; retaining project instructions for manual review"],
+            }
+        replacement = text[: -len(inserted_text)]
+    else:
+        before = text[:span[0]].rstrip()
+        after = text[span[1]:].lstrip("\n")
+        replacement = (before + "\n\n" + after).rstrip() + "\n" if before and after else (before or after)
+    label = f"{ENTRYPOINT_PATH.as_posix()}#AEROS-entrypoint"
+    if confirm:
+        path.write_text(replacement, encoding="utf-8")
+    return {"status": "DETACHED" if confirm else "DRY_RUN", "detached": bool(confirm), "would_remove": [label], "removed": [label] if confirm else []}
 
 
 def _configured_mode(root: Path) -> str:
@@ -194,6 +349,7 @@ def attach_project(
     *,
     mode: str = "auto",
     dry_run: bool = False,
+    install_entrypoint: bool = False,
     policy_bundle_version: str = "aeros-policy-v1",
 ) -> dict[str, Any]:
     """Attach a project by metadata only, preserving all research files."""
@@ -205,31 +361,38 @@ def attach_project(
         return {"status": "ATTENTION", "attached": False, "failures": [f"unsupported attach mode: {mode}"]}
     before = detect_project_adapter(root)
     runtime_mode = str(before.get("runtime_mode") or "unknown")
+    entrypoint = entrypoint_plan(root) if install_entrypoint else None
+    if entrypoint and entrypoint.get("status") != "READY":
+        return {"status": "ATTENTION", "attached": False, "failures": entrypoint.get("failures") or ["entrypoint installation needs manual review"]}
     if dry_run:
         target_mode = "package" if requested == "package" or (requested == "auto" and runtime_mode == "unknown") else runtime_mode
+        would_create = [".aeros/project.yml", "aeros.lock", ".aeros/adapter.yml"] if target_mode == "package" else [".aeros/adapter.yml"]
+        if entrypoint and entrypoint.get("action") in {"create", "append"}:
+            would_create.append(f"{ENTRYPOINT_PATH.as_posix()}#AEROS-entrypoint")
         return {
             "status": "DRY_RUN",
             "attached": False,
             "runtime_mode_before": runtime_mode,
             "runtime_mode_after": target_mode,
-            "would_create": [".aeros/project.yml", "aeros.lock", ".aeros/adapter.yml"]
-            if target_mode == "package"
-            else [".aeros/adapter.yml"],
+            "would_create": would_create,
             "adapter": before,
             "does_not_prove": DOES_NOT_PROVE,
         }
     if requested == "package" or (requested == "auto" and runtime_mode == "unknown"):
         from .devendor import attach_package_mode
 
-        report = attach_package_mode(root, policy_bundle_version=policy_bundle_version)
+        report = attach_package_mode(root, policy_bundle_version=policy_bundle_version, with_entrypoint=install_entrypoint)
         report.setdefault("adapter", detect_project_adapter(root))
         return report
     path = write_project_adapter(root, before)
+    installed = install_entrypoint(root) if install_entrypoint else None
+    if installed and installed.get("status") == "ATTENTION":
+        return {"status": "ATTENTION", "attached": False, "failures": installed.get("failures") or ["entrypoint installation needs manual review"]}
     return {
         "status": "ADAPTED",
         "attached": True,
         "runtime_mode": runtime_mode,
-        "created": [path.relative_to(root).as_posix()],
+        "created": [path.relative_to(root).as_posix(), *(installed.get("created") or [])] if installed else [path.relative_to(root).as_posix()],
         "adapter": detect_project_adapter(root),
         "does_not_prove": DOES_NOT_PROVE,
     }

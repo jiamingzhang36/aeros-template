@@ -686,6 +686,7 @@ def _cmd_attach(args: argparse.Namespace) -> int:
         root,
         mode=mode,
         dry_run=bool(args.dry_run),
+        install_entrypoint=bool(args.install_entrypoint),
         policy_bundle_version=args.policy_bundle_version,
     )
     if args.json:
@@ -2207,6 +2208,7 @@ def main(argv: list[str] | None = None) -> int:
     attach.add_argument("--mode", choices=["auto", "package", "adapter"], default="auto", help="auto-select package or adapter-only attachment")
     attach.add_argument("--package", action="store_true", help=argparse.SUPPRESS)
     attach.add_argument("--policy-bundle-version", default="aeros-policy-v1")
+    attach.add_argument("--install-entrypoint", action="store_true", help="add a reversible AGENTS.md block that requires context-aware task preflight")
     attach.add_argument("--dry-run", action="store_true", help="preview the attachment without writing metadata")
     attach.add_argument("--json", action="store_true")
     attach.set_defaults(func=_cmd_attach)
