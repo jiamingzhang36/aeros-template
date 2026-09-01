@@ -2721,7 +2721,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-08-11 — Add reduction-first NODIUJ agent scope review
 
-- **Commit(s)**: pending
+- **Commit(s)**: b7a4b36
 - **Change type**: agent instruction / scope control / anti-overengineering
 - **Action**: Added a shared NODIUJ review to the root and lane-level agent instructions. Before a new runtime surface, policy, check, registry, task mode, workflow preset, or cross-lane expansion, agents must assess necessity, over-engineering, duplication, reachability, unrequested utility, and maintenance justification. Bounded bug fixes remain lightweight; new-surface decisions must be recorded in a plan or run report.
 - **Validation**: Instruction-surface validation remains required.
@@ -2732,7 +2732,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ## 2026-09-01 — Unify project-adaptable runtime, context, environment, and rubric boundaries
 
-- **Commit(s)**: pending
+- **Commit(s)**: b7a4b36
 - **Change type**: runtime integration / project attachment / context and execution safety
 - **Action**: Added metadata-only generic project attachment and package-mode diagnostics; compiled typed ActionSpecs into monotonic environment profiles that narrow ExecutionEnvelopes; made AEROS advice record compact context episodes without raw transcripts; added a human-frozen ExecutableRubric vertical slice for `data_probe`; and made task preflight surface a deterministic startup brief so P0 research risk is visible before project work begins. Added the NODIUJ reduction-first instruction across root and lane guidance.
 - **Validation**: Targeted adapter, environment, context, execution-envelope, ResearchJob, ExecutableRubric, and task-preflight checks; smoke/full harness before commit.
