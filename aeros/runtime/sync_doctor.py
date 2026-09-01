@@ -18,6 +18,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "harness_observed_receipts": ["aeros/runtime/harness_receipt.py", "checks/check_harness_observed_receipts.py", "checks/run_harness_checks.py"],
     "update_ledger_hash_chain": ["aeros/runtime/ledger_hash_chain.py", "harness/update_ledger_hash_chain_policy.yml", "checks/check_update_ledger_hash_chain.py"],
     "protected_path_hook": ["harness/protected_path_commit_policy.yml", "tools/hooks/pre-commit-aeros-protected-paths", "tools/install_aeros_git_hooks.zsh", "checks/check_protected_path_hook.py"],
+    "generic_context_bound_run": ["aeros/cli.py", "aeros/runtime/context_episode.py", "aeros/runtime/execution_envelope.py", "checks/check_generic_run.py"],
     "evidence_sufficiency_audit": ["harness/evidence_sufficiency_audit_policy.yml", "templates/evidence_sufficiency_audit.yml", "checks/check_evidence_sufficiency_audit.py"],
     "aea_replication_alignment": ["harness/aea_replication_policy.yml", "templates/aea_data_package_manifest.yml", "checks/check_aea_replication_alignment.py"],
     "mode": ["aeros/runtime/execution_mode.py", "aeros/runtime/task_mode.py", "aeros/runtime/mode_compiler.py", "harness/task_mode_policy.yml", "checks/check_task_mode.py"],

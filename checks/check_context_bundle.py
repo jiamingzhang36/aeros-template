@@ -31,7 +31,7 @@ def main() -> int:
         sys.path.insert(0, str(ROOT))
         try:
             from aeros.runtime.context_bundle import build_context_bundle, format_context_bundle
-            from aeros.runtime.context_episode import close_context_episode, context_episode_status, ensure_advice_context, open_context_episode
+            from aeros.runtime.context_episode import bind_execution_context, close_context_episode, context_episode_status, ensure_advice_context, open_context_episode, record_task_preflight
             bundle = build_context_bundle(ROOT, lane="project", brief=True)
             rendered = format_context_bundle(bundle, brief=True)
         except Exception as exc:  # noqa: BLE001
@@ -70,6 +70,28 @@ def main() -> int:
                 )
                 if not (opened.get("context_basis") or {}).get("context_hash"):
                     failures.append("context episode did not record a context hash")
+                binding = bind_execution_context(
+                    fixture_root,
+                    task_id="T_CONTEXT",
+                    lane="literature",
+                    goal="ground one citation",
+                )
+                binding_path = fixture_root / str(binding.get("binding_path") or "")
+                if not binding.get("episode_id") or not binding_path.is_file():
+                    failures.append("execution context did not write a durable task binding")
+                activation = record_task_preflight(
+                    fixture_root,
+                    context_basis=opened.get("context_basis") or {},
+                    report={
+                        "status": "ADVISORY",
+                        "lane": "literature",
+                        "intent": "ground one citation",
+                        "task_mode": "literature_recovery",
+                        "startup_brief": {"recommended_action": "inspect a passage", "highest_research_risk": {"risk_id": "citation_debt"}},
+                    },
+                )
+                if activation.get("status") != "ACTIVE":
+                    failures.append("task preflight did not record a durable activation packet")
                 tracked.write_text("after\n", encoding="utf-8")
                 closed = close_context_episode(
                     fixture_root,
@@ -82,8 +104,10 @@ def main() -> int:
                 artifact_rows = (closed.get("close") or {}).get("observed_artifacts") or []
                 if not artifact_rows or artifact_rows[0].get("changed_since_open") is not True:
                     failures.append("context episode did not distinguish an observed artifact change from declared work")
+                if (closed.get("effect") or {}).get("status") != "RISK_RAISED":
+                    failures.append("closed context episode did not report the recorded risk effect honestly")
                 episode_status = context_episode_status(fixture_root, conversation_id="fixture-chat")
-                if episode_status.get("status") != "CLOSED":
+                if episode_status.get("status") != "CLOSED" or episode_status.get("activation_status") != "EFFECT_REPORTED":
                     failures.append("context episode did not close cleanly")
                 replacement_bundle = dict(fixture_bundle)
                 replacement_bundle["current_goal"] = "review a different passage"
@@ -113,6 +137,13 @@ def main() -> int:
                     fallback = ensure_advice_context(fixture_root, lane="literature", entrypoint="fixture")
                 if fallback.get("status") != "EPHEMERAL_UNPERSISTED" or not fallback.get("persistence_warning"):
                     failures.append("unwritable episode storage did not yield an explicit ephemeral context basis")
+                with patch("aeros.runtime.context_episode.open_context_episode", side_effect=OSError("read-only fixture")):
+                    try:
+                        bind_execution_context(fixture_root, task_id="T_BLOCK", lane="literature", goal="fixture")
+                    except RuntimeError:
+                        pass
+                    else:
+                        failures.append("execution context did not fail closed when persistence was unavailable")
     template = ROOT / "templates/CONTEXT_BUNDLE.md"
     if template.exists():
         text = template.read_text(encoding="utf-8")

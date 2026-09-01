@@ -212,7 +212,7 @@ profiles:
   regulated: {workspace: isolated_candidate_worktree, check_strategy: full, skill_policy: contract_required_use_or_waive, promotion_authority: unchanged}
 does_not_prove: [scientific validity, provider sandboxing, promotion approval]
 """,
-    "harness/protected_path_commit_policy.yml": """version: "0.1"
+    "harness/protected_path_commit_policy.yml": """version: "0.2"
 policy: AEROS-PROTECTED-PATH-COMMIT-001
 principle: Protected research-authority paths must not be committed by default from an agent run.
 protected_paths:
@@ -221,6 +221,13 @@ protected_paths:
 override:
   env_var: AEROS_ALLOW_PROTECTED_COMMIT
   allowed_value: "1"
+context_evidence:
+  policy: AEROS-CONTEXT-EFFECT-COMMIT-001
+  exact: [evidence/claim_registry.md]
+  prefixes: [paper/, tex/, data/processed/, evidence/, code/]
+  accepted_effect_statuses: [BLOCKED_BEFORE_EXECUTION, REUSE_OR_REVALIDATION_PROMPTED, RISK_RAISED, GUIDANCE_RECORDED, RESPONSE_ARTIFACT_OBSERVED]
+  report_prefix: outputs/context/episodes/
+  report_suffix: /effect_report.json
 installation:
   template: tools/hooks/pre-commit-aeros-protected-paths
   installer: tools/install_aeros_git_hooks.zsh
@@ -255,34 +262,41 @@ max_source_hashes: 12
     "harness/check_profiles.yml": """version: "0.1"
 default_profile: full
 profiles:
-  smoke: {checks: [check_campaign_contract.py, check_authority_evidence.py, check_authority_lifecycle_e2e.py, check_action_spec.py, check_progress_semantics.py, check_artifact_semantics.py, check_research_job_compiler.py, check_econ_pack.py, check_census_probe.py, check_adaptive_checks.py, check_task_preflight.py, check_owner_decisions.py, check_broad_capture_firewall.py, check_output_intent.py, check_sync_doctor.py, check_update_ledger_hash_chain.py, check_protected_path_hook.py, check_execution_profiles.py]}
+  smoke: {checks: [check_campaign_contract.py, check_authority_evidence.py, check_authority_lifecycle_e2e.py, check_action_spec.py, check_progress_semantics.py, check_artifact_semantics.py, check_research_job_compiler.py, check_econ_pack.py, check_census_probe.py, check_adaptive_checks.py, check_task_preflight.py, check_owner_decisions.py, check_broad_capture_firewall.py, check_output_intent.py, check_context_bundle.py, check_generic_run.py, check_sync_doctor.py, check_update_ledger_hash_chain.py, check_protected_path_hook.py, check_execution_profiles.py]}
   full: {checks: all}
 """,
     "tools/hooks/pre-commit-aeros-protected-paths": """#!/usr/bin/env python3
-\"\"\"AEROS protected-path pre-commit guard. AEROS-PROTECTED-PATH-HOOK-001\"\"\"
+\"\"\"AEROS protected/context-effect pre-commit guard. AEROS-PROTECTED-PATH-HOOK-001\"\"\"
 from __future__ import annotations
-import os, subprocess, sys
+import json, os, subprocess, sys
 PROTECTED_EXACT = {"docs/protected_definitions.yml", "docs/data_contract.yml", "evidence/claim_registry.md", "decisions/decision_log.csv", "harness/permissions.yml"}
-PROTECTED_PREFIXES = ("data/raw/", "decisions/approvals/")
-def git(args):
-    return subprocess.check_output(["git", *args], text=True, stderr=subprocess.DEVNULL)
-def is_protected(path):
-    return path in PROTECTED_EXACT or any(path.startswith(prefix) for prefix in PROTECTED_PREFIXES)
+PROTECTED_PREFIXES = ("data/raw/", "decisions/approvals/", "campaigns/campaign_decisions.yml")
+CONTEXT_EXACT = {"evidence/claim_registry.md"}
+CONTEXT_PREFIXES = ("paper/", "tex/", "data/processed/", "evidence/", "code/")
+EFFECT_PREFIX, EFFECT_SUFFIX = "outputs/context/episodes/", "/effect_report.json"
+EFFECT_STATUSES = {"BLOCKED_BEFORE_EXECUTION", "REUSE_OR_REVALIDATION_PROMPTED", "RISK_RAISED", "GUIDANCE_RECORDED", "RESPONSE_ARTIFACT_OBSERVED"}
+def git(args): return subprocess.check_output(["git", *args], text=True, stderr=subprocess.DEVNULL)
+def protected(path): return path in PROTECTED_EXACT or any(path.startswith(prefix) for prefix in PROTECTED_PREFIXES)
+def needs_context(path): return path in CONTEXT_EXACT or any(path.startswith(prefix) for prefix in CONTEXT_PREFIXES)
 def main():
     staged = [line.strip() for line in git(["diff", "--cached", "--name-only"]).splitlines()]
-    hits = [path for path in staged if path and is_protected(path)]
-    if not hits:
-        return 0
-    if os.environ.get("AEROS_ALLOW_PROTECTED_COMMIT") == "1":
-        print("AEROS protected-path hook: human override accepted.", file=sys.stderr)
-        return 0
-    print("AEROS protected-path hook blocked protected staged file(s):", file=sys.stderr)
-    for path in hits:
-        print(f"  - {path}", file=sys.stderr)
-    print("Set AEROS_ALLOW_PROTECTED_COMMIT=1 only after explicit human approval/gate review.", file=sys.stderr)
-    return 1
-if __name__ == "__main__":
-    raise SystemExit(main())
+    protected_hits = [path for path in staged if path and protected(path)]
+    if protected_hits and os.environ.get("AEROS_ALLOW_PROTECTED_COMMIT") != "1":
+        print("AEROS protected-path hook blocked protected staged file(s):", file=sys.stderr); return 1
+    covered = set()
+    for path in staged:
+        if path.startswith(EFFECT_PREFIX) and path.endswith(EFFECT_SUFFIX):
+            try: effect = json.loads(git(["show", f":{path}"]))
+            except Exception: continue
+            if effect.get("preflight_recorded") and effect.get("status") in EFFECT_STATUSES:
+                covered.update(str(row.get("path") or "") for row in (effect.get("observed_workspace_delta") or {}).get("paths", []) if isinstance(row, dict))
+    missing = [path for path in staged if path and needs_context(path) and path not in covered]
+    if missing:
+        print("AEROS context-effect hook blocked significant staged file(s):", file=sys.stderr)
+        for path in missing: print(f"  - missing observed effect coverage: {path}", file=sys.stderr)
+        return 1
+    return 0
+if __name__ == "__main__": raise SystemExit(main())
 """,
     "tools/install_aeros_git_hooks.zsh": """#!/bin/zsh
 set -euo pipefail

@@ -89,6 +89,8 @@ def main() -> int:
         effect_class="read_only",
         lane="literature",
         campaign_id="literature_fulltext_recovery",
+        context_episode_id="CTX-fixture",
+        context_hash="fixture-hash",
         command="python3 -m aeros.cli literature status",
         stop_condition="stop after status",
     )
@@ -96,6 +98,8 @@ def main() -> int:
         failures.append("declared ActionSpec producer_mode is not declared")
     if declared.campaign_id != "literature_fulltext_recovery":
         failures.append("declared ActionSpec did not preserve campaign_id")
+    if declared.context_episode_id != "CTX-fixture" or declared.context_hash != "fixture-hash":
+        failures.append("declared ActionSpec did not preserve context episode binding")
     if not declared.authority_boundary:
         failures.append("declared ActionSpec missing authority_boundary")
     if declared.post_run_hooks:
@@ -128,6 +132,19 @@ def main() -> int:
     )
     if not any("require a decision" in item for item in validate_action_spec(invalid_task_run)):
         failures.append("invalid task_run ActionSpec without requires_decision was not rejected")
+
+    invalid_context = ActionSpec(
+        id="AS-invalid-context",
+        kind="fixture",
+        lane="data",
+        effect_class="read_only",
+        capabilities=("read_project_state",),
+        context_episode_id="CTX-fixture",
+        command="python3 -m aeros.cli status",
+        stop_condition="stop",
+    )
+    if not any("context episode" in item for item in validate_action_spec(invalid_context)):
+        failures.append("partial ActionSpec context binding was not rejected")
 
     if failures:
         print("FAIL: ActionSpec problems detected:")

@@ -67,6 +67,7 @@ CHECKS = [
     "check_adversarial_benchmark.py",
     "check_stale_triage.py",
     "check_context_bundle.py",
+    "check_generic_run.py",
     "check_current_work_context.py",
     "check_context_graph.py",
     "check_cockpit.py",

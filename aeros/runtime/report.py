@@ -40,6 +40,9 @@ class RunRecord:
     temperature: float | None = None
     tools_used: list[str] = field(default_factory=list)
     skill_receipt_path: str = ""
+    context_episode_id: str = ""
+    context_hash: str = ""
+    context_binding_path: str = ""
 
 
 def _checks_table(run: RunRecord) -> str:
@@ -127,6 +130,8 @@ def write_run_report(project_root: Path, run: RunRecord) -> Path:
 - Mode: {c.stage}
 - Work mode: runtime
 - Completion Status: {run.final_status}
+- Context episode: {run.context_episode_id or 'not recorded'}
+- Context binding: {run.context_binding_path or 'not recorded'}
 - Critic required: {"yes" if review_plan.required else "no"}
 - Completion review risk: {review_plan.risk}
 - Human gate required: {"yes" if review_plan.human_gate_required or run.final_status == "escalated" else "no"}

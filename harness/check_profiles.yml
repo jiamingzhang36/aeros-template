@@ -30,6 +30,7 @@ profiles:
       - check_update_ledger_hash_chain.py
       - check_protected_path_hook.py
       - check_execution_profiles.py
+      - check_generic_run.py
   pre_drive:
     description: "2-5 second authority/context/action compilation gate before choosing work."
     checks:
@@ -43,6 +44,7 @@ profiles:
       - check_next_action.py
       - check_action_spec.py
       - check_context_bundle.py
+      - check_generic_run.py
       - check_data_inventory.py
       - check_discovery_route_decision.py
       - check_estimand_data_contract.py

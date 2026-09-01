@@ -1,4 +1,4 @@
-version: "0.1"
+version: "0.2"
 policy: AEROS-PROTECTED-PATH-COMMIT-001
 principle: >
   Protected research-authority paths must not be committed by default from an
@@ -22,6 +22,23 @@ override:
     Use only after an explicit human approval, gate decision, or protected-path
     review. The hook cannot verify scientific validity; it only prevents silent
     protected-path commits.
+context_evidence:
+  policy: AEROS-CONTEXT-EFFECT-COMMIT-001
+  principle: >
+    Significant research-facing changes require a staged AEROS effect report
+    whose observed workspace delta includes the changed path. This establishes
+    that a scoped preflight and close record exist; it does not prove the edit
+    was scientifically correct or caused by AEROS guidance.
+  exact: [evidence/claim_registry.md]
+  prefixes: [paper/, tex/, data/processed/, evidence/, code/]
+  accepted_effect_statuses:
+    - BLOCKED_BEFORE_EXECUTION
+    - REUSE_OR_REVALIDATION_PROMPTED
+    - RISK_RAISED
+    - GUIDANCE_RECORDED
+    - RESPONSE_ARTIFACT_OBSERVED
+  report_prefix: outputs/context/episodes/
+  report_suffix: /effect_report.json
 installation:
   template: tools/hooks/pre-commit-aeros-protected-paths
   installer: tools/install_aeros_git_hooks.zsh

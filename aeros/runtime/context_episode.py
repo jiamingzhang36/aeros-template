@@ -143,7 +143,7 @@ def _artifact_state(root: Path, raw: str) -> dict[str, Any]:
 def _workspace_snapshot(root: Path) -> dict[str, Any]:
     try:
         completed = subprocess.run(
-            ["git", "status", "--short"],
+            ["git", "status", "--short", "--untracked-files=all"],
             cwd=root,
             text=True,
             capture_output=True,
@@ -345,6 +345,171 @@ def ensure_advice_context(
         }
 
 
+def bind_execution_context(
+    root: Path | str,
+    *,
+    task_id: str,
+    lane: str,
+    goal: str,
+    entrypoint: str = "task_execution_preflight",
+) -> dict[str, Any]:
+    """Persist and bind fresh project context before a task can execute.
+
+    This is deliberately narrower than a completion receipt. It proves that
+    the runtime compiled the current scoped context immediately before the
+    task began; it cannot prove that a model semantically followed the brief.
+    """
+
+    project_root = Path(root).resolve()
+    requested_lane = str(lane or "project").strip() or "project"
+    try:
+        opened = open_context_episode(
+            project_root,
+            lane=requested_lane,
+            goal=str(goal or ""),
+            entrypoint=entrypoint,
+        )
+    except OSError as exc:
+        raise RuntimeError(
+            "task execution requires a durable context episode; run task preflight after restoring writable context storage"
+        ) from exc
+
+    basis = dict(opened.get("context_basis") or {})
+    episode_id = str(basis.get("episode_id") or "")
+    effective_lane = str(basis.get("lane") or "").strip()
+    if not episode_id or basis.get("status") != "fresh":
+        raise RuntimeError("task execution requires a fresh persisted context episode")
+    if requested_lane != "project" and effective_lane != requested_lane:
+        raise RuntimeError(
+            f"task execution context lane mismatch: requested {requested_lane!r}, recorded {effective_lane!r}"
+        )
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    filename = f"{_slug(task_id) or 'task'}-{timestamp}.json"
+    binding_relative = Path("outputs/context/episodes") / episode_id / "execution_bindings" / filename
+    binding = {
+        "version": 1,
+        "task_id": str(task_id or "").strip(),
+        "lane": effective_lane,
+        "bound_at": _now(),
+        "entrypoint": entrypoint,
+        "episode_id": episode_id,
+        "context_hash": str(basis.get("context_hash") or ""),
+        "does_not_prove": [
+            "that a model semantically followed every context instruction",
+            "scientific validity, claim support, or gate approval",
+            "that a task completed or produced an accepted artifact",
+        ],
+    }
+    try:
+        _write_json(project_root / binding_relative, binding)
+    except OSError as exc:
+        raise RuntimeError("task execution requires a durable context binding record") from exc
+    return {**basis, "binding_path": binding_relative.as_posix()}
+
+
+def record_task_preflight(
+    root: Path | str,
+    *,
+    context_basis: dict[str, Any],
+    report: dict[str, Any],
+) -> dict[str, Any]:
+    """Attach a task-start decision packet to its durable context episode."""
+
+    project_root = Path(root).resolve()
+    episode_id = str(context_basis.get("episode_id") or "")
+    if not episode_id:
+        return {
+            "status": "NOT_RECORDED",
+            "reason": "preflight context was ephemeral and has no durable episode_id",
+            "does_not_prove": ["that task guidance was persisted or followed"],
+        }
+    brief = report.get("startup_brief") if isinstance(report.get("startup_brief"), dict) else {}
+    payload = {
+        "version": 1,
+        "episode_id": episode_id,
+        "recorded_at": _now(),
+        "preflight_status": str(report.get("status") or ""),
+        "task_id": str(report.get("task_id") or ""),
+        "lane": str(report.get("lane") or context_basis.get("lane") or "project"),
+        "intent": str(report.get("intent") or ""),
+        "task_mode": str(report.get("task_mode") or ""),
+        "workflow_preset": str(report.get("workflow_preset") or ""),
+        "highest_research_risk": brief.get("highest_research_risk"),
+        "recommended_action": str(brief.get("recommended_action") or ""),
+        "reuse_decision": report.get("reuse_decision") or {},
+        "campaign_breakers": report.get("campaign_breakers") or [],
+        "allowed_to_touch": report.get("allowed_to_touch") or [],
+        "must_not_touch": report.get("must_not_touch") or [],
+        "does_not_prove": [
+            "that the recommendation was scientifically optimal",
+            "that an agent followed the guidance",
+            "that any proposed intervention changed the counterfactual outcome",
+        ],
+    }
+    relative = Path("outputs/context/episodes") / episode_id / "task_preflight.json"
+    try:
+        _write_json(project_root / relative, payload)
+    except OSError as exc:
+        return {
+            "status": "NOT_RECORDED",
+            "episode_id": episode_id,
+            "reason": str(exc),
+            "does_not_prove": payload["does_not_prove"],
+        }
+    return {
+        "status": "ACTIVE",
+        "episode_id": episode_id,
+        "preflight_record": relative.as_posix(),
+        "effect_reported_at_close": True,
+        "does_not_prove": payload["does_not_prove"],
+    }
+
+
+def _effect_report(opened: dict[str, Any], closed: dict[str, Any], preflight: dict[str, Any]) -> dict[str, Any]:
+    """Describe observed AEROS effect without asserting a counterfactual."""
+
+    risk = preflight.get("highest_research_risk") if isinstance(preflight.get("highest_research_risk"), dict) else {}
+    reuse = preflight.get("reuse_decision") if isinstance(preflight.get("reuse_decision"), dict) else {}
+    if not preflight:
+        status = "NO_PREFLIGHT_RECORDED"
+        summary = "No durable task preflight was recorded, so AEROS cannot attribute any observed work to its guidance."
+    elif preflight.get("preflight_status") == "BLOCKED":
+        status = "BLOCKED_BEFORE_EXECUTION"
+        summary = "AEROS blocked the declared task before execution because a recorded guardrail was triggered."
+    elif reuse.get("should_execute") is False:
+        status = "REUSE_OR_REVALIDATION_PROMPTED"
+        summary = "AEROS recommended reuse or free revalidation instead of an unchanged rerun."
+    elif risk.get("risk_id"):
+        status = "RISK_RAISED"
+        summary = "AEROS raised a registered research risk before task execution; subsequent compliance is not inferred."
+    elif closed.get("declared_resolution") and closed.get("resolution_artifacts"):
+        status = "RESPONSE_ARTIFACT_OBSERVED"
+        summary = "A response artifact was observed after AEROS guidance; this does not prove the underlying research risk was resolved."
+    else:
+        status = "GUIDANCE_RECORDED"
+        summary = "AEROS recorded task scope and guidance, but no blocking or redirection effect was mechanically observed."
+    return {
+        "version": 1,
+        "episode_id": str(opened.get("episode_id") or ""),
+        "reported_at": _now(),
+        "status": status,
+        "summary": summary,
+        "preflight_recorded": bool(preflight),
+        "recommended_action": str(preflight.get("recommended_action") or ""),
+        "highest_research_risk": risk,
+        "observed_workspace_delta": closed.get("observed_workspace_delta") or {},
+        "declared_resolution": str(closed.get("declared_resolution") or ""),
+        "resolution_artifacts": closed.get("resolution_artifacts") or [],
+        "does_not_prove": [
+            "that AEROS caused a better scientific outcome",
+            "that an agent followed advice after preflight",
+            "that a declared response resolved the underlying research risk",
+            "scientific validity, claim support, gate approval, or completion",
+        ],
+    }
+
+
 def close_context_episode(
     root: Path | str,
     *,
@@ -357,6 +522,8 @@ def close_context_episode(
     blockers: list[str] | tuple[str, ...] = (),
     next_action: str = "",
     outcome: str = "",
+    resolution: str = "",
+    resolution_artifact_paths: list[str] | tuple[str, ...] = (),
 ) -> dict[str, Any]:
     """Close an episode with declared work and bounded observed changes."""
 
@@ -400,6 +567,10 @@ def close_context_episode(
     for raw in receipt_paths:
         relative = _safe_relative(project_root, raw)
         linked_receipts.append({"path": relative, "exists": (project_root / relative).is_file()})
+    linked_resolution_artifacts: list[dict[str, Any]] = []
+    for raw in resolution_artifact_paths:
+        relative = _safe_relative(project_root, raw)
+        linked_resolution_artifacts.append({"path": relative, "exists": (project_root / relative).is_file()})
     closed = {
         "version": EPISODE_VERSION,
         "episode_id": resolved_id,
@@ -412,13 +583,18 @@ def close_context_episode(
         "observed_artifacts": list(artifacts.values()),
         "observed_workspace_delta": _workspace_delta(opened.get("workspace_snapshot") or {}, _workspace_snapshot(project_root)),
         "linked_receipts": linked_receipts,
+        "declared_resolution": str(resolution or "").strip(),
+        "resolution_artifacts": linked_resolution_artifacts,
         "context_hash": opened.get("context_hash", ""),
         "does_not_prove": DOES_NOT_PROVE,
     }
     _write_json(directory / "closed.json", closed)
+    preflight = _read_json(directory / "task_preflight.json")
+    effect = _effect_report(opened, closed, preflight)
+    _write_json(directory / "effect_report.json", effect)
     if str(active.get("episode_id") or "") == resolved_id:
         _write_json(active_path, {"episode_id": resolved_id, "state": "closed", "updated_at": _now()})
-    return {"status": "CLOSED", "episode": opened, "close": closed}
+    return {"status": "CLOSED", "episode": opened, "close": closed, "effect": effect}
 
 
 def context_episode_status(
@@ -443,6 +619,9 @@ def context_episode_status(
         state = "superseded_without_close"
     else:
         state = "open"
+    preflight = _read_json(directory / "task_preflight.json")
+    effect = _read_json(directory / "effect_report.json")
+    activation = "EFFECT_REPORTED" if effect else ("PREFLIGHT_ACTIVE" if preflight else "NO_TASK_PREFLIGHT")
     return {
         "status": state.upper(),
         "episode_id": resolved_id,
@@ -451,6 +630,9 @@ def context_episode_status(
         "context_hash": opened.get("context_hash", ""),
         "lane": (opened.get("context_projection") or {}).get("lane", "project"),
         "active_pointer_state": active.get("state", ""),
+        "activation_status": activation,
+        "preflight_status": preflight.get("preflight_status", ""),
+        "effect_status": effect.get("status", ""),
         "does_not_prove": DOES_NOT_PROVE,
     }
 

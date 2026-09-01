@@ -959,6 +959,24 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
              task_timeout_override: int | None = None) -> int:
     contract = load_contract(contract_path)
     project_root = find_project_root(Path(contract_path).resolve())
+    # Import lazily: context compilation reaches next_action/controller, which
+    # already imports kernel for task planning. The execution boundary is the
+    # only caller that needs this dependency.
+    from .context_episode import bind_execution_context
+    try:
+        context_basis = bind_execution_context(
+            project_root,
+            task_id=contract.task_id,
+            lane=contract.work_lane,
+            goal=contract.goal,
+        )
+    except RuntimeError as exc:
+        print(f"[kernel] task {contract.task_id} BLOCKED: {exc}")
+        return 2
+    print(
+        f"[kernel] context episode {context_basis['episode_id']} "
+        f"(lane={context_basis['lane']}, status={context_basis['status']})"
+    )
     state = state_mod.load_state(project_root)
     entry = state_mod.task_entry(state, contract.task_id)
     if entry.get("status") == "passed" and entry.get("output_fingerprint"):
@@ -1022,6 +1040,9 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
             run_input_tokens=run_in, run_output_tokens=run_out,
             agent_provider=prov_provider, agent_model=prov_model,
             temperature=prov_temp, tools_used=tools_used,
+            context_episode_id=str(context_basis.get("episode_id") or ""),
+            context_hash=str(context_basis.get("context_hash") or ""),
+            context_binding_path=str(context_basis.get("binding_path") or ""),
         )
         skill_receipt = write_skill_invocation_receipt(
             project_root, contract, skills_used=[], run_report_path=None
@@ -1151,6 +1172,9 @@ def run_task(contract_path: str | Path, *, dry_run: bool = False,
                 agent_model=_agent_provenance(project_root)[1],
                 temperature=_agent_provenance(project_root)[2],
                 tools_used=sorted({name for rec in attempts_log for name, _, _ in rec.checks}),
+                context_episode_id=str(context_basis.get("episode_id") or ""),
+                context_hash=str(context_basis.get("context_hash") or ""),
+                context_binding_path=str(context_basis.get("binding_path") or ""),
             )
             skill_receipt = write_skill_invocation_receipt(
                 project_root,

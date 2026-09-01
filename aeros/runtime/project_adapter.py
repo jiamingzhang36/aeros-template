@@ -23,6 +23,7 @@ ENTRYPOINT_BLOCK = """<!-- AEROS:ENTRYPOINT:BEGIN -->
 Before any substantive research or project change:
 
 1. Run `aeros task preflight --intent "<task request>" --json`.
+   Before reporting completion, close the active context episode so AEROS can report whether it blocked, redirected, or only recorded guidance.
 2. Read `startup_brief` before proposing or executing work. It contains the current goal, highest deterministic research risk, and recommended bounded action.
 3. If `startup_brief.status` is `ATTENTION_REQUIRED`, explain that P0 risk and keep unrelated work on hold until the user redirects or clears it.
 4. Treat AEROS output as advisory except for explicit process or authority blocks. It does not certify scientific validity, human approval, claim support, or paper readiness.

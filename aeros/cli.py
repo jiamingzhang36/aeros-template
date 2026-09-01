@@ -16,6 +16,7 @@ import json
 import os
 import subprocess
 import sys
+from dataclasses import asdict, is_dataclass
 from datetime import datetime, timezone
 from functools import partial
 from pathlib import Path
@@ -37,7 +38,10 @@ from .runtime.context_episode import (
     ensure_advice_context,
     format_context_episode,
     open_context_episode,
+    record_task_preflight,
 )
+from .runtime.action_spec import declared_action_spec
+from .runtime.execution_envelope import execute_action_spec_in_isolated_worktree
 from .runtime.cockpit import build_cockpit, format_cockpit, write_cockpit
 from .runtime.controller import run_iteration
 from .runtime import identity
@@ -98,7 +102,145 @@ def _format_advice_context(basis: dict[str, object]) -> str:
     )
 
 
+_GENERIC_CANDIDATE_OUTPUT_PREFIXES = (
+    "work/",
+    "audits/",
+    "outputs/",
+    "quality_reports/",
+    "agent_runs/",
+)
+
+
+def _generic_project_relative(raw: str) -> str:
+    candidate = Path(str(raw or ""))
+    if not str(raw or "").strip() or candidate.is_absolute() or ".." in candidate.parts:
+        raise ValueError(f"generic expected output must be a safe project-relative path: {raw!r}")
+    relative = candidate.as_posix()
+    if not any(relative.startswith(prefix) for prefix in _GENERIC_CANDIDATE_OUTPUT_PREFIXES):
+        allowed = ", ".join(_GENERIC_CANDIDATE_OUTPUT_PREFIXES)
+        raise ValueError(
+            f"generic run only accepts candidate-surface outputs ({allowed}); got {relative}"
+        )
+    return relative
+
+
+def _generic_result_payload(result: object) -> dict[str, object]:
+    if is_dataclass(result):
+        return asdict(result)
+    if isinstance(result, dict):
+        return result
+    return dict(vars(result))
+
+
+def _cmd_generic_run(args: argparse.Namespace) -> int:
+    """Run a bounded candidate action for projects without task contracts.
+
+    This is deliberately narrower than contract execution: it can only accept
+    candidate/audit artifacts, and it always records a context-bound preflight.
+    It cannot directly update data/processed, claims, manuscript, or canonical
+    project state.
+    """
+
+    root = _project_root()
+    lane = args.lane or "project"
+    intent = str(args.intent or "").strip()
+    command = str(args.generic_command or "").strip()
+    if not intent or not command:
+        print("GENERIC_RUN_REFUSED: --intent and --command are both required")
+        return 2
+    try:
+        expected_outputs = tuple(_generic_project_relative(item) for item in (args.expected_output or []))
+        acceptance_checks = tuple(str(item) for item in (args.acceptance_check or []))
+        if expected_outputs and not acceptance_checks:
+            raise ValueError(
+                "generic outputs require at least one --acceptance-check checks/*.py validator before copyback"
+            )
+        invalid_checks = [item for item in acceptance_checks if not item.startswith("checks/") or not item.endswith(".py")]
+        if invalid_checks:
+            raise ValueError(f"generic acceptance checks must be project checks/*.py: {invalid_checks}")
+        context_basis = _advice_context(root, lane=lane, entrypoint="generic_run", goal=intent)
+        from .runtime.task_preflight import build_task_preflight
+
+        preflight = build_task_preflight(root, lane=lane, intent=intent)
+        activation = record_task_preflight(root, context_basis=context_basis, report=preflight)
+    except (OSError, ValueError, RuntimeError) as exc:
+        print(f"GENERIC_RUN_REFUSED: {exc}")
+        return 2
+
+    base = {
+        "status": str(preflight.get("status") or ""),
+        "activation": activation,
+        "preflight": preflight,
+        "does_not_prove": [
+            "scientific validity, claim support, promotion approval, or that a candidate artifact should be merged",
+        ],
+    }
+    if preflight.get("status") == "BLOCKED":
+        closed = close_context_episode(
+            root,
+            episode_id=str(context_basis.get("episode_id") or ""),
+            summary="Generic candidate action was blocked by task preflight.",
+            work_items=[intent],
+            blockers=[str(preflight.get("message") or "preflight blocked")],
+            outcome="generic_action_blocked_before_execution",
+        )
+        base["effect"] = closed.get("effect")
+        print(json.dumps(base, indent=2, ensure_ascii=False) if args.json else "GENERIC_RUN_BLOCKED: task preflight requires a human decision")
+        return 2
+
+    spec = declared_action_spec(
+        kind="generic_project_action",
+        effect_class="local_write" if expected_outputs else "read_only",
+        lane=lane,
+        context_episode_id=str(context_basis.get("episode_id") or ""),
+        context_hash=str(context_basis.get("context_hash") or ""),
+        command=command,
+        stop_condition="candidate outputs accepted or a bounded execution failure is observed",
+        source="aeros.cli.generic_run",
+        capabilities=("run_local_command", "write_candidate_artifact") if expected_outputs else ("run_local_command",),
+        expected_outputs=expected_outputs,
+        acceptance_checks=acceptance_checks,
+        runtime_profile="research",
+        authority_boundary={
+            "canonical": "not_authorized",
+            "claim": "not_authorized",
+            "paper": "not_authorized",
+            "release": "not_authorized",
+        },
+        preconditions=("durable context episode", "task preflight recorded"),
+    )
+    base["action_spec"] = spec.to_dict()
+    if args.dry_run:
+        base["status"] = "PREVIEW"
+        print(json.dumps(base, indent=2, ensure_ascii=False) if args.json else "GENERIC_RUN_PREVIEW: candidate action is bounded to declared outputs")
+        return 0
+
+    result = execute_action_spec_in_isolated_worktree(root, spec, timeout_seconds=args.task_timeout or 30)
+    result_payload = _generic_result_payload(result)
+    accepted = [str(item) for item in (result_payload.get("accepted_outputs") or [])]
+    closed = close_context_episode(
+        root,
+        episode_id=str(context_basis.get("episode_id") or ""),
+        summary="Generic candidate action completed through the isolated execution envelope.",
+        work_items=[intent],
+        artifact_paths=accepted,
+        blockers=[str(result_payload.get("message") or "")] if not result_payload.get("ok") else [],
+        next_action="Review accepted candidate artifacts before any separate promotion action.",
+        outcome="generic_action_accepted" if result_payload.get("ok") else "generic_action_rejected",
+        resolution="candidate artifact accepted" if result_payload.get("ok") and accepted else "",
+        resolution_artifact_paths=accepted,
+    )
+    base.update({"status": "PASS" if result_payload.get("ok") else "FAIL", "execution": result_payload, "effect": closed.get("effect")})
+    print(json.dumps(base, indent=2, ensure_ascii=False) if args.json else str(base["status"]))
+    return 0 if result_payload.get("ok") else 1
+
+
 def _cmd_run(args: argparse.Namespace) -> int:
+    if getattr(args, "generic_command", ""):
+        if args.contract or getattr(args, "until", ""):
+            print("GENERIC_RUN_REFUSED: --command cannot be combined with a task contract or --until")
+            return 2
+        return _cmd_generic_run(args)
     if getattr(args, "until", ""):
         root = _project_root()
         rc, records = run_until(root, ControllerLoopArgs(
@@ -449,6 +591,8 @@ def _cmd_context(args: argparse.Namespace) -> int:
                 blockers=args.blocker or [],
                 next_action=args.next_action,
                 outcome=args.outcome,
+                resolution=args.resolution,
+                resolution_artifact_paths=args.resolution_artifact or [],
             )
         except (OSError, ValueError) as exc:
             print(f"CONTEXT_CLOSE_REFUSED: {exc}")
@@ -1908,10 +2052,16 @@ def _cmd_sync_doctor(args: argparse.Namespace) -> int:
 
 def _cmd_task_preflight(args: argparse.Namespace) -> int:
     from .runtime.task_preflight import build_task_preflight, format_task_preflight
+    from .runtime.context_episode import record_task_preflight
 
     root = _project_root()
     try:
-        context_basis = _advice_context(root, lane=getattr(args, "lane", "") or "project", entrypoint="task_preflight")
+        context_basis = _advice_context(
+            root,
+            lane=getattr(args, "lane", "") or "project",
+            goal=getattr(args, "intent", "") or "",
+            entrypoint="task_preflight",
+        )
     except RuntimeError as exc:
         print(str(exc))
         return 2
@@ -1923,6 +2073,7 @@ def _cmd_task_preflight(args: argparse.Namespace) -> int:
         campaign_id=getattr(args, "campaign_id", "") or "",
     )
     report["context_basis"] = context_basis
+    report["activation"] = record_task_preflight(root, context_basis=context_basis, report=report)
     if getattr(args, "json", False):
         print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
     else:
@@ -2043,6 +2194,12 @@ def main(argv: list[str] | None = None) -> int:
                      help="override the contract's retry_policy.max_retries")
     run.add_argument("--task-timeout", type=int, default=None,
                      help="override this task's agent/command timeout in seconds")
+    run.add_argument("--intent", default="", help="bounded generic action intent when no task contract exists")
+    run.add_argument("--command", dest="generic_command", default="", help="safe local generic command for candidate-only isolated execution")
+    run.add_argument("--expected-output", action="append", default=[],
+                     help="candidate/audit output path expected from --command; repeatable")
+    run.add_argument("--acceptance-check", action="append", default=[],
+                     help="project checks/*.py validator for --command output; repeatable")
     run.set_defaults(func=_cmd_run)
 
     chk = sub.add_parser("check", help="run a contract's checks or a harness profile without calling the agent")
@@ -2099,6 +2256,9 @@ def main(argv: list[str] | None = None) -> int:
     context_p.add_argument("--blocker", action="append", default=[], help="new blocker found during the episode; may repeat")
     context_p.add_argument("--next-action", default="", help="recommended next action at episode close")
     context_p.add_argument("--outcome", default="", help="honest episode outcome label")
+    context_p.add_argument("--resolution", default="", help="bounded response taken after AEROS guidance; not a scientific-resolution claim")
+    context_p.add_argument("--resolution-artifact", action="append", default=[],
+                           help="artifact observed for --resolution; may repeat")
     context_p.set_defaults(func=_cmd_context)
 
     cockpit_p = sub.add_parser("cockpit", help="show one compact context + next-action + fast-check dashboard")

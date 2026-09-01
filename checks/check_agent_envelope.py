@@ -108,6 +108,12 @@ def main() -> int:
             failures.append("write-producing agent did not execute in a separate candidate worktree")
         if not (repo / "outputs/agent/allowed.txt").exists():
             failures.append("accepted candidate output was not copied back")
+        reports = sorted((repo / "agent_runs").glob("T_AGENT_ALLOWED_*.md"))
+        bindings = sorted((repo / "outputs/context/episodes").glob("*/execution_bindings/T_AGENT_ALLOWED-*.json"))
+        if not reports or "Context episode: CTX-" not in reports[-1].read_text(encoding="utf-8"):
+            failures.append("agent run report did not record its execution context episode")
+        if not bindings:
+            failures.append("agent task did not persist an execution context binding")
 
         def denied_agent(_prompt: str, project_root: Path, **_kwargs) -> AgentResult:
             _write(project_root / "outputs/agent/denied.txt", "declared\n")

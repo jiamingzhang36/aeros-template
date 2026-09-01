@@ -44,6 +44,17 @@ def stage(repo: Path, rel: str, body: str) -> None:
         raise RuntimeError(added.stderr or added.stdout)
 
 
+def stage_effect_report(repo: Path, observed: list[str], *, status: str = "GUIDANCE_RECORDED") -> None:
+    body = {
+        "version": 1,
+        "status": status,
+        "preflight_recorded": True,
+        "observed_workspace_delta": {"paths": [{"path": path} for path in observed]},
+    }
+    import json
+    stage(repo, "outputs/context/episodes/CTX-hook/effect_report.json", json.dumps(body))
+
+
 def hook(repo: Path, *, override: bool = False) -> subprocess.CompletedProcess[str]:
     env = {"AEROS_ALLOW_PROTECTED_COMMIT": "1"} if override else None
     return run([sys.executable, str(HOOK)], repo, env=env)
@@ -110,8 +121,35 @@ def main() -> int:
         repo = make_repo()
         stage(repo, "evidence/claim_registry.md", "# claim\n")
         proc = hook(repo, override=True)
+        if proc.returncode == 0:
+            failures.append("human override incorrectly bypassed required context-effect evidence")
+
+        repo = make_repo()
+        stage(repo, "evidence/claim_registry.md", "# claim\n")
+        stage_effect_report(repo, ["evidence/claim_registry.md"])
+        proc = hook(repo, override=True)
         if proc.returncode != 0:
-            failures.append(f"human override did not allow protected commit: {proc.stderr or proc.stdout}")
+            failures.append(f"protected commit with override and matching staged effect report was blocked: {proc.stderr or proc.stdout}")
+
+        repo = make_repo()
+        stage(repo, "paper/draft.tex", "\\section{Candidate}\n")
+        proc = hook(repo)
+        if proc.returncode == 0:
+            failures.append("paper change without a staged matching effect report was not blocked")
+
+        repo = make_repo()
+        stage(repo, "paper/draft.tex", "\\section{Candidate}\n")
+        stage_effect_report(repo, ["paper/draft.tex"])
+        proc = hook(repo)
+        if proc.returncode != 0:
+            failures.append(f"paper change with matching staged effect report was blocked: {proc.stderr or proc.stdout}")
+
+        repo = make_repo()
+        stage(repo, "paper/draft.tex", "\\section{Candidate}\n")
+        stage_effect_report(repo, ["paper/other.tex"])
+        proc = hook(repo)
+        if proc.returncode == 0:
+            failures.append("unrelated effect report incorrectly covered a paper change")
 
         repo = make_repo()
         stage(repo, "data/raw/source.csv", "x\n")

@@ -2765,3 +2765,19 @@ committed, backfill this pending entry and append a final hash-chain record.
 **Drift risk**: Treating adapter attachment as equivalent to a clean package-mode lifecycle could hide residual runtime metadata. Vendored projects remain framework-managed until an explicit detach lifecycle is implemented.
 
 **Next check**: Sync the committed fix into an isolated vendored research worktree, run `aeros attach --install-entrypoint` and task preflight, and confirm manuscript/data/evidence paths remain untouched.
+
+### 2026-09-01 — Add context-bound generic candidate execution and observable effect records
+
+**Commit(s)**: `pending`
+
+**Action**: Bound contract execution to a durable context episode and added a generic `aeros run --intent --command` path for attached projects without task contracts. Generic actions compile a declared ActionSpec, run in an isolated worktree, and can copy back only validator-accepted outputs under candidate/audit paths. Context close records an effect status that distinguishes no preflight, a mechanical block, reuse/redirection, risk raising, guidance only, and an observed response artifact. The protected-path hook now requires a staged, path-matching effect report for significant paper/data/evidence/code changes in addition to existing human overrides for protected authority paths.
+
+**Validation**: Added a contract-free isolated-worktree fixture, expanded context/action-spec/agent-envelope/hook coverage, and ran targeted checks plus smoke/full harness.
+
+**Non-goal**: Do not claim that free-form chat is intercepted before it enters AEROS; certify a scientific correction from an effect report; allow generic actions to modify `paper/`, `tex/`, `data/processed/`, canonical evidence, claims, approvals, or release artifacts; or treat local hook evidence as human identity verification.
+
+**Does not prove**: scientific validity; that an agent followed guidance; that an observed response resolved a risk; claim support; gate approval; promotion; submission; or release readiness.
+
+**Drift risk**: Generic candidate writes must retain an explicit `checks/*.py` validator, and the effect hook must stay path-matching rather than accepting unrelated receipts.
+
+**Next check**: Backfill the functional commit reference, append its ledger-chain record, and sync/test this generic path in one clean attached project.

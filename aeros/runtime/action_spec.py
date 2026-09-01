@@ -31,6 +31,8 @@ class ActionSpec:
     lane: str
     effect_class: str
     campaign_id: str = ""
+    context_episode_id: str = ""
+    context_hash: str = ""
     capabilities: tuple[str, ...] = ()
     requires_decision: bool = False
     expected_outputs: tuple[str, ...] = ()
@@ -65,6 +67,7 @@ class ActionSpec:
             "lane": self.lane,
             "effect_class": self.effect_class,
             "campaign_id": self.campaign_id,
+            "context_episode_id": self.context_episode_id,
             "capabilities": self.capabilities,
             "expected_outputs": self.expected_outputs,
             "authority_boundary": self.authority_boundary,
@@ -297,6 +300,8 @@ def declared_action_spec(
     effect_class: str,
     lane: str,
     campaign_id: str = "",
+    context_episode_id: str = "",
+    context_hash: str = "",
     command: str,
     stop_condition: str,
     source: str = "deterministic",
@@ -337,6 +342,8 @@ def declared_action_spec(
         lane=lane,
         effect_class=effect_class,
         campaign_id=str(campaign_id or "").strip(),
+        context_episode_id=str(context_episode_id or "").strip(),
+        context_hash=str(context_hash or "").strip(),
         capabilities=merged_capabilities,
         requires_decision=bool(requires_decision),
         expected_outputs=expected_outputs if expected_outputs is not None else _expected_outputs_for(kind),
@@ -371,6 +378,12 @@ def validate_action_spec(spec: ActionSpec | dict[str, Any]) -> list[str]:
         failures.append(f"ActionSpec has invalid producer_mode {data.get('producer_mode')!r}")
     if not isinstance(data.get("campaign_id", ""), str):
         failures.append("ActionSpec campaign_id must be a string")
+    if not isinstance(data.get("context_episode_id", ""), str):
+        failures.append("ActionSpec context_episode_id must be a string")
+    if not isinstance(data.get("context_hash", ""), str):
+        failures.append("ActionSpec context_hash must be a string")
+    if bool(data.get("context_episode_id")) != bool(data.get("context_hash")):
+        failures.append("ActionSpec context episode identity and hash must be declared together")
     if not isinstance(data.get("capabilities"), list) or not data.get("capabilities"):
         failures.append("ActionSpec capabilities must be a non-empty list")
     if data.get("effect_class") in {"task_run", "human_decision", "blocked"} and not data.get("requires_decision"):
