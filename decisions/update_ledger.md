@@ -2754,7 +2754,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ### 2026-09-01 — Runtime / Fix vendored task-entrypoint activation
 
-**Commit(s)**: `pending`
+**Commit(s)**: `47e0ec0`
 
 **Action**: Renamed the internal task-entrypoint installer so the public `install_entrypoint` boolean cannot shadow it during vendored-project attachment. Added a vendored adapter fixture that installs the entrypoint through `attach_project` and verifies the marker is written.
 
