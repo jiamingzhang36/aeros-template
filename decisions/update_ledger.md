@@ -2751,3 +2751,17 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: that every agent host automatically invokes project instructions; scientific validity; research priority optimality; claim support; human approval; or release readiness.
 - **Drift risk**: The installed block must remain one small, explicit, removable entrypoint. Do not turn attachment into a vendored runtime, a transcript store, or a new project-state authority.
 - **Next check**: Backfill the functional commit, append the ledger hash-chain record, then test one explicitly chosen clean project separately.
+
+### 2026-09-01 — Runtime / Fix vendored task-entrypoint activation
+
+**Commit(s)**: `pending`
+
+**Action**: Renamed the internal task-entrypoint installer so the public `install_entrypoint` boolean cannot shadow it during vendored-project attachment. Added a vendored adapter fixture that installs the entrypoint through `attach_project` and verifies the marker is written.
+
+**Alignment**: Makes existing-project adoption reliable: a project can activate AEROS context/preflight guidance without changing its research artifacts.
+
+**Non-goal**: This does not prove that AEROS has identified every project-specific research risk, nor does it make vendored-framework detachment fully reversible yet.
+
+**Drift risk**: Treating adapter attachment as equivalent to a clean package-mode lifecycle could hide residual runtime metadata. Vendored projects remain framework-managed until an explicit detach lifecycle is implemented.
+
+**Next check**: Sync the committed fix into an isolated vendored research worktree, run `aeros attach --install-entrypoint` and task preflight, and confirm manuscript/data/evidence paths remain untouched.

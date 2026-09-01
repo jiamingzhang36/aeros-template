@@ -94,7 +94,7 @@ def entrypoint_plan(root: Path | str) -> dict[str, Any]:
     return {"status": "READY", "action": "append", "path": ENTRYPOINT_PATH.as_posix()}
 
 
-def install_entrypoint(root: Path | str, *, dry_run: bool = False) -> dict[str, Any]:
+def install_task_entrypoint(root: Path | str, *, dry_run: bool = False) -> dict[str, Any]:
     """Install one bounded task-entry block without replacing project instructions."""
     project_root = Path(root).expanduser().resolve()
     plan = entrypoint_plan(project_root)
@@ -385,7 +385,7 @@ def attach_project(
         report.setdefault("adapter", detect_project_adapter(root))
         return report
     path = write_project_adapter(root, before)
-    installed = install_entrypoint(root) if install_entrypoint else None
+    installed = install_task_entrypoint(root) if install_entrypoint else None
     if installed and installed.get("status") == "ATTENTION":
         return {"status": "ATTENTION", "attached": False, "failures": installed.get("failures") or ["entrypoint installation needs manual review"]}
     return {

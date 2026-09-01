@@ -9,7 +9,7 @@ import shutil
 import subprocess
 import yaml
 
-from .project_adapter import detach_entrypoint, detect_project_adapter, entrypoint_plan, install_entrypoint, write_project_adapter
+from .project_adapter import detach_entrypoint, detect_project_adapter, entrypoint_plan, install_task_entrypoint, write_project_adapter
 
 VENDORED_SURFACES = ("aeros", "checks", "harness", "templates", "tools", "tests")
 ATTACHMENT_MANIFEST = ".aeros/attachment.yml"
@@ -132,7 +132,7 @@ def attach_package_mode(
     adapter = detect_project_adapter(root)
     adapter["runtime_mode"] = "package"
     adapter_path = write_project_adapter(root, adapter)
-    entrypoint = install_entrypoint(root) if with_entrypoint else None
+    entrypoint = install_task_entrypoint(root) if with_entrypoint else None
     records = [{"path": rel, "sha256": _file_hash(root / rel)} for rel in ATTACHMENT_MANAGED_PATHS]
     manifest = {
         "schema_version": 1,

@@ -159,6 +159,14 @@ def main() -> int:
         detected = detect_project_adapter(project)
         if detected.get("project_kind") != "research_project" or "paper" not in (detected.get("path_map") or {}).get("manuscript", []):
             failures.append("fixture: generic project adapter did not detect manuscript surface")
+    with tempfile.TemporaryDirectory(prefix="aeros_vendored_entrypoint_") as tmp:
+        project = Path(tmp) / "vendored"
+        project.mkdir()
+        (project / "aeros").mkdir()
+        (project / "AGENTS.md").write_text("# Existing vendored-project rules\n", encoding="utf-8")
+        attached = attach_project(project, install_entrypoint=True)
+        if attached.get("status") != "ADAPTED" or "<!-- AEROS:ENTRYPOINT:BEGIN -->" not in (project / "AGENTS.md").read_text(encoding="utf-8"):
+            failures.append("fixture: vendored adapter attachment did not install the bounded AEROS task entrypoint")
     with tempfile.TemporaryDirectory(prefix="aeros_entrypoint_attachment_") as tmp:
         project = Path(tmp) / "plain"
         project.mkdir()
