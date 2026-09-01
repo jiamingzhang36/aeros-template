@@ -8,6 +8,8 @@ Shared universal rules are in [harness/common_rules.md](harness/common_rules.md)
 
 Discovery-specific requirements follow the same governance baseline in the root file and should be applied together.
 
+Before adding a discovery workflow, registry, search policy, or new review surface, apply the root `NODIUJ` Scope and Complexity Gate. Prefer a bounded lead, route decision, or existing evidence path over a new discovery layer.
+
 Use `aeros adopt` as the default intake path for new ideas, source memos, or partially completed projects. Adoption outputs are advisory drafts and inventories; they do not approve gates, certify claims, or replace source-grounded discovery work.
 
 ## Exploration Policy

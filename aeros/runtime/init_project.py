@@ -474,6 +474,7 @@ human_approval:
     campaign_release: "signed_commit"
     gate_approval: "signed_commit"
     gate_apply: "signed_commit"
+    rubric_freeze: "signed_commit"
   trusted_signers: []
 """,
     "aeros_state.yml": """current_stage: discovery

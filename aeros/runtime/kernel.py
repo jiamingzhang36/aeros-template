@@ -36,12 +36,19 @@ print = partial(print, flush=True)
 
 
 def find_project_root(start: Path) -> Path:
-    """Walk up from a contract path to the dir containing project_manifest.yml."""
+    """Walk up to a manifest, attached adapter, or Git project root."""
     for parent in [start, *start.parents]:
-        if (parent / "project_manifest.yml").exists():
+        if (
+            (parent / "project_manifest.yml").exists()
+            or (parent / ".aeros/project.yml").exists()
+            or (parent / ".aeros/adapter.yml").exists()
+        ):
+            return parent
+    for parent in [start, *start.parents]:
+        if (parent / ".git").exists():
             return parent
     raise FileNotFoundError(
-        "could not locate project root (no project_manifest.yml above "
+        "could not locate project root (no project manifest, .aeros adapter, or Git root above "
         f"{start})"
     )
 

@@ -1,0 +1,54 @@
+version: 1
+policy: AEROS-ENV-PROFILE-001
+principle: >
+  A task's environment is compiled from its typed ActionSpec. Project, task,
+  and runtime layers may only narrow the declared policy; they may not add
+  network, credential, read, write, promotion, or release authority.
+
+profiles:
+  capture:
+    network_policy: public_web_only
+    credential_policy: scrub_all
+    shell_environment_policy: clean_allowlist
+    read_roots: [discovery/, data/, work/, harness/, checks/, contracts/, docs/]
+    write_roots: [work/leads/, data/backfill/, data/probes/, discovery/literature/, audits/, quality_reports/, outputs/candidates/, outputs/.provenance/]
+    deny_roots: [data/raw/, data/intermediate/, data/processed/, paper/, tex/, evidence/claim_registry.md, decisions/approvals/, aeros/state/]
+    does_not_prove: [safe provider behavior, source admissibility, canonical admission, claim support]
+  analysis:
+    network_policy: deny
+    credential_policy: scrub_all
+    shell_environment_policy: clean_allowlist
+    read_roots: [data/, code/, contracts/, tasks/, checks/, harness/, outputs/, evidence/, docs/, work/, adoption/, decisions/]
+    write_roots: [outputs/, audits/, work/, data/intermediate/, contracts/generated/, adoption/, decisions/adoption/, evidence/research_graph.yml, evidence/result_index.csv]
+    deny_roots: [data/raw/, data/processed/, paper/, tex/, evidence/claim_registry.md, decisions/approvals/, aeros/state/]
+    does_not_prove: [restricted-data isolation, result admission, claim support, release approval]
+  manuscript:
+    network_policy: deny
+    credential_policy: scrub_all
+    shell_environment_policy: clean_allowlist
+    read_roots: [paper/, tex/, docs/, outputs/, evidence/, discovery/literature/, audits/]
+    write_roots: [work/manuscript_candidates/, outputs/reviews/, audits/manuscript/]
+    deny_roots: [data/, evidence/claim_registry.md, decisions/approvals/, aeros/state/]
+    does_not_prove: [canonical manuscript promotion, number correctness, claim approval]
+  reviewer:
+    network_policy: deny
+    credential_policy: scrub_all
+    shell_environment_policy: clean_allowlist
+    read_roots: [paper/, tex/, docs/, outputs/, evidence/, discovery/, audits/, checks/, harness/]
+    write_roots: []
+    deny_roots: [data/, decisions/, evidence/claim_registry.md, aeros/state/]
+    does_not_prove: [independent peer review, claim approval, release approval]
+  promotion:
+    network_policy: deny
+    credential_policy: human_injected_only
+    shell_environment_policy: approval_bound
+    read_roots: [outputs/, evidence/, paper/, tex/, docs/, audits/, decisions/]
+    write_roots: []
+    deny_roots: [data/raw/, aeros/state/]
+    requires_human_decision: true
+    does_not_prove: [human approval, signed authority, release completion]
+
+does_not_prove:
+  - "that a host OS, provider, or Codex version enforces every compiled field"
+  - "that public-web access is safe or a source is admissible"
+  - "that candidate acceptance promotes a result, claim, gate, or release"

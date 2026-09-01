@@ -22,8 +22,10 @@ from .campaign import (
     match_campaign_scope,
 )
 from .contract import Contract
+from .current_work import load_current_work_context
 from .output_intent import contract_output_intents
 from .owner_decisions import evaluate_owner_decision_rules
+from .research_risk import compile_research_risk
 from .skill_obligation import infer_skill_obligations, obligation_classes
 from .source_capture_permission import classify_source_capture_permission
 from . import state as state_mod
@@ -226,6 +228,62 @@ def _reuse_decision(root: Path, contract: Contract | None) -> dict[str, Any]:
     return base
 
 
+def _startup_brief(root: Path, *, intent: str, lane: str, reuse_decision: dict[str, Any]) -> dict[str, Any]:
+    """Expose the one project-level signal an agent must acknowledge first.
+
+    This is deliberately a derived, read-only projection.  It makes the
+    current objective and any deterministic P0 research risk visible before a
+    task starts; it neither blocks a user-directed task nor certifies that the
+    selected risk is the scientifically best one.
+    """
+    current_work = load_current_work_context(root)
+    risk_report = compile_research_risk(root)
+    top_risk = risk_report.get("top_risk") or {}
+    priority_order = list(current_work.get("priority_order") or [])
+    current_priority = priority_order[0] if priority_order else ""
+    risk_severity = str(top_risk.get("severity") or "none")
+    attention_required = risk_severity == "p0"
+    if top_risk:
+        recommended_action = str(top_risk.get("recommended_action") or "Review the top research risk before starting unrelated work.")
+        command = str(top_risk.get("command") or "")
+        stop_condition = str(top_risk.get("stop_condition") or "Stop after the risk is classified or explicitly deferred by the human.")
+        source = str(top_risk.get("source") or "aeros.runtime.research_risk")
+    elif not bool(reuse_decision.get("should_execute", True)):
+        recommended_action = str(reuse_decision.get("recommended_action") or "Revalidate or reuse accepted artifacts before rerunning.")
+        command = str(reuse_decision.get("recommended_action") or "")
+        stop_condition = "Stop after reuse or free revalidation is resolved; do not rerun an unchanged task first."
+        source = "aeros.runtime.task_preflight.reuse_decision"
+    else:
+        recommended_action = current_priority or "Proceed with the bounded task intent after reviewing its envelope."
+        command = ""
+        stop_condition = "Stop at the task preflight boundary before changing lane, canonical state, claims, or human decisions."
+        source = str(current_work.get("source_path") or "task_preflight")
+    return {
+        "status": "ATTENTION_REQUIRED" if attention_required else "READY",
+        "intent": intent,
+        "current_goal": str(current_work.get("active_goal") or ""),
+        "current_deliverable": str(current_work.get("active_deliverable") or ""),
+        "current_priority": current_priority,
+        "current_lane": str(current_work.get("active_lane") or lane),
+        "highest_research_risk": {
+            "risk_id": str(top_risk.get("risk_id") or ""),
+            "severity": risk_severity,
+            "why": str(top_risk.get("why") or ""),
+            "outranks": list(top_risk.get("outranks") or []),
+        } if top_risk else None,
+        "recommended_action": recommended_action,
+        "command": command,
+        "stop_condition": stop_condition,
+        "source": source,
+        "must_acknowledge_before_unrelated_work": attention_required,
+        "does_not_prove": [
+            "that the top risk is the scientifically optimal next action",
+            "that a user-directed task is forbidden",
+            "that risk resolution approves a gate, claim, paper, or release",
+        ],
+    }
+
+
 def build_task_preflight(
     root: Path,
     *,
@@ -392,6 +450,12 @@ def build_task_preflight(
                 "recommended_action": "continue outside campaign control",
             }
     campaign_breakers = list(campaign.get("breakers") or [])
+    startup_brief = _startup_brief(
+        root,
+        intent=intent,
+        lane=effective_lane,
+        reuse_decision=reuse_decision,
+    )
     stop_reasons = [
         "route is pending and task is route-sensitive",
         "skill obligations cannot be used or waived",
@@ -420,6 +484,7 @@ def build_task_preflight(
         "skill_obligations": obligations,
         "skill_use_contract": skill_use_contract,
         "reuse_decision": reuse_decision,
+        "startup_brief": startup_brief,
         "output_intents": output_intents,
         "source_capture_permission": permission,
         "owner_decision_status": owner_decisions.get("status"),
@@ -442,8 +507,24 @@ def build_task_preflight(
 
 
 def format_task_preflight(report: dict[str, Any]) -> str:
+    brief = report.get("startup_brief") or {}
+    risk = brief.get("highest_research_risk") or {}
     lines = [
         "# AEROS Task Start Preflight",
+        "",
+        "## Startup Brief",
+        f"startup_status: {brief.get('status')}",
+        f"current_goal: {brief.get('current_goal')}",
+        f"current_deliverable: {brief.get('current_deliverable')}",
+        f"current_priority: {brief.get('current_priority')}",
+        f"current_lane: {brief.get('current_lane')}",
+        f"highest_research_risk: {risk.get('risk_id')}",
+        f"highest_risk_severity: {risk.get('severity')}",
+        f"highest_risk_why: {risk.get('why')}",
+        f"recommended_action: {brief.get('recommended_action')}",
+        f"recommended_command: {brief.get('command')}",
+        f"startup_stop_condition: {brief.get('stop_condition')}",
+        f"must_acknowledge_before_unrelated_work: {brief.get('must_acknowledge_before_unrelated_work')}",
         "",
         f"status: {report.get('status')}",
         f"task_mode: {report.get('task_mode')}",

@@ -29,6 +29,7 @@ data/snapshots/*
 # Generated outputs can be committed selectively when needed.
 outputs/logs/*.log
 outputs/harness_receipts/*.json
+outputs/context/episodes/
 
 # Large model artifacts are usually regenerated or archived separately.
 outputs/model_outputs/*
@@ -39,7 +40,10 @@ discovery/literature/pdfs/*
 !discovery/literature/pdfs/.gitkeep
 
 # Local check artifacts.
-.aeros/
+.aeros/*
+!.aeros/project.yml
+!.aeros/adapter.yml
+!.aeros/attachment.yml
 outputs/logs/rigor_check_latest.*
 
 # Local validation projects not promoted to template fixtures.

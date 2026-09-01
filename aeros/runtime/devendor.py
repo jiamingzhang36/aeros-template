@@ -5,12 +5,18 @@ from hashlib import sha256
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from typing import Any
+import shutil
 import subprocess
 import yaml
 
+from .project_adapter import detect_project_adapter, write_project_adapter
+
 VENDORED_SURFACES = ("aeros", "checks", "harness", "templates", "tools", "tests")
 ATTACHMENT_MANIFEST = ".aeros/attachment.yml"
-ATTACHMENT_MANAGED_PATHS = (".aeros/project.yml", "aeros.lock")
+LEGACY_ATTACHMENT_MANAGED_PATHS = (".aeros/project.yml", "aeros.lock")
+ATTACHMENT_MANAGED_PATHS = (*LEGACY_ATTACHMENT_MANAGED_PATHS, ".aeros/adapter.yml")
+ATTACHMENT_CONTEXT_ROOT = Path(".aeros/context")
+ATTACHMENT_CONTEXT_MARKER = ATTACHMENT_CONTEXT_ROOT / ".aeros-managed.json"
 
 
 def installed_version() -> str:
@@ -36,6 +42,37 @@ def _file_hash(path: Path) -> str:
     return sha256(path.read_bytes()).hexdigest()
 
 
+def _removable_context_state(root: Path) -> tuple[bool, list[str]]:
+    """Return whether all package-mode context records are AEROS-owned.
+
+    An attachment may safely remove its own compact episode records, but it
+    must retain a similarly named directory if a user added any unknown file.
+    """
+    context_root = root / ATTACHMENT_CONTEXT_ROOT
+    marker = root / ATTACHMENT_CONTEXT_MARKER
+    if not marker.exists():
+        return False, []
+    try:
+        payload = yaml.safe_load(marker.read_text(encoding="utf-8")) or {}
+    except (OSError, yaml.YAMLError):
+        return False, [ATTACHMENT_CONTEXT_MARKER.as_posix()]
+    if not isinstance(payload, dict) or payload.get("managed_by") != "aeros_context_episode":
+        return False, [ATTACHMENT_CONTEXT_MARKER.as_posix()]
+
+    unknown: list[str] = []
+    known_episode_records = {"opened.json", "closed.json", "superseded.json"}
+    for candidate in context_root.rglob("*"):
+        if candidate.is_dir() or candidate == marker:
+            continue
+        relative = candidate.relative_to(context_root)
+        parts = relative.parts
+        is_active_pointer = len(parts) == 3 and parts[:2] == ("episodes", "active") and candidate.suffix == ".json"
+        is_episode_record = len(parts) == 3 and parts[0] == "episodes" and parts[1] != "active" and parts[2] in known_episode_records
+        if not (is_active_pointer or is_episode_record):
+            unknown.append(candidate.relative_to(root).as_posix())
+    return not unknown, unknown
+
+
 def prepare_package_mode(root: Path, *, policy_bundle_version: str = "aeros-policy-v1") -> tuple[Path, Path]:
     config_path = root / ".aeros/project.yml"
     lock_path = root / "aeros.lock"
@@ -46,7 +83,10 @@ def prepare_package_mode(root: Path, *, policy_bundle_version: str = "aeros-poli
         "schema_version": int(config.get("schema_version") or 1),
         "runtime_mode": "hybrid" if vendored else "package",
         "policy_bundle_version": str(config.get("policy_bundle_version") or policy_bundle_version),
-        "project_manifest": str(config.get("project_manifest") or "project_manifest.yml"),
+        "project_manifest": str(
+            config.get("project_manifest")
+            or ("project_manifest.yml" if (root / "project_manifest.yml").exists() else "")
+        ),
     })
     config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
     lock = {
@@ -71,8 +111,6 @@ def attach_package_mode(root: Path, *, policy_bundle_version: str = "aeros-polic
     conflicts = [rel for rel in (*ATTACHMENT_MANAGED_PATHS, ATTACHMENT_MANIFEST) if (root / rel).exists()]
     vendored = [name for name in VENDORED_SURFACES if (root / name).exists()]
     failures: list[str] = []
-    if not (root / "project_manifest.yml").is_file():
-        failures.append("missing project_manifest.yml")
     if conflicts:
         failures.append("existing AEROS metadata: " + ", ".join(conflicts))
     if vendored:
@@ -83,6 +121,9 @@ def attach_package_mode(root: Path, *, policy_bundle_version: str = "aeros-polic
             "does_not_prove": ["package compatibility", "research validity", "safe removal of an existing migration"],
         }
     config_path, lock_path = prepare_package_mode(root, policy_bundle_version=policy_bundle_version)
+    adapter = detect_project_adapter(root)
+    adapter["runtime_mode"] = "package"
+    adapter_path = write_project_adapter(root, adapter)
     records = [{"path": rel, "sha256": _file_hash(root / rel)} for rel in ATTACHMENT_MANAGED_PATHS]
     manifest_path.write_text(yaml.safe_dump({
         "schema_version": 1,
@@ -92,7 +133,12 @@ def attach_package_mode(root: Path, *, policy_bundle_version: str = "aeros-polic
     }, sort_keys=False), encoding="utf-8")
     return {
         "status": "PASS", "attached": True,
-        "created": [str(config_path.relative_to(root)), str(lock_path.relative_to(root)), ATTACHMENT_MANIFEST],
+        "created": [
+            str(config_path.relative_to(root)),
+            str(lock_path.relative_to(root)),
+            str(adapter_path.relative_to(root)),
+            ATTACHMENT_MANIFEST,
+        ],
         "does_not_prove": ["scientific validity", "policy compatibility", "release readiness"],
     }
 
@@ -118,7 +164,8 @@ def detach_package_mode(root: Path, *, confirm: bool = False) -> dict[str, Any]:
         return {"status": "ATTENTION", "detached": False, "would_remove": [], "failures": [f"invalid attachment manifest: {exc}"], "does_not_prove": ["safe detachment"]}
     records = payload.get("managed_files") if isinstance(payload, dict) else None
     expected = {str(item.get("path")): str(item.get("sha256")) for item in records or [] if isinstance(item, dict)}
-    if tuple(expected) != ATTACHMENT_MANAGED_PATHS or any(not expected[rel] for rel in ATTACHMENT_MANAGED_PATHS):
+    managed_paths = tuple(expected)
+    if managed_paths not in {LEGACY_ATTACHMENT_MANAGED_PATHS, ATTACHMENT_MANAGED_PATHS} or any(not expected[rel] for rel in managed_paths):
         return {
             "status": "ATTENTION", "detached": False, "would_remove": [],
             "failures": ["attachment manifest does not match the fixed package metadata allowlist"],
@@ -127,7 +174,7 @@ def detach_package_mode(root: Path, *, confirm: bool = False) -> dict[str, Any]:
     unchanged: list[str] = []
     missing: list[str] = []
     modified: list[str] = []
-    for rel in ATTACHMENT_MANAGED_PATHS:
+    for rel in managed_paths:
         path = root / rel
         if not path.exists():
             missing.append(rel)
@@ -135,18 +182,26 @@ def detach_package_mode(root: Path, *, confirm: bool = False) -> dict[str, Any]:
             unchanged.append(rel)
         else:
             modified.append(rel)
+    removable_context, retained_context_state = _removable_context_state(root)
+    would_remove = [*unchanged, *missing, ATTACHMENT_MANIFEST]
+    if removable_context:
+        would_remove.append(f"{ATTACHMENT_CONTEXT_ROOT.as_posix()}/")
     report = {
         "status": "DRY_RUN" if not modified else "ATTENTION",
         "detached": False,
-        "would_remove": [*unchanged, *missing, ATTACHMENT_MANIFEST],
+        "would_remove": would_remove,
         "retained_modified": modified,
         "does_not_prove": ["that the installed package is uninstalled", "scientific validity", "safe removal of user-modified metadata"],
     }
+    if retained_context_state:
+        report["retained_context_state"] = retained_context_state
     if not confirm or modified:
         return report
     for rel in unchanged:
         (root / rel).unlink()
     manifest_path.unlink()
+    if removable_context:
+        shutil.rmtree(root / ATTACHMENT_CONTEXT_ROOT)
     aeros_dir = root / ".aeros"
     try:
         aeros_dir.rmdir()
@@ -175,8 +230,24 @@ def inspect_migration(root: Path) -> dict[str, Any]:
 def doctor_package_mode(root: Path) -> dict[str, Any]:
     config = _project_config(root)
     lock_path = root / "aeros.lock"
+    configured_mode = str(config.get("runtime_mode") or "").strip().lower()
+    vendored = [name for name in VENDORED_SURFACES if (root / name).exists()]
+    inferred_mode = "hybrid" if vendored and lock_path.exists() else "vendored" if vendored else "package" if lock_path.exists() else "unknown"
+    runtime_mode = configured_mode if configured_mode in {"package", "vendored", "hybrid"} else inferred_mode
+    if runtime_mode == "vendored":
+        return {
+            "status": "PASS",
+            "runtime_mode": "vendored",
+            "failures": [],
+            "warnings": ["project uses its vendored AEROS runtime; use sync doctor for template drift"],
+            "aeros_version": "project-vendored",
+            "runtime_identity": "project-vendored",
+            "imported_runtime": str(Path(__file__).resolve()),
+            "vendored_surfaces_present": vendored,
+            "does_not_prove": ["template freshness", "scientific validity", "release readiness"],
+        }
     failures: list[str] = []
-    if config.get("runtime_mode") not in {"package", "hybrid"}: failures.append(".aeros/project.yml runtime_mode is not package or hybrid")
+    if runtime_mode not in {"package", "hybrid"}: failures.append("project is not attached to package or vendored AEROS runtime")
     if not lock_path.exists(): failures.append("missing aeros.lock")
     lock = yaml.safe_load(lock_path.read_text(encoding="utf-8")) or {} if lock_path.exists() else {}
     if str(lock.get("aeros_version") or "") != installed_version(): failures.append("installed AEROS version differs from aeros.lock")
@@ -184,10 +255,19 @@ def doctor_package_mode(root: Path) -> dict[str, Any]:
     imported = Path(__file__).resolve()
     try: imported.relative_to(root.resolve()); imported_from_project = True
     except ValueError: imported_from_project = False
-    if imported_from_project: failures.append("AEROS runtime is still imported from the project vendored tree")
+    warnings: list[str] = []
+    if imported_from_project and runtime_mode == "package":
+        failures.append("AEROS runtime is still imported from the project vendored tree")
+    elif imported_from_project and runtime_mode == "hybrid":
+        warnings.append("hybrid mode is using a project-vendored runtime; package metadata is validated but migration is incomplete")
+    status = "PASS" if not failures else "ATTENTION"
+    if status == "PASS" and runtime_mode == "hybrid":
+        status = "MIGRATION_ACTIVE"
     return {
-        "status": "PASS" if not failures else "ATTENTION",
+        "status": status,
+        "runtime_mode": runtime_mode,
         "failures": failures,
+        "warnings": warnings,
         "aeros_version": installed_version(),
         "runtime_identity": runtime_identity(),
         "imported_runtime": str(imported),

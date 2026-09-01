@@ -29,6 +29,7 @@ SECURE_DEFAULT_MINIMUMS = {
     "gate_approval": "signed_commit",
     "gate_apply": "signed_commit",
     "claim_upgrade": "signed_commit",
+    "rubric_freeze": "signed_commit",
     "release": "signed_commit",
 }
 

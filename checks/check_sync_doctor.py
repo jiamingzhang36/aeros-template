@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from aeros.runtime.devendor import installed_version
+from aeros.runtime.project_adapter import attach_project, detect_project_adapter
 from aeros.runtime.sync_doctor import CAPABILITIES, CAPABILITY_EXEMPT_CHECKS, diagnose_project, sync_doctor
 from checks.run_harness_checks import CHECKS
 
@@ -124,6 +126,39 @@ def main() -> int:
             failures.append("fixture: explicit hybrid runtime mode was not preserved")
         if ((hybrid.get("capabilities") or {}).get("devendor_package") or {}).get("status") != "migration_active":
             failures.append("fixture: hybrid migration should be visible without a false missing capability")
+    with tempfile.TemporaryDirectory(prefix="aeros_sync_doctor_package_") as tmp:
+        project = Path(tmp) / "project"
+        project.mkdir()
+        (project / ".aeros").mkdir()
+        (project / ".aeros/project.yml").write_text(
+            "schema_version: 1\nruntime_mode: package\npolicy_bundle_version: aeros-policy-v1\n",
+            encoding="utf-8",
+        )
+        (project / "aeros.lock").write_text(
+            f"schema_version: 1\naeros_version: {installed_version()}\n"
+            "policy_bundle_version: aeros-policy-v1\n",
+            encoding="utf-8",
+        )
+        (project / ".aeros/adapter.yml").write_text("schema_version: 1\nadapter_id: aeros.generic.project\n", encoding="utf-8")
+        package = diagnose_project(ROOT, project)
+        if package.get("runtime_mode") != "package" or package.get("missing_capabilities") or package.get("outdated_capabilities"):
+            failures.append("fixture: package-mode project should be checked through installed runtime, not vendored file presence")
+        if any((row or {}).get("status") != "package_managed" for row in (package.get("capabilities") or {}).values()):
+            failures.append("fixture: package-mode capabilities should be marked package_managed")
+    with tempfile.TemporaryDirectory(prefix="aeros_project_adapter_") as tmp:
+        project = Path(tmp) / "plain"
+        project.mkdir()
+        (project / ".git").mkdir()
+        (project / "paper").mkdir()
+        (project / "paper/draft.md").write_text("draft\n", encoding="utf-8")
+        preview = attach_project(project, dry_run=True)
+        if preview.get("status") != "DRY_RUN" or ".aeros/adapter.yml" not in (preview.get("would_create") or []):
+            failures.append("fixture: generic project dry-run did not produce adapter preview")
+        if (project / ".aeros").exists():
+            failures.append("fixture: adapter dry-run wrote project metadata")
+        detected = detect_project_adapter(project)
+        if detected.get("project_kind") != "research_project" or "paper" not in (detected.get("path_map") or {}).get("manuscript", []):
+            failures.append("fixture: generic project adapter did not detect manuscript surface")
     if "--json" in sys.argv:
         print(json.dumps({"status": "fail" if failures else "pass", "failures": failures}, ensure_ascii=False))
     elif failures:

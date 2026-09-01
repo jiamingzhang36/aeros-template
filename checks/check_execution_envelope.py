@@ -34,6 +34,12 @@ def _repo() -> Path:
     _run(tmp, ["git", "config", "user.email", "aeros@example.test"])
     _run(tmp, ["git", "config", "user.name", "aeros-test"])
     shutil.copytree(ROOT / "aeros", tmp / "aeros", ignore=shutil.ignore_patterns("__pycache__"))
+    # The fixture vendors the policy needed by EnvironmentProfile compilation,
+    # but intentionally omits the full adaptive-check catalog.  It is not a
+    # complete research project, so deterministic task execution must retain
+    # its explicit contract check rather than selecting absent project checks.
+    (tmp / "harness").mkdir()
+    shutil.copy2(ROOT / "harness/environment_profiles.yml", tmp / "harness/environment_profiles.yml")
     if (ROOT / "project_manifest.yml").exists():
         shutil.copy2(ROOT / "project_manifest.yml", tmp / "project_manifest.yml")
     _write(tmp / "scripts/good.py", "from pathlib import Path\nPath('outputs/envelope/allowed.txt').parent.mkdir(parents=True, exist_ok=True)\nPath('outputs/envelope/allowed.txt').write_text('allowed\\n')\n")
@@ -261,11 +267,11 @@ def main() -> int:
         failures.append(f"read-only safe check copied outputs: {read_only.accepted_outputs}")
 
     next_spec = declared_action_spec(
-        kind="next_action_preview",
+        kind="cli_help_preview",
         effect_class="read_only",
         lane="harness",
-        command=f"{sys.executable} -m aeros.cli next --json",
-        stop_condition="stop after emitting JSON",
+        command=f"{sys.executable} -m aeros.cli --help",
+        stop_condition="stop after emitting CLI help",
         capabilities=("read_project_state",),
     )
     next_result = execute_action_spec_in_isolated_worktree(repo, next_spec, timeout_seconds=30)

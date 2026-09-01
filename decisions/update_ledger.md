@@ -2718,3 +2718,25 @@ committed, backfill this pending entry and append a final hash-chain record.
 - **Does not prove**: skill use; correctness of a reported finding; scientific validity; citation entailment; claim, gate, promotion, submission, or release authority.
 - **Drift risk**: The plan is a small deterministic mapping, not a semantic planner. New skills must be added deliberately to the mapping only when they improve a measured research action.
 - **Next check**: Run the targeted drive and skill checks, then the smoke/full harness; backfill the functional commit and append its ledger hash-chain record.
+
+## 2026-08-11 — Add reduction-first NODIUJ agent scope review
+
+- **Commit(s)**: pending
+- **Change type**: agent instruction / scope control / anti-overengineering
+- **Action**: Added a shared NODIUJ review to the root and lane-level agent instructions. Before a new runtime surface, policy, check, registry, task mode, workflow preset, or cross-lane expansion, agents must assess necessity, over-engineering, duplication, reachability, unrequested utility, and maintenance justification. Bounded bug fixes remain lightweight; new-surface decisions must be recorded in a plan or run report.
+- **Validation**: Instruction-surface validation remains required.
+- **Non-goal**: Do not create a runtime gate, require six fields for routine edits, add approval friction to ordinary fixes, or weaken existing evidence and authority constraints.
+- **Does not prove**: that an agent will make optimal design choices; scientific validity; project value; claim support; or human approval.
+- **Drift risk**: The gate must remain a reduction heuristic, not grow into another mandatory process layer.
+- **Next check**: Run agent-instruction and smoke checks; backfill the functional commit and append its ledger hash-chain record.
+
+## 2026-09-01 — Unify project-adaptable runtime, context, environment, and rubric boundaries
+
+- **Commit(s)**: pending
+- **Change type**: runtime integration / project attachment / context and execution safety
+- **Action**: Added metadata-only generic project attachment and package-mode diagnostics; compiled typed ActionSpecs into monotonic environment profiles that narrow ExecutionEnvelopes; made AEROS advice record compact context episodes without raw transcripts; added a human-frozen ExecutableRubric vertical slice for `data_probe`; and made task preflight surface a deterministic startup brief so P0 research risk is visible before project work begins. Added the NODIUJ reduction-first instruction across root and lane guidance.
+- **Validation**: Targeted adapter, environment, context, execution-envelope, ResearchJob, ExecutableRubric, and task-preflight checks; smoke/full harness before commit.
+- **Non-goal**: Do not claim OS-level sandbox enforcement for every provider, auto-freeze scientific assumptions, certify research validity, or turn context episodes into completion evidence.
+- **Does not prove**: optimal research prioritization; external human identity; source admissibility; claim support; gate approval; paper readiness; or release authorization.
+- **Drift risk**: Generic attachment must remain metadata-first; environment profiles may only narrow ActionSpec/ExecutionEnvelope authority; context episodes remain compact ephemeral history; and rubric support stays limited to the tested `data_probe` slice until another slice is explicitly specified and verified.
+- **Next check**: Backfill the functional commit, append the ledger hash-chain record, then run package-mode attachment and real-project rollout tests separately. If episode storage is unavailable, verify the explicit `EPHEMERAL_UNPERSISTED` advice basis rather than treating advice as unavailable.

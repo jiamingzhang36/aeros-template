@@ -9,6 +9,8 @@ Core evidence and governance rules are in:
 - [discovery/AGENTS.md](../AGENTS.md)
 - [harness/common_rules.md](../../harness/common_rules.md)
 
+Before adding a literature queue, extraction schema, retrieval policy, or citation check, apply the root `NODIUJ` Scope and Complexity Gate. Reuse the current registry, extraction-card, and risk-tier mechanisms unless the new surface addresses an observed gap.
+
 ## Hard Rules
 
 Apply the full source-grounded rules in [discovery/literature/literature_rules.md](literature_rules.md), and keep them aligned with the shared governance rules above.

@@ -11,6 +11,8 @@ from dataclasses import asdict, dataclass, field
 from hashlib import sha256
 from typing import Any
 
+from .environment_profile import compile_environment_profile, validate_environment_profile
+
 
 EFFECT_CLASSES = {
     "read_only",
@@ -40,6 +42,8 @@ class ActionSpec:
     idempotency_key: str = ""
     producer_mode: str = "declared"
     runtime_profile: str = ""
+    environment_profile: dict[str, Any] = field(default_factory=dict)
+    environment_approval_fingerprint: str = ""
     resource_budget: dict[str, str] = field(default_factory=dict)
     authority_boundary: dict[str, str] = field(default_factory=dict)
     preconditions: tuple[str, ...] = ()
@@ -54,6 +58,25 @@ class ActionSpec:
         "gate approval",
         "paper readiness",
     )
+
+    def __post_init__(self) -> None:
+        data = {
+            "kind": self.kind,
+            "lane": self.lane,
+            "effect_class": self.effect_class,
+            "campaign_id": self.campaign_id,
+            "capabilities": self.capabilities,
+            "expected_outputs": self.expected_outputs,
+            "authority_boundary": self.authority_boundary,
+        }
+        profile = self.environment_profile or compile_environment_profile(data)
+        object.__setattr__(self, "environment_profile", profile)
+        digest = str(profile.get("policy_digest") or "")
+        fingerprint = str(profile.get("approval_fingerprint") or "")
+        object.__setattr__(self, "environment_approval_fingerprint", self.environment_approval_fingerprint or fingerprint)
+        base_key = self.idempotency_key or self.id
+        if digest and not base_key.endswith(":" + digest[:12]):
+            object.__setattr__(self, "idempotency_key", f"{base_key}:{digest[:12]}")
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
@@ -361,4 +384,9 @@ def validate_action_spec(spec: ActionSpec | dict[str, Any]) -> list[str]:
         failures.append("ActionSpec post_run_hooks must be a list")
     if data.get("execution_envelope") and not isinstance(data.get("execution_envelope"), dict):
         failures.append("ActionSpec execution_envelope must be a mapping when present")
+    profile = data.get("environment_profile")
+    if profile:
+        failures.extend(validate_environment_profile(profile))
+    if not str(data.get("environment_approval_fingerprint") or "").strip():
+        failures.append("ActionSpec missing environment_approval_fingerprint")
     return failures

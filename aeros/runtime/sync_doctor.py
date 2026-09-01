@@ -47,6 +47,7 @@ CAPABILITIES: dict[str, list[str]] = {
     "authority_evidence": ["aeros/runtime/authority.py", "harness/authority_evidence_policy.yml", "checks/check_authority_evidence.py", "checks/check_authority_lifecycle_e2e.py"],
     "artifact_semantics": ["aeros/runtime/artifact_semantics.py", "harness/artifact_semantics_policy.yml", "checks/check_artifact_semantics.py"],
     "research_job_compiler": ["aeros/runtime/research_job.py", "aeros/runtime/job_actions.py", "templates/research_job_data_probe.yml", "checks/check_research_job_compiler.py", "checks/check_specification_run.py"],
+    "executable_rubric": ["aeros/runtime/executable_rubric.py", "aeros/runtime/research_job.py", "checks/check_executable_rubric.py", "aeros/cli.py"],
     "heavy_run_single_flight": ["aeros/runtime/heavy_run.py", "templates/heavy_jobs.yml", "checks/check_heavy_run.py", "aeros/cli.py"],
     "adaptive_checks": ["aeros/runtime/adaptive_checks.py", "harness/adaptive_checks.yml", "checks/check_adaptive_checks.py"],
     "risk_based_completion_review": [
@@ -186,6 +187,27 @@ def diagnose_project(template_root: Path, project_root: Path) -> dict[str, Any]:
     missing_capabilities: list[str] = []
     outdated_capabilities: list[str] = []
     runtime_mode = _project_runtime_mode(project_root)
+    if runtime_mode == "package":
+        from .devendor import doctor_package_mode
+
+        package_report = doctor_package_mode(project_root)
+        capabilities = {
+            capability: {
+                "status": "package_managed",
+                "files": [],
+                "reason": "runtime and policy surface are supplied by the installed AEROS package",
+            }
+            for capability in CAPABILITIES
+        }
+        return {
+            "project": project_root.as_posix(),
+            "runtime_mode": runtime_mode,
+            "status": "PASS" if package_report.get("status") == "PASS" else "ATTENTION",
+            "missing_capabilities": [],
+            "outdated_capabilities": [],
+            "package_runtime": package_report,
+            "capabilities": capabilities,
+        }
     for capability, rels in CAPABILITIES.items():
         if capability == "devendor_package" and runtime_mode in {"vendored", "hybrid"}:
             status = "not_applicable" if runtime_mode == "vendored" else "migration_active"

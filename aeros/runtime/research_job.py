@@ -9,6 +9,7 @@ import shlex
 import yaml
 
 from .action_spec import ActionSpec
+from .executable_rubric import rubric_skeleton_for_job, validate_executable_rubric
 from .execution_envelope import ExecutionEnvelope
 
 
@@ -27,6 +28,7 @@ class CompiledResearchJob:
     task_contract: dict[str, Any]
     action_spec: ActionSpec
     execution_envelope: ExecutionEnvelope
+    executable_rubric: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -34,6 +36,7 @@ class CompiledResearchJob:
             "task_contract": self.task_contract,
             "action_spec": self.action_spec.to_dict(),
             "execution_envelope": self.execution_envelope.to_dict(),
+            "executable_rubric": self.executable_rubric,
         }
 
 
@@ -93,6 +96,9 @@ def compile_research_job(job: ResearchJob) -> CompiledResearchJob:
             runtime_profile=envelope.runtime_profile, execution_envelope=envelope.to_dict(),
             authority_boundary={"claim":"none","release":"none","canonical":"none","human_decision_required":"false"},
         )
+        # ExecutableRubric v1 deliberately covers data_probe only. Candidate
+        # specification runs retain their existing RunBundle/acceptance path
+        # until a specification-specific scientific rubric is defined.
         return CompiledResearchJob(job, task, action, envelope)
     output = f"audits/data_probe/{slug}.json"
     validation = f"audits/data_probe/{slug}_validation.json"
@@ -128,7 +134,7 @@ def compile_research_job(job: ResearchJob) -> CompiledResearchJob:
         runtime_profile=envelope.runtime_profile, execution_envelope=envelope.to_dict(),
         authority_boundary={"claim":"none","release":"none","canonical":"none","human_decision_required":"false"},
     )
-    return CompiledResearchJob(job, task, action, envelope)
+    return CompiledResearchJob(job, task, action, envelope, rubric_skeleton_for_job(job))
 
 
 def validate_compilation(compiled: CompiledResearchJob) -> list[str]:
@@ -141,6 +147,8 @@ def validate_compilation(compiled: CompiledResearchJob) -> list[str]:
     for root in compiled.execution_envelope.write_roots:
         if not any(out.startswith(root.rstrip('/') + '/') or out == root.rstrip('/') for out in action_outputs):
             failures.append(f"ExecutionEnvelope write root {root} is not bounded by expected outputs")
+    if compiled.executable_rubric:
+        failures.extend(f"ExecutableRubric: {failure}" for failure in validate_executable_rubric(compiled.executable_rubric))
     return failures
 
 
@@ -151,4 +159,8 @@ def write_compiled_job(root: Path, compiled: CompiledResearchJob) -> list[Path]:
     paths[0].write_text(yaml.safe_dump(compiled.task_contract, sort_keys=False), encoding="utf-8")
     paths[1].write_text(json.dumps(compiled.action_spec.to_dict(), indent=2) + "\n", encoding="utf-8")
     paths[2].write_text(json.dumps(compiled.execution_envelope.to_dict(), indent=2) + "\n", encoding="utf-8")
+    if compiled.executable_rubric:
+        rubric_path = base.with_suffix(".rubric.yml")
+        rubric_path.write_text(yaml.safe_dump(compiled.executable_rubric, sort_keys=False, allow_unicode=True), encoding="utf-8")
+        paths.append(rubric_path)
     return paths

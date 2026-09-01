@@ -31,6 +31,13 @@ from .runtime.collection import collect_prompt_grid, resolve_config
 from .runtime.contract import load_contract
 from .runtime.controller_loop import ControllerLoopArgs, format_run_until, run_until, run_until_json
 from .runtime.context_bundle import build_context_bundle, format_context_bundle, write_context_bundle
+from .runtime.context_episode import (
+    close_context_episode,
+    context_episode_status,
+    ensure_advice_context,
+    format_context_episode,
+    open_context_episode,
+)
 from .runtime.cockpit import build_cockpit, format_cockpit, write_cockpit
 from .runtime.controller import run_iteration
 from .runtime import identity
@@ -73,6 +80,22 @@ def _display_rel(path: str | Path, root: Path) -> str:
         return p.resolve().relative_to(root.resolve()).as_posix()
     except Exception:
         return p.as_posix()
+
+
+def _advice_context(root: Path, *, lane: str, entrypoint: str, goal: str = "") -> dict[str, object]:
+    """Fail closed before printing project-level advice without fresh context."""
+    try:
+        return ensure_advice_context(root, lane=lane or "project", goal=goal, entrypoint=entrypoint)
+    except (OSError, ValueError) as exc:
+        raise RuntimeError(f"CONTEXT_REQUIRED: unable to record fresh scoped context: {exc}") from exc
+
+
+def _format_advice_context(basis: dict[str, object]) -> str:
+    return (
+        f"\ncontext_episode: {basis.get('episode_id', '')} "
+        f"(lane={basis.get('lane', 'project')}, status={basis.get('status', '')}, "
+        f"reused={basis.get('reused', False)})"
+    )
 
 
 def _cmd_run(args: argparse.Namespace) -> int:
@@ -409,6 +432,29 @@ def _cmd_status(args: argparse.Namespace) -> int:
 
 def _cmd_context(args: argparse.Namespace) -> int:
     root = _project_root()
+    if args.episode_status:
+        report = context_episode_status(root, episode_id=args.episode_id, conversation_id=args.conversation_id)
+        print(json.dumps(report, indent=2, ensure_ascii=False) if args.json else format_context_episode(report))
+        return 0 if report.get("status") != "UNREADABLE" else 1
+    if args.close:
+        try:
+            report = close_context_episode(
+                root,
+                episode_id=args.episode_id,
+                conversation_id=args.conversation_id,
+                summary=args.summary,
+                work_items=args.work_item or [],
+                artifact_paths=args.artifact or [],
+                receipt_paths=args.receipt or [],
+                blockers=args.blocker or [],
+                next_action=args.next_action,
+                outcome=args.outcome,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"CONTEXT_CLOSE_REFUSED: {exc}")
+            return 2
+        print(json.dumps(report, indent=2, ensure_ascii=False) if args.json else format_context_episode(report))
+        return 0
     bundle = build_context_bundle(root, lane=args.lane or "project", brief=args.brief)
     if args.stale:
         stale = bundle.get("context_staleness") or {}
@@ -421,10 +467,29 @@ def _cmd_context(args: argparse.Namespace) -> int:
             for rel in changed:
                 print(f"  - {rel}")
         return 1 if stale.get("stale") else 0
+    episode = None
+    should_open_episode = args.open or (args.brief and not args.write)
+    if should_open_episode:
+        try:
+            episode = open_context_episode(
+                root,
+                lane=args.lane or "project",
+                goal=args.goal,
+                entrypoint="context_brief" if not args.open else "context",
+                conversation_id=args.conversation_id,
+                tracked_artifacts=args.track_artifact or [],
+                bundle=bundle,
+            )
+        except (OSError, ValueError) as exc:
+            print(f"CONTEXT_OPEN_REFUSED: {exc}")
+            return 2
     if args.json:
-        print(json.dumps(bundle, indent=2, ensure_ascii=False))
+        payload: object = bundle if episode is None else {"context_bundle": bundle, "context_episode": episode}
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
     else:
         print(format_context_bundle(bundle, brief=args.brief))
+        if episode is not None:
+            print(format_context_episode(episode))
     if args.write:
         md_path, json_path = write_context_bundle(root, bundle)
         print(f"wrote {md_path.relative_to(root)}")
@@ -434,11 +499,18 @@ def _cmd_context(args: argparse.Namespace) -> int:
 
 def _cmd_next(args: argparse.Namespace) -> int:
     root = _project_root()
+    try:
+        context_basis = _advice_context(root, lane=args.lane or "project", entrypoint="next")
+    except RuntimeError as exc:
+        print(str(exc))
+        return 2
     action = compute_next_action(root, lane=args.lane or "")
     if args.json:
-        print(json.dumps(action.to_dict(), indent=2, ensure_ascii=False))
+        payload = action.to_dict()
+        payload["context_basis"] = context_basis
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
     else:
-        print(format_next_action(action))
+        print(format_next_action(action) + _format_advice_context(context_basis))
     if args.write:
         path = write_next_action(root, action)
         print(f"wrote {path.relative_to(root)}")
@@ -550,6 +622,33 @@ def _cmd_job(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_rubric(args: argparse.Namespace) -> int:
+    from .runtime.executable_rubric import default_rubric_path, draft_executable_rubric, freeze_executable_rubric, verify_executable_rubric, write_executable_rubric, write_verification_report
+    from .runtime.research_job import load_research_job
+
+    root = _project_root()
+    if args.rubric_command == "draft":
+        job_path = Path(args.job)
+        job_path = job_path if job_path.is_absolute() else root / job_path
+        rubric = draft_executable_rubric(root, load_research_job(job_path))
+        output = Path(args.output) if args.output else default_rubric_path(root, rubric["research_job"]["job_id"])
+        if args.write:
+            rubric["written_to"] = _display_rel(write_executable_rubric(root, rubric, output), root)
+        print(json.dumps(rubric, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(rubric, sort_keys=False, allow_unicode=True))
+        return 0
+    if args.rubric_command == "freeze":
+        result = freeze_executable_rubric(root, args.rubric, args.approval)
+        print(json.dumps(result, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(result, sort_keys=False, allow_unicode=True))
+        return 0 if result.get("status") == "FROZEN" else 2
+    if args.rubric_command == "verify":
+        report = verify_executable_rubric(root, args.rubric)
+        if args.write:
+            report["written_to"] = _display_rel(write_verification_report(root, report), root)
+        print(json.dumps(report, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(report, sort_keys=False, allow_unicode=True))
+        return 0 if report.get("status") == "PASS" else 2 if report.get("status") == "BLOCKED" else 1
+    raise SystemExit(f"unknown rubric command: {args.rubric_command}")
+
+
 def _cmd_adaptive_checks(args: argparse.Namespace) -> int:
     from .runtime.adaptive_checks import assess_post_action, changed_paths, select_checks
     root = _project_root()
@@ -579,13 +678,23 @@ def _cmd_migrate(args: argparse.Namespace) -> int:
 
 
 def _cmd_attach(args: argparse.Namespace) -> int:
-    from .runtime.devendor import attach_package_mode
-    if not args.package:
-        print("FAIL: attach currently requires --package")
-        return 2
-    report = attach_package_mode(_project_root(), policy_bundle_version=args.policy_bundle_version)
-    print(json.dumps(report, indent=2) if args.json else "status: " + report["status"] + "\n" + "\n".join(report.get("created") or report.get("failures") or []))
-    return 0 if report["status"] == "PASS" else 1
+    from .runtime.project_adapter import attach_project
+
+    root = Path(args.path or ".").expanduser().resolve()
+    mode = "package" if args.package else (args.mode or "auto")
+    report = attach_project(
+        root,
+        mode=mode,
+        dry_run=bool(args.dry_run),
+        policy_bundle_version=args.policy_bundle_version,
+    )
+    if args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        print("status: " + str(report.get("status")))
+        for item in report.get("created") or report.get("would_create") or report.get("failures") or []:
+            print(item)
+    return 0 if report.get("status") in {"PASS", "ADAPTED", "DRY_RUN"} else 1
 
 
 def _cmd_detach(args: argparse.Namespace) -> int:
@@ -598,8 +707,8 @@ def _cmd_detach(args: argparse.Namespace) -> int:
 def _cmd_doctor(args: argparse.Namespace) -> int:
     from .runtime.devendor import doctor_package_mode
     report = doctor_package_mode(_project_root())
-    print(json.dumps(report, indent=2) if args.json else f"status: {report['status']}\n" + "\n".join(report.get("failures") or ["package lock matches installed runtime"]))
-    return 0 if report["status"] == "PASS" else 1
+    print(json.dumps(report, indent=2) if args.json else f"status: {report['status']}\n" + "\n".join(report.get("failures") or report.get("warnings") or ["AEROS runtime is attached"]))
+    return 0 if report["status"] in {"PASS", "MIGRATION_ACTIVE"} else 1
 
 
 def _cmd_campaign(args: argparse.Namespace) -> int:
@@ -661,6 +770,16 @@ def _cmd_drive(args: argparse.Namespace) -> int:
     from .runtime.drive import build_drive_report, format_drive_report, write_drive_report
 
     root = _project_root()
+    try:
+        context_basis = _advice_context(
+            root,
+            lane=getattr(args, "lane", "") or "project",
+            goal=getattr(args, "goal", "") if getattr(args, "goal", "") != "auto" else "",
+            entrypoint="drive",
+        )
+    except RuntimeError as exc:
+        print(str(exc))
+        return 2
     report = build_drive_report(
         root,
         goal=getattr(args, "goal", "auto") or "auto",
@@ -671,6 +790,7 @@ def _cmd_drive(args: argparse.Namespace) -> int:
         target=getattr(args, "target", "") or "",
         include_history=not bool(getattr(args, "no_history", False)),
     )
+    report["context_basis"] = context_basis
     if getattr(args, "json", False):
         print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
     else:
@@ -709,9 +829,14 @@ def _cmd_econ(args: argparse.Namespace) -> int:
 
 
 def _cmd_submit(args: argparse.Namespace) -> int:
+    root = _project_root()
+    try:
+        context_basis = _advice_context(root, lane="writing", entrypoint="submit")
+    except RuntimeError as exc:
+        print(str(exc))
+        return 2
     if getattr(args, "submit_action", "readiness") == "fact-check":
         from .runtime.grounded_fact_check import build_grounded_fact_check, write_grounded_fact_check
-        root = _project_root()
         payload = build_grounded_fact_check(
             root,
             manuscript=args.manuscript,
@@ -719,6 +844,7 @@ def _cmd_submit(args: argparse.Namespace) -> int:
         )
         if args.write:
             payload["written_to"] = write_grounded_fact_check(root, payload)
+        payload["context_basis"] = context_basis
         print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(payload, sort_keys=False, allow_unicode=True))
         if payload["status"] == "FAIL":
             return 1
@@ -726,7 +852,6 @@ def _cmd_submit(args: argparse.Namespace) -> int:
     from .runtime.econ_pack import submission_review_ready
     from .runtime.paper_readiness import assess_paper_readiness
     from .runtime.submission_driver import build_submission_driver
-    root = _project_root()
     driver = build_submission_driver(root)
     readiness = assess_paper_readiness(root).to_dict()
     payload = {
@@ -734,6 +859,7 @@ def _cmd_submit(args: argparse.Namespace) -> int:
         "paper_readiness": readiness,
         "ready_for_human_review": submission_review_ready(driver, readiness),
         "authority": "advisory; mechanical readiness may enter human review but does not approve paper readiness or release",
+        "context_basis": context_basis,
     }
     print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else yaml.safe_dump(payload, sort_keys=False, allow_unicode=True))
     return 0 if payload["ready_for_human_review"] else 2
@@ -840,8 +966,14 @@ def _cmd_driver(args: argparse.Namespace) -> int:
     from .runtime.submission_driver import build_submission_driver, format_submission_driver, write_submission_driver
 
     root = _project_root()
+    try:
+        context_basis = _advice_context(root, lane="writing", entrypoint="driver_submission")
+    except RuntimeError as exc:
+        print(str(exc))
+        return 2
     if args.driver_command == "submission":
         report = build_submission_driver(root)
+        report["context_basis"] = context_basis
         if args.json:
             print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
         else:
@@ -1453,7 +1585,13 @@ def _cmd_data_backfill(args: argparse.Namespace) -> int:
 
 def _cmd_cockpit(args: argparse.Namespace) -> int:
     root = _project_root()
+    try:
+        context_basis = _advice_context(root, lane=args.lane or "project", entrypoint="cockpit")
+    except RuntimeError as exc:
+        print(str(exc))
+        return 2
     cockpit = build_cockpit(root, lane=args.lane or "project", check_profile=args.profile)
+    cockpit["context_basis"] = context_basis
     if args.json:
         print(json.dumps(cockpit, indent=2, ensure_ascii=False))
     else:
@@ -1770,13 +1908,20 @@ def _cmd_sync_doctor(args: argparse.Namespace) -> int:
 def _cmd_task_preflight(args: argparse.Namespace) -> int:
     from .runtime.task_preflight import build_task_preflight, format_task_preflight
 
+    root = _project_root()
+    try:
+        context_basis = _advice_context(root, lane=getattr(args, "lane", "") or "project", entrypoint="task_preflight")
+    except RuntimeError as exc:
+        print(str(exc))
+        return 2
     report = build_task_preflight(
-        _project_root(),
+        root,
         task_id=getattr(args, "task_id", "") or "",
         lane=getattr(args, "lane", "") or "",
         intent=getattr(args, "intent", "") or "",
         campaign_id=getattr(args, "campaign_id", "") or "",
     )
+    report["context_basis"] = context_basis
     if getattr(args, "json", False):
         print(json.dumps(report, indent=2, ensure_ascii=False, sort_keys=True))
     else:
@@ -1939,6 +2084,20 @@ def main(argv: list[str] | None = None) -> int:
     context_p.add_argument("--json", action="store_true", help="emit machine-readable JSON")
     context_p.add_argument("--write", action="store_true", help="write CONTEXT_BUNDLE.md and outputs/context/context_bundle.json")
     context_p.add_argument("--stale", action="store_true", help="only report whether the written context bundle is stale")
+    context_p.add_argument("--open", action="store_true", help="record this scoped context as the start of a conversation episode")
+    context_p.add_argument("--close", action="store_true", help="close an episode with declared work and observed artifact metadata")
+    context_p.add_argument("--episode-status", action="store_true", help="show the current conversation episode status")
+    context_p.add_argument("--episode-id", default="", help="explicit context episode id, mainly for close/status")
+    context_p.add_argument("--conversation-id", default="", help="opaque external conversation id; use to keep parallel chats separate")
+    context_p.add_argument("--goal", default="", help="optional work goal to bind to an opened context episode")
+    context_p.add_argument("--track-artifact", action="append", default=[], help="project-relative artifact to snapshot at episode open; may repeat")
+    context_p.add_argument("--summary", default="", help="required concise work summary when closing an episode")
+    context_p.add_argument("--work-item", action="append", default=[], help="declared work item when closing; may repeat")
+    context_p.add_argument("--artifact", action="append", default=[], help="artifact to record at close; may repeat")
+    context_p.add_argument("--receipt", action="append", default=[], help="action/completion receipt to link at close; may repeat")
+    context_p.add_argument("--blocker", action="append", default=[], help="new blocker found during the episode; may repeat")
+    context_p.add_argument("--next-action", default="", help="recommended next action at episode close")
+    context_p.add_argument("--outcome", default="", help="honest episode outcome label")
     context_p.set_defaults(func=_cmd_context)
 
     cockpit_p = sub.add_parser("cockpit", help="show one compact context + next-action + fast-check dashboard")
@@ -1989,6 +2148,25 @@ def main(argv: list[str] | None = None) -> int:
     job_sub = job.add_subparsers(dest="job_command", required=True); job_compile = job_sub.add_parser("compile")
     job_compile.add_argument("--file", required=True); job_compile.add_argument("--write", action="store_true"); job_compile.set_defaults(func=_cmd_job)
 
+    rubric = sub.add_parser("rubric", help="draft, freeze, and verify an executable ResearchJob rubric")
+    rubric_sub = rubric.add_subparsers(dest="rubric_command", required=True)
+    rubric_draft = rubric_sub.add_parser("draft", help="compile a candidate data-probe rubric from a ResearchJob and visible DataContract")
+    rubric_draft.add_argument("--job", required=True, help="project-relative ResearchJob YAML")
+    rubric_draft.add_argument("--output", default="", help="target rubric path; defaults to contracts/rubrics/<job>.yml")
+    rubric_draft.add_argument("--write", action="store_true", help="write the candidate rubric; without this flag only print it")
+    rubric_draft.add_argument("--json", action="store_true")
+    rubric_draft.set_defaults(func=_cmd_rubric)
+    rubric_freeze = rubric_sub.add_parser("freeze", help="freeze exact candidate content using a signed, scoped human approval")
+    rubric_freeze.add_argument("--rubric", required=True, help="candidate rubric path")
+    rubric_freeze.add_argument("--approval", required=True, help="committed signed approval artifact binding rubric content hash")
+    rubric_freeze.add_argument("--json", action="store_true")
+    rubric_freeze.set_defaults(func=_cmd_rubric)
+    rubric_verify = rubric_sub.add_parser("verify", help="verify every frozen criterion against its declared evidence artifact")
+    rubric_verify.add_argument("--rubric", required=True, help="frozen rubric path")
+    rubric_verify.add_argument("--write", action="store_true", help="write a derived criterion-level verification report")
+    rubric_verify.add_argument("--json", action="store_true")
+    rubric_verify.set_defaults(func=_cmd_rubric)
+
     heavy = sub.add_parser(
         "heavy",
         help="single-flight execution and cache reuse for declared expensive jobs",
@@ -2024,9 +2202,12 @@ def main(argv: list[str] | None = None) -> int:
     migrate_prepare = migrate_sub.add_parser("prepare"); migrate_prepare.add_argument("--policy-bundle-version", default="aeros-policy-v1"); migrate_prepare.set_defaults(func=_cmd_migrate)
     doctor = sub.add_parser("doctor", help="validate installed package against .aeros/project.yml and aeros.lock")
     doctor.add_argument("--json", action="store_true"); doctor.set_defaults(func=_cmd_doctor)
-    attach = sub.add_parser("attach", help="attach a fresh project to the installed AEROS package")
-    attach.add_argument("--package", action="store_true", help="create only attach-managed package metadata")
+    attach = sub.add_parser("attach", help="adapt any project to AEROS without copying the framework")
+    attach.add_argument("path", nargs="?", default=".", help="project directory; defaults to the current directory")
+    attach.add_argument("--mode", choices=["auto", "package", "adapter"], default="auto", help="auto-select package or adapter-only attachment")
+    attach.add_argument("--package", action="store_true", help=argparse.SUPPRESS)
     attach.add_argument("--policy-bundle-version", default="aeros-policy-v1")
+    attach.add_argument("--dry-run", action="store_true", help="preview the attachment without writing metadata")
     attach.add_argument("--json", action="store_true")
     attach.set_defaults(func=_cmd_attach)
     detach = sub.add_parser("detach", help="dry-run or remove unchanged metadata created by aeros attach --package")

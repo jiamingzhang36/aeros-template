@@ -130,6 +130,19 @@ Every task contract must include a Mainline Alignment Gate section before execut
 - Do not move speculative content into feasibility, design, method, or claim files without evidence.
 - If uncertainty remains unresolved (ambiguous lead mapping, mechanism choice, or alternative path choices), pause and ask the owner before proceeding.
 
+## Scope and Complexity Gate (NODIUJ)
+
+Before adding a runtime capability, policy, check, registry, task mode, workflow preset, or cross-lane scope expansion, apply this reduction-first review:
+
+- `N` Necessity: is this work inside the project's actual responsibility and needed for the stated objective?
+- `O` Over-engineering: is the smallest viable change preferable to a new abstraction or defensive layer?
+- `D` Duplication: does an existing command, policy, check, skill, or artifact already solve it?
+- `I` In-reach: is the failure mode reachable in the current project rather than merely imaginable?
+- `U` Unrequested utility: is this an unrequested convenience feature with no bounded user or project need?
+- `J` Justification: does the expected benefit exceed the added control, maintenance, and cognitive cost?
+
+For an in-scope bug fix or bounded artifact edit, apply the test silently and keep the change small. For a new surface or scope expansion, record the NODIUJ conclusion in the plan or run report. If necessity, reachability, or justification is unclear, reuse the existing mechanism, defer it to the improvement backlog, or ask the owner rather than adding it. This gate does not authorize edits, weaken evidence/authority rules, or replace task contracts and human gates.
+
 ## Literature Review Rules
 
 - Do not summarize papers from memory.
@@ -219,9 +232,10 @@ Every substantial run must classify what kind of progress it made before calling
 
 ## Context Bundle Rules
 
-Use `aeros context` to assemble compact project context before long or ambiguous work.
+Every project-specific task must begin by reading a compact derived project context before giving a plan, running a project command, or editing files. Run `aeros task preflight --lane <inferred lane> --intent "<concise user request>"` once at the start of the task and read its `startup_brief`. This is the default task-entry gate, not an optional checklist.
 
-- `aeros context --brief` is the default starting snapshot for an agent turn.
+- If `startup_brief.status` is `ATTENTION_REQUIRED`, state the P0 risk and whether the requested task addresses or intentionally defers it. Do not silently let unrelated collection, reruns, or bookkeeping outrank it.
+- For long, ambiguous, or multi-lane work, additionally run `aeros context --brief`; it is the compact source-anchored snapshot for the turn.
 - `aeros context --lane <lane>` should be used before lane-specific work so data, literature, method, claim, and writing context do not blur together.
 - Context bundles are derived summaries, not evidence. They do not prove task completion, data access, full-text review, empirical validity, claim support, paper readiness, or gate approval.
 - Read files listed under `Files To Read If Needed` only when the next action requires them; do not bulk-read the project to feel safe.
@@ -242,7 +256,7 @@ Valid lanes:
 - `compliance`
 - `harness`
 
-Before non-trivial work, identify the active lane. Prefer commands like:
+Before non-trivial work, identify the active lane through the mandatory task-start preflight. Use commands like these only after reading its `startup_brief`:
 
 ```bash
 python3 -m aeros.cli iterate --lane data --dry-run
@@ -633,7 +647,7 @@ For route-sensitive work such as denominator capture, negative-seed discovery, s
 
 Use `aeros improve harvest` to collect framework-improvement candidates from local receipts and logs. Harvest output is advisory backlog input only; it does not modify gates, claims, or project state.
 
-Before opening a project task, prefer `aeros task preflight --lane <lane> --intent "<short intent>"`. Treat the packet as the operating envelope for that turn: task mode, route, skill obligations, output intents, allowed paths, and must-not-touch paths.
+Treat the mandatory `aeros task preflight --lane <lane> --intent "<short intent>"` packet as the operating envelope for that turn: startup risk, task mode, route, skill obligations, output intents, allowed paths, and must-not-touch paths.
 
 Use `aeros sync doctor --project <path>` before judging a downstream project's behavior against the latest template. If the doctor reports missing or outdated capabilities, sync/roll out the template first or describe the project as running an older AEROS surface.
 

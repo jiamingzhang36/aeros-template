@@ -54,6 +54,7 @@ SAFE_AEROS_COMMAND_MARKERS = (
     " data probe census",
     " data probe official",
     " econ ",
+    " rubric verify",
 )
 
 CONTINUATION_MODEL = "AEROS-CONTINUATION-001"
@@ -467,6 +468,27 @@ def _auto_objective(root: Path, lane: str) -> DriveObjective:
     top_risk = risk_report.get("top_risk")
     if isinstance(top_risk, dict) and int(top_risk.get("score") or 0) > 0:
         return _objective_from_risk(top_risk)
+
+    from .executable_rubric import active_rubric_issue
+    rubric = active_rubric_issue(root)
+    if rubric:
+        unmet = [str(item) for item in rubric.get("unmet_criteria") or []]
+        blocked = str(rubric.get("status") or "") == "BLOCKED"
+        rubric_path = str(rubric.get("rubric_path") or "")
+        return DriveObjective(
+            objective_id=f"executable_rubric:{rubric.get('rubric_id') or 'unresolved'}",
+            objective="Resolve the highest-priority unmet frozen executable-rubric criterion.",
+            lane="data",
+            why=f"Frozen rubric {rubric.get('rubric_id') or rubric_path} has unresolved criterion/criteria: {', '.join(unmet) or 'unknown'}. {rubric.get('reason') or ''}",
+            command=f"python3 -m aeros.cli rubric verify --rubric {shlex.quote(rubric_path)} --json",
+            stop_condition="Stop after each unresolved criterion and its required evidence artifact are explicit; verification neither executes work nor promotes outputs.",
+            expected_artifacts=tuple(str(item) for row in rubric.get("criteria") or [] for item in row.get("evidence_artifacts") or []),
+            can_run_without_human=True,
+            needs_human=blocked,
+            status_label="RUBRIC_BLOCKED" if blocked else "RUBRIC_UNMET",
+            safety=("only human-frozen rubrics can alter Drive priority", "does not execute research work, admit outputs, upgrade claims, or approve gates"),
+            source="aeros.runtime.executable_rubric.active_rubric_issue",
+        )
 
     current_work = load_current_work_context(root)
     if not lane and current_work.get("status") == "active" and current_work.get("priority_order"):

@@ -136,12 +136,14 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def _hash_sources(root: Path, paths: list[str]) -> dict[str, str]:
+def _hash_sources(root: Path, paths: list[str], *, max_hashes: int = 0) -> dict[str, str]:
     out: dict[str, str] = {}
     for rel in paths:
         path = root / rel
         if path.exists() and path.is_file():
             out[rel] = _sha256(path)
+            if max_hashes and len(out) >= max_hashes:
+                break
     return out
 
 
@@ -294,8 +296,17 @@ def build_context_bundle(root: Path, *, lane: str = "", brief: bool = False) -> 
         "evidence/delta_log.jsonl",
         "harness/context_budget.yml",
     ] + LANE_READS.get(lane, [])
+    try:
+        from .project_adapter import context_anchor_paths, detect_project_adapter
+
+        adapter = detect_project_adapter(root)
+        adapter_paths = context_anchor_paths(root, adapter=adapter, lane=lane)
+    except Exception:  # Adapter discovery is advisory context only.
+        adapter = {}
+        adapter_paths = []
+    source_paths = list(dict.fromkeys(source_paths + adapter_paths))
     max_hashes = int(budget.get("max_source_hashes", 12) or 12)
-    source_hashes = _hash_sources(root, source_paths[:max_hashes])
+    source_hashes = _hash_sources(root, source_paths, max_hashes=max_hashes)
     bundle = {
         "version": "0.1",
         "policy": "AEROS-CONTEXT-001",
@@ -315,7 +326,14 @@ def build_context_bundle(root: Path, *, lane: str = "", brief: bool = False) -> 
         "recent_evidence_deltas": _read_jsonl_tail(root / "evidence/delta_log.jsonl", int(budget.get("max_recent_deltas", 5) or 5)),
         "latest_revision": _latest_revision(root),
         "lane_snapshot": _lane_snapshot(root, lane),
-        "files_to_read_if_needed": LANE_READS.get(lane, ["CURRENT_STATE.md", "NEXT_ACTION.md", "AGENTS.md"]),
+        "files_to_read_if_needed": list(dict.fromkeys(
+            LANE_READS.get(lane, ["CURRENT_STATE.md", "NEXT_ACTION.md", "AGENTS.md"]) + adapter_paths
+        )),
+        "project_adapter": {
+            "project_kind": adapter.get("project_kind", "unknown"),
+            "runtime_mode": adapter.get("runtime_mode", "unknown"),
+            "adapter_present": bool(adapter),
+        },
         "source_hashes": source_hashes,
         "context_staleness": _context_staleness(root, lane, source_hashes),
         "stop_rule": next_action.get("stop_condition", "Stop before switching lanes, claiming substantive progress, or changing gates without evidence."),
@@ -348,6 +366,8 @@ def format_context_bundle(bundle: dict[str, Any], *, brief: bool = False) -> str
         f"context_stale_reason: {(bundle.get('context_staleness') or {}).get('message', '')}",
         f"stop_rule: {bundle.get('stop_rule', '')}",
         f"latest_revision: {bundle.get('latest_revision', '')}",
+        f"project_kind: {(bundle.get('project_adapter') or {}).get('project_kind', 'unknown')}",
+        f"runtime_mode: {(bundle.get('project_adapter') or {}).get('runtime_mode', 'unknown')}",
         "",
         "## Lane Snapshot",
     ]

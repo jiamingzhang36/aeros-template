@@ -8,6 +8,7 @@ import json
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -292,6 +293,26 @@ def main() -> int:
     release_skills = ((release.get("skill_use_contract") or {}).get("candidate_skills_by_class") or {})
     if "research-release-controller" not in release_skills.get("release_control", []):
         failures.append("release work did not surface research-release-controller")
+    with patch("aeros.runtime.task_preflight.compile_research_risk") as mocked_risk:
+        mocked_risk.return_value = {
+            "top_risk": {
+                "risk_id": "submission_truth_risk",
+                "severity": "p0",
+                "why": "A claim-bearing manuscript citation lacks a supporting passage.",
+                "recommended_action": "Resolve manuscript citation debt before unrelated work.",
+                "command": "python3 checks/check_manuscript_citation_faithfulness.py",
+                "stop_condition": "Stop after the citation debt is classified.",
+                "outranks": ["stale_revalidate"],
+                "source": "aeros.runtime.citation_sentence_grounding",
+            }
+        }
+        startup = build_task_preflight(ROOT, lane="data", intent="inspect a source candidate").get("startup_brief") or {}
+    if startup.get("status") != "ATTENTION_REQUIRED":
+        failures.append("task start brief did not surface an active P0 research risk")
+    if (startup.get("highest_research_risk") or {}).get("risk_id") != "submission_truth_risk":
+        failures.append("task start brief lost the top deterministic research-risk identifier")
+    if not startup.get("must_acknowledge_before_unrelated_work"):
+        failures.append("task start brief did not require acknowledgement before unrelated work")
     failures.extend(_accepted_task_reuse_is_enforced())
     failures.extend(_campaign_breaker_blocks_preflight())
     if "--json" in sys.argv:

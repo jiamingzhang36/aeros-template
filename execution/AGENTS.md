@@ -8,6 +8,8 @@ The goal is to execute, reproduce, validate, audit, and package an empirical res
 
 Execution-specific rules are layered on top of [AGENTS.md](../AGENTS.md) and [harness/common_rules.md](../harness/common_rules.md).
 
+Before adding an execution protocol, automation layer, check, or robustness branch, apply the root `NODIUJ` Scope and Complexity Gate. Prefer the smallest task-contract or artifact-specific change that resolves an observed failure.
+
 If this project entered AEROS through `aeros adopt`, treat adoption artifacts as intake evidence and planning material, not as completed execution evidence. Formal execution status must come from task contracts, receipts, checks, run reports, and human gate decisions.
 
 ## Required Reading

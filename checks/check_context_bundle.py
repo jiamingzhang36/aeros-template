@@ -4,11 +4,15 @@
 from __future__ import annotations
 
 import sys
+import tempfile
+import json
+from unittest.mock import patch
 from pathlib import Path
 
 ROOT = Path.cwd()
 REQUIRED_FILES = [
     ROOT / "aeros/runtime/context_bundle.py",
+    ROOT / "aeros/runtime/context_episode.py",
     ROOT / "harness/context_budget.yml",
     ROOT / "templates/CONTEXT_BUNDLE.md",
     ROOT / "CONTEXT_BUNDLE.md",
@@ -27,6 +31,7 @@ def main() -> int:
         sys.path.insert(0, str(ROOT))
         try:
             from aeros.runtime.context_bundle import build_context_bundle, format_context_bundle
+            from aeros.runtime.context_episode import close_context_episode, context_episode_status, ensure_advice_context, open_context_episode
             bundle = build_context_bundle(ROOT, lane="project", brief=True)
             rendered = format_context_bundle(bundle, brief=True)
         except Exception as exc:  # noqa: BLE001
@@ -41,6 +46,73 @@ def main() -> int:
             for marker in ["recommended_next_action", "status_label", "context_stale", "stop_rule", "does_not_prove"]:
                 if marker not in rendered:
                     failures.append(f"rendered context missing marker: {marker}")
+            with tempfile.TemporaryDirectory(prefix="aeros_context_episode_") as temporary:
+                fixture_root = Path(temporary)
+                tracked = fixture_root / "artifact.txt"
+                tracked.write_text("before\n", encoding="utf-8")
+                fixture_bundle = {
+                    "lane": "literature",
+                    "current_goal": "ground one citation",
+                    "current_blocker": "",
+                    "latest_substantive_artifact": "",
+                    "next_action": {"recommended_next_action": "inspect a passage", "command": "aeros submit", "status_label": "ROUTE_READY"},
+                    "source_hashes": {"CURRENT_STATE.md": "fixture"},
+                    "does_not_prove": "fixture boundary",
+                }
+                opened = open_context_episode(
+                    fixture_root,
+                    lane="literature",
+                    goal="ground one citation",
+                    entrypoint="fixture",
+                    conversation_id="fixture-chat",
+                    tracked_artifacts=["artifact.txt"],
+                    bundle=fixture_bundle,
+                )
+                if not (opened.get("context_basis") or {}).get("context_hash"):
+                    failures.append("context episode did not record a context hash")
+                tracked.write_text("after\n", encoding="utf-8")
+                closed = close_context_episode(
+                    fixture_root,
+                    conversation_id="fixture-chat",
+                    summary="updated the tracked fixture artifact",
+                    work_items=["fixture update"],
+                    artifact_paths=["artifact.txt"],
+                    outcome="fixture_complete",
+                )
+                artifact_rows = (closed.get("close") or {}).get("observed_artifacts") or []
+                if not artifact_rows or artifact_rows[0].get("changed_since_open") is not True:
+                    failures.append("context episode did not distinguish an observed artifact change from declared work")
+                episode_status = context_episode_status(fixture_root, conversation_id="fixture-chat")
+                if episode_status.get("status") != "CLOSED":
+                    failures.append("context episode did not close cleanly")
+                replacement_bundle = dict(fixture_bundle)
+                replacement_bundle["current_goal"] = "review a different passage"
+                old_directory = fixture_root / "outputs/context/episodes" / str((opened.get("episode") or {}).get("episode_id") or "")
+                active_pointer = fixture_root / "outputs/context/episodes/active/fixture-chat.json"
+                active_pointer.write_text(
+                    json.dumps({"episode_id": (opened.get("episode") or {}).get("episode_id"), "state": "open"}),
+                    encoding="utf-8",
+                )
+                if old_directory.is_dir():
+                    old_directory.chmod(0o500)
+                try:
+                    replacement = open_context_episode(
+                        fixture_root,
+                        lane="literature",
+                        goal="review a different passage",
+                        entrypoint="fixture",
+                        conversation_id="fixture-chat",
+                        bundle=replacement_bundle,
+                    )
+                finally:
+                    if old_directory.is_dir():
+                        old_directory.chmod(0o700)
+                if replacement.get("status") not in {"OPENED", "REUSED"}:
+                    failures.append("a stale read-only episode prevented a fresh context episode")
+                with patch("aeros.runtime.context_episode.open_context_episode", side_effect=OSError("read-only fixture")):
+                    fallback = ensure_advice_context(fixture_root, lane="literature", entrypoint="fixture")
+                if fallback.get("status") != "EPHEMERAL_UNPERSISTED" or not fallback.get("persistence_warning"):
+                    failures.append("unwritable episode storage did not yield an explicit ephemeral context basis")
     template = ROOT / "templates/CONTEXT_BUNDLE.md"
     if template.exists():
         text = template.read_text(encoding="utf-8")

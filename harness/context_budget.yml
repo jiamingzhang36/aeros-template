@@ -36,3 +36,27 @@ stale_context_policy:
     - tracked_source_removed
     - bundle_lane_differs_from_requested_lane
   action: "Regenerate with `aeros cockpit --write` or `aeros context --write` before relying on old context."
+
+context_episode_policy:
+  principle: >
+    AEROS-managed advice must record a fresh scoped context basis before it is
+    shown. Closing an episode records declared work separately from bounded
+    observed workspace and artifact changes.
+  store: outputs/context/episodes/
+  managed_advice_entrypoints:
+    - aeros next
+    - aeros drive
+    - aeros driver submission
+    - aeros submit
+    - aeros task preflight
+    - aeros cockpit
+  raw_chat_transcripts: forbidden
+  raw_tool_output: forbidden
+  require_close_summary_for_manual_close: true
+  artifact_hash_limit_bytes: 16777216
+  workspace_delta: git_status_only
+  boundaries:
+    - A context episode is not a completion receipt.
+    - A declared summary is not independent verification.
+    - Shared-worktree deltas are not exclusive agent attribution.
+    - If episode storage is unavailable, advice may use an explicit EPHEMERAL_UNPERSISTED context basis; it must not claim durable context history.

@@ -24,6 +24,7 @@ human_approval:
     gate_approval: "signed_commit"
     gate_apply: "signed_commit"
     claim_upgrade: "signed_commit"
+    rubric_freeze: "signed_commit"
     release: "signed_commit"
   # Bootstrap the first signer interactively with `aeros authority bootstrap`.
   # Later changes to this policy must be signed by a signer in the preceding policy.

@@ -14,6 +14,8 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from .environment_profile import compile_environment_profile, effective_envelope_data, environment_profile_errors
+
 
 @dataclass(frozen=True)
 class ExecutionEnvelope:
@@ -24,6 +26,12 @@ class ExecutionEnvelope:
     allowed_sidecars: tuple[str, ...] = ()
     validation_manifest: str = ""
     runtime_profile: str = "local-safe"
+    environment_profile: str = ""
+    environment_policy_digest: str = ""
+    environment_approval_fingerprint: str = ""
+    network_policy: str = "deny"
+    credential_policy: str = "scrub_all"
+    shell_environment_policy: str = "clean_allowlist"
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -34,6 +42,12 @@ class ExecutionEnvelope:
             "allowed_sidecars": list(self.allowed_sidecars),
             "validation_manifest": self.validation_manifest,
             "runtime_profile": self.runtime_profile,
+            "environment_profile": self.environment_profile,
+            "environment_policy_digest": self.environment_policy_digest,
+            "environment_approval_fingerprint": self.environment_approval_fingerprint,
+            "network_policy": self.network_policy,
+            "credential_policy": self.credential_policy,
+            "shell_environment_policy": self.shell_environment_policy,
         }
 
 
@@ -87,6 +101,12 @@ def envelope_from_dict(data: dict[str, Any] | None) -> ExecutionEnvelope:
         allowed_sidecars=tuple(str(x) for x in data.get("allowed_sidecars", []) if str(x).strip()),
         validation_manifest=str(data.get("validation_manifest") or "").strip(),
         runtime_profile=str(data.get("runtime_profile") or "local-safe"),
+        environment_profile=str(data.get("environment_profile") or "").strip(),
+        environment_policy_digest=str(data.get("environment_policy_digest") or "").strip(),
+        environment_approval_fingerprint=str(data.get("environment_approval_fingerprint") or "").strip(),
+        network_policy=str(data.get("network_policy") or "deny").strip(),
+        credential_policy=str(data.get("credential_policy") or "scrub_all").strip(),
+        shell_environment_policy=str(data.get("shell_environment_policy") or "clean_allowlist").strip(),
     )
 
 
@@ -424,6 +444,12 @@ def execute_in_isolated_worktree(
                             "version": 1,
                             "status": "passed",
                             "runtime_profile": envelope.runtime_profile,
+                            "environment_profile": envelope.environment_profile,
+                            "environment_policy_digest": envelope.environment_policy_digest,
+                            "environment_approval_fingerprint": envelope.environment_approval_fingerprint,
+                            "network_policy": envelope.network_policy,
+                            "credential_policy": envelope.credential_policy,
+                            "shell_environment_policy": envelope.shell_environment_policy,
                             "return_code": return_code,
                             "expected_outputs": [
                                 {"path": path, "sha256": digest}
@@ -509,22 +535,26 @@ def execute_in_isolated_worktree(
 def default_envelope_for_action_spec(spec: Any) -> ExecutionEnvelope:
     data = spec.to_dict() if hasattr(spec, "to_dict") else dict(spec)
     if data.get("execution_envelope"):
-        return envelope_from_dict(data.get("execution_envelope"))
-    effect = str(data.get("effect_class", "")).strip()
-    expected = tuple(str(x) for x in data.get("expected_outputs") or [] if str(x).strip())
-    deny = (
-        "paper/",
-        "evidence/claim_registry.md",
-        "decisions/approvals/",
-        "data/raw/",
-        "aeros/state/",
-    )
-    if effect == "read_only":
-        return ExecutionEnvelope(read_roots=(".",), write_roots=(), deny_roots=deny, expected_outputs=())
-    if effect in {"local_write", "local_write_preview"}:
-        write_roots = tuple(sorted({path if path.endswith("/") else str(Path(path).parent) + "/" for path in expected if path}))
-        return ExecutionEnvelope(read_roots=(".",), write_roots=write_roots, deny_roots=deny, expected_outputs=expected)
-    return ExecutionEnvelope(read_roots=(".",), write_roots=(), deny_roots=deny, expected_outputs=())
+        base = envelope_from_dict(data.get("execution_envelope")).to_dict()
+    else:
+        effect = str(data.get("effect_class", "")).strip()
+        expected = tuple(str(x) for x in data.get("expected_outputs") or [] if str(x).strip())
+        deny = (
+            "paper/",
+            "evidence/claim_registry.md",
+            "decisions/approvals/",
+            "data/raw/",
+            "aeros/state/",
+        )
+        if effect == "read_only":
+            base = ExecutionEnvelope(read_roots=(".",), write_roots=(), deny_roots=deny, expected_outputs=()).to_dict()
+        elif effect in {"local_write", "local_write_preview"}:
+            write_roots = tuple(sorted({path if path.endswith("/") else str(Path(path).parent) + "/" for path in expected if path}))
+            base = ExecutionEnvelope(read_roots=(".",), write_roots=write_roots, deny_roots=deny, expected_outputs=expected).to_dict()
+        else:
+            base = ExecutionEnvelope(read_roots=(".",), write_roots=(), deny_roots=deny, expected_outputs=()).to_dict()
+    profile = data.get("environment_profile") if isinstance(data.get("environment_profile"), dict) else compile_environment_profile(data)
+    return envelope_from_dict(effective_envelope_data(base, profile))
 
 
 def execute_action_spec_in_isolated_worktree(
@@ -547,6 +577,9 @@ def execute_action_spec_in_isolated_worktree(
     except ValueError as exc:
         return ExecutionEnvelopeResult(False, 1, message=f"cannot parse ActionSpec command: {exc}")
     envelope = default_envelope_for_action_spec(data)
+    profile_failures = environment_profile_errors(data, envelope.to_dict())
+    if profile_failures:
+        return ExecutionEnvelopeResult(False, 1, message="environment profile rejected ActionSpec: " + "; ".join(profile_failures))
     checks = tuple(str(item) for item in data.get("acceptance_checks") or [] if str(item).strip())
     return execute_in_isolated_worktree(
         root,

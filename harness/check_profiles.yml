@@ -16,6 +16,7 @@ profiles:
       - check_progress_semantics.py
       - check_artifact_semantics.py
       - check_research_job_compiler.py
+      - check_executable_rubric.py
       - check_heavy_run.py
       - check_econ_pack.py
       - check_census_probe.py
