@@ -40,6 +40,8 @@ CAPABILITIES: dict[str, list[str]] = {
         "checks/check_manuscript_citation_interpretation.py", "checks/check_grounded_fact_check.py", "checks/check_literature_wrapper_sync.py", "aeros/cli.py"],
     "citation_risk_radar": ["aeros/runtime/citation_radar.py", "checks/check_citation_risk_radar.py",
         "aeros/runtime/drive.py"],
+    "lawful_fulltext_recovery": ["aeros/runtime/literature_adapter.py", "harness/literature_fulltext_recovery_policy.yml", "checks/check_literature_fulltext_recovery.py", "aeros/cli.py"],
+    "source_bound_candidate_paragraphs": ["aeros/runtime/literature_paragraph.py", "harness/literature_paragraph_compilation_policy.yml", "checks/check_literature_paragraph_compilation.py", "aeros/cli.py"],
     "drive": ["aeros/runtime/drive.py", "aeros/runtime/research_risk.py", "checks/check_drive.py", "aeros/cli.py"],
     "econ_pack": ["aeros/runtime/econ_pack.py", "checks/check_econ_pack.py", "templates/econ_sample_registry.csv", "templates/econ_specification_registry.csv", "templates/econ_exhibit_registry.csv", "templates/econ_sentence_binding_registry.csv", "aeros/cli.py"],
     "official_economic_probe": ["aeros/runtime/economic_probe.py", "aeros/runtime/census_probe.py", "aeros/runtime/fred_probe.py", "checks/check_census_probe.py", "templates/economic_data_series_census.yml", "templates/economic_data_series_fred.yml", "aeros/cli.py"],

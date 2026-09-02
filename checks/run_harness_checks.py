@@ -94,6 +94,8 @@ CHECKS = [
     "check_literature_tools.py",
     "check_literature_adapters.py",
     "check_literature_fulltext_execution.py",
+    "check_literature_fulltext_recovery.py",
+    "check_literature_paragraph_compilation.py",
     "check_citation_audit.py",
     "check_literature_wrapper_sync.py",
     "check_manuscript_citation_faithfulness.py",

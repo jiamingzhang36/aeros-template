@@ -10,12 +10,14 @@ from dataclasses import dataclass
 import csv
 from datetime import datetime, timezone
 import hashlib
+from io import BytesIO
 import json
+import os
 from pathlib import Path
 import re
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote_plus
+from urllib.parse import quote, quote_plus, unquote, urlparse
 from urllib.request import Request, urlopen
 
 
@@ -90,6 +92,12 @@ MISSING_FULLTEXT_COLUMNS = [
     "notes",
 ]
 
+FULLTEXT_RECOVERY_COLUMNS = [
+    "attempted_at", "paper_id", "resolver", "candidate_url", "final_url",
+    "recovery_status", "content_kind", "content_bytes", "sha256", "matched_by",
+    "staging_artifact", "next_action", "notes",
+]
+
 ALLOWED_SOURCES = {"openalex", "manual", "zotero"}
 ALLOWED_FUNCTIONS = {
     "idea-inspiring",
@@ -123,6 +131,11 @@ FULLTEXT_BLOCKER_REASONS = {
     "manual_pdf_required",
 }
 
+LAWFUL_FULLTEXT_RESOLVERS = (
+    "local_or_zotero_attachment", "registered_oa_url", "openalex_oa",
+    "unpaywall_oa", "manual_lawful_url",
+)
+
 
 @dataclass(frozen=True)
 class LiteratureSearchArgs:
@@ -138,6 +151,18 @@ class LiteratureSearchArgs:
     url: str = ""
     pdf_url: str = ""
     zotero_base_url: str = "http://127.0.0.1:23119"
+
+
+@dataclass(frozen=True)
+class FulltextRecoveryArgs:
+    """Inputs for a lawful, staging-only full-text recovery attempt."""
+
+    paper_id: str
+    candidate_urls: tuple[str, ...] = ()
+    unpaywall_email: str = ""
+    output_dir: str = "work/literature_recovery"
+    max_bytes: int = 30_000_000
+    dry_run: bool = False
 
 
 def _utc_now() -> str:
@@ -202,6 +227,7 @@ def verify_fulltext_candidate_content(
     expected_title: str = "",
     expected_doi: str = "",
     source_url: str = "",
+    parsed_text: str = "",
 ) -> dict[str, str]:
     """Classify fetched full-text candidate content without certifying review.
 
@@ -211,18 +237,9 @@ def verify_fulltext_candidate_content(
     """
     raw = body.encode("utf-8", errors="ignore") if isinstance(body, str) else (body or b"")
     content_type_l = str(content_type or "").lower()
-    text = raw[:200_000].decode("utf-8", errors="ignore")
+    text = str(parsed_text or "") or raw[:200_000].decode("utf-8", errors="ignore")
     text_l = text.lower()
     notes: list[str] = []
-
-    if not raw or len(raw) < 64:
-        return {
-            "verdict": "blocked",
-            "content_kind": "empty",
-            "blocker_reason": "empty_response",
-            "matched_by": "",
-            "notes": "empty or tiny response; cannot be treated as full text",
-        }
 
     security_markers = {
         "just a moment": "security_challenge",
@@ -244,8 +261,17 @@ def verify_fulltext_candidate_content(
                 "content_kind": "html",
                 "blocker_reason": reason,
                 "matched_by": "",
-                "notes": f"response contains blocker marker {marker!r}",
-            }
+            "notes": f"response contains blocker marker {marker!r}",
+        }
+
+    if not raw or len(raw) < 64:
+        return {
+            "verdict": "blocked",
+            "content_kind": "empty",
+            "blocker_reason": "empty_response",
+            "matched_by": "",
+            "notes": "empty or tiny response; cannot be treated as full text",
+        }
 
     is_pdf = raw.startswith(b"%PDF") or "application/pdf" in content_type_l
     if is_pdf:
@@ -701,3 +727,266 @@ def run_literature_search(root: Path, args: LiteratureSearchArgs) -> int:
     print("status_label: ROUTE_READY")
     print("does_not_prove: full-text review, extraction-card completion, synthesis, gap support, claim support, or gate approval")
     return 0
+
+
+def _normalize_doi(value: str) -> str:
+    return str(value or "").strip().lower().replace("https://doi.org/", "").replace("http://doi.org/", "")
+
+
+def _rows_if_present(path: Path) -> list[dict[str, str]]:
+    if not path.exists():
+        return []
+    with path.open(newline="", encoding="utf-8") as handle:
+        return list(csv.DictReader(handle))
+
+
+def _openalex_oa_urls(row: dict[str, str]) -> list[str]:
+    """Return declared OA locations from OpenAlex; never publisher scraping."""
+    doi = _normalize_doi(row.get("doi", ""))
+    locator = str(row.get("url", "")).strip()
+    if locator.startswith("https://api.openalex.org/works/"):
+        endpoint = locator
+    elif doi:
+        endpoint = f"https://api.openalex.org/works/https://doi.org/{quote(doi, safe='')}"
+    else:
+        return []
+    request = Request(endpoint, headers={"User-Agent": "AEROS lawful full-text recovery"})
+    with urlopen(request, timeout=20) as response:  # noqa: S310 - public scholarly metadata endpoint
+        work = json.loads(response.read().decode("utf-8"))
+    locations = [work.get("best_oa_location") or {}]
+    locations.extend(work.get("locations") or [])
+    urls: list[str] = []
+    for location in locations:
+        if not isinstance(location, dict) or location.get("is_oa") is False:
+            continue
+        for key in ("pdf_url", "landing_page_url"):
+            candidate = str(location.get(key) or "").strip()
+            if candidate and candidate not in urls:
+                urls.append(candidate)
+    return urls
+
+
+def _unpaywall_oa_urls(doi: str, email: str) -> list[str]:
+    """Return legal OA locations advertised by Unpaywall when configured."""
+    doi = _normalize_doi(doi)
+    if not doi or not email.strip():
+        return []
+    endpoint = f"https://api.unpaywall.org/v2/{quote(doi, safe='')}?email={quote_plus(email.strip())}"
+    request = Request(endpoint, headers={"User-Agent": "AEROS lawful full-text recovery"})
+    with urlopen(request, timeout=20) as response:  # noqa: S310 - public OA metadata endpoint
+        payload = json.loads(response.read().decode("utf-8"))
+    locations = [payload.get("best_oa_location") or {}]
+    locations.extend(payload.get("oa_locations") or [])
+    urls: list[str] = []
+    for location in locations:
+        if not isinstance(location, dict):
+            continue
+        for key in ("url_for_pdf", "url"):
+            candidate = str(location.get(key) or "").strip()
+            if candidate and candidate not in urls:
+                urls.append(candidate)
+    return urls
+
+
+def _candidate_content_type(url: str) -> str:
+    suffix = Path(urlparse(url).path).suffix.lower()
+    if suffix == ".pdf":
+        return "application/pdf"
+    if suffix in {".html", ".htm"}:
+        return "text/html"
+    return ""
+
+
+def _fetch_lawful_candidate(url: str, max_bytes: int) -> tuple[bytes, str, str]:
+    """Fetch only an explicit local path or public http(s) candidate URL."""
+    parsed = urlparse(url)
+    if parsed.scheme == "file":
+        path = Path(unquote(parsed.path))
+        if not path.is_file():
+            raise FileNotFoundError(f"local full-text candidate does not exist: {path}")
+        if path.stat().st_size > max_bytes:
+            raise ValueError(f"local full-text candidate exceeds max_bytes={max_bytes}")
+        return path.read_bytes(), _candidate_content_type(url), path.resolve().as_uri()
+    if not parsed.scheme:
+        path = Path(url)
+        if not path.is_file():
+            raise ValueError("candidate URL must be http(s), file://, or an existing local file")
+        if path.stat().st_size > max_bytes:
+            raise ValueError(f"local full-text candidate exceeds max_bytes={max_bytes}")
+        return path.read_bytes(), _candidate_content_type(path.as_uri()), path.resolve().as_uri()
+    if parsed.scheme not in {"https", "http"}:
+        raise ValueError(f"unsupported candidate URL scheme {parsed.scheme!r}")
+    request = Request(
+        url,
+        headers={
+            "User-Agent": "AEROS lawful full-text recovery (metadata/OA resolver)",
+            "Accept": "application/pdf, text/html;q=0.9, text/plain;q=0.8",
+        },
+    )
+    with urlopen(request, timeout=30) as response:  # noqa: S310 - explicit public candidate URL
+        body = response.read(max_bytes + 1)
+        if len(body) > max_bytes:
+            raise ValueError(f"remote full-text candidate exceeds max_bytes={max_bytes}")
+        return body, str(response.headers.get_content_type() or ""), str(response.geturl() or url)
+
+
+def _extract_pdf_text(body: bytes) -> tuple[str, str]:
+    """Best-effort local parsing; parser absence is an honest recovery blocker."""
+    for module_name, class_name in (("pypdf", "PdfReader"), ("PyPDF2", "PdfReader")):
+        try:
+            module = __import__(module_name, fromlist=[class_name])
+            reader = getattr(module, class_name)(BytesIO(body))
+            text = "\n".join((page.extract_text() or "") for page in reader.pages[:5])
+            return text, module_name
+        except ImportError:
+            continue
+        except Exception as exc:  # noqa: BLE001 - malformed/scanned PDFs are recovery outcomes
+            return "", f"{module_name}_parse_error:{type(exc).__name__}"
+    return "", "pdf_text_parser_unavailable"
+
+
+def _recovery_candidates(root: Path, row: dict[str, str], args: FulltextRecoveryArgs) -> list[tuple[str, str]]:
+    """Build the local-first lawful resolver ladder without fetching content."""
+    candidates: list[tuple[str, str]] = []
+
+    def add(resolver: str, url: str) -> None:
+        clean = str(url or "").strip()
+        if clean and clean not in {existing for _, existing in candidates}:
+            candidates.append((resolver, clean))
+
+    ready_path = root / "discovery/literature/fulltext_ready_queue.csv"
+    for ready in _rows_if_present(ready_path):
+        if str(ready.get("paper_id") or "").strip() == args.paper_id:
+            add("local_or_zotero_attachment", ready.get("pdf_path_or_url", ""))
+    for url in args.candidate_urls:
+        add("manual_lawful_url", url)
+    add("registered_oa_url", row.get("pdf_url", ""))
+    return candidates
+
+
+def _stage_recovered_content(root: Path, args: FulltextRecoveryArgs, paper_id: str, body: bytes, content_kind: str, metadata: dict[str, Any]) -> tuple[str, str]:
+    base = root / args.output_dir / paper_id
+    base.mkdir(parents=True, exist_ok=True)
+    suffix = ".pdf" if content_kind == "pdf" else ".html"
+    digest = hashlib.sha256(body).hexdigest()
+    artifact = base / f"{digest[:16]}{suffix}"
+    temporary = artifact.with_suffix(artifact.suffix + ".tmp")
+    temporary.write_bytes(body)
+    temporary.replace(artifact)
+    manifest = artifact.with_suffix(artifact.suffix + ".recovery.json")
+    manifest.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    return artifact.relative_to(root).as_posix(), digest
+
+
+def _recovery_outcome(attempts: list[dict[str, str]]) -> tuple[str, str]:
+    statuses = {attempt.get("recovery_status", "") for attempt in attempts}
+    if "recovered_verified_fulltext" in statuses:
+        return "RECOVERED", "open the staged copy, write a full-text extraction card, then separately promote its evidence status"
+    if "needs_identity_or_ocr" in statuses:
+        return "BLOCKED", "obtain readable/OCR text or manually confirm the PDF identity; do not treat the attachment as full text yet"
+    if any(status.startswith("blocked_") for status in statuses):
+        return "BLOCKED", "record the access blocker and use a lawful repository, library/Zotero attachment, or user-provided PDF; do not bypass access controls"
+    if attempts:
+        return "BLOCKED", "review retrieval errors or add a lawful candidate URL; no verified full text was recovered"
+    return "BLOCKED", "no lawful full-text location was found; queue human library/Zotero/manual recovery"
+
+
+def recover_fulltext(root: Path, args: FulltextRecoveryArgs) -> dict[str, Any]:
+    """Recover one paper through lawful routes and write staging-only artifacts.
+
+    This never changes the paper registry, extraction cards, synthesis, claims,
+    gates, or canonical data. A recovered file is only a candidate for later
+    human/full-text review.
+    """
+    paper_id = str(args.paper_id or "").strip()
+    registry_path = root / "discovery/literature/paper_registry.csv"
+    if not paper_id:
+        raise ValueError("full-text recovery requires --paper-id")
+    if not registry_path.exists():
+        raise FileNotFoundError(f"missing literature registry: {registry_path}")
+    rows = _rows_if_present(registry_path)
+    row = next((item for item in rows if str(item.get("paper_id") or "").strip() == paper_id), None)
+    if row is None:
+        raise ValueError(f"paper_id {paper_id!r} was not found in {registry_path}")
+    if args.max_bytes < 64 or args.max_bytes > 100_000_000:
+        raise ValueError("max_bytes must be between 64 and 100000000")
+
+    candidates = _recovery_candidates(root, row, args)
+    resolver_plan = [resolver for resolver, _ in candidates]
+    if _normalize_doi(row.get("doi", "")):
+        resolver_plan.extend(["openalex_oa", "unpaywall_oa"])
+    payload: dict[str, Any] = {
+        "policy": "AEROS-LITERATURE-FULLTEXT-RECOVERY-001",
+        "paper_id": paper_id,
+        "title": row.get("title", ""),
+        "dry_run": args.dry_run,
+        "resolver_plan": resolver_plan or list(LAWFUL_FULLTEXT_RESOLVERS),
+        "attempts": [], "writes": [],
+        "does_not_prove": [
+            "that the paper was read or understood", "that an extraction card or synthesis claim is valid",
+            "that the recovered copy is licensed for redistribution", "claim support, gate approval, or paper readiness",
+        ],
+    }
+    if args.dry_run:
+        payload.update({"status": "ROUTE_READY", "next_action": "run without --dry-run to attempt only the listed lawful OA/local routes; blocked access is not retried through paywall bypasses"})
+        return payload
+
+    attempts: list[dict[str, str]] = []
+    resolved_candidates = list(candidates)
+    resolver_errors: list[str] = []
+    try:
+        for url in _openalex_oa_urls(row):
+            if url not in {existing for _, existing in resolved_candidates}:
+                resolved_candidates.append(("openalex_oa", url))
+    except Exception as exc:  # noqa: BLE001 - metadata service outage is not a research claim
+        resolver_errors.append(f"OpenAlex metadata lookup: {type(exc).__name__}")
+    try:
+        email = args.unpaywall_email.strip() or os.environ.get("UNPAYWALL_EMAIL", "").strip()
+        for url in _unpaywall_oa_urls(row.get("doi", ""), email):
+            if url not in {existing for _, existing in resolved_candidates}:
+                resolved_candidates.append(("unpaywall_oa", url))
+    except Exception as exc:  # noqa: BLE001 - metadata service outage is not a research claim
+        resolver_errors.append(f"Unpaywall metadata lookup: {type(exc).__name__}")
+
+    for resolver, candidate_url in resolved_candidates:
+        attempt: dict[str, str] = {column: "" for column in FULLTEXT_RECOVERY_COLUMNS}
+        attempt.update({"attempted_at": _utc_now(), "paper_id": paper_id, "resolver": resolver, "candidate_url": candidate_url, "content_bytes": "0"})
+        try:
+            body, content_type, final_url = _fetch_lawful_candidate(candidate_url, args.max_bytes)
+            parsed_text, parser_note = _extract_pdf_text(body) if body.startswith(b"%PDF") else ("", "")
+            verification = verify_fulltext_candidate_content(
+                body, content_type=content_type, expected_title=row.get("title", ""),
+                expected_doi=row.get("doi", ""), source_url=final_url, parsed_text=parsed_text,
+            )
+            attempt.update({
+                "final_url": final_url, "content_kind": verification.get("content_kind", ""),
+                "content_bytes": str(len(body)), "matched_by": verification.get("matched_by", ""),
+                "notes": "; ".join(part for part in [verification.get("notes", ""), parser_note] if part),
+            })
+            if verification.get("verdict") in {"verified_pdf", "verified_article_html"}:
+                artifact, digest = _stage_recovered_content(
+                    root, args, paper_id, body, verification.get("content_kind", ""),
+                    {"paper_id": paper_id, "resolver": resolver, "candidate_url": candidate_url, "final_url": final_url,
+                     "content_type": content_type, "content_kind": verification.get("content_kind", ""),
+                     "matched_by": verification.get("matched_by", ""), "sha256": hashlib.sha256(body).hexdigest(),
+                     "parser": parser_note, "recovery_boundary": "staging_only; no registry/card/synthesis/claim promotion occurred"},
+                )
+                attempt.update({"recovery_status": "recovered_verified_fulltext", "sha256": digest, "staging_artifact": artifact,
+                                "next_action": "open staged full text and write a page/section-bound extraction card before synthesis"})
+                attempts.append(attempt)
+                break
+            if verification.get("verdict") == "needs_identity_check":
+                attempt.update({"recovery_status": "needs_identity_or_ocr", "next_action": "obtain readable/OCR text or manually verify identity before any extraction"})
+            else:
+                attempt.update({"recovery_status": f"blocked_{verification.get('blocker_reason', 'unverified')}",
+                                "next_action": "do not bypass the access control; try another lawful OA/repository/Zotero route or queue human recovery"})
+        except Exception as exc:  # noqa: BLE001 - failed source route must be visible, not retried blindly
+            attempt.update({"recovery_status": "retrieval_error", "next_action": "inspect this route once, then use another lawful resolver or queue human recovery", "notes": f"{type(exc).__name__}: {exc}"})
+        attempts.append(attempt)
+
+    status, next_action = _recovery_outcome(attempts)
+    payload.update({"status": status, "next_action": next_action, "attempts": attempts, "resolver_errors": resolver_errors})
+    recovery_queue = root / "discovery/literature/fulltext_recovery_queue.csv"
+    _append_rows(recovery_queue, FULLTEXT_RECOVERY_COLUMNS, attempts)
+    payload["writes"] = [recovery_queue.relative_to(root).as_posix()] + [item["staging_artifact"] for item in attempts if item.get("staging_artifact")]
+    return payload

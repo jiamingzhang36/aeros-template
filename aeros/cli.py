@@ -54,7 +54,14 @@ from .runtime.decision_packet import write_decision_packet
 from .runtime.evidence_delta import EvidenceDeltaArgs, append_delta, read_delta_records
 from .runtime.init_project import init_project
 from .runtime.kernel import find_project_root, run_pipeline, run_task
-from .runtime.literature_adapter import LiteratureSearchArgs, format_literature_status, run_literature_search
+from .runtime.literature_adapter import (
+    FulltextRecoveryArgs,
+    LiteratureSearchArgs,
+    format_literature_status,
+    recover_fulltext,
+    run_literature_search,
+)
+from .runtime.literature_paragraph import ParagraphCandidateArgs, compile_candidate_paragraphs
 from .runtime.kernel import _record_task_fingerprints, _task_gates, discover_contracts, topo_order
 from .runtime.milestones import format_roadmap, format_simple_status
 from .runtime.next_action import compute_next_action, format_next_action, write_next_action
@@ -1669,6 +1676,53 @@ def _cmd_literature(args: argparse.Namespace) -> int:
         except Exception as exc:  # noqa: BLE001
             print(f"FAIL: literature adapter failed: {exc}")
             return 1
+    if args.literature_command == "recover":
+        try:
+            payload = recover_fulltext(root, FulltextRecoveryArgs(
+                paper_id=args.paper_id,
+                candidate_urls=tuple(args.candidate_url or []),
+                unpaywall_email=args.unpaywall_email or "",
+                output_dir=args.output_dir or "work/literature_recovery",
+                max_bytes=args.max_bytes,
+                dry_run=args.dry_run,
+            ))
+        except Exception as exc:  # noqa: BLE001
+            print(f"FAIL: lawful full-text recovery failed: {exc}")
+            return 1
+        if args.json:
+            print(json.dumps(payload, indent=2, ensure_ascii=False))
+        else:
+            print(f"full_text_recovery: {payload.get('status')}")
+            print(f"paper_id: {payload.get('paper_id')}")
+            print(f"attempts: {len(payload.get('attempts') or [])}")
+            print(f"next_action: {payload.get('next_action')}")
+            for path in payload.get("writes") or []:
+                print(f"wrote: {path}")
+            print("does_not_prove: recovered bytes are staging-only and do not prove full-text reading, extraction, synthesis, claim support, or paper readiness")
+        return 0
+    if args.literature_command == "compose":
+        try:
+            payload = compile_candidate_paragraphs(root, ParagraphCandidateArgs(
+                paper_ids=tuple(args.paper_id or []),
+                purpose=args.purpose or "",
+                target_claim=args.target_claim or "",
+                output_dir=args.output_dir or "work/literature_candidate_paragraphs",
+                dry_run=args.dry_run,
+            ))
+        except Exception as exc:  # noqa: BLE001
+            print(f"FAIL: source-bound paragraph compilation failed: {exc}")
+            return 1
+        if args.json:
+            print(json.dumps(payload, indent=2, ensure_ascii=False))
+        else:
+            print(f"candidate_paragraph: {payload.get('status')}")
+            for paper_id, errors in (payload.get("failures") or {}).items():
+                print(f"- {paper_id}: {'; '.join(errors)}")
+            for path in payload.get("writes") or []:
+                print(f"wrote: {path}")
+            print(f"next_action: {payload.get('next_action')}")
+            print("does_not_prove: candidate prose is not an approved manuscript sentence or claim support")
+        return 0 if payload.get("status") != "REFUSED" else 2
     print("unknown literature command")
     return 2
 
@@ -2489,6 +2543,23 @@ def main(argv: list[str] | None = None) -> int:
     literature_search.add_argument("--zotero-base-url", default="http://127.0.0.1:23119", help="Zotero local API base URL")
     literature_search.add_argument("--dry-run", action="store_true", help="preview registry/search-log changes without writing")
     literature_search.set_defaults(func=_cmd_literature)
+    literature_recover = literature_sub.add_parser("recover", help="recover one paper only through lawful OA/local/Zotero routes into staging")
+    literature_recover.add_argument("--paper-id", required=True, help="registered paper id, e.g. P016")
+    literature_recover.add_argument("--candidate-url", action="append", default=[], help="explicit lawful OA/repository/local file URL; may be repeated")
+    literature_recover.add_argument("--unpaywall-email", default="", help="contact email for the public Unpaywall API; defaults to UNPAYWALL_EMAIL")
+    literature_recover.add_argument("--output-dir", default="work/literature_recovery", help="staging-only output directory")
+    literature_recover.add_argument("--max-bytes", type=int, default=30_000_000, help="maximum bytes to fetch for one candidate (default: 30 MB)")
+    literature_recover.add_argument("--dry-run", action="store_true", help="show the lawful resolver plan without any network fetch or writes")
+    literature_recover.add_argument("--json", action="store_true", help="emit machine-readable recovery report")
+    literature_recover.set_defaults(func=_cmd_literature)
+    literature_compose = literature_sub.add_parser("compose", help="compile verified extraction cards into work-only source-bound candidate prose")
+    literature_compose.add_argument("--paper-id", action="append", required=True, help="verified full-text extraction paper id; may be repeated")
+    literature_compose.add_argument("--purpose", required=True, help="limited literature-positioning purpose for the candidate prose")
+    literature_compose.add_argument("--target-claim", required=True, help="candidate claim that remains subject to sentence-level grounding")
+    literature_compose.add_argument("--output-dir", default="work/literature_candidate_paragraphs", help="work-only output directory")
+    literature_compose.add_argument("--dry-run", action="store_true", help="validate card eligibility without writing a candidate packet")
+    literature_compose.add_argument("--json", action="store_true", help="emit machine-readable packet metadata")
+    literature_compose.set_defaults(func=_cmd_literature)
 
     action = sub.add_parser("action", help="write/validate action progress receipts")
     action_sub = action.add_subparsers(dest="action_command", required=True)

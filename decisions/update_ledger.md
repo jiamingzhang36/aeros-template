@@ -2781,3 +2781,19 @@ committed, backfill this pending entry and append a final hash-chain record.
 **Drift risk**: Generic candidate writes must retain an explicit `checks/*.py` validator, and the effect hook must stay path-matching rather than accepting unrelated receipts.
 
 **Next check**: Backfill the functional commit reference, append its ledger-chain record, and sync/test this generic path in one clean attached project.
+
+### 2026-09-02 — Add lawful full-text recovery and source-bound candidate prose
+
+**Commit(s)**: pending
+
+**Action**: Added `aeros literature recover` and `aeros literature compose`. Recovery uses only explicit local/Zotero attachments, registered public OA links, OpenAlex OA locations, Unpaywall OA locations, or user-supplied lawful URLs. It rejects short challenge pages, CAPTCHA/login responses, SPA shells, non-PDF content, and target-identity mismatches; verified bytes are staged with SHA-256 manifests only. Composition accepts only verified full-text extraction cards with a citation key, page/section evidence locator, and explicit support/limitation sections, then emits source-bound candidate prose only under `work/literature_candidate_paragraphs/`.
+
+**Validation**: Local no-network fixtures passed for verified source recovery, short Cloudflare challenge rejection, registry non-mutation, extraction prerequisite refusal, and work-only candidate outputs. The 22-check smoke harness passed.
+
+**Non-goal**: Do not bypass paywalls, credentials, CAPTCHA, Cloudflare, publisher access controls, or legal restrictions; create an extraction card automatically; write to a manuscript; certify an interpretation; or promote a claim.
+
+**Does not prove**: a recovered paper was read or understood; that candidate prose faithfully represents a source; claim support, causal identification, independent verification, manuscript readiness, or human approval.
+
+**Drift risk**: OpenAlex/Unpaywall are locator services rather than availability guarantees, and optional local PDF text extraction can remain unavailable for scanned PDFs. Candidate prose remains intentionally constrained by card text and must pass the existing sentence-level grounding and interpretation checks after human review before manuscript use.
+
+**Next check**: Backfill the functional commit reference and append the ledger hash-chain record; then sync one literature project and measure lawful recovery outcomes and candidate-paragraph review friction.

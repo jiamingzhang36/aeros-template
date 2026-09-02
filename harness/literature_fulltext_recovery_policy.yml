@@ -1,0 +1,24 @@
+version: "0.1"
+policy: AEROS-LITERATURE-FULLTEXT-RECOVERY-001
+principle: >
+  Full-text recovery may use only explicit local/Zotero attachments and public
+  lawful open-access or repository routes. Recovery is staging-only; promotion
+  into extraction, synthesis, claims, or a paper is a separate action.
+resolver_ladder:
+  - local_or_zotero_attachment
+  - registered_oa_url
+  - openalex_oa
+  - unpaywall_oa
+  - manual_lawful_url
+content_acceptance:
+  required:
+    - PDF magic bytes or sufficiently long article text
+    - DOI or title identity match when registry identity is available
+    - SHA-256 manifest for a staged recovered artifact
+  blockers: [security_challenge, captcha, login_required, spa_shell, not_pdf, cache_mismatch, title_mismatch, doi_mismatch, needs_ocr]
+staging:
+  recovery_queue: discovery/literature/fulltext_recovery_queue.csv
+  artifact_root: work/literature_recovery/
+  forbidden_promotion_targets: [discovery/literature/extraction_cards/, discovery/literature/synthesis/, evidence/claim_registry.md, paper/]
+prohibited_routes: [paywall_bypass, credential_bypass, captcha_bypass, cloudflare_bypass, shadow_library_or_pirated_source]
+does_not_prove: [that a recovered paper was read or understood, extraction-card completion, synthesis or claim support, redistribution rights, paper readiness]

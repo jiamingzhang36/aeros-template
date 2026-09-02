@@ -1,0 +1,19 @@
+version: "0.1"
+policy: AEROS-LITERATURE-PARAGRAPH-001
+principle: >
+  Candidate prose may be compiled only from verified full-text extraction cards
+  with page/section-bound evidence. The output is source-bound work product,
+  not a manuscript edit or a claim-support decision.
+required_source_state:
+  registry: [full_text_available_yes, extraction_card_yes, full_text_or_extraction_card_basis, citation_key]
+  extraction_card: [full_text_obtained, full_text_extraction, content_summary, direct_evidence_locator, can_support, cannot_support]
+output:
+  root: work/literature_candidate_paragraphs/
+  status: CANDIDATE_ONLY
+  must_include: [citation_key, extraction_card, direct_evidence_locator, can_support, cannot_support, does_not_prove]
+promotion_boundary:
+  - candidate packet must not write paper/
+  - candidate packet must not write evidence/claim_registry.md
+  - manuscript use requires sentence-level citation grounding and interpretation review
+  - tier_2_claim_bearing use retains its independent-verifier floor
+does_not_prove: [faithful scientific interpretation, claim support, causal identification, manuscript readiness, human approval]
