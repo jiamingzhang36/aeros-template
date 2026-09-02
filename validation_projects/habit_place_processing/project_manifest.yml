@@ -26,7 +26,7 @@ research:
       decision_record: "00_admin/NOT_A_CLEAN_SLATE_DECISION_2026-08-29.md"
     paper_2:
       title: "Digital / retail-familiarity portability of location-specific shopping capital"
-      status: "outcomes closed; awaiting a human estimand decision"
+      status: "pivoted 2026-08-31 to retailer-relationship survival; outcomes open and robust; authorizing memo not filed"
       decision_record: "00_admin/SHOPPING_CAPITAL_PORTABILITY_DECISION_2026-08-27.md"
   closed_branches:
     - id: "inventory_stockpiling"
@@ -136,7 +136,7 @@ claim_ceiling:
     - "no claim of memory reactivation, attention, search or welfare from transaction data"
     - "no claim of a causal market-wide competition or entry-barrier effect"
     - "no hysteresis or demand-capital language without observed exposure removal"
-    - "no 'lifetime-unseen' state language while the archive is left-truncated at 2014-12-28"
+    - "no 'lifetime-unseen' state language; window-unseen means finite-window unseen, not lifetime nonpurchase"
     - "no claim about recent entrants until brand x market entry dates are auditable"
     - "Retail Scanner sales are not shelf space; local nonmover purchases are not retail supply"
   headline_ceiling: >-
