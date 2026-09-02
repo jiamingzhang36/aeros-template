@@ -1,0 +1,165 @@
+project:
+  name: "Habit, Place and Processing"
+  version: "0.1"
+  template: "aeros-template"
+  status: "active"
+  private_by_default: true
+
+research:
+  field_or_domain: "Agricultural and food economics; consumer demand"
+  topic: >-
+    What happens to household brand demand when a residential move disrupts an
+    incumbent shopping routine: how much displaced demand reaches genuinely
+    unfamiliar alternatives, and how much is recaptured by brands already in
+    the household's purchase history.
+  one_sentence_question: >-
+    When a residential move breaks a household's shopping routine, is the
+    resulting demand actually contestable to history-unseen brands, or is it
+    recaptured by dormant historical brand relationships?
+  current_stage: "measurement"
+  human_owner: "jiaming"
+  collaborators: []
+  paper_lines:
+    paper_1:
+      title: "Not a Clean Slate: Consumer History and Brand Choice after Residential Moves"
+      status: "active primary line"
+      decision_record: "00_admin/NOT_A_CLEAN_SLATE_DECISION_2026-08-29.md"
+    paper_2:
+      title: "Digital / retail-familiarity portability of location-specific shopping capital"
+      status: "outcomes closed; awaiting a human estimand decision"
+      decision_record: "00_admin/SHOPPING_CAPITAL_PORTABILITY_DECISION_2026-08-27.md"
+  closed_branches:
+    - id: "inventory_stockpiling"
+      status: "INCONCLUSIVE; appendix / alternative-mechanism only"
+      record: "00_admin/INVENTORY_BRANCH_CLOSURE_2026-07-16.md"
+    - id: "destination_retail_menu_mechanism"
+      status: "STOP_POSITIVE_PLACE_PRECISE_NULL"
+      record: "00_admin/PLACE_MECHANISM_CLOSURE_2026-08-23.md"
+
+repository:
+  working_dir: "~/Desktop/Habit_Place_Processing"
+  remote: "git@github.com:jiamingzhang36/Habit_Place_Processing.git"
+  visibility: "private"
+  local_only_paths:
+    - "02_data/**"            # licensed Nielsen microdata, gitignored by design
+    - "04_output/**"          # regenerable figures, tables, logs
+    - "**/staged_panels/**"   # household-level staged panels
+  external_mounts:
+    - "/Volumes/LENOVO_USB_/Habit_Place_Processing_Work"   # RMS raw + work root
+  layout_note: >-
+    The repository uses a numbered research layout (00_admin, 01_literature,
+    02_data, 03_code, 04_output, 05_paper, quality_reports) rather than the
+    AEROS conventional names. `aeros attach --dry-run` detects only 1 of 15
+    research surfaces against this tree. See the adapter note in
+    harness/permissions.yml.
+
+gate_lifecycle:
+  current_gate: "G2 Measurement / Variable Construction"
+  binding_line: "paper_1"
+  gates:
+    - "G0 Project Intake"
+    - "G1 Data Readiness"
+    - "G2 Measurement / Variable Construction"
+    - "G3 Research Design"
+    - "G4 Main Estimation"
+    - "G5 Robustness"
+    - "G6 Result Validation"
+    - "G7 Claim Audit"
+    - "G8 Referee Simulation"
+    - "G9 Replication Package"
+
+automation:
+  pipeline:
+    cwd: "~/Desktop/Habit_Place_Processing"
+    # No single run_all entry point. 138 numbered scripts in 03_code/python
+    # follow a builder / independent-validator pair convention: an even-numbered
+    # builder is checked by the next script, which must not import the builder.
+    convention: "builder script NN, independent validator NN+1, frozen config in 03_code/config/*.json"
+    heavy_jobs_declared_in: ".aeros/heavy_jobs.yml"
+    heavy_jobs:
+      - "rms_quarterly_split_store_refresh"
+      - "rms_measurement_models"
+    key_outputs:
+      - "quality_reports/holdout_h1_h4_estimation_2022_2023/README.md"
+      - "quality_reports/brand_destination_hazard_2017_2018/README.md"
+      - "quality_reports/DORMANT_REPERTOIRE_FEASIBILITY_2026-08-30.md"
+      - "quality_reports/rms_inference_measurement/model_manifest.json"
+      - "05_paper/manuscript_not_a_clean_slate_2026-08-30/paper.tex"
+      - "05_paper/manuscript_paper2_digital_portability_2026-08-31/paper.tex"
+
+gate_exit_criteria:
+  G2:
+    requires:
+      - type: "human_judgement"
+        criterion: >-
+          The deduplicated monthly move-timing selector is repaired and frozen.
+          The 2026-08-29 audit found a December-boundary defect in the frozen
+          pre-2019 timing layer; correcting it turned the tightest-timing
+          subsample from a null (+1.71 pp) into the largest estimate
+          (+7.67 pp). Defective timing tiers must not be reused, and no final
+          discovery table may be built on them.
+      - type: "human_judgement"
+        criterion: >-
+          An auditable stable brand-family / UPC crosswalk exists. The
+          2026-08-30 dormant-repertoire preflight states raw brand codes are
+          internally stable in the eight-module archive but that no audited
+          crosswalk exists.
+      - type: "artifact_exists"
+        artifact: "quality_reports/DORMANT_REPERTOIRE_FEASIBILITY_2026-08-30.md"
+  G3:
+    requires:
+      - type: "human_judgement"
+        criterion: >-
+          Paper 1: states, observation windows, pseudo-event construction,
+          non-mover benchmark, denominators and the joint inference procedure
+          are pre-specified before any dormant-versus-unseen outcome is opened.
+      - type: "human_judgement"
+        criterion: >-
+          Paper 2: a decision is recorded either declaring the online-use x
+          familiar-environment interaction unsupported, or authorizing a
+          substantively new estimand with a fresh outcome-blind support
+          protocol. Four successive overlap/balance diagnostics have failed;
+          re-tuning the existing rule after seeing those failures is barred.
+  G6:
+    requires:
+      - type: "artifact_exists"
+        artifact: "quality_reports/holdout_h1_h4_estimation_2022_2023/validation.json"
+        note: >-
+          The H1-H4 estimation layer is the only frozen layer in the project
+          without an independent validator. Its replicated numbers are
+          builder-verified only.
+
+claim_ceiling:
+  stated_in: "00_admin/NOT_A_CLEAN_SLATE_DECISION_2026-08-29.md"
+  non_claims:
+    - "no claim that moves are an exogenous treatment; moves are selected"
+    - "no claim of memory reactivation, attention, search or welfare from transaction data"
+    - "no claim of a causal market-wide competition or entry-barrier effect"
+    - "no hysteresis or demand-capital language without observed exposure removal"
+    - "no 'lifetime-unseen' state language while the archive is left-truncated at 2014-12-28"
+    - "no claim about recent entrants until brand x market entry dates are auditable"
+    - "Retail Scanner sales are not shelf space; local nonmover purchases are not retail supply"
+  headline_ceiling: >-
+    "Post-move re-entry into dormant historical brands replicates out of
+    sample", not "moves cause brand switching" and not "historical familiarity
+    is an entry barrier". The five non-negotiable gates in the 2026-08-29
+    decision (excess reactivation, history gradient, flow accounting,
+    supply/marketing checks, entrant feasibility) govern any stronger phrasing.
+
+protected_definitions:
+  - "00_admin/PROJECT_CHARTER.md"
+  - "00_admin/NOT_A_CLEAN_SLATE_DECISION_2026-08-29.md"
+  - "00_admin/SHOPPING_CAPITAL_PORTABILITY_DECISION_2026-08-27.md"
+  - "00_admin/INVENTORY_BRANCH_CLOSURE_2026-07-16.md"
+  - "00_admin/PLACE_MECHANISM_CLOSURE_2026-08-23.md"
+  - "03_code/config/*.json"          # frozen prespecification configs
+  - ".aeros/heavy_jobs.yml"
+  - "quality_reports/**/README.md"   # frozen result certificates
+
+permissions:
+  policy_file: "~/Desktop/Habit_Place_Processing/harness/permissions.yml"
+  push_to_remote: "agent_allowed"
+  push_divergence_note: >-
+    AEROS default is human_only. This project keeps the global auto-commit
+    protocol by explicit human decision, recorded in the repo's CLAUDE.md, on
+    the same terms as UPF_Definition_Politics.
