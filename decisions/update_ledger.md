@@ -2784,7 +2784,7 @@ committed, backfill this pending entry and append a final hash-chain record.
 
 ### 2026-09-02 — Add lawful full-text recovery and source-bound candidate prose
 
-**Commit(s)**: pending
+**Commit(s)**: `ccb3fb8`
 
 **Action**: Added `aeros literature recover` and `aeros literature compose`. Recovery uses only explicit local/Zotero attachments, registered public OA links, OpenAlex OA locations, Unpaywall OA locations, or user-supplied lawful URLs. It rejects short challenge pages, CAPTCHA/login responses, SPA shells, non-PDF content, and target-identity mismatches; verified bytes are staged with SHA-256 manifests only. Composition accepts only verified full-text extraction cards with a citation key, page/section evidence locator, and explicit support/limitation sections, then emits source-bound candidate prose only under `work/literature_candidate_paragraphs/`.
 
